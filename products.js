@@ -1656,6 +1656,14 @@ window.PRAJO_PRODUCTS = [
    {
     "card": "https://i.etsystatic.com/60023144/r/il/afb053/8721048044/il_570xN.8721048044_5w4i.jpg",
     "large": "https://i.etsystatic.com/60023144/r/il/afb053/8721048044/il_1140xN.8721048044_5w4i.jpg"
+   },
+   {
+    "card": "heritage-iraq-eagle-card.jpg",
+    "large": "heritage-iraq-eagle.jpg"
+   },
+   {
+    "card": "heritage-south-korea-card.jpg",
+    "large": "heritage-south-korea.jpg"
    }
   ],
   "variations": [
@@ -1667,8 +1675,20 @@ window.PRAJO_PRODUCTS = [
      "India",
      "Afghanistan",
      "Mexico",
-     "Iraq"
-    ]
+     "Iraq",
+     "Iraq (Eagle edition)",
+     "South Korea"
+    ],
+    "photos": {
+     "Fiji": 0,
+     "Philippines": 4,
+     "India": 3,
+     "Afghanistan": 2,
+     "Mexico": 1,
+     "Iraq": 5,
+     "Iraq (Eagle edition)": 6,
+     "South Korea": 7
+    }
    },
    {
     "name": "Personalization",

@@ -515,8 +515,23 @@ function descHtml(blocks) {
   return blocks.map((b) => b.type === "head" ? `<h4>${esc(b.text)}</h4>`
     : b.type === "list" ? `<ul>${b.items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>` : `<p>${esc(b.text)}</p>`).join("");
 }
+let cur = null;
+// Move the gallery to photo i, and highlight its thumbnail and any option that photo shows.
+function showSlide(i, scroll = true) {
+  const s = $("slides");
+  if (scroll) s.scrollTo({ left: s.clientWidth * i, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+  document.querySelectorAll("#thumbs button").forEach((b) => b.setAttribute("aria-current", +b.dataset.i === i));
+  const th = $("thumbs"), tb = th.querySelector(`button[data-i="${i}"]`);
+  if (tb) th.scrollTo({ left: tb.offsetLeft - th.clientWidth / 2 + tb.clientWidth / 2, behavior: scroll ? "smooth" : "auto" });
+  (cur?.variations || []).forEach((v, vi) => {
+    const val = Object.keys(v.photos || {}).find((k) => v.photos[k] === i);
+    if (val == null) return;
+    document.querySelectorAll(`#info .chips button[data-v="${vi}"]`).forEach((b) => b.setAttribute("aria-pressed", b.dataset.val === val));
+  });
+}
 function openProduct(id) {
   const p = P.find((x) => x.id === id);
+  cur = p || null;
   if (!p) { closeProduct(true); return; }
   lastFocus = lastFocus || document.activeElement;
   $("slides").innerHTML = p.images.map((im, i) => `<img src="${esc(im.large)}" alt="${esc(p.name)}${i ? ` photo ${i + 1}` : ""}" ${i ? 'loading="lazy"' : ""}>`).join("");
@@ -528,7 +543,7 @@ function openProduct(id) {
     <div class="eyebrow">${esc(cat ? cat.label : "")}</div>
     <h2 id="pTitle">${esc(p.name)}</h2>
     <div class="pr">${priceHtml(p)}${p.stock > 0 && p.stock <= 3 && !p.digital ? ` <small>· only ${p.stock} left</small>` : ""}</div>
-    ${p.variations.map((v) => `<div class="opt"><span>${esc(v.name)}</span><div class="chips">${v.values.map((x, i) => `<button type="button" aria-pressed="${i === 0}">${esc(/^\d+$/.test(x) ? x + "oz" : x)}</button>`).join("")}</div></div>`).join("")}
+    ${p.variations.map((v, vi) => `<div class="opt"><span>${esc(v.name)}</span><div class="chips">${v.values.map((x, i) => `<button type="button" data-v="${vi}" data-val="${esc(x)}" aria-pressed="${i === 0}">${esc(/^\d+$/.test(x) ? x + "oz" : x)}</button>`).join("")}</div></div>`).join("")}
     <div class="perks">${perks.map((x) => `<span>${esc(x)}</span>`).join("")}</div>
     <div class="actions">
       <a class="btn btn-gold" href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">${p.digital ? "Get it on Etsy" : "Order on Etsy"}</a>
@@ -538,6 +553,7 @@ function openProduct(id) {
   $("sheet").hidden = false;
   document.body.style.overflow = "hidden";
   $("slides").scrollLeft = 0;
+  showSlide(0, false);
   $("closeBtn").focus({ preventScroll: true });
   document.title = `${p.name} · PrAjo Custom Studio`;
 }
@@ -559,15 +575,18 @@ $("sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") close
 document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeProduct(false); });
 $("thumbs").addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (!b) return;
-  const s = $("slides"); s.scrollTo({ left: s.clientWidth * +b.dataset.i, behavior: "smooth" });
+  showSlide(+b.dataset.i);
 });
 $("slides").addEventListener("scroll", () => {
-  const s = $("slides"), i = Math.round(s.scrollLeft / Math.max(1, s.clientWidth));
-  document.querySelectorAll("#thumbs button").forEach((b) => b.setAttribute("aria-current", +b.dataset.i === i));
+  const s = $("slides");
+  clearTimeout(s._t);
+  s._t = setTimeout(() => showSlide(Math.round(s.scrollLeft / Math.max(1, s.clientWidth)), false), 80);
 }, { passive: true });
 $("info").addEventListener("click", (e) => {
   const b = e.target.closest(".opt .chips button"); if (!b) return;
   b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  const idx = cur?.variations[+b.dataset.v]?.photos?.[b.dataset.val];
+  if (idx != null) showSlide(idx);
 });
 route();
 </script>
