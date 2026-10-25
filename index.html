@@ -253,6 +253,28 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 .chat-send textarea { min-height: 46px; max-height: 140px; }
 .chat-send .btn { min-height: 46px; padding: 0 18px; }
 .chat-err { color: #ffb4a8; font-size: 13.5px; margin: 0; }
+.clip { flex: none; width: 46px; height: 46px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel-2); color: var(--gold-2); cursor: pointer; display: grid; place-items: center; }
+.clip svg { width: 20px; height: 20px; }
+.clip:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+.about-chip .rm { margin-left: auto; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .08); cursor: pointer; flex: none; }
+.pick-link { background: none; border: 1px dashed var(--line); color: var(--gold-2); border-radius: 14px; padding: 10px 12px; font-weight: 700; cursor: pointer; text-align: left; font-size: 14px; }
+.pchip { display: flex; gap: 10px; align-items: center; padding: 6px; margin: -2px -4px 8px; border-radius: 12px; background: rgba(10, 18, 32, .18); text-decoration: none; color: inherit; }
+.bubble.them .pchip { background: rgba(255, 255, 255, .06); }
+.pchip img { width: 46px; height: 46px; border-radius: 9px; object-fit: cover; flex: none; }
+.pchip small { display: block; font-size: 11px; opacity: .75; }
+.pchip b { font-size: 14px; line-height: 1.25; }
+.picker { position: absolute; inset: 0; z-index: 5; background: var(--navy); display: flex; flex-direction: column; }
+.picker-head { display: flex; align-items: center; gap: 10px; padding: calc(12px + env(safe-area-inset-top, 0px)) 14px 12px; border-bottom: 1px solid var(--line-soft); }
+.picker-head b { flex: 1; font-size: 16px; }
+.picker-head .close { position: static; }
+.picker input { margin: 12px 14px 4px; width: calc(100% - 28px); }
+.picker-list { flex: 1; overflow-y: auto; padding: 8px 14px 16px; display: grid; gap: 8px; align-content: start; }
+.picker-list button { display: flex; gap: 12px; align-items: center; text-align: left; padding: 8px; border-radius: 14px; border: 1px solid var(--line-soft); background: var(--panel); cursor: pointer; color: inherit; min-height: 64px; }
+.picker-list button:hover, .picker-list button:focus-visible { border-color: var(--gold); outline: none; }
+.picker-list img { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; flex: none; }
+.picker-list span { min-width: 0; }
+.picker-list b { display: block; font-size: 14.5px; line-height: 1.3; }
+.picker-list small { color: var(--gold-2); font-size: 13px; }
 .linkbtn { background: none; border: 0; color: var(--gold-2); font-weight: 700; font-size: 12.5px; cursor: pointer; padding: 2px; text-decoration: underline; }
 </style>
 </head>
@@ -452,11 +474,18 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
   </div>
   <div class="chat-body" id="chatBody" aria-live="polite"></div>
   <div class="chat-foot" id="chatFoot" hidden>
+    <div id="chatAbout"></div>
     <p class="chat-err" id="chatErr2" hidden></p>
     <form class="chat-send" id="chatSend">
+      <button class="clip" type="button" id="chatClip" aria-label="Ask about a product" title="Ask about a product"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.4 11.1-9.2 9.2a6 6 0 0 1-8.5-8.5l9.2-9.2a4 4 0 0 1 5.7 5.7l-9.2 9.2a2 2 0 0 1-2.8-2.8l8.5-8.5"/></svg></button>
       <textarea id="chatMsg" rows="1" placeholder="Write a message…" aria-label="Your message" maxlength="4000"></textarea>
       <button class="btn btn-gold" type="submit" id="chatSendBtn">Send</button>
     </form>
+  </div>
+  <div class="picker" id="picker" hidden role="dialog" aria-label="Choose a product to ask about">
+    <div class="picker-head"><b>Which product?</b><button class="close" type="button" id="pickClose" aria-label="Close">×</button></div>
+    <input class="in" id="pickSearch" placeholder="Search products" aria-label="Search products" autocomplete="off">
+    <div class="picker-list" id="pickList"></div>
   </div>
 </div>
 
@@ -706,13 +735,59 @@ async function chatCall(body) {
 const when = (iso) => new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
 function chatLink() { const c = chatStore.get(); return c ? `${location.origin}${location.pathname}#chat/${c.token}` : ""; }
 
+// A product in a message travels as two plain lines at the top: "📦 Name" and its store link.
+// Telegram and the app show them as text and a tappable link; this page shows a small card.
+const productUrl = (id) => `${location.origin}${location.pathname}#p/${id}`;
+const withProduct = (text, a) => a ? `📦 ${a.name}\n${productUrl(a.id)}\n\n${text}` : text;
+function bubbleHtml(body) {
+  const m = String(body).match(/^📦 (.+)\n(https?:\/\/\S+#p\/([\w-]+))\s*\n?([\s\S]*)$/);
+  if (!m) return esc(body);
+  const p = P.find((x) => x.id === m[3]);
+  const img = p?.images?.[0]?.card;
+  return `<a class="pchip" href="#p/${esc(m[3])}">${img ? `<img src="${esc(img)}" alt="">` : ""}<span><small>About</small><b>${esc(m[1])}</b></span></a>${esc(m[4].trim())}`;
+}
+function aboutHtml(inForm) {
+  const a = chatState.about;
+  if (a) return `<div class="about-chip">${a.image ? `<img src="${esc(a.image)}" alt="">` : ""}<div><small>Asking about</small>${esc(a.name)}</div><button class="rm" type="button" data-about-clear aria-label="Remove product">×</button></div>`;
+  return inForm ? `<button class="pick-link" type="button" data-pick>📎 Asking about a product? Choose it here (optional)</button>` : "";
+}
+function setAbout(a) {
+  chatState.about = a;
+  if ($("startAbout")) $("startAbout").innerHTML = aboutHtml(true);
+  $("chatAbout").innerHTML = chatStore.get() ? aboutHtml(false) : "";
+}
+function openPicker() {
+  $("picker").hidden = false; $("pickSearch").value = ""; renderPicker();
+  setTimeout(() => $("pickSearch").focus({ preventScroll: true }), 30);
+}
+function renderPicker() {
+  const q = $("pickSearch").value.trim().toLowerCase();
+  const list = P.filter((p) => !q || [p.name, p.title, ...p.variations.flatMap((v) => v.values)].join(" ").toLowerCase().includes(q));
+  $("pickList").innerHTML = list.map((p) => `<button type="button" data-pid="${esc(p.id)}"><img src="${esc(p.images[0]?.card || "")}" alt="" loading="lazy"><span><b>${esc(p.name)}</b><small>${priceHtml(p)}</small></span></button>`).join("")
+    || `<p class="chat-note">No products match “${esc(q)}”.</p>`;
+}
+$("chatClip").onclick = openPicker;
+$("pickClose").onclick = () => { $("picker").hidden = true; };
+$("pickSearch").addEventListener("input", renderPicker);
+$("pickList").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-pid]"); if (!b) return;
+  const p = P.find((x) => x.id === b.dataset.pid);
+  setAbout({ id: p.id, name: p.name, image: p.images[0]?.card });
+  $("picker").hidden = true;
+  (chatStore.get() ? $("chatMsg") : $("cMsg"))?.focus({ preventScroll: true });
+});
+document.querySelector(".chat").addEventListener("click", (e) => {
+  if (e.target.closest("[data-about-clear]")) setAbout(null);
+  if (e.target.closest("[data-pick]")) openPicker();
+});
+
 function renderChat() {
   const c = chatStore.get(), body = $("chatBody");
   if (!c) {
     const a = chatState.about;
     body.innerHTML = `<form class="chat-form" id="chatStart" novalidate>
       <p>Questions, custom designs, bulk orders or local pickup: send us a message and we'll reply here.</p>
-      ${a ? `<div class="about-chip">${a.image ? `<img src="${esc(a.image)}" alt="">` : ""}<div><small>Asking about</small>${esc(a.name)}</div></div>` : ""}
+      <div id="startAbout">${aboutHtml(true)}</div>
       <label>Your name<input id="cName" autocomplete="name" maxlength="80" required></label>
       <label>Email<input id="cEmail" type="email" autocomplete="email" inputmode="email" maxlength="160" required></label>
       <label>Message<textarea id="cMsg" maxlength="4000" required placeholder="${a ? "What would you like to know?" : "Tell us your idea: names, colours, quantity, dates…"}"></textarea></label>
@@ -724,10 +799,11 @@ function renderChat() {
     $("chatFoot").hidden = true;
     return;
   }
-  const items = chatState.messages.map((m) => `<div class="bubble ${m.sender === "customer" ? "me" : "them"}">${esc(m.body)}<time>${esc(when(m.created_at))}</time></div>`).join("");
+  const items = chatState.messages.map((m) => `<div class="bubble ${m.sender === "customer" ? "me" : "them"}">${bubbleHtml(m.body)}<time>${esc(when(m.created_at))}</time></div>`).join("");
   body.innerHTML = `<p class="chat-note">Hi ${esc(c.name)}! Your conversation is saved on this device. <button class="linkbtn" type="button" id="chatCopy">Copy link</button> to continue on another device.</p>${items}
     ${chatState.messages.length && chatState.messages[chatState.messages.length - 1].sender === "customer" ? `<p class="chat-note">Thanks! We'll reply here soon.</p>` : ""}`;
   $("chatFoot").hidden = false;
+  $("chatAbout").innerHTML = aboutHtml(false);
   body.scrollTop = body.scrollHeight;
 }
 
@@ -775,20 +851,23 @@ $("chatBody").addEventListener("submit", async (e) => {
   go.disabled = true; go.textContent = "Sending…";
   try {
     const a = chatState.about;
-    const d = await chatCall({ action: "start", name, email, message, website: $("cSite").value, productId: a?.id, productName: a?.name });
+    const d = await chatCall({ action: "start", name, email, message: withProduct(message, a), website: $("cSite").value, productId: a?.id, productName: a?.name });
     chatStore.set({ token: d.token, name });
+    chatState.about = null;
     chatState.messages = d.messages;
     renderChat();
   } catch (x) { show(x.message); go.disabled = false; go.textContent = "Send message"; }
 });
 $("chatSend").addEventListener("submit", async (e) => {
   e.preventDefault();
-  const c = chatStore.get(), box = $("chatMsg"), text = box.value.trim(), err = $("chatErr2");
+  const c = chatStore.get(), box = $("chatMsg"), err = $("chatErr2"), a = chatState.about;
+  let text = box.value.trim();
+  if (!text && a) text = "Hi! I have a question about this item.";
   if (!c || !text || chatState.busy) return;
   chatState.busy = true; $("chatSendBtn").disabled = true; err.hidden = true;
   try {
-    const d = await chatCall({ action: "send", token: c.token, message: text });
-    box.value = ""; box.style.height = "";
+    const d = await chatCall({ action: "send", token: c.token, message: withProduct(text, a) });
+    box.value = ""; box.style.height = ""; chatState.about = null;
     chatState.messages = d.messages; renderChat();
   } catch (x) { err.textContent = x.message; err.hidden = false; }
   chatState.busy = false; $("chatSendBtn").disabled = false; box.focus();
