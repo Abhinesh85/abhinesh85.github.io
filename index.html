@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,500;1,9..144,700&family=Great+Vibes&family=Manrope:wght@400;500;600;700;800&display=swap">
 <link rel="preconnect" href="https://i.etsystatic.com">
-<script src="products.js"></script>
+<script src="products.js?v=d6fe29f995"></script>
 <style>
 /* Layout: dark navy studio with gold line-work from the PrAjo badge; one wide column of full-bleed bands, content capped at 1200px. */
 :root {
@@ -192,7 +192,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 /* product sheet */
 .sheet { position: fixed; inset: 0; z-index: 80; background: rgba(5, 9, 17, .72); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: flex-start; overflow-y: auto; padding: max(16px, env(safe-area-inset-top, 0px)) var(--gutter-r) max(16px, env(safe-area-inset-bottom, 0px)) var(--gutter); }
 .sheet .box { position: relative; width: 100%; max-width: 1080px; margin: auto 0; background: var(--navy); border: 1px solid var(--line); border-radius: 28px; display: grid; grid-template-columns: 1.1fr 1fr; overflow: hidden; animation: up .35s cubic-bezier(.2, .8, .2, 1); }
-@keyframes up { from { transform: translateY(24px); opacity: 0; } }
+@keyframes up { from { transform: translateY(24px); } }
 @media (max-width: 820px) { .sheet { padding: 0; } .sheet .box { grid-template-columns: 1fr; border-radius: 0; min-height: 100%; border: 0; } }
 .close { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 5; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: rgba(10, 18, 32, .8); cursor: pointer; font-size: 22px; line-height: 1; }
 @media (min-width: 821px) { .close { top: 12px; } }
@@ -218,6 +218,42 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 .desc ul { margin: 0; padding-left: 18px; }
 .desc p { margin: 0 0 10px; }
 .actions { display: grid; gap: 10px; }
+/* chat */
+.chat-fab { position: fixed; z-index: 70; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); display: inline-flex; align-items: center; gap: 10px; min-height: 54px; padding: 0 22px 0 18px; border-radius: 999px; border: 0; cursor: pointer; font-weight: 800; font-size: 15px; color: #1b1305; background: linear-gradient(135deg, var(--gold-2), var(--gold) 55%, #b98a32); box-shadow: 0 12px 34px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 255, 255, .15) inset; transition: transform .2s; }
+.chat-fab:hover { transform: translateY(-2px); }
+.chat-fab:focus-visible { outline: 2px solid var(--cream); outline-offset: 3px; }
+.chat-fab svg { width: 22px; height: 22px; }
+.chat-fab .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--saffron); box-shadow: 0 0 0 3px rgba(242, 138, 36, .3); }
+.chat { position: fixed; z-index: 90; right: max(16px, env(safe-area-inset-right, 0px)); bottom: max(16px, env(safe-area-inset-bottom, 0px)); width: min(400px, calc(100vw - 32px)); height: min(640px, calc(100vh - 32px)); display: flex; flex-direction: column; background: var(--navy); border: 1px solid var(--line); border-radius: 24px; overflow: hidden; box-shadow: 0 30px 80px rgba(0, 0, 0, .6); animation: up .3s cubic-bezier(.2, .8, .2, 1); }
+@media (max-width: 600px) { .chat { inset: 0; width: auto; height: auto; border-radius: 0; border: 0; padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); } }
+.chat-head { display: flex; align-items: center; gap: 12px; padding: 14px 14px 14px 16px; background: linear-gradient(120deg, #1a2c4b, var(--navy)); border-bottom: 1px solid var(--line-soft); }
+.chat-head img { width: 40px; height: 40px; border-radius: 50%; }
+.chat-head b { display: block; font-size: 15px; }
+.chat-head small { color: var(--muted); font-size: 12.5px; }
+.chat-head small::before { content: ""; display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--leaf); margin-right: 6px; vertical-align: 1px; }
+.chat-head .close { position: static; margin-left: auto; flex: none; }
+.chat-body { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 10px; overscroll-behavior: contain; }
+.chat-form { display: grid; gap: 12px; }
+.chat-form p { margin: 0; color: var(--muted); font-size: 14.5px; }
+.chat-form label { display: grid; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.chat input, .chat textarea { width: 100%; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); color: var(--cream); font: 500 16px var(--f-body); padding: 11px 13px; }
+.chat textarea { resize: none; min-height: 96px; line-height: 1.4; }
+.chat input:focus, .chat textarea:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217, 171, 79, .18); }
+.chat .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+.about-chip { display: flex; gap: 10px; align-items: center; padding: 8px; border-radius: 14px; border: 1px solid var(--line); background: rgba(217, 171, 79, .06); font-size: 14px; }
+.about-chip img { width: 44px; height: 44px; border-radius: 10px; object-fit: cover; }
+.about-chip small { display: block; color: var(--muted); font-size: 12px; }
+.bubble { max-width: 82%; padding: 10px 14px; border-radius: 18px; font-size: 15px; line-height: 1.45; white-space: pre-wrap; overflow-wrap: anywhere; }
+.bubble time { display: block; font-size: 11px; opacity: .65; margin-top: 4px; }
+.bubble.me { align-self: flex-end; background: linear-gradient(135deg, var(--gold-2), var(--gold)); color: #1b1305; border-bottom-right-radius: 6px; }
+.bubble.them { align-self: flex-start; background: var(--panel-2); border: 1px solid var(--line-soft); border-bottom-left-radius: 6px; }
+.chat-note { text-align: center; color: var(--muted); font-size: 12.5px; margin: 4px 0; }
+.chat-foot { border-top: 1px solid var(--line-soft); padding: 10px 12px; display: grid; gap: 8px; }
+.chat-send { display: flex; gap: 8px; align-items: flex-end; }
+.chat-send textarea { min-height: 46px; max-height: 140px; }
+.chat-send .btn { min-height: 46px; padding: 0 18px; }
+.chat-err { color: #ffb4a8; font-size: 13.5px; margin: 0; }
+.linkbtn { background: none; border: 0; color: var(--gold-2); font-weight: 700; font-size: 12.5px; cursor: pointer; padding: 2px; text-decoration: underline; }
 </style>
 </head>
 <body>
@@ -366,7 +402,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
           <h2>Have something special in mind?</h2>
           <p class="lede">Team names, wedding party gifts, company logos, a photo of someone you love. Tell us the idea and we'll design it with you.</p>
           <div class="hero-cta" style="margin-top:8px">
-            <a class="btn btn-gold" href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Message us on Etsy</a>
+            <button class="btn btn-gold" type="button" data-chat>Message us</button>
+            <a class="btn btn-line" href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Visit our Etsy shop</a>
           </div>
         </div>
         <ul>
@@ -401,6 +438,27 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
     <span>© 2026 PrAjo Custom Studio</span>
   </div>
 </footer>
+
+<button class="chat-fab" type="button" id="chatFab" aria-haspopup="dialog">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/></svg>
+  Message us <span class="dot" id="chatDot" hidden></span>
+</button>
+
+<div class="chat" id="chat" hidden role="dialog" aria-modal="false" aria-labelledby="chatTitle">
+  <div class="chat-head">
+    <img src="logo.png" alt="">
+    <div><b id="chatTitle">PrAjo Custom Studio</b><small>We usually reply within a day</small></div>
+    <button class="close" type="button" id="chatClose" aria-label="Close messages">×</button>
+  </div>
+  <div class="chat-body" id="chatBody" aria-live="polite"></div>
+  <div class="chat-foot" id="chatFoot" hidden>
+    <p class="chat-err" id="chatErr2" hidden></p>
+    <form class="chat-send" id="chatSend">
+      <textarea id="chatMsg" rows="1" placeholder="Write a message…" aria-label="Your message" maxlength="4000"></textarea>
+      <button class="btn btn-gold" type="submit" id="chatSendBtn">Send</button>
+    </form>
+  </div>
+</div>
 
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="pTitle">
   <div class="box">
@@ -547,7 +605,7 @@ function openProduct(id) {
     <div class="perks">${perks.map((x) => `<span>${esc(x)}</span>`).join("")}</div>
     <div class="actions">
       <a class="btn btn-gold" href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">${p.digital ? "Get it on Etsy" : "Order on Etsy"}</a>
-      <a class="btn btn-line" href="${SHOP}" target="_blank" rel="noopener">Ask us a question</a>
+      <button class="btn btn-line" type="button" data-ask>Ask about this item</button>
     </div>
     <div class="desc">${descHtml(p.description)}</div>`;
   $("sheet").hidden = false;
@@ -587,6 +645,133 @@ $("info").addEventListener("click", (e) => {
   b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
   const idx = cur?.variations[+b.dataset.v]?.photos?.[b.dataset.val];
   if (idx != null) showSlide(idx);
+});
+/* ---------- messaging (Supabase Edge Function "chat") ---------- */
+const CHAT = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co/functions/v1/chat", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" };
+const chatStore = {
+  get() { try { return JSON.parse(localStorage.getItem("prajo:chat") || "null"); } catch { return null; } },
+  set(v) { try { localStorage.setItem("prajo:chat", JSON.stringify(v)); } catch {} },
+};
+let chatState = { open: false, about: null, messages: [], busy: false, timer: null };
+async function chatCall(body) {
+  const r = await fetch(CHAT.url, { method: "POST", headers: { "Content-Type": "application/json", apikey: CHAT.key, Authorization: `Bearer ${CHAT.key}` }, body: JSON.stringify(body) });
+  const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || "Something went wrong. Please try again.");
+  return data;
+}
+const when = (iso) => new Date(iso).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+function chatLink() { const c = chatStore.get(); return c ? `${location.origin}${location.pathname}#chat/${c.token}` : ""; }
+
+function renderChat() {
+  const c = chatStore.get(), body = $("chatBody");
+  if (!c) {
+    const a = chatState.about;
+    body.innerHTML = `<form class="chat-form" id="chatStart" novalidate>
+      <p>Questions, custom designs, bulk orders or local pickup: send us a message and we'll reply here.</p>
+      ${a ? `<div class="about-chip">${a.image ? `<img src="${esc(a.image)}" alt="">` : ""}<div><small>Asking about</small>${esc(a.name)}</div></div>` : ""}
+      <label>Your name<input id="cName" autocomplete="name" maxlength="80" required></label>
+      <label>Email<input id="cEmail" type="email" autocomplete="email" inputmode="email" maxlength="160" required></label>
+      <label>Message<textarea id="cMsg" maxlength="4000" required placeholder="${a ? "What would you like to know?" : "Tell us your idea: names, colours, quantity, dates…"}"></textarea></label>
+      <input class="hp" id="cSite" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p class="chat-err" id="chatErr" hidden></p>
+      <button class="btn btn-gold" type="submit" id="cGo">Send message</button>
+      <p style="font-size:12.5px">We only use your email to reply to you.</p>
+    </form>`;
+    $("chatFoot").hidden = true;
+    return;
+  }
+  const items = chatState.messages.map((m) => `<div class="bubble ${m.sender === "customer" ? "me" : "them"}">${esc(m.body)}<time>${esc(when(m.created_at))}</time></div>`).join("");
+  body.innerHTML = `<p class="chat-note">Hi ${esc(c.name)}! Your conversation is saved on this device. <button class="linkbtn" type="button" id="chatCopy">Copy link</button> to continue on another device.</p>${items}
+    ${chatState.messages.length && chatState.messages[chatState.messages.length - 1].sender === "customer" ? `<p class="chat-note">Thanks! We'll reply here soon.</p>` : ""}`;
+  $("chatFoot").hidden = false;
+  body.scrollTop = body.scrollHeight;
+}
+
+async function refreshChat(quiet) {
+  const c = chatStore.get(); if (!c) return;
+  try {
+    const d = await chatCall({ action: "get", token: c.token });
+    const changed = d.messages.length !== chatState.messages.length;
+    chatState.messages = d.messages;
+    if (chatState.open) { if (changed || !quiet) renderChat(); }
+    else $("chatDot").hidden = !d.thread.customerUnread;
+  } catch (e) {
+    if (/couldn't find/i.test(e.message)) { chatStore.set(null); chatState.messages = []; if (chatState.open) renderChat(); }
+  }
+}
+function openChat(about) {
+  chatState.open = true;
+  if (about) chatState.about = about;
+  $("chat").hidden = false; $("chatFab").hidden = true; $("chatDot").hidden = true;
+  renderChat();
+  refreshChat(false);
+  clearInterval(chatState.timer);
+  chatState.timer = setInterval(() => document.visibilityState === "visible" && refreshChat(true), 6000);
+  setTimeout(() => (chatStore.get() ? $("chatMsg") : $("cName"))?.focus({ preventScroll: true }), 50);
+}
+function closeChat() {
+  chatState.open = false;
+  $("chat").hidden = true; $("chatFab").hidden = false;
+  clearInterval(chatState.timer);
+  chatState.timer = setInterval(() => document.visibilityState === "visible" && refreshChat(true), 60000);
+  if (location.hash.startsWith("#chat/")) history.replaceState(null, "", location.pathname);
+}
+$("chatFab").onclick = () => openChat(null);
+$("chatClose").onclick = closeChat;
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && chatState.open && $("sheet").hidden) closeChat(); });
+$("chatBody").addEventListener("submit", async (e) => {
+  if (e.target.id !== "chatStart") return;
+  e.preventDefault();
+  const err = $("chatErr"), go = $("cGo");
+  const name = $("cName").value.trim(), email = $("cEmail").value.trim(), message = $("cMsg").value.trim();
+  const show = (m) => { err.textContent = m; err.hidden = false; };
+  if (!name) return show("Please add your name.");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return show("Please add a valid email so we can reply.");
+  if (!message) return show("Please write a message.");
+  go.disabled = true; go.textContent = "Sending…";
+  try {
+    const a = chatState.about;
+    const d = await chatCall({ action: "start", name, email, message, website: $("cSite").value, productId: a?.id, productName: a?.name });
+    chatStore.set({ token: d.token, name });
+    chatState.messages = d.messages;
+    renderChat();
+  } catch (x) { show(x.message); go.disabled = false; go.textContent = "Send message"; }
+});
+$("chatSend").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const c = chatStore.get(), box = $("chatMsg"), text = box.value.trim(), err = $("chatErr2");
+  if (!c || !text || chatState.busy) return;
+  chatState.busy = true; $("chatSendBtn").disabled = true; err.hidden = true;
+  try {
+    const d = await chatCall({ action: "send", token: c.token, message: text });
+    box.value = ""; box.style.height = "";
+    chatState.messages = d.messages; renderChat();
+  } catch (x) { err.textContent = x.message; err.hidden = false; }
+  chatState.busy = false; $("chatSendBtn").disabled = false; box.focus();
+});
+$("chatMsg").addEventListener("input", (e) => { e.target.style.height = "auto"; e.target.style.height = Math.min(140, e.target.scrollHeight) + "px"; });
+$("chatMsg").addEventListener("keydown", (e) => { if (e.key === "Enter" && !e.shiftKey && matchMedia("(hover: hover)").matches) { e.preventDefault(); $("chatSend").requestSubmit(); } });
+$("chatBody").addEventListener("click", async (e) => {
+  if (e.target.id !== "chatCopy") return;
+  try { await navigator.clipboard.writeText(chatLink()); e.target.textContent = "Link copied"; }
+  catch { e.target.textContent = chatLink(); }
+});
+// A conversation link (#chat/<key>) opens that conversation on any device.
+function chatRoute() {
+  const m = location.hash.match(/^#chat\/([A-Za-z0-9_-]{20,})$/);
+  if (!m) return false;
+  const c = chatStore.get();
+  if (!c || c.token !== m[1]) { chatStore.set({ token: m[1], name: c?.name || "there" }); chatState.messages = []; }
+  openChat(null);
+  return true;
+}
+window.addEventListener("hashchange", chatRoute);
+if (!chatRoute() && chatStore.get()) refreshChat(true);
+chatState.timer = setInterval(() => !chatState.open && document.visibilityState === "visible" && refreshChat(true), 60000);
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-chat]")) openChat(null);
+  const ask = e.target.closest("[data-ask]");
+  if (ask && cur) openChat({ id: cur.id, name: cur.name, image: cur.images[0]?.card });
 });
 route();
 </script>
