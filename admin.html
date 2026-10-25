@@ -1,0 +1,534 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Store Admin · PrAjo Custom Studio</title>
+<meta name="theme-color" content="#0a1220">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Fraunces:opsz,wght@9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+<script src="products.js"></script>
+<style>
+/* Layout: the store's navy-and-gold palette in a calm working layout: toolbar, card grid, and an edit sheet. */
+:root {
+  color-scheme: dark;
+  --ink: #0a1220; --navy: #0f1b2e; --panel: #13213a; --panel-2: #182a47;
+  --line: rgba(217, 171, 79, .22); --line-soft: rgba(245, 236, 220, .1);
+  --gold: #d9ab4f; --gold-2: #f3d48a; --saffron: #f28a24; --leaf: #3bb35a; --danger: #ff7a6b;
+  --cream: #f5ecdc; --muted: #a3adbf;
+  --f-display: "Fraunces", Georgia, serif; --f-body: "Manrope", system-ui, sans-serif; --f-label: "Cinzel", Georgia, serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--ink); color: var(--cream); font: 15px/1.5 var(--f-body); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--ink); z-index: 60; }
+button, input, select, textarea { font: inherit; color: inherit; }
+img { max-width: 100%; display: block; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.lbl { font-family: var(--f-label); font-size: 11.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+h1, h2 { font-family: var(--f-display); margin: 0; letter-spacing: -.01em; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid transparent; font-weight: 800; font-size: 14.5px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.gold { background: linear-gradient(135deg, var(--gold-2), var(--gold) 55%, #b98a32); color: #1b1305; }
+.line { border-color: var(--line); background: rgba(245, 236, 220, .03); }
+.danger { border-color: rgba(255, 122, 107, .35); color: var(--danger); background: none; }
+.in { width: 100%; min-height: 46px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); padding: 10px 13px; font-size: 16px; }
+.in:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217, 171, 79, .18); }
+textarea.in { min-height: 180px; resize: vertical; line-height: 1.45; }
+label.f { display: grid; gap: 6px; min-width: 0; }
+label.f > span { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hint { margin: 0; font-size: 13px; color: var(--muted); }
+.row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 520px) { .row3 { grid-template-columns: 1fr 1fr; } }
+
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40; background: rgba(10, 18, 32, .85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line-soft); }
+header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64px; flex-wrap: wrap; padding-block: 8px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; color: inherit; }
+.brand img { width: 38px; height: 38px; border-radius: 50%; }
+.brand b { font-family: var(--f-label); letter-spacing: .12em; }
+.brand small { display: block; font-size: 11px; color: var(--gold); letter-spacing: .14em; text-transform: uppercase; }
+
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 20px 0 16px; }
+.tools .in { max-width: 280px; min-height: 42px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-soft); background: none; color: var(--muted); font-weight: 700; font-size: 13.5px; cursor: pointer; }
+.chips button[aria-pressed="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+.count { color: var(--muted); font-size: 13.5px; margin-left: auto; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; padding-bottom: 60px; }
+@media (max-width: 520px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+.item { position: relative; background: var(--panel); border: 1px solid var(--line-soft); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+.item.off { opacity: .55; }
+.item .ph { position: relative; aspect-ratio: 1; background: var(--navy); cursor: pointer; }
+.item .ph img { width: 100%; height: 100%; object-fit: cover; }
+.item .ph .none { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+.item .grab { position: absolute; top: 8px; left: 8px; width: 34px; height: 34px; border-radius: 10px; background: rgba(10, 18, 32, .8); border: 1px solid var(--line); display: grid; place-items: center; cursor: grab; touch-action: none; color: var(--gold-2); font-size: 16px; }
+.item .tag { position: absolute; top: 8px; right: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; background: rgba(10, 18, 32, .85); border: 1px solid var(--line); color: var(--gold-2); }
+.item .meta { padding: 10px 12px 12px; display: grid; gap: 6px; }
+.item .nm { font-weight: 700; font-size: 14px; line-height: 1.3; cursor: pointer; }
+.item .pr { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.item .pr b { font-family: var(--f-display); color: var(--gold-2); font-size: 17px; }
+.item .pr small { font-size: 11px; color: var(--leaf); font-weight: 800; }
+.sortable-ghost { opacity: .35; }
+.sortable-chosen { box-shadow: 0 0 0 2px var(--gold); }
+
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--muted); user-select: none; }
+.switch input { appearance: none; -webkit-appearance: none; width: 42px; height: 24px; border-radius: 999px; background: #2a3550; position: relative; cursor: pointer; transition: background .2s; flex: none; margin: 0; }
+.switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.switch input:checked { background: var(--leaf); }
+.switch input:checked::after { transform: translateX(18px); }
+.switch input:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+
+.empty { text-align: center; padding: 50px 20px; border: 1px dashed var(--line); border-radius: 22px; display: grid; gap: 12px; justify-items: center; }
+.empty b { font-family: var(--f-display); font-size: 22px; }
+
+/* editor sheet */
+.sheet { position: fixed; inset: 0; z-index: 80; background: rgba(5, 9, 17, .7); backdrop-filter: blur(4px); display: flex; justify-content: flex-end; }
+.panel { width: min(720px, 100%); height: 100%; background: var(--navy); border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+.panel-head { display: flex; align-items: center; gap: 10px; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; border-bottom: 1px solid var(--line-soft); }
+.panel-head h2 { font-size: 20px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.x { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: none; cursor: pointer; font-size: 20px; flex: none; }
+.panel-body { flex: 1; overflow-y: auto; padding: 18px 16px 30px; display: grid; gap: 22px; align-content: start; }
+.panel-foot { display: flex; gap: 10px; flex-wrap: wrap; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line-soft); background: var(--navy); }
+.panel-foot .gold { flex: 1; }
+.sec { display: grid; gap: 12px; }
+
+.drop { border: 2px dashed var(--line); border-radius: 18px; padding: 22px 16px; text-align: center; display: grid; gap: 8px; justify-items: center; cursor: pointer; transition: border-color .2s, background .2s; }
+.drop.over { border-color: var(--gold-2); background: rgba(217, 171, 79, .08); }
+.drop b { font-size: 15.5px; }
+.drop svg { width: 34px; height: 34px; color: var(--gold-2); }
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.ph-item { position: relative; border-radius: 14px; overflow: hidden; background: var(--panel); border: 1px solid var(--line-soft); display: flex; flex-direction: column; }
+.ph-item .im { position: relative; aspect-ratio: 1; cursor: grab; touch-action: none; }
+.ph-item .im img { width: 100%; height: 100%; object-fit: cover; }
+.ph-item .cover { position: absolute; left: 6px; top: 6px; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; background: var(--gold-2); color: #1b1305; padding: 3px 7px; border-radius: 999px; }
+.ph-item .del { position: absolute; right: 6px; top: 6px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(10, 18, 32, .85); cursor: pointer; font-size: 16px; }
+.ph-item select { border: 0; border-top: 1px solid var(--line-soft); background: var(--panel-2); color: var(--cream); font-size: 12.5px; padding: 7px 6px; min-height: 34px; width: 100%; }
+.ph-item.busy .im::after { content: "Uploading…"; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(10, 18, 32, .7); font-size: 12px; font-weight: 700; }
+
+.opt-group { border: 1px solid var(--line-soft); border-radius: 14px; padding: 12px; display: grid; gap: 10px; background: var(--panel); }
+.opt-head { display: flex; gap: 8px; }
+.vals { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.val { display: inline-flex; align-items: center; gap: 4px; padding: 6px 6px 6px 12px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line-soft); font-size: 14px; }
+.val button { width: 24px; height: 24px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .08); cursor: pointer; line-height: 1; }
+.vals input { flex: 1; min-width: 120px; min-height: 36px; font-size: 15px; }
+.price-box { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: grid; gap: 10px; background: rgba(217, 171, 79, .05); }
+.linked { font-size: 13.5px; color: var(--muted); }
+.linked b { color: var(--gold-2); font-family: var(--f-display); font-size: 18px; }
+
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; background: var(--cream); color: var(--ink); padding: 10px 18px; border-radius: 999px; font-weight: 800; font-size: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
+
+.signin { max-width: 400px; margin: 12vh auto 0; padding: 26px; border-radius: 24px; border: 1px solid var(--line); background: var(--navy); display: grid; gap: 14px; }
+.err { color: #ffb4a8; font-size: 14px; margin: 0; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./" title="Open the store">
+      <img src="logo.png" alt="">
+      <span><b>PRAJO</b><small>Store admin</small></span>
+    </a>
+    <a class="btn line" href="./" target="_blank" rel="noopener">View store ↗</a>
+    <button class="btn gold" type="button" id="newBtn" hidden>+ New listing</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <form class="signin" id="signin" hidden novalidate>
+    <h2>Sign in</h2>
+    <p class="hint">Use the same email and password as your PrAjo Pricing app.</p>
+    <label class="f"><span>Email</span><input class="in" id="siEmail" type="email" autocomplete="email"></label>
+    <label class="f"><span>Password</span><input class="in" id="siPw" type="password" autocomplete="current-password"></label>
+    <p class="err" id="siErr" hidden></p>
+    <button class="btn gold" type="submit">Sign in</button>
+  </form>
+
+  <div id="appView" hidden>
+    <div class="tools">
+      <input class="in" id="search" placeholder="Search listings" aria-label="Search listings" autocomplete="off">
+      <div class="chips" id="cats" role="group" aria-label="Filter"></div>
+      <span class="count" id="count"></span>
+    </div>
+    <p class="hint" style="margin:-6px 0 14px">Drag <b>⠿</b> to change the order on the store. Tap a listing to edit it. Changes go live as soon as you save.</p>
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="edTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="edTitle">Edit listing</h2>
+      <button class="x" type="button" id="edClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body" id="edBody"></div>
+    <div class="panel-foot">
+      <button class="btn danger" type="button" id="edDelete">Delete</button>
+      <button class="btn line" type="button" id="edDup">Duplicate</button>
+      <button class="btn gold" type="button" id="edSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<input type="file" id="filePick" accept="image/*" multiple hidden>
+
+<script>
+const CFG = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", owner: "abhi.prasad85@gmail.com", bucket: "listing-photos" };
+const CATS = [{ id: "tumblers", label: "Tumblers" }, { id: "mugs", label: "Mugs" }, { id: "tags", label: "Badges & Tags" }, { id: "printables", label: "Printables" }, { id: "apparel", label: "Apparel" }, { id: "other", label: "Other" }];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const money = (n) => "$" + Number(n || 0).toFixed(2);
+const sb = window.supabase.createClient(CFG.url, CFG.key, { auth: { persistSession: true, autoRefreshToken: true } });
+let rows = [], prices = {}, filter = "all", ed = null, sortable = null;
+let toastT;
+function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2400); }
+const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "listing";
+
+/* ---------- sign in ---------- */
+async function boot() {
+  const { data } = await sb.auth.getSession();
+  const email = data.session?.user?.email?.toLowerCase();
+  if (!email) { $("signin").hidden = false; return; }
+  if (email !== CFG.owner) { $("signin").hidden = false; $("siErr").textContent = `${email} can't edit this store.`; $("siErr").hidden = false; return; }
+  $("appView").hidden = false; $("newBtn").hidden = false;
+  await Promise.all([loadRows(), loadPrices()]);
+}
+$("signin").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const { error } = await sb.auth.signInWithPassword({ email: $("siEmail").value.trim(), password: $("siPw").value });
+  if (error) { $("siErr").textContent = error.message; $("siErr").hidden = false; return; }
+  location.reload();
+});
+
+/* ---------- data ---------- */
+async function loadRows() {
+  const { data, error } = await sb.from("listings").select("*").order("sort").order("name");
+  if (error) { $("grid").innerHTML = `<div class="empty"><b>Store listings aren't set up yet</b><p class="hint">Run listings-setup.sql in Supabase first.</p></div>`; return; }
+  rows = data; render();
+}
+async function loadPrices() {
+  const { data } = await sb.from("docs").select("data").eq("coll", "app").eq("id", "store-prices").maybeSingle();
+  prices = data?.data?.prices || {};
+}
+const priceOf = (r) => r.price_source === "pricing" && prices[r.pricing_id] ? prices[r.pricing_id].sell : Number(r.price);
+
+/* ---------- list ---------- */
+function render() {
+  const q = $("search").value.trim().toLowerCase();
+  $("cats").innerHTML = [{ id: "all", label: "All" }, ...CATS.filter((c) => rows.some((r) => r.category === c.id)), { id: "hidden", label: "Hidden" }]
+    .map((c) => `<button type="button" data-f="${c.id}" aria-pressed="${filter === c.id}">${esc(c.label)}</button>`).join("");
+  if (!rows.length) {
+    $("grid").innerHTML = `<div class="empty" style="grid-column:1/-1"><b>No listings in the database yet</b>
+      <p class="hint">Bring in the ${(window.PRAJO_PRODUCTS || []).length || "current"} products from your live store to start editing.</p>
+      <button class="btn gold" type="button" id="importBtn">Import current store products</button></div>`;
+    $("count").textContent = ""; return;
+  }
+  const list = rows.filter((r) => (filter === "all" || (filter === "hidden" ? !r.visible : r.category === filter))
+    && (!q || (r.name + " " + (r.title || "")).toLowerCase().includes(q)));
+  $("count").textContent = `${list.length} of ${rows.length}`;
+  $("grid").innerHTML = list.map((r) => `
+    <div class="item${r.visible ? "" : " off"}" data-id="${esc(r.id)}">
+      <div class="ph" data-edit>${r.images?.[0] ? `<img src="${esc(r.images[0].card)}" alt="" loading="lazy">` : `<span class="none">No photo yet</span>`}
+        <span class="grab" title="Drag to reorder" aria-label="Drag to reorder">⠿</span>
+        ${r.visible ? "" : `<span class="tag">Hidden</span>`}</div>
+      <div class="meta">
+        <span class="nm" data-edit>${esc(r.name)}</span>
+        <div class="pr"><b>${money(priceOf(r))}</b>${r.price_source === "pricing" ? `<small>⟲ from app</small>` : ""}</div>
+        <label class="switch"><input type="checkbox" data-vis ${r.visible ? "checked" : ""} aria-label="Show on store"> On store</label>
+      </div>
+    </div>`).join("");
+  sortable?.destroy();
+  sortable = (filter === "all" && !q) ? Sortable.create($("grid"), { handle: ".grab", animation: 160, onEnd: saveOrder }) : null;
+}
+$("search").addEventListener("input", render);
+$("cats").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { filter = b.dataset.f; render(); } });
+$("grid").addEventListener("click", async (e) => {
+  if (e.target.id === "importBtn") return importStore(e.target);
+  const it = e.target.closest(".item"); if (!it) return;
+  if (e.target.matches("[data-vis]")) {
+    const r = rows.find((x) => x.id === it.dataset.id); r.visible = e.target.checked;
+    const { error } = await sb.from("listings").update({ visible: r.visible, updated_at: new Date().toISOString() }).eq("id", r.id);
+    if (error) { toast("Couldn't update. Try again."); r.visible = !r.visible; }
+    else toast(r.visible ? "Now on the store" : "Hidden from the store");
+    render(); return;
+  }
+  if (e.target.closest("[data-edit]") && !e.target.closest(".grab")) openEditor(rows.find((x) => x.id === it.dataset.id));
+});
+async function saveOrder() {
+  const ids = [...$("grid").querySelectorAll(".item")].map((el) => el.dataset.id);
+  const changed = [];
+  ids.forEach((id, i) => { const r = rows.find((x) => x.id === id); if (r.sort !== (i + 1) * 10) { r.sort = (i + 1) * 10; changed.push(r); } });
+  rows.sort((a, b) => a.sort - b.sort);
+  for (const r of changed) await sb.from("listings").update({ sort: r.sort }).eq("id", r.id);
+  if (changed.length) toast("Order saved");
+}
+
+/* ---------- one-time import from the current store (products.js) ---------- */
+function blocksToText(blocks) {
+  return (blocks || []).map((b) => b.type === "head" ? b.text.toUpperCase() : b.type === "list" ? b.items.map((i) => "• " + i).join("\n") : b.text).join("\n\n");
+}
+async function importStore(btn) {
+  const src = window.PRAJO_PRODUCTS || [];
+  if (!src.length) return toast("Couldn't find the current products.");
+  btn.disabled = true; btn.textContent = "Importing…";
+  const toRow = (p, i) => {
+    const images = p.images.map((im, idx) => {
+      const shows = (p.variations || []).flatMap((v) => Object.entries(v.photos || {}).filter(([, n]) => n === idx).map(([val]) => ({ name: v.name, value: val })))[0];
+      return shows ? { card: abs(im.card), large: abs(im.large), shows } : { card: abs(im.card), large: abs(im.large) };
+    });
+    return { id: p.id, name: p.name, title: p.title, category: p.category, price: p.price, currency: p.currency || "USD", stock: p.stock,
+      digital: !!p.digital, personalizable: !!p.personalizable, visible: true, sort: (i + 1) * 10,
+      variations: (p.variations || []).map((v) => ({ name: v.name, values: v.values })), images, tags: p.tags || [], description: blocksToText(p.description) };
+  };
+  const { error } = await sb.from("listings").upsert(src.map(toRow));
+  if (error) { toast("Import failed: " + error.message); btn.disabled = false; btn.textContent = "Import current store products"; return; }
+  toast(`Imported ${src.length} listings`);
+  loadRows();
+}
+const abs = (u) => /^https?:/.test(u) ? u : new URL(u, location.href).href;
+
+/* ---------- editor ---------- */
+function openEditor(r, isNew) {
+  ed = JSON.parse(JSON.stringify(r || { id: "", name: "", title: "", category: "tumblers", price: 0, currency: "USD", stock: 10, digital: false, personalizable: true, visible: true, sort: (rows.length + 1) * 10, variations: [], images: [], tags: [], description: "", pricing_id: null, price_source: "manual" }));
+  ed._new = isNew || !r;
+  ed._folder = ed.id || "new-" + Math.random().toString(36).slice(2, 8);
+  $("edTitle").textContent = ed._new ? "New listing" : ed.name;
+  $("edDelete").hidden = ed._new; $("edDup").hidden = ed._new;
+  renderEditor();
+  $("sheet").hidden = false; document.body.style.overflow = "hidden";
+}
+function closeEditor() { $("sheet").hidden = true; document.body.style.overflow = ""; ed = null; delArmed = false; $("edDelete").textContent = "Delete"; }
+$("edClose").onclick = closeEditor;
+$("sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") closeEditor(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && ed) closeEditor(); });
+$("newBtn").onclick = () => openEditor(null, true);
+
+function optionChoices() {
+  return ed.variations.flatMap((v) => v.values.map((val) => ({ name: v.name, value: val })));
+}
+function renderEditor() {
+  const pricingList = Object.entries(prices).sort((a, b) => a[1].name.localeCompare(b[1].name));
+  const linked = ed.price_source === "pricing" && prices[ed.pricing_id];
+  const choices = optionChoices();
+  $("edBody").innerHTML = `
+    <section class="sec">
+      <div class="lbl">Photos</div>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Add photos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="m21 17-5-5-7 7"/><path d="M12 3v4M10 5h4"/></svg>
+        <b>Drag photos here or tap to add</b>
+        <span class="hint">JPG, PNG or HEIC from your phone. They're resized automatically. Drag photos to reorder; the first is the cover.</span>
+      </div>
+      <div class="photos" id="photos">${ed.images.map((im, i) => `
+        <div class="ph-item${im._busy ? " busy" : ""}" data-i="${i}">
+          <div class="im"><img src="${esc(im._preview || im.card)}" alt="">${i === 0 ? `<span class="cover">Cover</span>` : ""}
+            <button class="del" type="button" data-del="${i}" aria-label="Remove photo">×</button></div>
+          ${choices.length ? `<select data-shows="${i}" aria-label="Option this photo shows"><option value="">Shows: any option</option>${choices.map((c) => `<option value="${esc(c.name + "\u0001" + c.value)}" ${im.shows && im.shows.name === c.name && im.shows.value === c.value ? "selected" : ""}>${esc(c.name)}: ${esc(c.value)}</option>`).join("")}</select>` : ""}
+        </div>`).join("")}</div>
+    </section>
+
+    <section class="sec">
+      <div class="lbl">Details</div>
+      <label class="f"><span>Name</span><input class="in" id="eName" value="${esc(ed.name)}" placeholder="e.g. Personalized Name Tumbler" maxlength="120"></label>
+      <div class="row">
+        <label class="f"><span>Category</span><select class="in" id="eCat">${CATS.map((c) => `<option value="${c.id}" ${ed.category === c.id ? "selected" : ""}>${c.label}</option>`).join("")}</select></label>
+        <label class="f"><span>In stock</span><input class="in" id="eStock" type="number" inputmode="numeric" min="0" value="${esc(ed.stock)}"></label>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px">
+        <label class="switch"><input type="checkbox" id="eVis" ${ed.visible ? "checked" : ""}> Show on store</label>
+        <label class="switch"><input type="checkbox" id="ePers" ${ed.personalizable ? "checked" : ""}> Personalizable</label>
+        <label class="switch"><input type="checkbox" id="eDig" ${ed.digital ? "checked" : ""}> Digital download</label>
+      </div>
+    </section>
+
+    <section class="sec">
+      <div class="lbl">Price</div>
+      <div class="price-box">
+        <label class="switch"><input type="checkbox" id="eLink" ${ed.price_source === "pricing" ? "checked" : ""} ${pricingList.length ? "" : "disabled"}> Use the price from my pricing app</label>
+        ${ed.price_source === "pricing" ? `
+          <label class="f"><span>Pricing-app product</span><select class="in" id="ePid"><option value="">Choose a product…</option>${pricingList.map(([id, p]) => `<option value="${esc(id)}" ${ed.pricing_id === id ? "selected" : ""}>${esc(p.name)} · ${money(p.sell)}</option>`).join("")}</select></label>
+          <p class="linked">${linked ? `Store price: <b>${money(linked.sell)}</b> (cost ${money(linked.cost)}). It updates by itself when you change the price in your pricing app.` : "Pick the product this listing is made from."}</p>`
+        : `<label class="f"><span>Store price ($)</span><input class="in" id="ePrice" type="number" inputmode="decimal" step="0.01" min="0" value="${esc(Number(ed.price).toFixed(2))}"></label>
+           ${pricingList.length ? "" : `<p class="hint">Open your pricing app once to make its prices available here.</p>`}`}
+      </div>
+      <p class="hint">Shown on the store as "from $X" when the listing has options.</p>
+    </section>
+
+    <section class="sec">
+      <div class="lbl">Options</div>
+      <p class="hint">Sizes, colours, designs: anything the customer chooses. Type a choice and press Enter to add it.</p>
+      <div id="opts" style="display:grid;gap:10px">${ed.variations.map((v, gi) => `
+        <div class="opt-group" data-g="${gi}">
+          <div class="opt-head"><input class="in" data-gname="${gi}" value="${esc(v.name)}" placeholder="Option name, e.g. Size" maxlength="40"><button class="btn danger" type="button" data-gdel="${gi}">Remove</button></div>
+          <div class="vals">${v.values.map((val, vi) => `<span class="val">${esc(val)}<button type="button" data-vdel="${gi}:${vi}" aria-label="Remove ${esc(val)}">×</button></span>`).join("")}
+            <input class="in" data-vadd="${gi}" placeholder="Add a choice…" maxlength="40"></div>
+        </div>`).join("")}</div>
+      <button class="btn line" type="button" id="addGroup">+ Add an option</button>
+    </section>
+
+    <section class="sec">
+      <div class="lbl">Description</div>
+      <textarea class="in" id="eDesc" placeholder="What it is, sizes, materials, care. Start lines with • for bullet points, and write headings in CAPITALS.">${esc(ed.description)}</textarea>
+    </section>`;
+  bindEditor();
+}
+
+function readForm() {
+  if (!ed || !$("eName")) return;
+  ed.name = $("eName").value.trim();
+  ed.category = $("eCat").value;
+  ed.stock = Math.max(0, parseInt($("eStock").value || "0", 10));
+  ed.visible = $("eVis").checked; ed.personalizable = $("ePers").checked; ed.digital = $("eDig").checked;
+  if ($("ePrice")) ed.price = Math.max(0, parseFloat($("ePrice").value || "0"));
+  if ($("ePid")) ed.pricing_id = $("ePid").value || null;
+  ed.description = $("eDesc").value;
+  document.querySelectorAll("[data-gname]").forEach((el) => { ed.variations[+el.dataset.gname].name = el.value.trim(); });
+}
+
+function bindEditor() {
+  const drop = $("drop");
+  drop.onclick = () => $("filePick").click();
+  drop.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("filePick").click(); } };
+  ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", (e) => addFiles(e.dataTransfer.files));
+  Sortable.create($("photos"), {
+    animation: 160, handle: ".im", filter: ".del", preventOnFilter: false,
+    onEnd: (ev) => { readForm(); const [m] = ed.images.splice(ev.oldIndex, 1); ed.images.splice(ev.newIndex, 0, m); renderEditor(); },
+  });
+  $("eLink").onchange = (e) => {
+    readForm(); ed.price_source = e.target.checked ? "pricing" : "manual";
+    if (e.target.checked && !ed.pricing_id) {
+      const match = Object.entries(prices).find(([, p]) => p.name.toLowerCase() === ed.name.toLowerCase());
+      if (match) ed.pricing_id = match[0];
+    }
+    renderEditor();
+  };
+  if ($("ePid")) $("ePid").onchange = () => { readForm(); renderEditor(); };
+}
+$("filePick").addEventListener("change", (e) => { addFiles(e.target.files); e.target.value = ""; });
+
+$("edBody").addEventListener("click", (e) => {
+  const t = e.target;
+  if (t.dataset.del != null) { readForm(); ed.images.splice(+t.dataset.del, 1); renderEditor(); return; }
+  if (t.id === "addGroup") { readForm(); ed.variations.push({ name: "", values: [] }); renderEditor(); setTimeout(() => document.querySelector(`[data-gname="${ed.variations.length - 1}"]`)?.focus(), 0); return; }
+  if (t.dataset.gdel != null) {
+    readForm(); const g = ed.variations[+t.dataset.gdel];
+    ed.images.forEach((im) => { if (im.shows?.name === g.name) delete im.shows; });
+    ed.variations.splice(+t.dataset.gdel, 1); renderEditor(); return;
+  }
+  if (t.dataset.vdel) {
+    readForm(); const [gi, vi] = t.dataset.vdel.split(":").map(Number); const g = ed.variations[gi], val = g.values[vi];
+    ed.images.forEach((im) => { if (im.shows?.name === g.name && im.shows.value === val) delete im.shows; });
+    g.values.splice(vi, 1); renderEditor();
+  }
+});
+$("edBody").addEventListener("keydown", (e) => {
+  if (e.target.dataset.vadd == null || e.key !== "Enter" && e.key !== ",") return;
+  e.preventDefault(); addValue(e.target);
+});
+$("edBody").addEventListener("focusout", (e) => { if (e.target.dataset?.vadd != null && e.target.value.trim()) addValue(e.target); });
+function addValue(input) {
+  readForm();
+  const g = ed.variations[+input.dataset.vadd], v = input.value.trim().replace(/,$/, "");
+  if (v && !g.values.includes(v)) g.values.push(v);
+  renderEditor();
+  setTimeout(() => document.querySelector(`[data-vadd="${input.dataset.vadd}"]`)?.focus(), 0);
+}
+$("edBody").addEventListener("change", (e) => {
+  if (e.target.dataset.shows == null) return;
+  const im = ed.images[+e.target.dataset.shows], v = e.target.value;
+  if (!v) delete im.shows; else { const [name, value] = v.split("\u0001"); im.shows = { name, value }; }
+});
+
+/* ---------- photo upload: resize in the browser, store two sizes ---------- */
+async function resized(file, width) {
+  const bmp = await createImageBitmap(file);
+  const scale = Math.min(1, width / bmp.width);
+  const c = document.createElement("canvas");
+  c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+  c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+  return new Promise((res) => c.toBlob(res, "image/jpeg", .86));
+}
+async function addFiles(fileList) {
+  const files = [...fileList].filter((f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name));
+  if (!files.length) return;
+  readForm();
+  for (const f of files) {
+    const item = { card: "", large: "", _busy: true, _preview: URL.createObjectURL(f) };
+    ed.images.push(item); renderEditor();
+    try {
+      const base = `${ed._folder}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      for (const [w, suffix, key] of [[1140, "l", "large"], [570, "c", "card"]]) {
+        const blob = await resized(f, w);
+        const { error } = await sb.storage.from(CFG.bucket).upload(`${base}-${suffix}.jpg`, blob, { contentType: "image/jpeg", upsert: false });
+        if (error) throw error;
+        item[key] = sb.storage.from(CFG.bucket).getPublicUrl(`${base}-${suffix}.jpg`).data.publicUrl;
+      }
+      delete item._busy;
+    } catch (err) {
+      ed.images.splice(ed.images.indexOf(item), 1);
+      toast(/heic|decode|bitmap/i.test(String(err)) ? "That photo format isn't supported here. Try a JPG or PNG." : "A photo didn't upload. Try again.");
+    }
+    renderEditor();
+  }
+}
+
+/* ---------- save / duplicate / delete ---------- */
+$("edSave").onclick = async () => {
+  readForm();
+  if (!ed.name) return toast("Give the listing a name");
+  if (ed.images.some((im) => im._busy)) return toast("Wait for the photos to finish uploading");
+  if (ed.price_source === "pricing" && !prices[ed.pricing_id]) return toast("Pick the pricing-app product, or turn off the link");
+  if (ed.price_source !== "pricing" && !(ed.price > 0)) return toast("Enter a store price");
+  ed.variations = ed.variations.filter((v) => v.name && v.values.length);
+  if (ed._new) {
+    let id = slug(ed.name);
+    while (rows.some((r) => r.id === id)) id = slug(ed.name).slice(0, 42) + "-" + Math.random().toString(36).slice(2, 6);
+    ed.id = id;
+  }
+  const row = {
+    id: ed.id, name: ed.name, title: ed.title || ed.name, category: ed.category,
+    price: ed.price_source === "pricing" ? prices[ed.pricing_id].sell : ed.price, currency: ed.currency || "USD",
+    stock: ed.stock, digital: ed.digital, personalizable: ed.personalizable, visible: ed.visible, sort: ed.sort,
+    variations: ed.variations.map((v) => ({ name: v.name, values: v.values })),
+    images: ed.images.map(({ card, large, shows }) => (shows ? { card, large, shows } : { card, large })),
+    tags: ed.tags || [], description: ed.description,
+    pricing_id: ed.price_source === "pricing" ? ed.pricing_id : null, price_source: ed.price_source,
+    updated_at: new Date().toISOString(),
+  };
+  $("edSave").disabled = true; $("edSave").textContent = "Saving…";
+  const { error } = await sb.from("listings").upsert(row);
+  $("edSave").disabled = false; $("edSave").textContent = "Save";
+  if (error) return toast("Couldn't save: " + error.message);
+  toast(ed._new ? "Listing added to the store" : "Saved. Live on the store now");
+  closeEditor(); loadRows();
+};
+$("edDup").onclick = () => {
+  readForm();
+  const copy = JSON.parse(JSON.stringify(ed));
+  copy.id = ""; copy.name = ed.name + " (copy)"; copy.visible = false; copy.sort = ed.sort + 1;
+  closeEditor(); openEditor(copy, true);
+  toast("Copy made: it's hidden until you switch it on");
+};
+let delArmed = false;
+$("edDelete").onclick = async () => {
+  if (!delArmed) { delArmed = true; $("edDelete").textContent = "Tap again to delete"; setTimeout(() => { delArmed = false; $("edDelete").textContent = "Delete"; }, 3500); return; }
+  const { error } = await sb.from("listings").delete().eq("id", ed.id);
+  if (error) return toast("Couldn't delete: " + error.message);
+  toast("Listing deleted"); closeEditor(); loadRows();
+};
+
+boot();
+</script>
+</body>
+</html>

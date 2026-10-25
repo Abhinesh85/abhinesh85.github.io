@@ -474,7 +474,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-const P = window.PRAJO_PRODUCTS || [];
+let P = window.PRAJO_PRODUCTS || [];   // built-in copy; replaced by the live listings from Supabase when they load
 const SHOP = "https://www.etsy.com/shop/PrAjoCustomStudio";
 const CATS = [
   { id: "tumblers", label: "Tumblers", blurb: "Insulated, full-wrap & engraved" },
@@ -533,19 +533,22 @@ sizeName();
 
 /* ---------- collections ---------- */
 const byCat = (c) => P.filter((p) => p.category === c);
+function renderCollections() {
 $("colls").innerHTML = CATS.map((c) => {
   const list = byCat(c.id); if (!list.length) return "";
   return `<button class="coll" type="button" data-cat="${c.id}">
     <img src="${esc(list[0].images[0].card)}" alt="" loading="lazy">
     <span class="txt"><h3>${esc(c.label)}</h3><small>${list.length} design${list.length > 1 ? "s" : ""}<span class="blurb"> · ${esc(c.blurb)}</span></small></span></button>`;
 }).join("");
+const aboutPick = P.find((p) => p.category === "tumblers" && p.images.length > 3) || P[0];
+if (aboutPick) $("aboutImg").src = (aboutPick.images[1] || aboutPick.images[0]).large;
+}
+renderCollections();
 $("colls").addEventListener("click", (e) => {
   const b = e.target.closest(".coll"); if (!b) return;
   setFilter(b.dataset.cat);
   $("shop").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
 });
-const aboutPick = P.find((p) => p.category === "tumblers" && p.images.length > 3) || P[0];
-if (aboutPick) $("aboutImg").src = (aboutPick.images[1] || aboutPick.images[0]).large;
 
 /* ---------- shop grid ---------- */
 let filter = "all";
@@ -566,6 +569,47 @@ function setFilter(f) {
 }
 $("filters").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setFilter(b.dataset.f); });
 setFilter("all");
+
+/* ---------- live listings (edited in admin.html, stored in Supabase) ---------- */
+const DB = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" };
+// Turn plain description text (Etsy style: CAPS headings, • bullets) into blocks.
+function describe(text) {
+  const blocks = []; let cur = null;
+  for (const raw of String(text || "").replace(/\r/g, "").split("\n")) {
+    const line = raw.trim();
+    if (!line) { cur = null; continue; }
+    if (/^[•\-*–]/.test(line)) {
+      const item = line.replace(/^[•\-*–]\s*/, "");
+      if (!cur || cur.type !== "list") { cur = { type: "list", items: [] }; blocks.push(cur); }
+      cur.items.push(item);
+    } else if (line === line.toUpperCase() && /[A-Z]/.test(line) && line.length < 40) {
+      cur = null; blocks.push({ type: "head", text: line.charAt(0) + line.slice(1).toLowerCase() });
+    } else if (cur && cur.type === "p") cur.text += " " + line;
+    else { cur = { type: "p", text: line }; blocks.push(cur); }
+  }
+  return blocks;
+}
+function fromRow(r) {
+  const images = (r.images || []).filter((im) => im && im.card);
+  const variations = (r.variations || []).map((v) => {
+    const photos = {};
+    images.forEach((im, i) => { if (im.shows && im.shows.name === v.name && v.values.includes(im.shows.value)) photos[im.shows.value] = i; });
+    return Object.keys(photos).length ? { ...v, photos } : { ...v };
+  });
+  return { id: r.id, name: r.name, title: r.title || r.name, category: r.category, price: Number(r.price), currency: r.currency,
+    stock: r.stock, digital: r.digital, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
+}
+(async function loadListings() {
+  try {
+    const r = await fetch(`${DB.url}/rest/v1/listings?select=*&visible=eq.true&order=sort.asc,name.asc`, { headers: { apikey: DB.key, Authorization: `Bearer ${DB.key}` } });
+    if (!r.ok) return;
+    const list = (await r.json()).map(fromRow).filter((p) => p.images.length);
+    if (!list.length) return;
+    P = list;
+    renderCollections(); setFilter(filter);
+    if (location.hash.startsWith("#p/")) { $("sheet").hidden = true; route(); }
+  } catch { /* keep the built-in copy */ }
+})();
 
 /* ---------- product sheet (#p/<id>) ---------- */
 let lastFocus = null;
