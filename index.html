@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>PrAjo Custom Studio · Custom engraved & UV printed gifts · Sacramento</title>
+<meta name="description" content="Custom tumblers, mugs, badge holders and printables, UV printed and laser engraved by hand in Sacramento, CA. Personalized gifts that tell your story.">
+<meta name="theme-color" content="#0a1220">
+<meta property="og:title" content="PrAjo Custom Studio">
+<meta property="og:description" content="Custom engraved & UV printed gifts, made by hand in Sacramento, CA.">
+<meta property="og:image" content="https://i.etsystatic.com/60023144/r/il/408f8e/7638299720/il_1140xN.7638299720_lgmf.jpg">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,500;1,9..144,700&family=Great+Vibes&family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="preconnect" href="https://i.etsystatic.com">
+<script src="products.js"></script>
+<style>
+/* Layout: dark navy studio with gold line-work from the PrAjo badge; one wide column of full-bleed bands, content capped at 1200px. */
+:root {
+  color-scheme: dark;
+  --ink: #0a1220;
+  --navy: #0f1b2e;
+  --panel: #13213a;
+  --panel-2: #182a47;
+  --line: rgba(217, 171, 79, .22);
+  --line-soft: rgba(245, 236, 220, .09);
+  --gold: #d9ab4f;
+  --gold-2: #f3d48a;
+  --saffron: #f28a24;
+  --leaf: #3bb35a;
+  --cream: #f5ecdc;
+  --muted: #a3adbf;
+  --danger: #ff7a6b;
+  --f-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --f-body: "Manrope", "Helvetica Neue", system-ui, sans-serif;
+  --f-label: "Cinzel", "Trajan Pro", Georgia, serif;
+  --f-script: "Great Vibes", "Snell Roundhand", cursive;
+  --gutter: max(16px, env(safe-area-inset-left, 0px));
+  --gutter-r: max(16px, env(safe-area-inset-right, 0px));
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+body { margin: 0; background: var(--ink); color: var(--cream); font-family: var(--f-body); font-size: 16px; line-height: 1.55; -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+button { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-left: var(--gutter); padding-right: var(--gutter-r); }
+.eyebrow { font-family: var(--f-label); font-size: 12.5px; letter-spacing: .28em; text-transform: uppercase; color: var(--gold); }
+h1, h2, h3 { font-family: var(--f-display); font-weight: 700; letter-spacing: -.015em; margin: 0; text-wrap: balance; }
+h2 { font-size: clamp(30px, 5vw, 48px); line-height: 1.05; }
+.lede { color: var(--muted); font-size: 17px; max-width: 58ch; margin: 0; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 50px; padding: 0 24px; border-radius: 999px; font-weight: 800; font-size: 15.5px; letter-spacing: .01em; text-decoration: none; cursor: pointer; border: 1px solid transparent; transition: transform .2s, box-shadow .2s, background .2s; }
+.btn:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 3px; }
+.btn-gold { background: linear-gradient(135deg, var(--gold-2), var(--gold) 55%, #b98a32); color: #1b1305; box-shadow: 0 8px 30px rgba(217, 171, 79, .28); }
+.btn-gold:hover { transform: translateY(-2px); box-shadow: 0 14px 40px rgba(217, 171, 79, .38); }
+.btn-line { border-color: var(--line); background: rgba(245, 236, 220, .03); }
+.btn-line:hover { border-color: var(--gold); background: rgba(217, 171, 79, .08); }
+
+/* header */
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--ink); z-index: 60; }
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 50; background: rgba(10, 18, 32, .78); backdrop-filter: blur(14px) saturate(1.3); -webkit-backdrop-filter: blur(14px) saturate(1.3); border-bottom: 1px solid var(--line-soft); }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; height: 68px; }
+.brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.brand img { width: 42px; height: 42px; border-radius: 50%; box-shadow: 0 0 0 1px var(--line), 0 4px 16px rgba(0, 0, 0, .4); }
+.brand b { font-family: var(--f-label); font-size: 17px; letter-spacing: .14em; font-weight: 700; }
+.brand small { display: block; font-family: var(--f-body); font-size: 10.5px; letter-spacing: .26em; text-transform: uppercase; color: var(--gold); margin-top: 1px; }
+nav.links { display: flex; gap: 28px; font-size: 14.5px; font-weight: 600; }
+nav.links a { text-decoration: none; color: var(--muted); transition: color .2s; }
+nav.links a:hover { color: var(--cream); }
+.top .btn { min-height: 42px; padding: 0 18px; font-size: 14px; }
+@media (max-width: 860px) { nav.links { display: none; } .brand small { display: none; } }
+
+/* hero */
+.hero { position: relative; overflow: hidden; padding: clamp(36px, 7vw, 90px) 0 clamp(40px, 6vw, 80px); }
+.hero::before { content: ""; position: absolute; inset: -20% -10% auto; height: 120%; background: radial-gradient(60% 50% at 75% 40%, rgba(242, 138, 36, .16), transparent 70%), radial-gradient(50% 45% at 15% 20%, rgba(217, 171, 79, .12), transparent 70%); pointer-events: none; }
+.hero .wrap { position: relative; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: clamp(28px, 5vw, 64px); }
+@media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; } }
+.hero h1 { font-size: clamp(44px, 8.4vw, 92px); line-height: .98; margin: 18px 0 20px; }
+.hero h1 em { font-style: italic; font-weight: 500; }
+.engrave { position: relative; display: inline-block; padding: 0 .06em .16em 0; margin-bottom: -.16em; background: linear-gradient(100deg, #b8862c, var(--gold-2) 30%, #fff3d0 48%, var(--gold) 62%, #a87a26); -webkit-background-clip: text; background-clip: text; color: transparent; animation: reveal 2.4s cubic-bezier(.6, .1, .2, 1) .3s both; }
+.engrave::after { content: ""; position: absolute; top: -6%; bottom: -6%; width: 3px; left: 0; border-radius: 3px; background: #fff7e0; box-shadow: 0 0 12px 3px rgba(255, 220, 140, .9), 0 0 40px 10px rgba(242, 138, 36, .55); opacity: 0; animation: beam 2.4s cubic-bezier(.6, .1, .2, 1) .3s both; }
+@keyframes reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
+@keyframes beam { 0% { left: 0; opacity: 1; } 92% { left: 100%; opacity: 1; } 100% { left: 100%; opacity: 0; } }
+.hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.proof { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 30px; font-size: 14px; color: var(--muted); }
+.proof b { color: var(--cream); }
+.stars { color: var(--gold-2); letter-spacing: 2px; }
+
+/* live name preview */
+.studio { position: relative; display: grid; place-items: center; min-height: 520px; }
+.mandala { position: absolute; width: min(560px, 115%); aspect-ratio: 1; opacity: .5; animation: spin 90s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.preview { position: relative; display: grid; justify-items: center; gap: 18px; }
+.tumbler { width: 210px; height: auto; filter: drop-shadow(0 30px 40px rgba(0, 0, 0, .55)); }
+.tumbler .name { font-family: var(--f-script); font-size: 52px; }
+.try { width: min(330px, 86vw); display: grid; gap: 10px; padding: 14px; border-radius: 20px; background: rgba(19, 33, 58, .75); border: 1px solid var(--line); backdrop-filter: blur(8px); }
+.try label { font-family: var(--f-label); font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
+.try input { width: 100%; min-height: 46px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); color: var(--cream); font: 600 17px var(--f-body); padding: 0 14px; }
+.try input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217, 171, 79, .2); }
+.swatches { display: flex; gap: 10px; align-items: center; }
+.swatches button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25); padding: 0; }
+.swatches button[aria-pressed="true"] { border-color: var(--gold-2); box-shadow: 0 0 0 3px rgba(217, 171, 79, .35); }
+.swatches span { font-size: 13px; color: var(--muted); margin-left: auto; }
+
+/* marquee */
+.marquee { border-block: 1px solid var(--line); background: linear-gradient(90deg, rgba(217, 171, 79, .08), rgba(242, 138, 36, .08)); overflow: hidden; }
+.marquee .track { display: flex; width: max-content; gap: 46px; padding: 16px 0; animation: slide 38s linear infinite; font-family: var(--f-label); font-size: 14px; letter-spacing: .24em; text-transform: uppercase; color: var(--gold-2); white-space: nowrap; }
+.marquee .track span::after { content: "✦"; margin-left: 46px; color: var(--saffron); }
+@keyframes slide { to { transform: translateX(-50%); } }
+
+/* sections */
+section.band { padding: clamp(56px, 9vw, 110px) 0; }
+.head { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: 18px; margin-bottom: 34px; }
+.head > div:not(.chips) { display: grid; gap: 12px; }
+
+/* collections */
+.collections { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }
+@media (max-width: 900px) { .collections { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.coll { position: relative; aspect-ratio: 3 / 4; border-radius: 22px; overflow: hidden; text-decoration: none; isolation: isolate; border: 1px solid var(--line-soft); cursor: pointer; background: var(--panel); padding: 0; text-align: left; }
+.coll img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .8s cubic-bezier(.2, .7, .2, 1); z-index: -2; }
+.coll::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 35%, rgba(10, 18, 32, .92)); z-index: -1; }
+.coll:hover img { transform: scale(1.07); }
+.coll .txt { position: absolute; left: 18px; right: 18px; bottom: 16px; }
+.coll h3 { font-size: clamp(20px, 2.4vw, 26px); }
+.coll small { color: var(--gold-2); font-weight: 700; font-size: 13px; }
+@media (max-width: 600px) { .coll .blurb { display: none; } }
+.coll:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 3px; }
+
+/* shop */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chips button { min-height: 42px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line-soft); background: transparent; color: var(--muted); font-weight: 700; font-size: 14px; cursor: pointer; }
+.chips button[aria-pressed="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+.grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 22px 18px; }
+@media (max-width: 1000px) { .grid { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+@media (max-width: 700px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 12px; } }
+.card { position: relative; display: grid; gap: 10px; text-decoration: none; cursor: pointer; background: none; border: 0; padding: 0; text-align: left; color: inherit; }
+.card .ph { position: relative; aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; background: var(--panel); border: 1px solid var(--line-soft); transition: border-color .3s, box-shadow .3s, transform .3s; }
+.card .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .5s, transform .8s cubic-bezier(.2, .7, .2, 1); }
+.card .ph img + img { opacity: 0; }
+@media (hover: hover) {
+  .card:hover .ph { border-color: var(--gold); box-shadow: 0 18px 50px rgba(0, 0, 0, .45), 0 0 0 1px var(--gold), 0 0 40px rgba(217, 171, 79, .18); transform: translateY(-4px); }
+  .card:hover .ph img:first-child { transform: scale(1.04); }
+  .card:hover .ph img + img { opacity: 1; }
+}
+.card:focus-visible .ph { outline: 2px solid var(--gold-2); outline-offset: 3px; }
+.badge { position: absolute; top: 10px; left: 10px; z-index: 2; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 5px 9px; border-radius: 999px; background: rgba(10, 18, 32, .82); border: 1px solid var(--line); color: var(--gold-2); backdrop-filter: blur(6px); }
+.badge.low { color: #ffd0c4; border-color: rgba(255, 122, 107, .4); }
+.card .nm { font-weight: 700; font-size: 15px; line-height: 1.3; }
+.card .pr { font-family: var(--f-display); font-size: 18px; color: var(--gold-2); }
+.card .pr small { font-family: var(--f-body); font-size: 12.5px; color: var(--muted); font-weight: 600; }
+
+/* process */
+.steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; counter-reset: s; }
+@media (max-width: 820px) { .steps { grid-template-columns: 1fr; } }
+.step { position: relative; padding: 28px 24px 26px; border-radius: 22px; background: linear-gradient(180deg, var(--panel), var(--navy)); border: 1px solid var(--line-soft); overflow: hidden; }
+.step::before { counter-increment: s; content: "0" counter(s); position: absolute; right: 18px; top: 6px; font-family: var(--f-display); font-size: 84px; font-weight: 800; color: rgba(217, 171, 79, .1); line-height: 1; }
+.step svg { width: 44px; height: 44px; color: var(--gold-2); margin-bottom: 16px; }
+.step h3 { font-size: 23px; margin-bottom: 8px; }
+.step p { margin: 0; color: var(--muted); }
+
+/* reviews */
+.reviews { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 18px; }
+@media (max-width: 820px) { .reviews { grid-template-columns: 1fr; } }
+.review { margin: 0; padding: 26px 24px; border-radius: 22px; border: 1px solid var(--line); background: radial-gradient(120% 90% at 0% 0%, rgba(217, 171, 79, .1), transparent 60%), var(--panel); display: grid; gap: 14px; align-content: start; }
+.review blockquote { margin: 0; font-family: var(--f-display); font-style: italic; font-size: 21px; line-height: 1.35; }
+.review figcaption { font-size: 14px; color: var(--muted); }
+.review figcaption b { color: var(--cream); }
+
+/* custom band */
+.custom { position: relative; border-radius: 30px; overflow: hidden; padding: clamp(32px, 6vw, 64px); background: linear-gradient(120deg, #1a2c4b, #0f1b2e 60%); border: 1px solid var(--line); display: grid; grid-template-columns: 1.3fr 1fr; gap: 30px; align-items: center; }
+.custom::after { content: ""; position: absolute; right: -120px; top: -120px; width: 420px; height: 420px; border-radius: 50%; background: radial-gradient(circle, rgba(242, 138, 36, .28), transparent 65%); pointer-events: none; }
+@media (max-width: 820px) { .custom { grid-template-columns: 1fr; } }
+.custom ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; position: relative; z-index: 1; }
+.custom li { display: flex; gap: 12px; align-items: center; padding: 14px 16px; border-radius: 14px; background: rgba(10, 18, 32, .5); border: 1px solid var(--line-soft); font-weight: 600; }
+.custom li::before { content: "✦"; color: var(--saffron); }
+
+/* about */
+.about { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(26px, 5vw, 60px); align-items: center; }
+@media (max-width: 820px) { .about { grid-template-columns: 1fr; } }
+.about .ph { border-radius: 26px; overflow: hidden; aspect-ratio: 1; border: 1px solid var(--line); }
+.about .ph img { width: 100%; height: 100%; object-fit: cover; }
+.about p { color: var(--muted); font-size: 17px; }
+.about .loc { display: inline-flex; gap: 8px; align-items: center; color: var(--gold-2); font-weight: 700; }
+
+footer { border-top: 1px solid var(--line-soft); padding: 40px 0 calc(40px + env(safe-area-inset-bottom, 0px)); color: var(--muted); font-size: 14px; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space-between; align-items: center; }
+
+/* product sheet */
+.sheet { position: fixed; inset: 0; z-index: 80; background: rgba(5, 9, 17, .72); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: flex-start; overflow-y: auto; padding: max(16px, env(safe-area-inset-top, 0px)) var(--gutter-r) max(16px, env(safe-area-inset-bottom, 0px)) var(--gutter); }
+.sheet .box { position: relative; width: 100%; max-width: 1080px; margin: auto 0; background: var(--navy); border: 1px solid var(--line); border-radius: 28px; display: grid; grid-template-columns: 1.1fr 1fr; overflow: hidden; animation: up .35s cubic-bezier(.2, .8, .2, 1); }
+@keyframes up { from { transform: translateY(24px); opacity: 0; } }
+@media (max-width: 820px) { .sheet { padding: 0; } .sheet .box { grid-template-columns: 1fr; border-radius: 0; min-height: 100%; border: 0; } }
+.close { position: absolute; top: calc(12px + env(safe-area-inset-top, 0px)); right: 12px; z-index: 5; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: rgba(10, 18, 32, .8); cursor: pointer; font-size: 22px; line-height: 1; }
+@media (min-width: 821px) { .close { top: 12px; } }
+.gallery { position: relative; background: var(--ink); min-width: 0; }
+.slides { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; aspect-ratio: 1; }
+.slides::-webkit-scrollbar { display: none; }
+.slides img { flex: 0 0 100%; width: 100%; height: 100%; object-fit: cover; scroll-snap-align: center; }
+.thumbs { display: flex; gap: 8px; padding: 12px; overflow-x: auto; }
+.thumbs button { flex: none; width: 60px; height: 60px; border-radius: 12px; overflow: hidden; border: 2px solid transparent; padding: 0; cursor: pointer; background: var(--panel); opacity: .6; }
+.thumbs button[aria-current="true"] { border-color: var(--gold); opacity: 1; }
+.thumbs img { width: 100%; height: 100%; object-fit: cover; }
+.info { padding: clamp(24px, 4vw, 40px); display: grid; gap: 18px; align-content: start; min-width: 0; }
+.info h2 { font-size: clamp(28px, 3.6vw, 38px); }
+.info .pr { font-family: var(--f-display); font-size: 30px; color: var(--gold-2); }
+.info .pr small { font-family: var(--f-body); font-size: 14px; color: var(--muted); }
+.opt { display: grid; gap: 8px; }
+.opt > span { font-family: var(--f-label); font-size: 11.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+.opt .chips button { min-height: 40px; }
+.perks { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13.5px; color: var(--muted); }
+.perks span::before { content: "✓ "; color: var(--leaf); font-weight: 800; }
+.desc { color: var(--muted); font-size: 15px; border-top: 1px solid var(--line-soft); padding-top: 16px; }
+.desc h4 { color: var(--cream); font-family: var(--f-label); letter-spacing: .14em; font-size: 12.5px; text-transform: uppercase; margin: 18px 0 6px; }
+.desc ul { margin: 0; padding-left: 18px; }
+.desc p { margin: 0 0 10px; }
+.actions { display: grid; gap: 10px; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="PrAjo Custom Studio home">
+      <img src="logo.png" alt="" width="42" height="42">
+      <span><b>PRAJO</b><small>Custom Studio</small></span>
+    </a>
+    <nav class="links" aria-label="Main">
+      <a href="#shop">Shop</a>
+      <a href="#how">How it's made</a>
+      <a href="#custom">Custom orders</a>
+      <a href="#reviews">Reviews</a>
+      <a href="#about">About</a>
+    </nav>
+    <a class="btn btn-gold" href="#shop">Shop now</a>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="wrap">
+      <div>
+        <div class="eyebrow">Handmade in Sacramento, CA</div>
+        <h1>Your story, <br><em class="engrave">engraved in light.</em></h1>
+        <p class="lede">Custom tumblers, mugs and keepsakes, UV printed in full colour or laser engraved for life. Every piece is made by hand, one order at a time.</p>
+        <div class="hero-cta">
+          <a class="btn btn-gold" href="#shop">Shop the collection</a>
+          <a class="btn btn-line" href="#custom">Design something custom</a>
+        </div>
+        <div class="proof">
+          <span><span class="stars">★★★★★</span> <b>5.0</b> on Etsy</span>
+          <span><b>Local pickup</b> in Sacramento</span>
+          <span><b>Personalized</b> just for you</span>
+        </div>
+      </div>
+
+      <div class="studio" aria-label="Try your name on a tumbler">
+        <svg class="mandala" viewBox="-200 -200 400 400" aria-hidden="true" id="mandala"></svg>
+        <div class="preview">
+          <svg class="tumbler" viewBox="0 0 220 470" role="img" aria-label="Tumbler preview with your name">
+            <defs>
+              <linearGradient id="steel" x1="0" x2="1">
+                <stop offset="0" id="c0" stop-color="#14161b"/>
+                <stop offset=".35" id="c1" stop-color="#3a3f4a"/>
+                <stop offset=".55" id="c2" stop-color="#5a606c"/>
+                <stop offset="1" id="c3" stop-color="#0d0f13"/>
+              </linearGradient>
+              <linearGradient id="engr" x1="0" x2="1" y1="0" y2="1">
+                <stop offset="0" stop-color="#fff3cf"/>
+                <stop offset=".5" stop-color="#e8c06a"/>
+                <stop offset="1" stop-color="#b8862c"/>
+              </linearGradient>
+              <filter id="glow" x="-30%" y="-30%" width="160%" height="160%"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+              <clipPath id="body"><path d="M40 70 L180 70 L168 450 Q110 462 52 450 Z"/></clipPath>
+            </defs>
+            <rect x="96" y="0" width="16" height="70" rx="4" fill="#e9e3d6" opacity=".9"/>
+            <rect x="30" y="50" width="160" height="26" rx="8" fill="#1d2129" stroke="#3b414d"/>
+            <path d="M40 70 L180 70 L168 450 Q110 462 52 450 Z" fill="url(#steel)"/>
+            <g clip-path="url(#body)">
+              <rect x="56" y="70" width="18" height="390" fill="#fff" opacity=".12"/>
+              <text id="tName" class="name" x="0" y="0" transform="translate(118 262) rotate(-90)" text-anchor="middle" dominant-baseline="middle" fill="url(#engr)" filter="url(#glow)">Priya</text>
+            </g>
+          </svg>
+          <div class="try">
+            <label for="nameIn">Try your name</label>
+            <input id="nameIn" maxlength="14" value="Priya" autocomplete="off" spellcheck="false">
+            <div class="swatches" role="group" aria-label="Tumbler colour">
+              <button type="button" data-c="#14161b,#3a3f4a,#5a606c,#0d0f13" aria-pressed="true" style="background:#2b2f37" aria-label="Black"></button>
+              <button type="button" data-c="#5a2a3a,#c77d8f,#f0b6c3,#4a1f2c" aria-pressed="false" style="background:#d48a9b" aria-label="Rose pink"></button>
+              <button type="button" data-c="#0e1d3a,#26457a,#3e64a3,#0a1428" aria-pressed="false" style="background:#2c4c86" aria-label="Navy"></button>
+              <button type="button" data-c="#1e3b2a,#3f7a55,#62a57a,#16301f" aria-pressed="false" style="background:#4c8c63" aria-label="Green"></button>
+              <button type="button" data-c="#cfc8bb,#f4f0e8,#ffffff,#b9b2a4" aria-pressed="false" style="background:#efe9de" aria-label="White"></button>
+              <span id="swName">Black</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="marquee" aria-hidden="true"><div class="track" id="track"></div></div>
+
+  <section class="band" id="collections">
+    <div class="wrap">
+      <div class="head">
+        <div><div class="eyebrow">Collections</div><h2>Made for every moment</h2></div>
+        <p class="lede">From everyday tumblers to heirloom gifts, all customised in our Sacramento studio.</p>
+      </div>
+      <div class="collections" id="colls"></div>
+    </div>
+  </section>
+
+  <section class="band" id="shop" style="padding-top:0">
+    <div class="wrap">
+      <div class="head">
+        <div><div class="eyebrow">The shop</div><h2>Find your piece</h2></div>
+        <div class="chips" role="group" aria-label="Filter products" id="filters"></div>
+      </div>
+      <div class="grid" id="grid"></div>
+    </div>
+  </section>
+
+  <section class="band" id="how" style="background:linear-gradient(180deg, transparent, rgba(19,33,58,.55), transparent)">
+    <div class="wrap">
+      <div class="head">
+        <div><div class="eyebrow">How it's made</div><h2>From your idea to your hands</h2></div>
+      </div>
+      <div class="steps">
+        <div class="step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+          <h3>You share your story</h3>
+          <p>A name, a date, a photo or a logo. Pick a design or send us your own idea and we'll lay it out for you.</p>
+        </div>
+        <div class="step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/></svg>
+          <h3>We print or engrave it</h3>
+          <p>Full-colour UV printing that won't peel or wash off, or laser engraving that's etched in for good.</p>
+        </div>
+        <div class="step">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7ZM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7Z"/></svg>
+          <h3>Finished by hand</h3>
+          <p>Every piece is checked, gift-ready packed and shipped with tracking, or ready for local pickup in Sacramento.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="reviews">
+    <div class="wrap">
+      <div class="head">
+        <div><div class="eyebrow">Reviews</div><h2>Loved by our customers</h2></div>
+        <p class="lede"><span class="stars">★★★★★</span> 5.0 average from our Etsy buyers</p>
+      </div>
+      <div class="reviews" id="revs"></div>
+    </div>
+  </section>
+
+  <section class="band" id="custom" style="padding-top:0">
+    <div class="wrap">
+      <div class="custom">
+        <div style="position:relative;z-index:1;display:grid;gap:16px">
+          <div class="eyebrow">Custom & bulk orders</div>
+          <h2>Have something special in mind?</h2>
+          <p class="lede">Team names, wedding party gifts, company logos, a photo of someone you love. Tell us the idea and we'll design it with you.</p>
+          <div class="hero-cta" style="margin-top:8px">
+            <a class="btn btn-gold" href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Message us on Etsy</a>
+          </div>
+        </div>
+        <ul>
+          <li>Weddings & bridal party sets</li>
+          <li>Teams, schools & graduations</li>
+          <li>Business logos & corporate gifts</li>
+          <li>Memorials & photo keepsakes</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="about" style="padding-top:0">
+    <div class="wrap about">
+      <div class="ph"><img id="aboutImg" alt="A finished PrAjo Custom Studio tumbler" loading="lazy"></div>
+      <div style="display:grid;gap:16px">
+        <div class="eyebrow">Our studio</div>
+        <h2>A small studio with a big heart</h2>
+        <p>We create custom engraved and printed gifts, made with care in Sacramento, CA. From tumblers and mugs to coasters, keychains and T-shirts, every order celebrates your story.</p>
+        <p>We're a new small business, and every order means the world to us. Message us for custom designs or local pickup.</p>
+        <span class="loc">⌖ Sacramento, California</span>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <a class="brand" href="#top"><img src="logo.png" alt="" width="36" height="36" style="width:36px;height:36px"><span><b>PRAJO</b><small>Custom Studio</small></span></a>
+    <span>Custom gifts & personalized moments · Sacramento, CA</span>
+    <a href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Find us on Etsy ↗</a>
+    <span>© 2026 PrAjo Custom Studio</span>
+  </div>
+</footer>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="pTitle">
+  <div class="box">
+    <button class="close" type="button" id="closeBtn" aria-label="Close">×</button>
+    <div class="gallery">
+      <div class="slides" id="slides"></div>
+      <div class="thumbs" id="thumbs"></div>
+    </div>
+    <div class="info" id="info"></div>
+  </div>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const P = window.PRAJO_PRODUCTS || [];
+const SHOP = "https://www.etsy.com/shop/PrAjoCustomStudio";
+const CATS = [
+  { id: "tumblers", label: "Tumblers", blurb: "Insulated, full-wrap & engraved" },
+  { id: "mugs", label: "Mugs", blurb: "Morning coffee, made personal" },
+  { id: "tags", label: "Badges & Tags", blurb: "Heritage & everyday carry" },
+  { id: "printables", label: "Printables", blurb: "Instant-download learning fun" },
+];
+const fmt = (n) => "$" + (Math.round(n * 100) % 100 ? n.toFixed(2) : String(Math.round(n)));
+const priceHtml = (p) => `${p.variations.length ? "<small>from </small>" : ""}${fmt(p.price)}`;
+
+/* ---------- reviews (from Etsy) ---------- */
+const REVIEWS = [
+  { name: "Crystal", date: "April 2026", text: "Great custom cup. I love it. Bought one for my mom for Mother's Day 💕" },
+  { name: "Gloria", date: "February 2026", text: "It was very beautiful 😍" },
+  { name: "Verified Etsy buyer", date: "March 2026", text: "Awesome product from an awesome vendor!" },
+];
+$("revs").innerHTML = REVIEWS.map((r) => `
+  <figure class="review"><span class="stars" aria-label="5 out of 5 stars">★★★★★</span>
+    <blockquote>“${esc(r.text)}”</blockquote>
+    <figcaption><b>${esc(r.name)}</b> · ${esc(r.date)}</figcaption></figure>`).join("");
+
+/* ---------- marquee ---------- */
+const OCCASIONS = ["Mother's Day", "Graduations", "Weddings", "Teachers", "Nurses", "Firefighters", "Birthdays", "Heritage pride", "Corporate gifts", "Christmas"];
+$("track").innerHTML = [...OCCASIONS, ...OCCASIONS].map((o) => `<span>${esc(o)}</span>`).join("");
+
+/* ---------- mandala line-work ---------- */
+(function () {
+  let g = "";
+  const ring = (n, r, len, w, rot = 0) => {
+    for (let i = 0; i < n; i++) {
+      const a = (i / n) * 360 + rot;
+      g += `<path d="M0 ${-r} C ${w} ${-r - len * .35}, ${w * .6} ${-r - len * .85}, 0 ${-r - len} C ${-w * .6} ${-r - len * .85}, ${-w} ${-r - len * .35}, 0 ${-r}Z" transform="rotate(${a})"/>`;
+    }
+  };
+  ring(12, 52, 46, 20); ring(12, 70, 58, 18, 15); ring(24, 118, 42, 10); ring(36, 150, 30, 6, 5);
+  const circles = [40, 52, 116, 150, 182].map((r) => `<circle r="${r}"/>`).join("");
+  const tri = [0, 180].map((rot) => `<path d="M0 -44 L38 22 L-38 22Z" transform="rotate(${rot})"/>`).join("");
+  $("mandala").innerHTML = `<g fill="none" stroke="#d9ab4f" stroke-width=".8">${circles}${tri}${g}</g>`;
+})();
+
+/* ---------- live name preview ---------- */
+const nameIn = $("nameIn"), tName = $("tName");
+function sizeName() {
+  const t = nameIn.value.trim() || "Your name";
+  tName.textContent = t;
+  tName.setAttribute("font-size", Math.max(30, Math.min(58, 420 / Math.max(t.length, 4))));
+}
+nameIn.addEventListener("input", sizeName);
+document.querySelector(".swatches").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  document.querySelectorAll(".swatches button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+  b.dataset.c.split(",").forEach((c, i) => $("c" + i).setAttribute("stop-color", c));
+  $("swName").textContent = b.getAttribute("aria-label");
+});
+sizeName();
+
+/* ---------- collections ---------- */
+const byCat = (c) => P.filter((p) => p.category === c);
+$("colls").innerHTML = CATS.map((c) => {
+  const list = byCat(c.id); if (!list.length) return "";
+  return `<button class="coll" type="button" data-cat="${c.id}">
+    <img src="${esc(list[0].images[0].card)}" alt="" loading="lazy">
+    <span class="txt"><h3>${esc(c.label)}</h3><small>${list.length} design${list.length > 1 ? "s" : ""}<span class="blurb"> · ${esc(c.blurb)}</span></small></span></button>`;
+}).join("");
+$("colls").addEventListener("click", (e) => {
+  const b = e.target.closest(".coll"); if (!b) return;
+  setFilter(b.dataset.cat);
+  $("shop").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+});
+const aboutPick = P.find((p) => p.category === "tumblers" && p.images.length > 3) || P[0];
+if (aboutPick) $("aboutImg").src = (aboutPick.images[1] || aboutPick.images[0]).large;
+
+/* ---------- shop grid ---------- */
+let filter = "all";
+function setFilter(f) {
+  filter = f;
+  $("filters").innerHTML = [{ id: "all", label: "All" }, ...CATS].filter((c) => c.id === "all" || byCat(c.id).length)
+    .map((c) => `<button type="button" data-f="${c.id}" aria-pressed="${c.id === filter}">${esc(c.label)}</button>`).join("");
+  const list = filter === "all" ? P : byCat(filter);
+  $("grid").innerHTML = list.map((p) => {
+    const badge = p.digital ? `<span class="badge">Instant download</span>`
+      : p.stock > 0 && p.stock <= 3 ? `<span class="badge low">Only ${p.stock} left</span>`
+      : p.personalizable ? `<span class="badge">Personalizable</span>` : "";
+    return `<a class="card" href="#p/${esc(p.id)}">
+      <span class="ph">${badge}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy">${p.images[1] ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
+      <span class="nm">${esc(p.name)}</span>
+      <span class="pr">${priceHtml(p)}</span></a>`;
+  }).join("");
+}
+$("filters").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setFilter(b.dataset.f); });
+setFilter("all");
+
+/* ---------- product sheet (#p/<id>) ---------- */
+let lastFocus = null;
+function descHtml(blocks) {
+  return blocks.map((b) => b.type === "head" ? `<h4>${esc(b.text)}</h4>`
+    : b.type === "list" ? `<ul>${b.items.map((i) => `<li>${esc(i)}</li>`).join("")}</ul>` : `<p>${esc(b.text)}</p>`).join("");
+}
+function openProduct(id) {
+  const p = P.find((x) => x.id === id);
+  if (!p) { closeProduct(true); return; }
+  lastFocus = lastFocus || document.activeElement;
+  $("slides").innerHTML = p.images.map((im, i) => `<img src="${esc(im.large)}" alt="${esc(p.name)}${i ? ` photo ${i + 1}` : ""}" ${i ? 'loading="lazy"' : ""}>`).join("");
+  $("thumbs").innerHTML = p.images.length > 1 ? p.images.map((im, i) => `<button type="button" data-i="${i}" aria-label="Photo ${i + 1}" aria-current="${i === 0}"><img src="${esc(im.card)}" alt="" loading="lazy"></button>`).join("") : "";
+  const cat = CATS.find((c) => c.id === p.category);
+  const perks = p.digital ? ["Instant download", "Print at home", "Use again and again"]
+    : ["Made to order in Sacramento", "Won't peel or wash off", "Gift-ready packaging", "Local pickup available"];
+  $("info").innerHTML = `
+    <div class="eyebrow">${esc(cat ? cat.label : "")}</div>
+    <h2 id="pTitle">${esc(p.name)}</h2>
+    <div class="pr">${priceHtml(p)}${p.stock > 0 && p.stock <= 3 && !p.digital ? ` <small>· only ${p.stock} left</small>` : ""}</div>
+    ${p.variations.map((v) => `<div class="opt"><span>${esc(v.name)}</span><div class="chips">${v.values.map((x, i) => `<button type="button" aria-pressed="${i === 0}">${esc(/^\d+$/.test(x) ? x + "oz" : x)}</button>`).join("")}</div></div>`).join("")}
+    <div class="perks">${perks.map((x) => `<span>${esc(x)}</span>`).join("")}</div>
+    <div class="actions">
+      <a class="btn btn-gold" href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">${p.digital ? "Get it on Etsy" : "Order on Etsy"}</a>
+      <a class="btn btn-line" href="${SHOP}" target="_blank" rel="noopener">Ask us a question</a>
+    </div>
+    <div class="desc">${descHtml(p.description)}</div>`;
+  $("sheet").hidden = false;
+  document.body.style.overflow = "hidden";
+  $("slides").scrollLeft = 0;
+  $("closeBtn").focus({ preventScroll: true });
+  document.title = `${p.name} · PrAjo Custom Studio`;
+}
+function closeProduct(fromHash) {
+  if ($("sheet").hidden) return;
+  $("sheet").hidden = true;
+  document.body.style.overflow = "";
+  document.title = "PrAjo Custom Studio · Custom engraved & UV printed gifts · Sacramento";
+  if (!fromHash && location.hash.startsWith("#p/")) history.back();
+  if (lastFocus) { lastFocus.focus({ preventScroll: true }); lastFocus = null; }
+}
+function route() {
+  const m = location.hash.match(/^#p\/(.+)$/);
+  if (m) openProduct(decodeURIComponent(m[1])); else closeProduct(true);
+}
+window.addEventListener("hashchange", route);
+$("closeBtn").onclick = () => closeProduct(false);
+$("sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") closeProduct(false); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") closeProduct(false); });
+$("thumbs").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const s = $("slides"); s.scrollTo({ left: s.clientWidth * +b.dataset.i, behavior: "smooth" });
+});
+$("slides").addEventListener("scroll", () => {
+  const s = $("slides"), i = Math.round(s.scrollLeft / Math.max(1, s.clientWidth));
+  document.querySelectorAll("#thumbs button").forEach((b) => b.setAttribute("aria-current", +b.dataset.i === i));
+}, { passive: true });
+$("info").addEventListener("click", (e) => {
+  const b = e.target.closest(".opt .chips button"); if (!b) return;
+  b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
+});
+route();
+</script>
+</body>
+</html>
