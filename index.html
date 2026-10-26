@@ -382,7 +382,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
       <div>
         <div class="eyebrow" data-s="heroEyebrow">Handmade in Sacramento, CA</div>
         <h1><span data-s="heroTitle1">Your story,</span> <br><em class="engrave" data-s="heroTitle2">engraved in light.</em></h1>
-        <p class="lede" data-s="heroIntro">Custom tumblers, mugs and keepsakes, UV printed in full colour or laser engraved for life. Every piece is made by hand, one order at a time.</p>
+        <p class="lede" data-s="heroIntro">Custom tumblers, mugs and keepsakes, UV printed in full color or laser engraved for life. Every piece is made by hand, one order at a time.</p>
         <div class="hero-cta">
           <a class="btn btn-gold" href="#shop">Shop the collection</a>
           <a class="btn btn-line" href="#custom">Design something custom</a>
@@ -425,7 +425,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
           <div class="try">
             <label for="nameIn">Try your name</label>
             <input id="nameIn" maxlength="14" value="Aleesa" autocomplete="off" spellcheck="false">
-            <div class="swatches" role="group" aria-label="Tumbler colour">
+            <div class="swatches" role="group" aria-label="Tumbler color">
               <span class="swbox" id="swatchBox"><button type="button" data-c="#14161b,#3a3f4a,#5a606c,#0d0f13" aria-pressed="true" style="background:#2b2f37" aria-label="Black"></button>
               <button type="button" data-c="#5a2a3a,#c77d8f,#f0b6c3,#4a1f2c" aria-pressed="false" style="background:#d48a9b" aria-label="Rose pink"></button>
               <button type="button" data-c="#0e1d3a,#26457a,#3e64a3,#0a1428" aria-pressed="false" style="background:#2c4c86" aria-label="Navy"></button>
@@ -445,7 +445,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
     <div class="wrap">
       <div class="head">
         <div><div class="eyebrow" data-s="collEyebrow">Collections</div><h2 data-s="collTitle">Made for every moment</h2></div>
-        <p class="lede" data-s="collIntro">From everyday tumblers to heirloom gifts, all customised in our Sacramento studio.</p>
+        <p class="lede" data-s="collIntro">From everyday tumblers to heirloom gifts, all customized in our Sacramento studio.</p>
       </div>
       <div class="collections" id="colls"></div>
     </div>
@@ -475,7 +475,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
         <div class="step">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/></svg>
           <h3 data-s="step2Title">We print or engrave it</h3>
-          <p data-s="step2Text">Full-colour UV printing that won't peel or wash off, or laser engraving that's etched in for good.</p>
+          <p data-s="step2Text">Full-color UV printing that won't peel or wash off, or laser engraving that's etched in for good.</p>
         </div>
         <div class="step">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7ZM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7Z"/></svg>
@@ -715,7 +715,7 @@ $("track").innerHTML = [...OCCASIONS, ...OCCASIONS].map((o) => `<span>${esc(o)}<
     }
     return `<path d="M${pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join("L")}Z"/>`;
   };
-  // Petal colour: deep rose at the base fading to soft lotus pink at the tip (radial, so every petal matches).
+  // Petal color: deep rose at the base fading to soft lotus pink at the tip (radial, so every petal matches).
   const grad = (id, r1, r2, a, b) => `<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="130">
       <stop offset="${(r1 / 130).toFixed(3)}" stop-color="${a}"/><stop offset="${(r2 / 130).toFixed(3)}" stop-color="${b}"/></radialGradient>`;
   $("mandala").innerHTML = `
@@ -995,7 +995,7 @@ function renderChat() {
       <div id="startAbout">${aboutHtml(true)}</div>
       <label>Your name<input id="cName" autocomplete="name" maxlength="80" required></label>
       <label>Email<input id="cEmail" type="email" autocomplete="email" inputmode="email" maxlength="160" required></label>
-      <label>Message<textarea id="cMsg" maxlength="4000" required placeholder="${a ? "What would you like to know?" : "Tell us your idea: names, colours, quantity, dates…"}"></textarea></label>
+      <label>Message<textarea id="cMsg" maxlength="4000" required placeholder="${a ? "What would you like to know?" : "Tell us your idea: names, colors, quantity, dates…"}"></textarea></label>
       <input class="hp" id="cSite" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p class="chat-err" id="chatErr" hidden></p>
       <button class="btn btn-gold" type="submit" id="cGo">Send message</button>

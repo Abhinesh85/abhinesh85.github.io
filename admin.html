@@ -199,7 +199,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     <div class="menu-wrap" id="menuWrap" hidden>
       <button class="btn line" type="button" id="menuBtn" aria-haspopup="menu" aria-expanded="false">⚙ Settings</button>
       <div class="menu" id="menu" role="menu" hidden>
-        <button type="button" role="menuitem" id="siteBtn">Site settings<small>Homepage text, announcement, colours, links</small></button>
+        <button type="button" role="menuitem" id="siteBtn">Site settings<small>Homepage text, announcement, colors, links</small></button>
         <button type="button" role="menuitem" id="bulkBtn">Attach download files<small>Add files to many digital listings at once</small></button>
         <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
         <a role="menuitem" href="./" target="_blank" rel="noopener">View store ↗<small>Opens the live shop in a new tab</small></a>
@@ -557,7 +557,7 @@ function renderEditor() {
 
     <section class="sec">
       <div class="lbl">Options</div>
-      <p class="hint">Sizes, colours, designs: anything the customer chooses. Type a choice and press Enter to add it.</p>
+      <p class="hint">Sizes, colors, designs: anything the customer chooses. Type a choice and press Enter to add it.</p>
       <div id="opts" style="display:grid;gap:10px">${ed.variations.map((v, gi) => `
         <div class="opt-group" data-g="${gi}">
           <div class="opt-head"><input class="in" data-gname="${gi}" value="${esc(v.name)}" placeholder="Option name, e.g. Size" maxlength="40"><button class="btn danger" type="button" data-gdel="${gi}">Remove</button></div>
@@ -788,7 +788,7 @@ $("coList").addEventListener("change", (e) => {
 });
 
 /* ---------- site settings: text and choices the store page reads at load (table site_settings) ---------- */
-// Empty fields use the store's built-in text (shown here as the grey placeholder). **word** makes a word bold.
+// Empty fields use the store's built-in text (shown here as the gray placeholder). **word** makes a word bold.
 const SITE_FIELDS = [
   { g: "Announcement bar", d: "A gold strip across the top of every page", f: [
     ["announceOn", "Show the announcement bar", "switch"],
@@ -798,22 +798,22 @@ const SITE_FIELDS = [
     ["heroEyebrow", "Small line above the headline", "text", "Handmade in Sacramento, CA"],
     ["heroTitle1", "Headline", "text", "Your story,"],
     ["heroTitle2", "Headline, gold second line", "text", "engraved in light."],
-    ["heroIntro", "Intro paragraph", "area", "Custom tumblers, mugs and keepsakes, UV printed in full colour or laser engraved for life. Every piece is made by hand, one order at a time."],
+    ["heroIntro", "Intro paragraph", "area", "Custom tumblers, mugs and keepsakes, UV printed in full color or laser engraved for life. Every piece is made by hand, one order at a time."],
     ["proof1", "Highlight 1 (after the stars)", "text", "**5.0** on Etsy"],
     ["proof2", "Highlight 2", "text", "**Local pickup** in Sacramento"],
     ["proof3", "Highlight 3", "text", "**Personalized** just for you"] ] },
   { g: "Tumbler preview", d: "The “Try your name” tumbler", f: [
     ["tumblerName", "Default name", "text", "Aleesa"],
-    ["tumblerColors", "Colour choices", "colors"] ] },
+    ["tumblerColors", "Color choices", "colors"] ] },
   { g: "Moving banner", d: "The scrolling list of occasions", f: [
     ["occasions", "One occasion per line", "lines", "Mother's Day\nGraduations\nWeddings\nTeachers\nNurses\nFirefighters\nBirthdays\nHeritage pride\nCorporate gifts\nChristmas"] ] },
   { g: "Section headings", d: "Collections, shop, how it's made, reviews", f: [
     ["collEyebrow", "Collections: small line", "text", "Collections"], ["collTitle", "Collections: heading", "text", "Made for every moment"],
-    ["collIntro", "Collections: intro", "area", "From everyday tumblers to heirloom gifts, all customised in our Sacramento studio."],
+    ["collIntro", "Collections: intro", "area", "From everyday tumblers to heirloom gifts, all customized in our Sacramento studio."],
     ["shopEyebrow", "Shop: small line", "text", "The shop"], ["shopTitle", "Shop: heading", "text", "Find your piece"],
     ["howEyebrow", "How it's made: small line", "text", "How it's made"], ["howTitle", "How it's made: heading", "text", "From your idea to your hands"],
     ["step1Title", "Step 1 title", "text", "You share your story"], ["step1Text", "Step 1 text", "area", "A name, a date, a photo or a logo. Pick a design or send us your own idea and we'll lay it out for you."],
-    ["step2Title", "Step 2 title", "text", "We print or engrave it"], ["step2Text", "Step 2 text", "area", "Full-colour UV printing that won't peel or wash off, or laser engraving that's etched in for good."],
+    ["step2Title", "Step 2 title", "text", "We print or engrave it"], ["step2Text", "Step 2 text", "area", "Full-color UV printing that won't peel or wash off, or laser engraving that's etched in for good."],
     ["step3Title", "Step 3 title", "text", "Finished by hand"], ["step3Text", "Step 3 text", "area", "Every piece is checked, gift-ready packed and shipped with tracking, or ready for local pickup in Sacramento."],
     ["revEyebrow", "Reviews: small line", "text", "Reviews"], ["revTitle", "Reviews: heading", "text", "Loved by our customers"],
     ["revLine", "Reviews: line after the stars", "text", "5.0 average from our Etsy buyers"] ] },
@@ -841,11 +841,11 @@ const SITE_FIELDS = [
 const DEFAULT_COLORS = [{ name: "Black", hex: "#2b2f37" }, { name: "Rose pink", hex: "#d48a9b" }, { name: "Navy", hex: "#2c4c86" }, { name: "Green", hex: "#4c8c63" }, { name: "White", hex: "#efe9de" }];
 let site = {}, siteDirty = false;
 function colorRows(list) {
-  return list.map((c, i) => `<div class="colrow" data-ci="${i}"><input type="color" value="${esc(c.hex)}" aria-label="Colour"><input class="in" value="${esc(c.name)}" placeholder="Colour name" aria-label="Colour name"><button class="rm" type="button" data-crm aria-label="Remove colour">×</button></div>`).join("")
-    + (list.length < 8 ? `<button class="btn line" type="button" id="colAdd" style="justify-self:start">+ Add colour</button>` : "");
+  return list.map((c, i) => `<div class="colrow" data-ci="${i}"><input type="color" value="${esc(c.hex)}" aria-label="Color"><input class="in" value="${esc(c.name)}" placeholder="Color name" aria-label="Color name"><button class="rm" type="button" data-crm aria-label="Remove color">×</button></div>`).join("")
+    + (list.length < 8 ? `<button class="btn line" type="button" id="colAdd" style="justify-self:start">+ Add color</button>` : "");
 }
 function renderSite() {
-  $("siteBody").innerHTML = `<p class="hint">Change any text on the store. Leave a field empty to keep the text shown in grey. Put <b>**two stars**</b> around words to make them bold. Press <b>Save changes</b> to publish.</p>` +
+  $("siteBody").innerHTML = `<p class="hint">Change any text on the store. Leave a field empty to keep the text shown in gray. Put <b>**two stars**</b> around words to make them bold. Press <b>Save changes</b> to publish.</p>` +
     SITE_FIELDS.map((grp, gi) => `<details class="sgroup"${gi === 0 ? " open" : ""}><summary><span>${grp.g}<small>${grp.d}</small></span></summary><div class="sfields">${grp.f.map(([k, label, type, ph]) => {
       if (type === "switch") return `<label class="ssw"><span class="switch"><input type="checkbox" data-k="${k}" ${site[k] ? "checked" : ""}></span>${label}</label>`;
       if (type === "colors") return `<div class="f"><span>${label}</span><div id="colList" style="display:grid;gap:8px">${colorRows(site.tumblerColors?.length ? site.tumblerColors : DEFAULT_COLORS)}</div></div>`;
