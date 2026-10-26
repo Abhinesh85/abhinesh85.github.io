@@ -121,7 +121,9 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 
 /* marquee */
 .marquee { border-block: 1px solid var(--line); background: linear-gradient(90deg, rgba(217, 171, 79, .08), rgba(242, 138, 36, .08)); overflow: hidden; }
-.marquee .track { display: flex; width: max-content; gap: 46px; padding: 16px 0; animation: slide 38s linear infinite; font-family: var(--f-label); font-size: 14px; letter-spacing: .24em; text-transform: uppercase; color: var(--gold-2); white-space: nowrap; }
+.marquee .track { display: flex; width: max-content; padding: 16px 0; animation: slide 38s linear infinite; font-family: var(--f-label); font-size: 14px; letter-spacing: .24em; text-transform: uppercase; color: var(--gold-2); white-space: nowrap; }
+/* spacing lives inside each item (not flex gap) so the two copies are exactly half the track: seamless loop */
+.marquee .track span { padding-right: 46px; }
 .marquee .track span::after { content: "✦"; margin-left: 46px; color: var(--saffron); }
 @keyframes slide { to { transform: translateX(-50%); } }
 
