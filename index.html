@@ -382,12 +382,12 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
             <path d="M40 70 L180 70 L168 450 Q110 462 52 450 Z" fill="url(#steel)"/>
             <g clip-path="url(#body)">
               <rect x="56" y="70" width="18" height="390" fill="#fff" opacity=".12"/>
-              <text id="tName" class="name" x="0" y="0" transform="translate(118 262) rotate(-90)" text-anchor="middle" dominant-baseline="middle" fill="url(#engr)" filter="url(#glow)">Priya</text>
+              <text id="tName" class="name" x="0" y="0" transform="translate(118 262) rotate(-90)" text-anchor="middle" dominant-baseline="middle" fill="url(#engr)" filter="url(#glow)">Aleesa</text>
             </g>
           </svg>
           <div class="try">
             <label for="nameIn">Try your name</label>
-            <input id="nameIn" maxlength="14" value="Priya" autocomplete="off" spellcheck="false">
+            <input id="nameIn" maxlength="14" value="Aleesa" autocomplete="off" spellcheck="false">
             <div class="swatches" role="group" aria-label="Tumbler colour">
               <button type="button" data-c="#14161b,#3a3f4a,#5a606c,#0d0f13" aria-pressed="true" style="background:#2b2f37" aria-label="Black"></button>
               <button type="button" data-c="#5a2a3a,#c77d8f,#f0b6c3,#4a1f2c" aria-pressed="false" style="background:#d48a9b" aria-label="Rose pink"></button>
@@ -1064,13 +1064,16 @@ $("checkoutBtn").onclick = async () => {
     btn.disabled = false; btn.textContent = "Checkout";
   }
 };
-async function showThanks(sessionId) {
+async function showThanks(sessionId, tries = 0) {
   $("thanks").hidden = false;
   try {
     const r = await fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "status", sessionId }) });
     const d = await r.json();
+    // The order number is given out when Stripe's "paid" notice arrives, which can be a few seconds behind.
+    if (d.paid && !d.orderNo && tries < 5) setTimeout(() => showThanks(sessionId, tries + 1), 2500);
     if (d.paid) {
       cart.set([]);
+      if (d.orderNo) $("thanksTitle").textContent = `Thank you! Order #${d.orderNo}`;
       $("thanksText").textContent = `${d.name ? d.name.split(" ")[0] + ", y" : "Y"}our order of ${fmt(d.total)} is confirmed. A receipt is on its way to ${d.email || "your email"}. We'll start making it and message you if anything needs checking.`;
     } else $("thanksText").textContent = "We're confirming your payment. If you don't get a receipt by email soon, please message us.";
   } catch { $("thanksText").textContent = "Your order went through. A receipt is on its way to your email."; }
