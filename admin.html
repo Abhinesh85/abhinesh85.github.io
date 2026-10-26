@@ -198,6 +198,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       <button class="btn line" type="button" id="menuBtn" aria-haspopup="menu" aria-expanded="false">⚙ Settings</button>
       <div class="menu" id="menu" role="menu" hidden>
         <button type="button" role="menuitem" id="siteBtn">Site settings<small>Homepage text, announcement, colours, links</small></button>
+        <button type="button" role="menuitem" id="bulkBtn">Attach download files<small>Add files to many digital listings at once</small></button>
         <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
         <a role="menuitem" href="./" target="_blank" rel="noopener">View store ↗<small>Opens the live shop in a new tab</small></a>
         <button type="button" role="menuitem" id="outBtn">Sign out</button>
@@ -269,6 +270,21 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     </div>
   </div>
 </div>
+
+<div class="sheet" id="bulkSheet" hidden role="dialog" aria-modal="true" aria-labelledby="bulkTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="bulkTitle">Attach download files</h2>
+      <button class="x" type="button" id="bulkClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body" id="bulkBody"></div>
+    <div class="panel-foot">
+      <button class="btn line" type="button" id="bulkPick">Choose folder…</button>
+      <button class="btn gold" type="button" id="bulkGo" disabled>Upload and attach</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="bulkDir" webkitdirectory multiple hidden>
 
 <div class="toast" id="toast" hidden></div>
 <input type="file" id="filePick" accept="image/*" multiple hidden>
@@ -874,6 +890,70 @@ $("siteSave").onclick = async () => {
   $("siteSave").disabled = false;
   if (error) return toast("Couldn't save: " + error.message);
   site = data; siteDirty = false; toast("Saved. Live on the store now");
+};
+
+/* ---------- bulk attach: a folder with one sub-folder per listing (named by its id) holding that listing's files ---------- */
+let bulkPlan = [];
+function bulkIntro() {
+  $("bulkBody").innerHTML = `<p class="hint">Choose a folder that has one folder per digital listing, named like the listing's web address (for example <b>safari-pals-coloring-book</b>). Every file inside is uploaded privately and attached to that listing. Files a listing already has are skipped.</p>
+    <p class="hint">On your Mac this folder is <b>Downloads → website-downloads</b>.</p>`;
+  $("bulkGo").disabled = true; bulkPlan = [];
+}
+$("bulkBtn").onclick = () => { bulkIntro(); $("bulkSheet").hidden = false; document.body.style.overflow = "hidden"; };
+$("bulkClose").onclick = () => { if ($("bulkGo").dataset.busy) return; $("bulkSheet").hidden = true; document.body.style.overflow = ""; };
+$("bulkPick").onclick = () => $("bulkDir").click();
+$("bulkDir").addEventListener("change", (e) => {
+  const files = [...e.target.files].filter((f) => !f.name.startsWith(".") && f.size > 0);
+  e.target.value = "";
+  const groups = {};
+  for (const f of files) {
+    const parts = (f.webkitRelativePath || f.name).split("/");
+    if (parts.length < 3) continue;                                     // folder/listing-id/file
+    (groups[parts[parts.length - 2]] ||= []).push(f);
+  }
+  bulkPlan = Object.entries(groups).map(([id, fs]) => {
+    const r = rows.find((x) => x.id === id);
+    const have = new Set((r?.files || []).map((x) => x.name));
+    return { id, r, add: r ? fs.filter((f) => !have.has(f.name) && f.size <= 50 * 1048576) : [], skip: r ? fs.filter((f) => have.has(f.name)) : fs, big: fs.filter((f) => f.size > 50 * 1048576) };
+  }).sort((a, b) => (a.r?.name || a.id).localeCompare(b.r?.name || b.id));
+  const n = bulkPlan.reduce((t, g) => t + g.add.length, 0), mb = bulkPlan.reduce((t, g) => t + g.add.reduce((u, f) => u + f.size, 0), 0) / 1048576;
+  $("bulkBody").innerHTML = `<p class="hint"><b>${n} files (${mb.toFixed(0)} MB)</b> ready for ${bulkPlan.filter((g) => g.add.length).length} listings.</p>` + bulkPlan.map((g) => `
+    <div class="dl-item" data-bid="${esc(g.id)}" style="display:block">
+      <b>${g.r ? esc(g.r.name) : `⚠ No listing called “${esc(g.id)}”`}</b>${g.r && !g.r.digital ? ` <small style="color:#ffcf8a">(not marked as a digital download)</small>` : ""}
+      ${g.add.map((f) => `<small data-f="${esc(f.name)}">＋ ${esc(f.name)} · ${fmtSize(f.size)}</small>`).join("")}
+      ${g.r ? g.skip.map((f) => `<small>✓ ${esc(f.name)} (already attached)</small>`).join("") : ""}
+      ${g.big.map((f) => `<small style="color:#ffb4a8">✕ ${esc(f.name)} is over 50 MB</small>`).join("")}
+    </div>`).join("");
+  $("bulkGo").disabled = !n;
+});
+$("bulkGo").onclick = async () => {
+  const btn = $("bulkGo"); btn.disabled = true; btn.dataset.busy = "1"; $("bulkPick").disabled = true;
+  let done = 0, failed = 0;
+  const total = bulkPlan.reduce((t, g) => t + g.add.length, 0);
+  for (const g of bulkPlan) {
+    if (!g.r || !g.add.length) continue;
+    const added = [];
+    for (const f of g.add) {
+      const el = document.querySelector(`[data-bid="${CSS.escape(g.id)}"] [data-f="${CSS.escape(f.name)}"]`);
+      btn.textContent = `Uploading ${done + failed + 1} of ${total}…`;
+      if (el) el.textContent = `⏳ ${f.name} · uploading…`;
+      const path = `${g.id}/${Date.now()}-${f.name.replace(/[^\w.\-]+/g, "-").slice(-80)}`;
+      const { error } = await sb.storage.from("digital-files").upload(path, f, { contentType: f.type || "application/octet-stream", upsert: false });
+      if (error) { failed++; if (el) el.textContent = `✕ ${f.name}: ${error.message}`; continue; }
+      added.push({ path, name: f.name, size: f.size }); done++;
+      if (el) el.textContent = `✓ ${f.name} · uploaded`;
+    }
+    if (added.length) {
+      const files = [...(g.r.files || []), ...added];
+      const { error } = await sb.from("listings").update({ files, updated_at: new Date().toISOString() }).eq("id", g.id);
+      if (error) { failed += added.length; toast(`Couldn't attach files to ${g.r.name}: ${error.message}`); }
+      else g.r.files = files;
+    }
+  }
+  delete btn.dataset.busy; $("bulkPick").disabled = false;
+  btn.textContent = "Upload and attach";
+  toast(failed ? `${done} attached, ${failed} failed. Choose the folder again to retry` : `All ${done} files attached. Live on the store now`);
+  loadRows();
 };
 
 boot();
