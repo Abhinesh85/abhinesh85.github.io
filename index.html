@@ -276,6 +276,46 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 .picker-list b { display: block; font-size: 14.5px; line-height: 1.3; }
 .picker-list small { color: var(--gold-2); font-size: 13px; }
 .linkbtn { background: none; border: 0; color: var(--gold-2); font-weight: 700; font-size: 12.5px; cursor: pointer; padding: 2px; text-decoration: underline; }
+/* cart */
+.cart-btn { position: relative; width: 44px; height: 44px; border-radius: 50%; border: 1px solid var(--line); background: rgba(245, 236, 220, .04); cursor: pointer; display: grid; place-items: center; color: var(--cream); }
+.cart-btn svg { width: 21px; height: 21px; }
+.cart-btn .n { position: absolute; top: -4px; right: -4px; min-width: 20px; height: 20px; padding: 0 5px; border-radius: 999px; background: var(--saffron); color: #1b1305; font-size: 11.5px; font-weight: 800; display: grid; place-items: center; }
+.top-actions { display: flex; align-items: center; gap: 10px; }
+.buy-row { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; }
+.qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 999px; height: 50px; }
+.qty button { width: 44px; height: 48px; border: 0; background: none; font-size: 20px; cursor: pointer; color: var(--cream); }
+.qty span { min-width: 28px; text-align: center; font-weight: 800; }
+.personal { display: grid; gap: 6px; }
+.personal input { width: 100%; min-height: 48px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); color: var(--cream); font: 500 16px var(--f-body); padding: 0 14px; }
+.personal input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217, 171, 79, .18); }
+.etsy-link { font-size: 13.5px; color: var(--muted); text-align: center; }
+.etsy-link a { color: var(--gold-2); }
+.drawer { position: fixed; inset: 0; z-index: 85; background: rgba(5, 9, 17, .7); backdrop-filter: blur(4px); display: flex; justify-content: flex-end; }
+.drawer .panel { width: min(440px, 100%); height: 100%; background: var(--navy); border-left: 1px solid var(--line); display: flex; flex-direction: column; animation: slidein .3s cubic-bezier(.2, .8, .2, 1); }
+@keyframes slidein { from { transform: translateX(30px); } }
+.drawer-head { display: flex; align-items: center; justify-content: space-between; padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 14px; border-bottom: 1px solid var(--line-soft); }
+.drawer-head h3 { font-size: 22px; }
+.drawer-head .close { position: static; }
+.cart-list { flex: 1; overflow-y: auto; padding: 14px 16px; display: grid; gap: 12px; align-content: start; }
+.ci { display: grid; grid-template-columns: 72px minmax(0, 1fr) auto; gap: 12px; padding: 10px; border-radius: 16px; border: 1px solid var(--line-soft); background: var(--panel); }
+.ci img { width: 72px; height: 72px; border-radius: 12px; object-fit: cover; }
+.ci b { display: block; font-size: 14.5px; line-height: 1.3; }
+.ci small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; overflow-wrap: anywhere; }
+.ci .right { display: grid; justify-items: end; align-content: space-between; gap: 6px; }
+.ci .lp { font-family: var(--f-display); color: var(--gold-2); }
+.ci .qty { height: 36px; } .ci .qty button { width: 32px; height: 34px; font-size: 17px; }
+.ci .rm { background: none; border: 0; color: var(--muted); font-size: 12.5px; text-decoration: underline; cursor: pointer; padding: 2px; }
+.cart-foot { border-top: 1px solid var(--line-soft); padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 10px; }
+.cart-foot .tot { display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; }
+.cart-foot .tot b { font-family: var(--f-display); color: var(--gold-2); font-size: 22px; }
+.cart-foot .note { font-size: 13px; color: var(--muted); margin: 0; }
+.pay-btn { min-height: 54px; font-size: 16px; }
+.pay-marks { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
+.pay-marks span { border: 1px solid var(--line-soft); border-radius: 6px; padding: 3px 8px; }
+.cart-empty { text-align: center; color: var(--muted); padding: 40px 10px; display: grid; gap: 12px; justify-items: center; }
+.thanks { position: fixed; inset: 0; z-index: 95; background: rgba(5, 9, 17, .78); display: grid; place-items: center; padding: 16px; }
+.thanks .card2 { max-width: 440px; width: 100%; background: var(--navy); border: 1px solid var(--line); border-radius: 26px; padding: 30px 24px; text-align: center; display: grid; gap: 14px; justify-items: center; }
+.thanks .big { font-size: 46px; }
 </style>
 </head>
 <body>
@@ -293,7 +333,10 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
       <a href="#reviews">Reviews</a>
       <a href="#about">About</a>
     </nav>
-    <a class="btn btn-gold" href="#shop">Shop now</a>
+    <div class="top-actions">
+      <a class="btn btn-gold" href="#shop">Shop now</a>
+      <button class="cart-btn" type="button" id="cartBtn" aria-label="Open cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg><span class="n" id="cartN" hidden>0</span></button>
+    </div>
   </div>
 </header>
 
@@ -489,6 +532,24 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
   </div>
 </div>
 
+<div class="drawer" id="cart" hidden role="dialog" aria-modal="true" aria-labelledby="cartTitle">
+  <div class="panel">
+    <div class="drawer-head"><h3 id="cartTitle">Your cart</h3><button class="close" type="button" id="cartClose" aria-label="Close cart">×</button></div>
+    <div class="cart-list" id="cartList"></div>
+    <div class="cart-foot" id="cartFoot">
+      <div class="tot"><span>Subtotal</span><b id="cartSub">$0</b></div>
+      <p class="note" id="cartNote"></p>
+      <p class="chat-err" id="cartErr" hidden></p>
+      <button class="btn btn-gold pay-btn" type="button" id="checkoutBtn">Checkout</button>
+      <div class="pay-marks" aria-label="Accepted payments"><span> Pay</span><span>G Pay</span><span>Visa · Mastercard · Amex</span></div>
+    </div>
+  </div>
+</div>
+<div class="thanks" id="thanks" hidden role="dialog" aria-modal="true" aria-labelledby="thanksTitle">
+  <div class="card2"><div class="big">🎉</div><h2 id="thanksTitle">Thank you!</h2><p class="lede" id="thanksText" style="margin:0">Your order is confirmed.</p>
+    <button class="btn btn-gold" type="button" id="thanksOk">Keep browsing</button></div>
+</div>
+
 <div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="pTitle">
   <div class="box">
     <button class="close" type="button" id="closeBtn" aria-label="Close">×</button>
@@ -669,18 +730,28 @@ function openProduct(id) {
   $("thumbs").innerHTML = p.images.length > 1 ? p.images.map((im, i) => `<button type="button" data-i="${i}" aria-label="Photo ${i + 1}" aria-current="${i === 0}"><img src="${esc(im.card)}" alt="" loading="lazy"></button>`).join("") : "";
   const cat = CATS.find((c) => c.id === p.category);
   const perks = p.digital ? ["Instant download", "Print at home", "Use again and again"]
-    : ["Made to order in Sacramento", "Won't peel or wash off", "Gift-ready packaging", "Local pickup available"];
+    : ["Made to order in Sacramento", "Won't peel or wash off", "Gift-ready packaging", "Local delivery or pickup"];
   $("info").innerHTML = `
     <div class="eyebrow">${esc(cat ? cat.label : "")}</div>
     <h2 id="pTitle">${esc(p.name)}</h2>
     <div class="pr">${priceHtml(p)}${p.stock > 0 && p.stock <= 3 && !p.digital ? ` <small>· only ${p.stock} left</small>` : ""}</div>
     ${p.variations.map((v, vi) => `<div class="opt"><span>${esc(v.name)}</span><div class="chips">${v.values.map((x, i) => `<button type="button" data-v="${vi}" data-val="${esc(x)}" aria-pressed="${i === 0}">${esc(/^\d+$/.test(x) ? x + "oz" : x)}</button>`).join("")}</div></div>`).join("")}
     <div class="perks">${perks.map((x) => `<span>${esc(x)}</span>`).join("")}</div>
-    <div class="actions">
+    ${p.digital || !canBuy() ? `<div class="actions">
       <a class="btn btn-gold" href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">${p.digital ? "Get it on Etsy" : "Order on Etsy"}</a>
       <button class="btn btn-line" type="button" data-ask>Ask about this item</button>
-    </div>
+    </div>` : `
+    ${p.personalizable ? `<label class="personal opt"><span>Personalization</span><input id="pPersonal" maxlength="200" placeholder="Name or text to print (leave empty if none)" autocomplete="off"></label>` : ""}
+    <div class="actions">
+      <div class="buy-row">
+        <div class="qty" aria-label="Quantity"><button type="button" data-qty="-1" aria-label="One less">−</button><span id="pQty">1</span><button type="button" data-qty="1" aria-label="One more">+</button></div>
+        <button class="btn btn-gold" type="button" id="addCart">Add to cart · ${fmt(p.price)}</button>
+      </div>
+      <button class="btn btn-line" type="button" data-ask>Ask about this item</button>
+      <p class="etsy-link">Prefer Etsy? <a href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">Order it there</a></p>
+    </div>`}
     <div class="desc">${descHtml(p.description)}</div>`;
+  pQty = 1;
   $("sheet").hidden = false;
   document.body.style.overflow = "hidden";
   $("slides").scrollLeft = 0;
@@ -699,6 +770,9 @@ function closeProduct(fromHash) {
 function route() {
   const m = location.hash.match(/^#p\/(.+)$/);
   if (m) openProduct(decodeURIComponent(m[1])); else closeProduct(true);
+  if (location.hash === "#cart") { history.replaceState(null, "", location.pathname); openCart(); }
+  const o = location.hash.match(/^#order\/(cs_[\w]+)$/);
+  if (o) { history.replaceState(null, "", location.pathname); showThanks(o[1]); }
 }
 window.addEventListener("hashchange", route);
 $("closeBtn").onclick = () => closeProduct(false);
@@ -896,6 +970,113 @@ document.addEventListener("click", (e) => {
   const ask = e.target.closest("[data-ask]");
   if (ask && cur) openChat({ id: cur.id, name: cur.name, image: cur.images[0]?.card });
 });
+/* ---------- cart & checkout (Supabase Edge Function "checkout" → Stripe: cards, Apple Pay, Google Pay) ---------- */
+const CHECKOUT_URL = "https://mrnnrmyvjkyjcjnfomna.supabase.co/functions/v1/checkout";
+// Which options are on is set on the admin page; the checkout function charges the real amounts.
+let CO = { enabled: true, shipping: true, shipFee: 5.95, freeOver: 50, delivery: true, deliveryFee: 7, pickup: true };
+const canBuy = () => CO.enabled && (CO.shipping || CO.delivery || CO.pickup);
+fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "settings" }) })
+  .then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && typeof d.enabled === "boolean") { CO = d; renderCartBadge(); } }).catch(() => {});
+const cart = {
+  get() { try { return JSON.parse(localStorage.getItem("prajo:cart") || "[]"); } catch { return []; } },
+  set(v) { try { localStorage.setItem("prajo:cart", JSON.stringify(v)); } catch {} renderCartBadge(); },
+};
+let pQty = 1;
+function renderCartBadge() {
+  const n = cart.get().reduce((t, i) => t + i.qty, 0);
+  $("cartN").textContent = n; $("cartN").hidden = !n;
+  $("cartBtn").hidden = !n && !canBuy();
+}
+function chosenOptions() {
+  const out = {};
+  (cur?.variations || []).forEach((v, vi) => {
+    const b = document.querySelector(`#info .chips button[data-v="${vi}"][aria-pressed="true"]`);
+    out[v.name] = b ? b.dataset.val : v.values[0];
+  });
+  return out;
+}
+$("info").addEventListener("click", (e) => {
+  const q = e.target.closest("[data-qty]");
+  if (q) { pQty = Math.max(1, Math.min(50, pQty + +q.dataset.qty)); $("pQty").textContent = pQty; return; }
+  if (e.target.closest("#addCart") && cur) {
+    const options = chosenOptions(), personalization = ($("pPersonal")?.value || "").trim();
+    const items = cart.get();
+    const same = items.find((i) => i.id === cur.id && JSON.stringify(i.options) === JSON.stringify(options) && i.personalization === personalization);
+    if (same) same.qty = Math.min(50, same.qty + pQty);
+    else items.push({ id: cur.id, qty: pQty, options, personalization });
+    cart.set(items);
+    pQty = 1;
+    closeProduct(false);
+    openCart();
+  }
+});
+function openCart() { renderCart(); $("cart").hidden = false; document.body.style.overflow = "hidden"; }
+function closeCart() { $("cart").hidden = true; if ($("sheet").hidden) document.body.style.overflow = ""; }
+$("cartBtn").onclick = openCart;
+$("cartClose").onclick = closeCart;
+$("cart").addEventListener("click", (e) => { if (e.target.id === "cart") closeCart(); });
+function renderCart() {
+  const items = cart.get();
+  const known = items.map((i) => ({ ...i, p: P.find((x) => x.id === i.id) })).filter((i) => i.p);
+  if (!known.length) {
+    $("cartList").innerHTML = `<div class="cart-empty"><div style="font-size:40px">🛍️</div><b>Your cart is empty</b><span>Find something to personalize.</span><a class="btn btn-line" href="#shop" id="cartShop">Browse the shop</a></div>`;
+    $("cartFoot").hidden = true; return;
+  }
+  $("cartFoot").hidden = false;
+  let sub = 0;
+  $("cartList").innerHTML = known.map((i, idx) => {
+    const line = i.p.price * i.qty; sub += line;
+    const opts = Object.entries(i.options || {}).map(([k, v]) => `${k}: ${/^\d+$/.test(v) ? v + "oz" : v}`).join(" · ");
+    return `<div class="ci" data-idx="${idx}"><img src="${esc(i.p.images[0]?.card || "")}" alt="">
+      <div><b>${esc(i.p.name)}</b>${opts ? `<small>${esc(opts)}</small>` : ""}${i.personalization ? `<small>✍️ ${esc(i.personalization)}</small>` : ""}</div>
+      <div class="right"><span class="lp">${fmt(line)}</span>
+        <div class="qty"><button type="button" data-cq="-1" aria-label="One less">−</button><span>${i.qty}</span><button type="button" data-cq="1" aria-label="One more">+</button></div>
+        <button class="rm" type="button" data-crm>Remove</button></div></div>`;
+  }).join("");
+  $("cartSub").textContent = fmt(sub);
+  const ways = [
+    CO.shipping && (CO.freeOver > 0 && sub >= CO.freeOver ? "🎉 Free shipping unlocked." : `Shipping ${fmt(CO.shipFee)}${CO.freeOver > 0 ? `, free over ${fmt(CO.freeOver)}` : ""}.`),
+    CO.delivery && `Local delivery in the Sacramento area ${fmt(CO.deliveryFee)}.`,
+    CO.pickup && "Free local pickup in Sacramento.",
+  ].filter(Boolean);
+  $("cartNote").textContent = canBuy() ? `${ways.join(" ")} California sales tax is added at checkout.` : "Online checkout is paused right now. Please order on Etsy or message us.";
+  $("checkoutBtn").disabled = !canBuy();
+  if (items.length !== known.length) cart.set(known.map(({ p, ...i }) => i));
+}
+$("cartList").addEventListener("click", (e) => {
+  if (e.target.id === "cartShop") { closeCart(); return; }
+  const row = e.target.closest(".ci"); if (!row) return;
+  const items = cart.get(), i = items[+row.dataset.idx];
+  if (e.target.closest("[data-cq]")) { i.qty = Math.max(1, Math.min(50, i.qty + +e.target.closest("[data-cq]").dataset.cq)); }
+  if (e.target.closest("[data-crm]")) items.splice(+row.dataset.idx, 1);
+  cart.set(items); renderCart();
+});
+$("checkoutBtn").onclick = async () => {
+  const btn = $("checkoutBtn"), err = $("cartErr");
+  btn.disabled = true; btn.textContent = "Opening secure checkout…"; err.hidden = true;
+  try {
+    const r = await fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "create", items: cart.get() }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.url) throw new Error(d.error || "Checkout isn't available right now. Please try again or message us.");
+    location.href = d.url;
+  } catch (x) {
+    err.textContent = navigator.onLine ? x.message : "You're offline. Checkout needs internet."; err.hidden = false;
+    btn.disabled = false; btn.textContent = "Checkout";
+  }
+};
+async function showThanks(sessionId) {
+  $("thanks").hidden = false;
+  try {
+    const r = await fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "status", sessionId }) });
+    const d = await r.json();
+    if (d.paid) {
+      cart.set([]);
+      $("thanksText").textContent = `${d.name ? d.name.split(" ")[0] + ", y" : "Y"}our order of ${fmt(d.total)} is confirmed. A receipt is on its way to ${d.email || "your email"}. We'll start making it and message you if anything needs checking.`;
+    } else $("thanksText").textContent = "We're confirming your payment. If you don't get a receipt by email soon, please message us.";
+  } catch { $("thanksText").textContent = "Your order went through. A receipt is on its way to your email."; }
+}
+$("thanksOk").onclick = () => { $("thanks").hidden = true; };
+renderCartBadge();
 route();
 </script>
 </body>

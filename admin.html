@@ -128,6 +128,20 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 
 .signin { max-width: 400px; margin: 12vh auto 0; padding: 26px; border-radius: 24px; border: 1px solid var(--line); background: var(--navy); display: grid; gap: 14px; }
 .err { color: #ffb4a8; font-size: 14px; margin: 0; }
+/* checkout settings */
+.co-list { display: grid; gap: 12px; }
+.co-row { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px; background: var(--panel); display: grid; gap: 12px; }
+.co-row.master { border-color: var(--line); background: rgba(217, 171, 79, .05); }
+.co-row.off { opacity: .6; }
+.co-top { display: flex; align-items: center; gap: 12px; }
+.co-top div { flex: 1; min-width: 0; }
+.co-top b { display: block; font-size: 15.5px; }
+.co-top small { color: var(--muted); font-size: 13px; }
+.co-top .switch input { width: 50px; height: 28px; }
+.co-top .switch input::after { width: 22px; height: 22px; }
+.co-top .switch input:checked::after { transform: translateX(22px); }
+.co-fees { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.co-list[data-paused] .co-row:not(.master) { opacity: .45; }
 </style>
 </head>
 <body>
@@ -139,6 +153,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       <span><b>PRAJO</b><small>Store admin</small></span>
     </a>
     <a class="btn line" href="./" target="_blank" rel="noopener">View store ↗</a>
+    <button class="btn line" type="button" id="coBtn" hidden>Checkout options</button>
     <button class="btn gold" type="button" id="newBtn" hidden>+ New listing</button>
   </div>
 </header>
@@ -179,6 +194,19 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
   </div>
 </div>
 
+<div class="sheet" id="coSheet" hidden role="dialog" aria-modal="true" aria-labelledby="coTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="coTitle">Checkout options</h2>
+      <button class="x" type="button" id="coClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body">
+      <p class="hint">Switch things on or off for store customers. Changes save and go live straight away.</p>
+      <div class="co-list" id="coList"><p class="hint">Loading…</p></div>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast" hidden></div>
 <input type="file" id="filePick" accept="image/*" multiple hidden>
 
@@ -200,7 +228,7 @@ async function boot() {
   const email = data.session?.user?.email?.toLowerCase();
   if (!email) { $("signin").hidden = false; return; }
   if (email !== CFG.owner) { $("signin").hidden = false; $("siErr").textContent = `${email} can't edit this store.`; $("siErr").hidden = false; return; }
-  $("appView").hidden = false; $("newBtn").hidden = false;
+  $("appView").hidden = false; $("newBtn").hidden = false; $("coBtn").hidden = false;
   await Promise.all([loadRows(), loadPrices()]);
 }
 $("signin").addEventListener("submit", async (e) => {
@@ -527,6 +555,47 @@ $("edDelete").onclick = async () => {
   if (error) return toast("Couldn't delete: " + error.message);
   toast("Listing deleted"); closeEditor(); loadRows();
 };
+
+/* ---------- checkout options (saved by the "checkout" Edge Function) ---------- */
+const CO_URL = CFG.url + "/functions/v1/checkout";
+let co = null;
+async function coCall(body) {
+  const { data } = await sb.auth.getSession();
+  const r = await fetch(CO_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: CFG.key, Authorization: `Bearer ${data.session?.access_token || CFG.key}` }, body: JSON.stringify(body) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || `Error ${r.status}`);
+  return d;
+}
+const CO_ROWS = [
+  { k: "shipping", t: "Shipping (USPS)", d: "Mailed anywhere in the US", fees: [["shipFee", "Shipping fee ($)"], ["freeOver", "Free shipping over ($, 0 = never)"]] },
+  { k: "delivery", t: "Local delivery", d: "You drop it off in the Sacramento area", fees: [["deliveryFee", "Delivery fee ($)"]] },
+  { k: "pickup", t: "Free local pickup", d: "Customer collects it in Sacramento", fees: [] },
+];
+function renderCo() {
+  const sw = (k, label) => `<label class="switch"><input type="checkbox" data-co="${k}" ${co[k] ? "checked" : ""} aria-label="${esc(label)}"></label>`;
+  const anyOn = co.shipping || co.delivery || co.pickup;
+  $("coList").toggleAttribute("data-paused", !co.enabled);
+  $("coList").innerHTML = `
+    <div class="co-row master"><div class="co-top"><div><b>Store checkout</b><small>${co.enabled ? (anyOn ? "On: customers can pay with card, Apple Pay or Google Pay" : "On, but every delivery option is off, so nobody can check out") : "Paused: customers see “Order on Etsy” instead of Add to cart"}</small></div>${sw("enabled", "Store checkout")}</div></div>
+    ${CO_ROWS.map((r) => `<div class="co-row ${co[r.k] ? "" : "off"}"><div class="co-top"><div><b>${r.t}</b><small>${r.d}</small></div>${sw(r.k, r.t)}</div>
+      ${r.fees.length && co[r.k] ? `<div class="co-fees">${r.fees.map(([f, l]) => `<label class="f"><span class="hint">${l}</span><input class="in" type="number" inputmode="decimal" min="0" step="0.5" data-fee="${f}" value="${co[f]}"></label>`).join("")}</div>` : ""}</div>`).join("")}`;
+}
+async function saveCo(msg) {
+  try { co = await coCall({ action: "save_settings", settings: co }); renderCo(); toast(msg); }
+  catch (e) { toast("Couldn't save: " + e.message); openCo(); }
+}
+async function openCo() {
+  $("coSheet").hidden = false; document.body.style.overflow = "hidden";
+  try { co = await coCall({ action: "settings" }); renderCo(); }
+  catch (e) { $("coList").innerHTML = `<div class="empty"><b>Checkout isn't set up yet</b><p class="hint">Deploy the checkout function in Supabase first. (${esc(e.message)})</p></div>`; }
+}
+$("coBtn").onclick = openCo;
+$("coClose").onclick = () => { $("coSheet").hidden = true; document.body.style.overflow = ""; };
+$("coList").addEventListener("change", (e) => {
+  const t = e.target;
+  if (t.dataset.co) { co[t.dataset.co] = t.checked; saveCo(`${t.dataset.co === "enabled" ? "Store checkout" : CO_ROWS.find((r) => r.k === t.dataset.co).t} ${t.checked ? "on" : "off"}`); }
+  if (t.dataset.fee) { const n = Number(t.value); if (!(n >= 0)) return toast("Enter a number"); co[t.dataset.fee] = n; saveCo("Fee saved"); }
+});
 
 boot();
 </script>
