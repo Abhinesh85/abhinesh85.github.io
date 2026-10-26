@@ -130,6 +130,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 
 .signin { max-width: 400px; margin: 12vh auto 0; padding: 26px; border-radius: 24px; border: 1px solid var(--line); background: var(--navy); display: grid; gap: 14px; }
 .err { color: #ffb4a8; font-size: 14px; margin: 0; }
+.linkish { background: none; border: 0; color: var(--gold-2); font-weight: 700; font-size: 14px; cursor: pointer; justify-self: center; text-decoration: underline; padding: 6px; }
 /* checkout settings */
 .co-list { display: grid; gap: 12px; }
 .co-row { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px; background: var(--panel); display: grid; gap: 12px; }
@@ -202,6 +203,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <button type="button" role="menuitem" id="siteBtn">Site settings<small>Homepage text, announcement, colors, links</small></button>
         <button type="button" role="menuitem" id="bulkBtn">Attach download files<small>Add files to many digital listings at once</small></button>
         <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
+        <button type="button" role="menuitem" id="pwBtn">Change password<small>For this admin page and the pricing app</small></button>
         <a role="menuitem" href="./" target="_blank" rel="noopener">View store ↗<small>Opens the live shop in a new tab</small></a>
         <button type="button" role="menuitem" id="outBtn">Sign out</button>
       </div>
@@ -217,7 +219,9 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     <label class="f"><span>Email</span><input class="in" id="siEmail" type="email" autocomplete="email"></label>
     <label class="f"><span>Password</span><input class="in" id="siPw" type="password" autocomplete="current-password"></label>
     <p class="err" id="siErr" hidden></p>
+    <p class="hint" id="siMsg" hidden></p>
     <button class="btn gold" type="submit">Sign in</button>
+    <button class="linkish" type="button" id="siForgot">Forgot password?</button>
   </form>
 
   <div id="appView" hidden>
@@ -288,6 +292,24 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 </div>
 <input type="file" id="bulkDir" webkitdirectory multiple hidden>
 
+<div class="sheet" id="pwSheet" hidden role="dialog" aria-modal="true" aria-labelledby="pwTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="pwTitle">Change password</h2>
+      <button class="x" type="button" id="pwClose" aria-label="Close">×</button>
+    </div>
+    <form class="panel-body" id="pwForm" novalidate>
+      <p class="hint" id="pwIntro">One password for this admin page and your PrAjo Pricing app. Use something long and unique, and let your iPhone or Mac Passwords app save it.</p>
+      <label class="f"><span>New password</span><input class="in" id="pwNew" type="password" autocomplete="new-password" minlength="10"></label>
+      <label class="f"><span>Type it again</span><input class="in" id="pwAgain" type="password" autocomplete="new-password"></label>
+      <label class="f" id="pwNonceRow" hidden><span>Code from the email we just sent you</span><input class="in" id="pwNonce" inputmode="numeric" autocomplete="one-time-code"></label>
+      <p class="hint" id="pwHint">At least 10 characters. A short phrase works well, like <b>tumbler-sunset-river-42</b>.</p>
+      <p class="err" id="pwErr" hidden></p>
+      <button class="btn gold" type="submit" id="pwSave">Save new password</button>
+    </form>
+  </div>
+</div>
+
 <div class="toast" id="toast" hidden></div>
 <input type="file" id="filePick" accept="image/*" multiple hidden>
 <input type="file" id="dlPick" accept=".pdf,.zip,.png,.jpg,.jpeg,.epub,application/pdf,application/zip" multiple hidden>
@@ -298,7 +320,10 @@ const CATS = [{ id: "tumblers", label: "Tumblers" }, { id: "mugs", label: "Mugs"
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const money = (n) => "$" + Number(n || 0).toFixed(2);
+// Arriving from a "reset your password" email: remember it, then ask for the authenticator code before the new password.
+try { if (/type=recovery/.test(location.hash)) sessionStorage.setItem("prajo:setpw", "1"); } catch {}
 const sb = window.supabase.createClient(CFG.url, CFG.key, { auth: { persistSession: true, autoRefreshToken: true } });
+sb.auth.onAuthStateChange((ev) => { if (ev === "PASSWORD_RECOVERY") try { sessionStorage.setItem("prajo:setpw", "1"); } catch {} });
 let rows = [], prices = {}, filter = "all", ed = null, sortable = null;
 let toastT;
 function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2400); }
@@ -378,6 +403,8 @@ async function boot() {
   if (email !== CFG.owner) { $("signin").hidden = false; $("siErr").textContent = `${email} can't edit this store.`; $("siErr").hidden = false; return; }
   if (!(await mfaGate(sb))) return;
   $("appView").hidden = false; $("newBtn").hidden = false; $("menuWrap").hidden = false;
+  let resetting = false; try { resetting = sessionStorage.getItem("prajo:setpw") === "1"; } catch {}
+  if (resetting) openPw(true);
   await Promise.all([loadRows(), loadPrices()]);
 }
 $("outBtn").onclick = async () => { await sb.auth.signOut({ scope: "local" }).catch(() => {}); location.reload(); };   // this device only
@@ -956,6 +983,54 @@ $("bulkGo").onclick = async () => {
   btn.textContent = "Upload and attach";
   toast(failed ? `${done} attached, ${failed} failed. Choose the folder again to retry` : `All ${done} files attached. Live on the store now`);
   loadRows();
+};
+
+/* ---------- passwords: change while signed in, or reset from an emailed link (always after the authenticator code) ---------- */
+$("siForgot").onclick = async () => {
+  const email = $("siEmail").value.trim(), msg = $("siMsg"), err = $("siErr");
+  err.hidden = true; msg.hidden = true;
+  if (!email) { err.textContent = "Type your email above first, then tap Forgot password."; err.hidden = false; return; }
+  $("siForgot").disabled = true;
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + "/admin.html" });
+  $("siForgot").disabled = false;
+  if (error) { err.textContent = error.message; err.hidden = false; return; }
+  msg.textContent = "If that's the shop's email, a reset link is on its way. Open it on this device; you'll enter your authenticator code, then choose a new password.";
+  msg.hidden = false;
+};
+function openPw(fromReset) {
+  $("pwForm").reset(); $("pwErr").hidden = true; $("pwNonceRow").hidden = true;
+  $("pwTitle").textContent = fromReset ? "Choose a new password" : "Change password";
+  $("pwSheet").hidden = false; document.body.style.overflow = "hidden";
+  setTimeout(() => $("pwNew").focus({ preventScroll: true }), 30);
+}
+function closePw() {
+  $("pwSheet").hidden = true; document.body.style.overflow = "";
+  try { sessionStorage.removeItem("prajo:setpw"); } catch {}
+}
+$("pwBtn").onclick = () => openPw(false);
+$("pwClose").onclick = closePw;
+$("pwForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const pw = $("pwNew").value, err = $("pwErr"), btn = $("pwSave");
+  const show = (t) => { err.textContent = t; err.hidden = false; };
+  err.hidden = true;
+  if (pw.length < 10) return show("Use at least 10 characters.");
+  if (pw !== $("pwAgain").value) return show("The two passwords don't match.");
+  if (pw.toLowerCase().includes("prajo") || /^(.)\1+$/.test(pw)) return show("Pick something harder to guess (not your shop name or one repeated character).");
+  btn.disabled = true; btn.textContent = "Saving…";
+  const nonce = $("pwNonce").value.trim();
+  let { error } = await sb.auth.updateUser(nonce ? { password: pw, nonce } : { password: pw });
+  // Supabase may ask to confirm it's really you: it emails a short code, which goes in the extra box.
+  if (error && /reauth/i.test(error.code || error.message) && !nonce) {
+    const r = await sb.auth.reauthenticate();
+    btn.disabled = false; btn.textContent = "Save new password";
+    if (r.error) return show(r.error.message);
+    $("pwNonceRow").hidden = false; $("pwNonce").focus();
+    return show("For safety, we emailed you a code. Type it in the new box and save again.");
+  }
+  btn.disabled = false; btn.textContent = "Save new password";
+  if (error) return show(/same/i.test(error.message) ? "That's your current password. Choose a new one." : error.message);
+  closePw(); toast("Password changed. Use it next time you sign in");
 };
 
 boot();
