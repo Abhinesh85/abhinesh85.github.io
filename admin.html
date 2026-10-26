@@ -42,8 +42,8 @@ h1, h2 { font-family: var(--f-display); margin: 0; letter-spacing: -.01em; }
 .in { width: 100%; min-height: 46px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); padding: 10px 13px; font-size: 16px; }
 .in:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217, 171, 79, .18); }
 textarea.in { min-height: 180px; resize: vertical; line-height: 1.45; }
-label.f { display: grid; gap: 6px; min-width: 0; }
-label.f > span { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+label.f, div.f { display: grid; gap: 6px; min-width: 0; }
+label.f > span, div.f > span { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 .hint { margin: 0; font-size: 13px; color: var(--muted); }
 .row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -148,6 +148,19 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .menu button, .menu a { display: grid; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer; text-decoration: none; }
 .menu small { font-weight: 500; font-size: 12.5px; color: var(--muted); }
 .menu button:hover, .menu a:hover, .menu button:focus-visible, .menu a:focus-visible { background: rgba(245, 236, 220, .06); outline: none; }
+/* site settings */
+.sgroup { border: 1px solid var(--line-soft); border-radius: 16px; background: var(--panel); }
+.sgroup > summary { list-style: none; cursor: pointer; padding: 14px 16px; font-weight: 800; font-size: 15.5px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.sgroup > summary::-webkit-details-marker { display: none; }
+.sgroup > summary::after { content: "+"; color: var(--gold-2); font-size: 20px; }
+.sgroup[open] > summary::after { content: "−"; }
+.sgroup > summary small { display: block; font-weight: 500; font-size: 12.5px; color: var(--muted); }
+.sgroup .sfields { padding: 0 16px 16px; display: grid; gap: 12px; }
+.sgroup textarea.in { min-height: 92px; }
+.colrow { display: grid; grid-template-columns: 46px 1fr 40px; gap: 8px; align-items: center; }
+.colrow input[type=color] { width: 46px; height: 42px; border: 1px solid var(--line-soft); border-radius: 10px; background: none; padding: 2px; cursor: pointer; }
+.colrow .rm { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-soft); background: none; cursor: pointer; color: inherit; font-size: 18px; }
+.ssw { display: flex; align-items: center; gap: 10px; font-weight: 700; }
 /* two-step sign-in */
 .mfa { position: fixed; inset: 0; z-index: 300; background: rgba(5, 9, 17, .88); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; overflow-y: auto; }
 .mfa-card { width: min(420px, 100%); background: #121722; color: #f5ecdc; border: 1px solid rgba(217, 171, 79, .35); border-radius: 22px; padding: 24px 22px; display: grid; gap: 12px; }
@@ -177,6 +190,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     <div class="menu-wrap" id="menuWrap" hidden>
       <button class="btn line" type="button" id="menuBtn" aria-haspopup="menu" aria-expanded="false">⚙ Settings</button>
       <div class="menu" id="menu" role="menu" hidden>
+        <button type="button" role="menuitem" id="siteBtn">Site settings<small>Homepage text, announcement, colours, links</small></button>
         <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
         <a role="menuitem" href="./" target="_blank" rel="noopener">View store ↗<small>Opens the live shop in a new tab</small></a>
         <button type="button" role="menuitem" id="outBtn">Sign out</button>
@@ -231,6 +245,20 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     <div class="panel-body">
       <p class="hint">Switch things on or off for store customers. Changes save and go live straight away.</p>
       <div class="co-list" id="coList"><p class="hint">Loading…</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="siteSheet" hidden role="dialog" aria-modal="true" aria-labelledby="siteTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="siteTitle">Site settings</h2>
+      <button class="x" type="button" id="siteClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body" id="siteBody"><p class="hint">Loading…</p></div>
+    <div class="panel-foot">
+      <a class="btn line" href="./" target="_blank" rel="noopener">View store ↗</a>
+      <button class="btn gold" type="button" id="siteSave">Save changes</button>
     </div>
   </div>
 </div>
@@ -690,6 +718,113 @@ $("coList").addEventListener("change", (e) => {
   if (t.dataset.co) { co[t.dataset.co] = t.checked; saveCo(`${t.dataset.co === "enabled" ? "Store checkout" : CO_ROWS.find((r) => r.k === t.dataset.co).t} ${t.checked ? "on" : "off"}`); }
   if (t.dataset.fee) { const n = Number(t.value); if (!(n >= 0)) return toast("Enter a number"); co[t.dataset.fee] = n; saveCo("Fee saved"); }
 });
+
+/* ---------- site settings: text and choices the store page reads at load (table site_settings) ---------- */
+// Empty fields use the store's built-in text (shown here as the grey placeholder). **word** makes a word bold.
+const SITE_FIELDS = [
+  { g: "Announcement bar", d: "A gold strip across the top of every page", f: [
+    ["announceOn", "Show the announcement bar", "switch"],
+    ["announceText", "Message", "text", "e.g. Holiday orders close **Dec 15**"],
+    ["announceLink", "Link when tapped (optional)", "url", "https://…"] ] },
+  { g: "Homepage top", d: "The first thing visitors see", f: [
+    ["heroEyebrow", "Small line above the headline", "text", "Handmade in Sacramento, CA"],
+    ["heroTitle1", "Headline", "text", "Your story,"],
+    ["heroTitle2", "Headline, gold second line", "text", "engraved in light."],
+    ["heroIntro", "Intro paragraph", "area", "Custom tumblers, mugs and keepsakes, UV printed in full colour or laser engraved for life. Every piece is made by hand, one order at a time."],
+    ["proof1", "Highlight 1 (after the stars)", "text", "**5.0** on Etsy"],
+    ["proof2", "Highlight 2", "text", "**Local pickup** in Sacramento"],
+    ["proof3", "Highlight 3", "text", "**Personalized** just for you"] ] },
+  { g: "Tumbler preview", d: "The “Try your name” tumbler", f: [
+    ["tumblerName", "Default name", "text", "Aleesa"],
+    ["tumblerColors", "Colour choices", "colors"] ] },
+  { g: "Moving banner", d: "The scrolling list of occasions", f: [
+    ["occasions", "One occasion per line", "lines", "Mother's Day\nGraduations\nWeddings\nTeachers\nNurses\nFirefighters\nBirthdays\nHeritage pride\nCorporate gifts\nChristmas"] ] },
+  { g: "Section headings", d: "Collections, shop, how it's made, reviews", f: [
+    ["collEyebrow", "Collections: small line", "text", "Collections"], ["collTitle", "Collections: heading", "text", "Made for every moment"],
+    ["collIntro", "Collections: intro", "area", "From everyday tumblers to heirloom gifts, all customised in our Sacramento studio."],
+    ["shopEyebrow", "Shop: small line", "text", "The shop"], ["shopTitle", "Shop: heading", "text", "Find your piece"],
+    ["howEyebrow", "How it's made: small line", "text", "How it's made"], ["howTitle", "How it's made: heading", "text", "From your idea to your hands"],
+    ["step1Title", "Step 1 title", "text", "You share your story"], ["step1Text", "Step 1 text", "area", "A name, a date, a photo or a logo. Pick a design or send us your own idea and we'll lay it out for you."],
+    ["step2Title", "Step 2 title", "text", "We print or engrave it"], ["step2Text", "Step 2 text", "area", "Full-colour UV printing that won't peel or wash off, or laser engraving that's etched in for good."],
+    ["step3Title", "Step 3 title", "text", "Finished by hand"], ["step3Text", "Step 3 text", "area", "Every piece is checked, gift-ready packed and shipped with tracking, or ready for local pickup in Sacramento."],
+    ["revEyebrow", "Reviews: small line", "text", "Reviews"], ["revTitle", "Reviews: heading", "text", "Loved by our customers"],
+    ["revLine", "Reviews: line after the stars", "text", "5.0 average from our Etsy buyers"] ] },
+  { g: "Custom & bulk orders", d: "The “Have something special in mind?” box", f: [
+    ["customEyebrow", "Small line", "text", "Custom & bulk orders"], ["customTitle", "Heading", "text", "Have something special in mind?"],
+    ["customIntro", "Text", "area", "Team names, wedding party gifts, company logos, a photo of someone you love. Tell us the idea and we'll design it with you."],
+    ["customList", "List, one item per line", "lines", "Weddings & bridal party sets\nTeams, schools & graduations\nBusiness logos & corporate gifts\nMemorials & photo keepsakes"] ] },
+  { g: "Our studio", d: "The about section", f: [
+    ["aboutEyebrow", "Small line", "text", "Our studio"], ["aboutTitle", "Heading", "text", "A small studio with a big heart"],
+    ["aboutText1", "Paragraph 1", "area", "We create custom engraved and printed gifts, made with care in Sacramento, CA. From tumblers and mugs to coasters, keychains and T-shirts, every order celebrates your story."],
+    ["aboutText2", "Paragraph 2", "area", "We're a new small business, and every order means the world to us. Message us for custom designs or local pickup."],
+    ["aboutPlace", "Location line", "text", "Sacramento, California"] ] },
+  { g: "Product page", d: "The ✓ points under every made-to-order product", f: [
+    ["perks", "One point per line", "lines", "Made to order in Sacramento\nWon't peel or wash off\nGift-ready packaging\nLocal delivery or pickup"] ] },
+  { g: "Contact & links", d: "Shown in the footer when filled in", f: [
+    ["etsyUrl", "Etsy shop link", "url", "https://www.etsy.com/shop/PrAjoCustomStudio"],
+    ["instagram", "Instagram link", "url", "https://instagram.com/…"], ["facebook", "Facebook link", "url", "https://facebook.com/…"],
+    ["tiktok", "TikTok link", "url", "https://tiktok.com/@…"], ["pinterest", "Pinterest link", "url", "https://pinterest.com/…"],
+    ["email", "Email", "email", "hello@prajocustomstudio.com"], ["phone", "Phone", "tel", "(916) 555-0100"],
+    ["footerLine", "Footer line", "text", "Custom gifts & personalized moments · Sacramento, CA"], ["footerCopy", "Copyright line", "text", "© 2026 PrAjo Custom Studio"] ] },
+  { g: "Messages", d: "The “Message us” chat", f: [
+    ["chatWelcome", "Welcome text before a customer writes", "area", "Questions, custom designs, bulk orders or local pickup: send us a message and we'll reply here."],
+    ["chatReplyTime", "Reply time under the shop name", "text", "We usually reply within a day"] ] },
+];
+const DEFAULT_COLORS = [{ name: "Black", hex: "#2b2f37" }, { name: "Rose pink", hex: "#d48a9b" }, { name: "Navy", hex: "#2c4c86" }, { name: "Green", hex: "#4c8c63" }, { name: "White", hex: "#efe9de" }];
+let site = {}, siteDirty = false;
+function colorRows(list) {
+  return list.map((c, i) => `<div class="colrow" data-ci="${i}"><input type="color" value="${esc(c.hex)}" aria-label="Colour"><input class="in" value="${esc(c.name)}" placeholder="Colour name" aria-label="Colour name"><button class="rm" type="button" data-crm aria-label="Remove colour">×</button></div>`).join("")
+    + (list.length < 8 ? `<button class="btn line" type="button" id="colAdd" style="justify-self:start">+ Add colour</button>` : "");
+}
+function renderSite() {
+  $("siteBody").innerHTML = `<p class="hint">Change any text on the store. Leave a field empty to keep the text shown in grey. Put <b>**two stars**</b> around words to make them bold. Press <b>Save changes</b> to publish.</p>` +
+    SITE_FIELDS.map((grp, gi) => `<details class="sgroup"${gi === 0 ? " open" : ""}><summary><span>${grp.g}<small>${grp.d}</small></span></summary><div class="sfields">${grp.f.map(([k, label, type, ph]) => {
+      if (type === "switch") return `<label class="ssw"><span class="switch"><input type="checkbox" data-k="${k}" ${site[k] ? "checked" : ""}></span>${label}</label>`;
+      if (type === "colors") return `<div class="f"><span>${label}</span><div id="colList" style="display:grid;gap:8px">${colorRows(site.tumblerColors?.length ? site.tumblerColors : DEFAULT_COLORS)}</div></div>`;
+      const v = esc(site[k] || ""), p = esc(ph || "");
+      return `<label class="f"><span>${label}</span>${type === "area" || type === "lines" ? `<textarea class="in" data-k="${k}" placeholder="${p}" rows="${type === "lines" ? 5 : 3}">${v}</textarea>` : `<input class="in" data-k="${k}" type="${type === "url" ? "url" : type === "email" ? "email" : type === "tel" ? "tel" : "text"}" value="${v}" placeholder="${p}">`}</label>`;
+    }).join("")}</div></details>`).join("");
+}
+function readColors() {
+  return [...document.querySelectorAll("#colList .colrow")].map((r) => ({ hex: r.querySelector("input[type=color]").value, name: r.querySelector("input.in").value.trim() })).filter((c) => c.name);
+}
+function readSite() {
+  const out = {};
+  document.querySelectorAll("#siteBody [data-k]").forEach((el) => {
+    const v = el.type === "checkbox" ? el.checked : el.value.trim();
+    if (v) out[el.dataset.k] = v;
+  });
+  const cols = readColors();
+  if (JSON.stringify(cols) !== JSON.stringify(DEFAULT_COLORS)) out.tumblerColors = cols;
+  return out;
+}
+async function openSite() {
+  $("siteSheet").hidden = false; document.body.style.overflow = "hidden"; siteDirty = false;
+  const { data, error } = await sb.from("site_settings").select("data").eq("id", 1).maybeSingle();
+  if (error) { $("siteBody").innerHTML = `<div class="empty"><b>Site settings aren't set up yet</b><p class="hint">Run site-settings.sql in Supabase first. (${esc(error.message)})</p></div>`; return; }
+  site = data?.data || {};
+  renderSite();
+}
+function closeSite() {
+  if (siteDirty && !confirm("You have unsaved changes. Close without saving?")) return;
+  $("siteSheet").hidden = true; document.body.style.overflow = "";
+}
+$("siteBtn").onclick = openSite;
+$("siteClose").onclick = closeSite;
+$("siteBody").addEventListener("input", () => { siteDirty = true; });
+$("siteBody").addEventListener("click", (e) => {
+  if (e.target.id === "colAdd") { const c = readColors(); c.push({ name: "", hex: "#d9ab4f" }); $("colList").innerHTML = colorRows(c.length ? c : DEFAULT_COLORS); siteDirty = true; $("colList").querySelector(".colrow:last-of-type input.in")?.focus(); }
+  if (e.target.closest("[data-crm]")) { const i = +e.target.closest(".colrow").dataset.ci, c = readColors().filter((_, j) => j !== i); $("colList").innerHTML = colorRows(c); siteDirty = true; }
+});
+$("siteSave").onclick = async () => {
+  const data = readSite();
+  for (const k of ["announceLink", "etsyUrl", "instagram", "facebook", "tiktok", "pinterest"]) if (data[k] && !/^https:\/\//.test(data[k])) return toast("Links need to start with https://");
+  $("siteSave").disabled = true;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data, updated_at: new Date().toISOString() });
+  $("siteSave").disabled = false;
+  if (error) return toast("Couldn't save: " + error.message);
+  site = data; siteDirty = false; toast("Saved. Live on the store now");
+};
 
 boot();
 </script>

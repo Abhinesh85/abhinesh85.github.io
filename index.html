@@ -86,6 +86,10 @@ nav.links a:hover { color: var(--cream); }
 @keyframes reveal { from { clip-path: inset(0 100% 0 0); } to { clip-path: inset(0 0 0 0); } }
 @keyframes beam { 0% { left: 0; opacity: 1; } 92% { left: 100%; opacity: 1; } 100% { left: 100%; opacity: 0; } }
 .hero-cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.announce { background: linear-gradient(90deg, #b8862c, #e9c477, #b8862c); color: #1b1305; text-align: center; font-weight: 700; font-size: 14px; padding: 9px 16px; padding-top: calc(9px + env(safe-area-inset-top, 0px)); }
+.announce a { color: inherit; }
+footer .social { display: flex; flex-wrap: wrap; gap: 14px; }
+footer .social a, footer a[data-link] { color: var(--gold-2); }
 .proof { display: flex; flex-wrap: wrap; gap: 10px 22px; margin-top: 30px; font-size: 14px; color: var(--muted); }
 .proof b { color: var(--cream); }
 .stars { color: var(--gold-2); letter-spacing: 2px; }
@@ -105,7 +109,8 @@ nav.links a:hover { color: var(--cream); }
 .swatches { display: flex; gap: 10px; align-items: center; }
 .swatches button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25); padding: 0; }
 .swatches button[aria-pressed="true"] { border-color: var(--gold-2); box-shadow: 0 0 0 3px rgba(217, 171, 79, .35); }
-.swatches span { font-size: 13px; color: var(--muted); margin-left: auto; }
+.swatches .swbox { display: flex; gap: 10px; flex-wrap: wrap; margin: 0; }
+.swatches #swName { font-size: 13px; color: var(--muted); margin-left: auto; }
 
 /* marquee */
 .marquee { border-block: 1px solid var(--line); background: linear-gradient(90deg, rgba(217, 171, 79, .08), rgba(242, 138, 36, .08)); overflow: hidden; }
@@ -320,6 +325,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 </style>
 </head>
 <body>
+<div class="announce" id="announce" hidden><span id="announceText"></span></div>
 
 <header class="top">
   <div class="wrap">
@@ -345,17 +351,17 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
   <section class="hero">
     <div class="wrap">
       <div>
-        <div class="eyebrow">Handmade in Sacramento, CA</div>
-        <h1>Your story, <br><em class="engrave">engraved in light.</em></h1>
-        <p class="lede">Custom tumblers, mugs and keepsakes, UV printed in full colour or laser engraved for life. Every piece is made by hand, one order at a time.</p>
+        <div class="eyebrow" data-s="heroEyebrow">Handmade in Sacramento, CA</div>
+        <h1><span data-s="heroTitle1">Your story,</span> <br><em class="engrave" data-s="heroTitle2">engraved in light.</em></h1>
+        <p class="lede" data-s="heroIntro">Custom tumblers, mugs and keepsakes, UV printed in full colour or laser engraved for life. Every piece is made by hand, one order at a time.</p>
         <div class="hero-cta">
           <a class="btn btn-gold" href="#shop">Shop the collection</a>
           <a class="btn btn-line" href="#custom">Design something custom</a>
         </div>
         <div class="proof">
-          <span><span class="stars">★★★★★</span> <b>5.0</b> on Etsy</span>
-          <span><b>Local pickup</b> in Sacramento</span>
-          <span><b>Personalized</b> just for you</span>
+          <span><span class="stars">★★★★★</span> <span data-s="proof1"><b>5.0</b> on Etsy</span></span>
+          <span data-s="proof2"><b>Local pickup</b> in Sacramento</span>
+          <span data-s="proof3"><b>Personalized</b> just for you</span>
         </div>
       </div>
 
@@ -390,11 +396,11 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
             <label for="nameIn">Try your name</label>
             <input id="nameIn" maxlength="14" value="Aleesa" autocomplete="off" spellcheck="false">
             <div class="swatches" role="group" aria-label="Tumbler colour">
-              <button type="button" data-c="#14161b,#3a3f4a,#5a606c,#0d0f13" aria-pressed="true" style="background:#2b2f37" aria-label="Black"></button>
+              <span class="swbox" id="swatchBox"><button type="button" data-c="#14161b,#3a3f4a,#5a606c,#0d0f13" aria-pressed="true" style="background:#2b2f37" aria-label="Black"></button>
               <button type="button" data-c="#5a2a3a,#c77d8f,#f0b6c3,#4a1f2c" aria-pressed="false" style="background:#d48a9b" aria-label="Rose pink"></button>
               <button type="button" data-c="#0e1d3a,#26457a,#3e64a3,#0a1428" aria-pressed="false" style="background:#2c4c86" aria-label="Navy"></button>
               <button type="button" data-c="#1e3b2a,#3f7a55,#62a57a,#16301f" aria-pressed="false" style="background:#4c8c63" aria-label="Green"></button>
-              <button type="button" data-c="#cfc8bb,#f4f0e8,#ffffff,#b9b2a4" aria-pressed="false" style="background:#efe9de" aria-label="White"></button>
+              <button type="button" data-c="#cfc8bb,#f4f0e8,#ffffff,#b9b2a4" aria-pressed="false" style="background:#efe9de" aria-label="White"></button></span>
               <span id="swName">Black</span>
             </div>
           </div>
@@ -408,8 +414,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
   <section class="band" id="collections">
     <div class="wrap">
       <div class="head">
-        <div><div class="eyebrow">Collections</div><h2>Made for every moment</h2></div>
-        <p class="lede">From everyday tumblers to heirloom gifts, all customised in our Sacramento studio.</p>
+        <div><div class="eyebrow" data-s="collEyebrow">Collections</div><h2 data-s="collTitle">Made for every moment</h2></div>
+        <p class="lede" data-s="collIntro">From everyday tumblers to heirloom gifts, all customised in our Sacramento studio.</p>
       </div>
       <div class="collections" id="colls"></div>
     </div>
@@ -418,7 +424,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
   <section class="band" id="shop" style="padding-top:0">
     <div class="wrap">
       <div class="head">
-        <div><div class="eyebrow">The shop</div><h2>Find your piece</h2></div>
+        <div><div class="eyebrow" data-s="shopEyebrow">The shop</div><h2 data-s="shopTitle">Find your piece</h2></div>
         <div class="chips" role="group" aria-label="Filter products" id="filters"></div>
       </div>
       <div class="grid" id="grid"></div>
@@ -428,23 +434,23 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
   <section class="band" id="how" style="background:linear-gradient(180deg, transparent, rgba(19,33,58,.55), transparent)">
     <div class="wrap">
       <div class="head">
-        <div><div class="eyebrow">How it's made</div><h2>From your idea to your hands</h2></div>
+        <div><div class="eyebrow" data-s="howEyebrow">How it's made</div><h2 data-s="howTitle">From your idea to your hands</h2></div>
       </div>
       <div class="steps">
         <div class="step">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-          <h3>You share your story</h3>
-          <p>A name, a date, a photo or a logo. Pick a design or send us your own idea and we'll lay it out for you.</p>
+          <h3 data-s="step1Title">You share your story</h3>
+          <p data-s="step1Text">A name, a date, a photo or a logo. Pick a design or send us your own idea and we'll lay it out for you.</p>
         </div>
         <div class="step">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/></svg>
-          <h3>We print or engrave it</h3>
-          <p>Full-colour UV printing that won't peel or wash off, or laser engraving that's etched in for good.</p>
+          <h3 data-s="step2Title">We print or engrave it</h3>
+          <p data-s="step2Text">Full-colour UV printing that won't peel or wash off, or laser engraving that's etched in for good.</p>
         </div>
         <div class="step">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7ZM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7Z"/></svg>
-          <h3>Finished by hand</h3>
-          <p>Every piece is checked, gift-ready packed and shipped with tracking, or ready for local pickup in Sacramento.</p>
+          <h3 data-s="step3Title">Finished by hand</h3>
+          <p data-s="step3Text">Every piece is checked, gift-ready packed and shipped with tracking, or ready for local pickup in Sacramento.</p>
         </div>
       </div>
     </div>
@@ -453,8 +459,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
   <section class="band" id="reviews">
     <div class="wrap">
       <div class="head">
-        <div><div class="eyebrow">Reviews</div><h2>Loved by our customers</h2></div>
-        <p class="lede"><span class="stars">★★★★★</span> 5.0 average from our Etsy buyers</p>
+        <div><div class="eyebrow" data-s="revEyebrow">Reviews</div><h2 data-s="revTitle">Loved by our customers</h2></div>
+        <p class="lede"><span class="stars">★★★★★</span> <span data-s="revLine">5.0 average from our Etsy buyers</span></p>
       </div>
       <div class="reviews" id="revs"></div>
     </div>
@@ -464,15 +470,15 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
     <div class="wrap">
       <div class="custom">
         <div style="position:relative;z-index:1;display:grid;gap:16px">
-          <div class="eyebrow">Custom & bulk orders</div>
-          <h2>Have something special in mind?</h2>
-          <p class="lede">Team names, wedding party gifts, company logos, a photo of someone you love. Tell us the idea and we'll design it with you.</p>
+          <div class="eyebrow" data-s="customEyebrow">Custom & bulk orders</div>
+          <h2 data-s="customTitle">Have something special in mind?</h2>
+          <p class="lede" data-s="customIntro">Team names, wedding party gifts, company logos, a photo of someone you love. Tell us the idea and we'll design it with you.</p>
           <div class="hero-cta" style="margin-top:8px">
             <button class="btn btn-gold" type="button" data-chat>Message us</button>
-            <a class="btn btn-line" href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Visit our Etsy shop</a>
+            <a class="btn btn-line" data-link="etsy" href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Visit our Etsy shop</a>
           </div>
         </div>
-        <ul>
+        <ul data-s-list="customList">
           <li>Weddings & bridal party sets</li>
           <li>Teams, schools & graduations</li>
           <li>Business logos & corporate gifts</li>
@@ -486,11 +492,11 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
     <div class="wrap about">
       <div class="ph"><img id="aboutImg" alt="A finished PrAjo Custom Studio tumbler" loading="lazy"></div>
       <div style="display:grid;gap:16px">
-        <div class="eyebrow">Our studio</div>
-        <h2>A small studio with a big heart</h2>
-        <p>We create custom engraved and printed gifts, made with care in Sacramento, CA. From tumblers and mugs to coasters, keychains and T-shirts, every order celebrates your story.</p>
-        <p>We're a new small business, and every order means the world to us. Message us for custom designs or local pickup.</p>
-        <span class="loc">⌖ Sacramento, California</span>
+        <div class="eyebrow" data-s="aboutEyebrow">Our studio</div>
+        <h2 data-s="aboutTitle">A small studio with a big heart</h2>
+        <p data-s="aboutText1">We create custom engraved and printed gifts, made with care in Sacramento, CA. From tumblers and mugs to coasters, keychains and T-shirts, every order celebrates your story.</p>
+        <p data-s="aboutText2">We're a new small business, and every order means the world to us. Message us for custom designs or local pickup.</p>
+        <span class="loc">⌖ <span data-s="aboutPlace">Sacramento, California</span></span>
       </div>
     </div>
   </section>
@@ -499,9 +505,10 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 <footer>
   <div class="wrap">
     <a class="brand" href="#top"><img src="logo.png" alt="" width="36" height="36" style="width:36px;height:36px"><span><b>PRAJO</b><small>Custom Studio</small></span></a>
-    <span>Custom gifts & personalized moments · Sacramento, CA</span>
-    <a href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Find us on Etsy ↗</a>
-    <span>© 2026 PrAjo Custom Studio</span>
+    <span data-s="footerLine">Custom gifts & personalized moments · Sacramento, CA</span>
+    <span class="social" id="social"></span>
+    <a data-link="etsy" href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Find us on Etsy ↗</a>
+    <span data-s="footerCopy">© 2026 PrAjo Custom Studio</span>
   </div>
 </footer>
 
@@ -513,7 +520,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 <div class="chat" id="chat" hidden role="dialog" aria-modal="false" aria-labelledby="chatTitle">
   <div class="chat-head">
     <img src="logo.png" alt="">
-    <div><b id="chatTitle">PrAjo Custom Studio</b><small>We usually reply within a day</small></div>
+    <div><b id="chatTitle">PrAjo Custom Studio</b><small data-s="chatReplyTime">We usually reply within a day</small></div>
     <button class="close" type="button" id="chatClose" aria-label="Close messages">×</button>
   </div>
   <div class="chat-body" id="chatBody" aria-live="polite"></div>
@@ -566,7 +573,52 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 let P = window.PRAJO_PRODUCTS || [];   // built-in copy; replaced by the live listings from Supabase when they load
-const SHOP = "https://www.etsy.com/shop/PrAjoCustomStudio";
+let SHOP = "https://www.etsy.com/shop/PrAjoCustomStudio";
+/* ---------- site settings (edited in admin: ⚙ Settings → Site settings). Empty fields keep the text in this page. ---------- */
+let SITE = {};
+try { SITE = JSON.parse(localStorage.getItem("prajo:site") || "{}"); } catch {}
+const richText = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>");
+const shade = (hex, to, amt) => {
+  const n = parseInt(hex.slice(1), 16), c = [n >> 16, (n >> 8) & 255, n & 255], t = to === "white" ? 255 : 0;
+  return "#" + c.map((v) => Math.round(v + (t - v) * amt).toString(16).padStart(2, "0")).join("");
+};
+function applySite() {
+  const S = SITE;
+  document.querySelectorAll("[data-s]").forEach((el) => {
+    if (!el.dataset.def) el.dataset.def = el.innerHTML;
+    el.innerHTML = S[el.dataset.s] ? richText(S[el.dataset.s]) : el.dataset.def;
+  });
+  document.querySelectorAll("[data-s-list]").forEach((el) => {
+    if (!el.dataset.def) el.dataset.def = el.innerHTML;
+    const items = (S[el.dataset.sList] || "").split("\n").map((x) => x.trim()).filter(Boolean);
+    el.innerHTML = items.length ? items.map((x) => `<li>${esc(x)}</li>`).join("") : el.dataset.def;
+  });
+  if (/^https:\/\//.test(S.etsyUrl || "")) SHOP = S.etsyUrl;
+  document.querySelectorAll('[data-link="etsy"]').forEach((a) => (a.href = SHOP));
+  const on = S.announceOn && S.announceText;
+  $("announce").hidden = !on;
+  if (on) $("announceText").innerHTML = /^https:\/\//.test(S.announceLink || "") ? `<a href="${esc(S.announceLink)}">${richText(S.announceText)}</a>` : richText(S.announceText);
+  const social = [["instagram", "Instagram"], ["facebook", "Facebook"], ["tiktok", "TikTok"], ["pinterest", "Pinterest"]]
+    .filter(([k]) => /^https:\/\//.test(S[k] || "")).map(([k, l]) => `<a href="${esc(S[k])}" target="_blank" rel="noopener">${l} ↗</a>`);
+  if (S.email) social.push(`<a href="mailto:${esc(S.email)}">${esc(S.email)}</a>`);
+  if (S.phone) social.push(`<a href="tel:${esc(S.phone.replace(/[^\d+]/g, ""))}">${esc(S.phone)}</a>`);
+  $("social").innerHTML = social.join("");
+  if (S.tumblerName && !nameIn.dataset.touched) { nameIn.value = S.tumblerName; sizeName(); }
+  const cols = (S.tumblerColors || []).filter((c) => c && /^#[0-9a-f]{6}$/i.test(c.hex) && c.name);
+  if (cols.length) {
+    $("swatchBox").innerHTML = cols.map((c, i) => `<button type="button" data-c="${shade(c.hex, "black", .62)},${c.hex},${shade(c.hex, "white", .3)},${shade(c.hex, "black", .72)}" aria-pressed="${i === 0}" style="background:${c.hex}" aria-label="${esc(c.name)}"></button>`).join("");
+    $("swatchBox").querySelector("button").click();
+  }
+  if (S.occasions) $("track").innerHTML = [...Array(2)].flatMap(() => S.occasions.split("\n").map((x) => x.trim()).filter(Boolean)).map((o) => `<span>${esc(o)}</span>`).join("");
+}
+const SITE_KEY = "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b";
+fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/site_settings?id=eq.1&select=data", { headers: { apikey: SITE_KEY, Authorization: `Bearer ${SITE_KEY}` } })
+  .then((r) => (r.ok ? r.json() : null)).then((rows) => {
+    if (!rows) return;
+    SITE = rows[0]?.data || {};
+    try { localStorage.setItem("prajo:site", JSON.stringify(SITE)); } catch {}
+    applySite();
+  }).catch(() => {});
 const CATS = [
   { id: "tumblers", label: "Tumblers", blurb: "Insulated, full-wrap & engraved" },
   { id: "mugs", label: "Mugs", blurb: "Morning coffee, made personal" },
@@ -648,7 +700,7 @@ function sizeName() {
   tName.textContent = t;
   tName.setAttribute("font-size", Math.max(30, Math.min(58, 420 / Math.max(t.length, 4))));
 }
-nameIn.addEventListener("input", sizeName);
+nameIn.addEventListener("input", () => { nameIn.dataset.touched = "1"; sizeName(); });
 document.querySelector(".swatches").addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (!b) return;
   document.querySelectorAll(".swatches button").forEach((x) => x.setAttribute("aria-pressed", x === b));
@@ -656,6 +708,7 @@ document.querySelector(".swatches").addEventListener("click", (e) => {
   $("swName").textContent = b.getAttribute("aria-label");
 });
 sizeName();
+applySite();
 
 /* ---------- collections ---------- */
 const byCat = (c) => P.filter((p) => p.category === c);
@@ -766,6 +819,7 @@ function openProduct(id) {
   $("thumbs").innerHTML = p.images.length > 1 ? p.images.map((im, i) => `<button type="button" data-i="${i}" aria-label="Photo ${i + 1}" aria-current="${i === 0}"><img src="${esc(im.card)}" alt="" loading="lazy"></button>`).join("") : "";
   const cat = CATS.find((c) => c.id === p.category);
   const perks = p.digital ? ["Instant download", "Print at home", "Use again and again"]
+    : (SITE.perks || "").split("\n").map((x) => x.trim()).filter(Boolean).length ? SITE.perks.split("\n").map((x) => x.trim()).filter(Boolean)
     : ["Made to order in Sacramento", "Won't peel or wash off", "Gift-ready packaging", "Local delivery or pickup"];
   $("info").innerHTML = `
     <div class="eyebrow">${esc(cat ? cat.label : "")}</div>
@@ -896,7 +950,7 @@ function renderChat() {
   if (!c) {
     const a = chatState.about;
     body.innerHTML = `<form class="chat-form" id="chatStart" novalidate>
-      <p>Questions, custom designs, bulk orders or local pickup: send us a message and we'll reply here.</p>
+      <p>${esc(SITE.chatWelcome || "Questions, custom designs, bulk orders or local pickup: send us a message and we'll reply here.")}</p>
       <div id="startAbout">${aboutHtml(true)}</div>
       <label>Your name<input id="cName" autocomplete="name" maxlength="80" required></label>
       <label>Email<input id="cEmail" type="email" autocomplete="email" inputmode="email" maxlength="160" required></label>
