@@ -9,6 +9,10 @@
 <meta property="og:title" content="PrAjo Custom Studio">
 <meta property="og:description" content="Custom engraved & UV printed gifts, made by hand in Sacramento, CA.">
 <meta property="og:image" content="https://i.etsystatic.com/60023144/r/il/408f8e/7638299720/il_1140xN.7638299720_lgmf.jpg">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://prajocustomstudio.com/">
+<meta property="og:site_name" content="PrAjo Custom Studio">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -322,6 +326,28 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 .thanks { position: fixed; inset: 0; z-index: 95; background: rgba(5, 9, 17, .78); display: grid; place-items: center; padding: 16px; }
 .thanks .card2 { max-width: 440px; width: 100%; background: var(--navy); border: 1px solid var(--line); border-radius: 26px; padding: 30px 24px; text-align: center; display: grid; gap: 14px; justify-items: center; }
 .thanks .big { font-size: 46px; }
+/* share */
+.ask-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.ask-row [data-share] svg, .share-shop svg { width: 18px; height: 18px; }
+.share { position: fixed; inset: 0; z-index: 96; background: rgba(5, 9, 17, .72); backdrop-filter: blur(4px); display: grid; place-items: end center; padding: 16px; }
+@media (min-width: 640px) { .share { place-items: center; } }
+.share-card { width: min(440px, 100%); background: var(--navy); border: 1px solid var(--line); border-radius: 24px; padding: 16px 16px calc(16px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 14px; animation: up .25s ease; }
+.share-head { display: flex; align-items: center; justify-content: space-between; }
+.share-head b { font-family: var(--f-display); font-size: 21px; }
+.share-head .close { position: static; }
+.share-item { display: flex; gap: 12px; align-items: center; padding: 8px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line-soft); }
+.share-item img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; flex: none; }
+.share-item b { display: block; font-size: 14.5px; line-height: 1.3; }
+.share-item small { color: var(--muted); font-size: 12.5px; overflow-wrap: anywhere; }
+.share-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.share-grid a, .share-grid button { display: grid; justify-items: center; gap: 6px; padding: 10px 4px; border-radius: 14px; border: 1px solid var(--line-soft); background: none; color: inherit; font: 600 12px var(--f-body); text-decoration: none; cursor: pointer; }
+.share-grid a:hover, .share-grid button:hover, .share-grid a:focus-visible, .share-grid button:focus-visible { border-color: var(--gold); outline: none; }
+.share-grid i { width: 40px; height: 40px; border-radius: 50%; display: grid; place-items: center; font-style: normal; font-weight: 800; font-size: 17px; color: #fff; }
+.thanks .card2 { max-height: calc(100vh - 32px); overflow-y: auto; }
+.dls { display: grid; gap: 10px; width: 100%; text-align: left; }
+.dls a.btn { justify-content: space-between; gap: 10px; }
+.dls a.btn span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.dls p { margin: 0; font-size: 13px; color: var(--muted); text-align: center; }
 </style>
 </head>
 <body>
@@ -508,6 +534,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
     <span data-s="footerLine">Custom gifts & personalized moments · Sacramento, CA</span>
     <span class="social" id="social"></span>
     <a data-link="etsy" href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Find us on Etsy ↗</a>
+    <button class="btn btn-line share-shop" type="button" data-share-site>Share our shop</button>
     <span data-s="footerCopy">© 2026 PrAjo Custom Studio</span>
   </div>
 </footer>
@@ -553,8 +580,16 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
     </div>
   </div>
 </div>
+<div class="share" id="shareBox" hidden role="dialog" aria-modal="true" aria-labelledby="shareTitle">
+  <div class="share-card">
+    <div class="share-head"><b id="shareTitle">Share</b><button class="close" type="button" id="shareClose" aria-label="Close">×</button></div>
+    <div class="share-item" id="shareItem"></div>
+    <div class="share-grid" id="shareGrid"></div>
+  </div>
+</div>
 <div class="thanks" id="thanks" hidden role="dialog" aria-modal="true" aria-labelledby="thanksTitle">
   <div class="card2"><div class="big">🎉</div><h2 id="thanksTitle">Thank you!</h2><p class="lede" id="thanksText" style="margin:0">Your order is confirmed.</p>
+    <div class="dls" id="thanksDl" hidden></div>
     <button class="btn btn-gold" type="button" id="thanksOk">Keep browsing</button></div>
 </div>
 
@@ -573,6 +608,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 let P = window.PRAJO_PRODUCTS || [];   // built-in copy; replaced by the live listings from Supabase when they load
+const SHARE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4M12 2v14"/></svg>`;
 let SHOP = "https://www.etsy.com/shop/PrAjoCustomStudio";
 /* ---------- site settings (edited in admin: ⚙ Settings → Site settings). Empty fields keep the text in this page. ---------- */
 let SITE = {};
@@ -776,7 +812,7 @@ function fromRow(r) {
     return Object.keys(photos).length ? { ...v, photos } : { ...v };
   });
   return { id: r.id, name: r.name, title: r.title || r.name, category: r.category, price: Number(r.price), currency: r.currency,
-    stock: r.stock, digital: r.digital, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
+    stock: r.stock, digital: r.digital, hasFile: (r.files || []).length > 0, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
 }
 (async function loadListings() {
   try {
@@ -827,17 +863,18 @@ function openProduct(id) {
     <div class="pr">${priceHtml(p)}${p.stock > 0 && p.stock <= 3 && !p.digital ? ` <small>· only ${p.stock} left</small>` : ""}</div>
     ${p.variations.map((v, vi) => `<div class="opt"><span>${esc(v.name)}</span><div class="chips">${v.values.map((x, i) => `<button type="button" data-v="${vi}" data-val="${esc(x)}" aria-pressed="${i === 0}">${esc(/^\d+$/.test(x) ? x + "oz" : x)}</button>`).join("")}</div></div>`).join("")}
     <div class="perks">${perks.map((x) => `<span>${esc(x)}</span>`).join("")}</div>
-    ${p.digital || !canBuy() ? `<div class="actions">
+    ${!buyable(p) ? `<div class="actions">
       <a class="btn btn-gold" href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">${p.digital ? "Get it on Etsy" : "Order on Etsy"}</a>
-      <button class="btn btn-line" type="button" data-ask>Ask about this item</button>
+      <div class="ask-row"><button class="btn btn-line" type="button" data-ask>Ask about this item</button><button class="btn btn-line" type="button" data-share aria-label="Share this product">${SHARE_ICON} Share</button></div>
     </div>` : `
-    ${p.personalizable ? `<label class="personal opt"><span>Personalization</span><input id="pPersonal" maxlength="200" placeholder="Name or text to print (leave empty if none)" autocomplete="off"></label>` : ""}
+    ${p.personalizable && !p.digital ? `<label class="personal opt"><span>Personalization</span><input id="pPersonal" maxlength="200" placeholder="Name or text to print (leave empty if none)" autocomplete="off"></label>` : ""}
     <div class="actions">
-      <div class="buy-row">
+      ${p.digital ? `<button class="btn btn-gold" type="button" id="addCart">Buy & download · ${fmt(p.price)}</button>
+      <p class="etsy-link" style="margin-top:-2px">💾 Instant download right after you pay. Nothing is shipped.</p>` : `<div class="buy-row">
         <div class="qty" aria-label="Quantity"><button type="button" data-qty="-1" aria-label="One less">−</button><span id="pQty">1</span><button type="button" data-qty="1" aria-label="One more">+</button></div>
         <button class="btn btn-gold" type="button" id="addCart">Add to cart · ${fmt(p.price)}</button>
-      </div>
-      <button class="btn btn-line" type="button" data-ask>Ask about this item</button>
+      </div>`}
+      <div class="ask-row"><button class="btn btn-line" type="button" data-ask>Ask about this item</button><button class="btn btn-line" type="button" data-share aria-label="Share this product">${SHARE_ICON} Share</button></div>
       <p class="etsy-link">Prefer Etsy? <a href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">Order it there</a></p>
     </div>`}
     <div class="desc">${descHtml(p.description)}</div>`;
@@ -862,7 +899,7 @@ function route() {
   if (m) openProduct(decodeURIComponent(m[1])); else closeProduct(true);
   if (location.hash === "#cart") { history.replaceState(null, "", location.pathname); openCart(); }
   const o = location.hash.match(/^#order\/(cs_[\w]+)$/);
-  if (o) { history.replaceState(null, "", location.pathname); showThanks(o[1]); }
+  if (o) showThanks(o[1]);
 }
 window.addEventListener("hashchange", route);
 $("closeBtn").onclick = () => closeProduct(false);
@@ -1065,6 +1102,7 @@ const CHECKOUT_URL = "https://mrnnrmyvjkyjcjnfomna.supabase.co/functions/v1/chec
 // Which options are on is set on the admin page; the checkout function charges the real amounts.
 let CO = { enabled: true, shipping: true, shipFee: 5.95, freeOver: 50, delivery: true, deliveryFee: 7, pickup: true };
 const canBuy = () => CO.enabled && (CO.shipping || CO.delivery || CO.pickup);
+const buyable = (p) => p.digital ? CO.enabled && !!p.hasFile : canBuy();
 fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "settings" }) })
   .then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && typeof d.enabled === "boolean") { CO = d; renderCartBadge(); } }).catch(() => {});
 const cart = {
@@ -1092,8 +1130,8 @@ $("info").addEventListener("click", (e) => {
     const options = chosenOptions(), personalization = ($("pPersonal")?.value || "").trim();
     const items = cart.get();
     const same = items.find((i) => i.id === cur.id && JSON.stringify(i.options) === JSON.stringify(options) && i.personalization === personalization);
-    if (same) same.qty = Math.min(50, same.qty + pQty);
-    else items.push({ id: cur.id, qty: pQty, options, personalization });
+    if (same) same.qty = cur.digital ? 1 : Math.min(50, same.qty + pQty);
+    else items.push({ id: cur.id, qty: cur.digital ? 1 : pQty, options, personalization, ...(cur.digital ? { digital: true } : {}) });
     cart.set(items);
     pQty = 1;
     closeProduct(false);
@@ -1120,7 +1158,7 @@ function renderCart() {
     return `<div class="ci" data-idx="${idx}"><img src="${esc(i.p.images[0]?.card || "")}" alt="">
       <div><b>${esc(i.p.name)}</b>${opts ? `<small>${esc(opts)}</small>` : ""}${i.personalization ? `<small>✍️ ${esc(i.personalization)}</small>` : ""}</div>
       <div class="right"><span class="lp">${fmt(line)}</span>
-        <div class="qty"><button type="button" data-cq="-1" aria-label="One less">−</button><span>${i.qty}</span><button type="button" data-cq="1" aria-label="One more">+</button></div>
+        ${i.p.digital ? `<small>💾 Download</small>` : `<div class="qty"><button type="button" data-cq="-1" aria-label="One less">−</button><span>${i.qty}</span><button type="button" data-cq="1" aria-label="One more">+</button></div>`}
         <button class="rm" type="button" data-crm>Remove</button></div></div>`;
   }).join("");
   $("cartSub").textContent = fmt(sub);
@@ -1129,8 +1167,11 @@ function renderCart() {
     CO.delivery && `Local delivery in the Sacramento area ${fmt(CO.deliveryFee)}.`,
     CO.pickup && "Free local pickup in Sacramento.",
   ].filter(Boolean);
-  $("cartNote").textContent = canBuy() ? `${ways.join(" ")} California sales tax is added at checkout.` : "Online checkout is paused right now. Please order on Etsy or message us.";
-  $("checkoutBtn").disabled = !canBuy();
+  const physical = known.some((i) => !i.p.digital), ok = known.every((i) => buyable(i.p));
+  $("cartNote").textContent = !ok ? "Online checkout is paused right now. Please order on Etsy or message us."
+    : physical ? `${ways.join(" ")} California sales tax is added at checkout.${known.some((i) => i.p.digital) ? " Downloads are ready right after you pay." : ""}`
+    : "💾 Instant download: your files are ready right after you pay. Nothing is shipped.";
+  $("checkoutBtn").disabled = !ok;
   if (items.length !== known.length) cart.set(known.map(({ p, ...i }) => i));
 }
 $("cartList").addEventListener("click", (e) => {
@@ -1164,11 +1205,67 @@ async function showThanks(sessionId, tries = 0) {
     if (d.paid) {
       cart.set([]);
       if (d.orderNo) $("thanksTitle").textContent = `Thank you! Order #${d.orderNo}`;
-      $("thanksText").textContent = `${d.name ? d.name.split(" ")[0] + ", y" : "Y"}our order of ${fmt(d.total)} is confirmed. A receipt is on its way to ${d.email || "your email"}. We'll start making it and message you if anything needs checking.`;
+      const dl = d.downloads || [];
+      $("thanksText").textContent = `${d.name ? d.name.split(" ")[0] + ", y" : "Y"}our order of ${fmt(d.total)} is confirmed. A receipt is on its way to ${d.email || "your email"}.` +
+        (dl.length ? "" : " We'll start making it and message you if anything needs checking.");
+      $("thanksDl").hidden = !dl.length;
+      if (dl.length) $("thanksDl").innerHTML = dl.map((f) => `<a class="btn btn-gold" href="${esc(f.url)}" download><span>⬇ ${esc(f.name)}</span></a>`).join("")
+        + `<p>Downloads stay available on this page for 30 days. <button class="linkbtn" type="button" id="dlCopy">Copy this page's link</button> to come back later.</p>`;
     } else $("thanksText").textContent = "We're confirming your payment. If you don't get a receipt by email soon, please message us.";
   } catch { $("thanksText").textContent = "Your order went through. A receipt is on its way to your email."; }
 }
-$("thanksOk").onclick = () => { $("thanks").hidden = true; };
+$("thanksOk").onclick = () => { $("thanks").hidden = true; history.replaceState(null, "", location.pathname); };
+$("thanksDl").addEventListener("click", async (e) => {
+  if (e.target.id !== "dlCopy") return;
+  try { await navigator.clipboard.writeText(location.href); e.target.textContent = "Link copied"; } catch { e.target.textContent = location.href; }
+});
+/* ---------- share: the phone's own share sheet, plus direct links for computers ---------- */
+document.querySelectorAll("[data-share-site]").forEach((b) => (b.innerHTML = SHARE_ICON + " " + b.textContent));
+const SITE_URL = location.origin + location.pathname;
+function shareData(p) {
+  if (!p) return { title: "PrAjo Custom Studio", text: "Custom engraved & UV printed gifts, handmade in Sacramento ✨", url: SITE_URL, image: document.querySelector('meta[property="og:image"]').content };
+  return { title: p.name, text: `${p.name}, ${p.digital ? "instant download" : "personalized for you"} at PrAjo Custom Studio`, url: `${SITE_URL}#p/${p.id}`, image: p.images[0]?.large || p.images[0]?.card || "", price: p.price };
+}
+function openShare(d) {
+  const u = encodeURIComponent(d.url), t = encodeURIComponent(d.text), both = encodeURIComponent(`${d.text} ${d.url}`);
+  const opts = [
+    ["copy", "Copy link", "#d9ab4f", "⧉"],
+    ["https://wa.me/?text=" + both, "WhatsApp", "#25d366", "W"],
+    ["https://www.facebook.com/sharer/sharer.php?u=" + u, "Facebook", "#1877f2", "f"],
+    ["https://pinterest.com/pin/create/button/?url=" + u + "&media=" + encodeURIComponent(d.image || "") + "&description=" + t, "Pinterest", "#e60023", "P"],
+    ["https://twitter.com/intent/tweet?text=" + t + "&url=" + u, "X", "#000", "𝕏"],
+    ["sms:?&body=" + both, "Text", "#34c759", "✉"],
+    ["mailto:?subject=" + encodeURIComponent(d.title) + "&body=" + both, "Email", "#5b6b8c", "@"],
+  ];
+  if (navigator.share) opts.push(["more", "More…", "#3a4560", "⋯"]);
+  $("shareItem").innerHTML = `${d.image ? `<img src="${esc(d.image)}" alt="">` : ""}<span><b>${esc(d.title)}</b><small>${esc(d.url.replace(/^https?:\/\//, ""))}</small></span>`;
+  $("shareGrid").innerHTML = opts.map(([href, label, bg, ch]) => /^(copy|more)$/.test(href)
+    ? `<button type="button" data-act="${href}"><i style="background:${bg}">${ch}</i>${label}</button>`
+    : `<a href="${esc(href)}" target="_blank" rel="noopener"><i style="background:${bg}">${ch}</i>${label}</a>`).join("");
+  $("shareGrid").onclick = async (e) => {
+    const b = e.target.closest("[data-act]"); if (!b) return;
+    if (b.dataset.act === "copy") {
+      try { await navigator.clipboard.writeText(d.url); b.lastChild.textContent = "Copied!"; } catch { prompt("Copy this link", d.url); }
+    } else navigator.share({ title: d.title, text: d.text, url: d.url }).catch(() => {});
+  };
+  $("shareBox").hidden = false;
+  $("shareGrid").querySelector("button, a").focus({ preventScroll: true });
+}
+async function share(p) {
+  const d = shareData(p);
+  // Phones: the built-in share sheet (Messages, WhatsApp, Instagram, AirDrop…). Computers: our panel.
+  if (navigator.share && matchMedia("(pointer: coarse)").matches) {
+    try { await navigator.share({ title: d.title, text: d.text, url: d.url }); return; } catch (e) { if (e.name === "AbortError") return; }
+  }
+  openShare(d);
+}
+$("shareClose").onclick = () => { $("shareBox").hidden = true; };
+$("shareBox").addEventListener("click", (e) => { if (e.target.id === "shareBox") $("shareBox").hidden = true; });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("shareBox").hidden) $("shareBox").hidden = true; });
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-share]")) share(cur);
+  if (e.target.closest("[data-share-site]")) share(null);
+});
 renderCartBadge();
 route();
 </script>

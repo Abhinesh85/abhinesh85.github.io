@@ -148,6 +148,13 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .menu button, .menu a { display: grid; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer; text-decoration: none; }
 .menu small { font-weight: 500; font-size: 12.5px; color: var(--muted); }
 .menu button:hover, .menu a:hover, .menu button:focus-visible, .menu a:focus-visible { background: rgba(245, 236, 220, .06); outline: none; }
+/* download files */
+.dl-list { display: grid; gap: 8px; }
+.dl-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--panel); font-weight: 700; font-size: 14.5px; }
+.dl-item span { min-width: 0; overflow-wrap: anywhere; }
+.dl-item small { display: block; font-weight: 500; font-size: 12.5px; color: var(--muted); }
+.dl-item.busy { opacity: .6; }
+.dl-none { margin: 0; font-size: 13.5px; color: #ffcf8a; }
 /* site settings */
 .sgroup { border: 1px solid var(--line-soft); border-radius: 16px; background: var(--panel); }
 .sgroup > summary { list-style: none; cursor: pointer; padding: 14px 16px; font-weight: 800; font-size: 15.5px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -265,6 +272,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 
 <div class="toast" id="toast" hidden></div>
 <input type="file" id="filePick" accept="image/*" multiple hidden>
+<input type="file" id="dlPick" accept=".pdf,.zip,.png,.jpg,.jpeg,.epub,application/pdf,application/zip" multiple hidden>
 
 <script>
 const CFG = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", owner: "abhi.prasad85@gmail.com", bucket: "listing-photos" };
@@ -284,12 +292,19 @@ async function mfaGate(sb) {
   let aal = null;
   try { aal = (await sb.auth.mfa.getAuthenticatorAssuranceLevel()).data; } catch { return true; }   // offline: the database still checks
   if (!aal || aal.currentLevel === "aal2") return true;
-  const { data: list } = await sb.auth.mfa.listFactors();
+  const { data: list, error: listErr } = await sb.auth.mfa.listFactors();
+  // A sign-in saved in this browser can stop working (expired or signed out elsewhere): ask for a fresh sign-in.
+  const expired = async () => {
+    await sb.auth.signOut({ scope: "local" }).catch(() => {});
+    box.innerHTML = `<div class="mfa-card"><h2 id="mfaTitle">Please sign in again</h2><p>Your sign-in on this device has expired. Sign in with your password and authenticator code.</p><button class="mfa-go" type="button" onclick="location.reload()">Sign in</button></div>`;
+    return false;
+  };
   let factor = (list?.totp || []).find((f) => f.status === "verified");
   const box = document.createElement("div");
   box.className = "mfa";
   box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-labelledby", "mfaTitle");
   document.body.appendChild(box);
+  if (listErr || !list) return expired();
   const form = (intro) => `
     <form class="mfa-card" id="mfaForm" novalidate>
       <h2 id="mfaTitle">${factor && !factor.setup ? "Enter your code" : "Turn on two-step sign-in"}</h2>
@@ -305,6 +320,7 @@ async function mfaGate(sb) {
     // Clear any half-finished setup, then start a fresh one.
     for (const f of list?.all || []) if (f.status !== "verified") await sb.auth.mfa.unenroll({ factorId: f.id }).catch(() => {});
     const { data: en, error } = await sb.auth.mfa.enroll({ factorType: "totp", issuer: "PrAjo Custom Studio", friendlyName: "Authenticator " + new Date().toISOString().slice(0, 10) });
+    if (error && /bearer|jwt|session|token/i.test(error.message)) return expired();
     if (error) { box.innerHTML = `<div class="mfa-card"><h2 id="mfaTitle">Two-step sign-in</h2><p class="mfa-err">${error.message}</p><button class="mfa-out" type="button" id="mfaOut">Sign out</button></div>`; }
     else {
       factor = { id: en.id, setup: true };
@@ -317,7 +333,7 @@ async function mfaGate(sb) {
         <details><summary>Can't scan? Enter this key instead</summary><code>${en.totp.secret}</code></details>`);
     }
   }
-  $("mfaOut").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+  $("mfaOut").onclick = async () => { await sb.auth.signOut({ scope: "local" }).catch(() => {}); location.reload(); };
   const code = $("mfaCode");
   if (code) {
     code.focus({ preventScroll: true });
@@ -346,7 +362,7 @@ async function boot() {
   $("appView").hidden = false; $("newBtn").hidden = false; $("menuWrap").hidden = false;
   await Promise.all([loadRows(), loadPrices()]);
 }
-$("outBtn").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+$("outBtn").onclick = async () => { await sb.auth.signOut({ scope: "local" }).catch(() => {}); location.reload(); };   // this device only
 // Settings menu: everything that isn't a listing lives here.
 const setMenu = (open) => { $("menu").hidden = !open; $("menuBtn").setAttribute("aria-expanded", open); };
 $("menuBtn").onclick = (e) => { e.stopPropagation(); setMenu($("menu").hidden); };
@@ -499,6 +515,14 @@ function renderEditor() {
         <label class="switch"><input type="checkbox" id="eDig" ${ed.digital ? "checked" : ""}> Digital download</label>
       </div>
     </section>
+    ${ed.digital ? `
+    <section class="sec">
+      <div class="lbl">Download files</div>
+      <p class="hint">What buyers download after paying on your site (PDF, ZIP or image, up to 50 MB each). Files are private: only paying customers get a link.</p>
+      <div class="dl-list">${(ed.files || []).map((f, i) => `<div class="dl-item${f._busy ? " busy" : ""}"><span>📄 ${esc(f.name)}<small>${f._busy ? "Uploading…" : fmtSize(f.size)}</small></span>${f._busy ? "" : `<button class="btn line" type="button" data-dlrm="${i}">Remove</button>`}</div>`).join("")
+        || `<p class="dl-none">No file yet. Customers can't buy this on your site until you add one (they'll see “Get it on Etsy”).</p>`}</div>
+      <button class="btn line" type="button" id="dlAdd" style="justify-self:start">+ Add download file</button>
+    </section>` : ""}
 
     <section class="sec">
       <div class="lbl">Price</div>
@@ -544,7 +568,31 @@ function readForm() {
   document.querySelectorAll("[data-gname]").forEach((el) => { ed.variations[+el.dataset.gname].name = el.value.trim(); });
 }
 
+const fmtSize = (b) => !b ? "" : b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.ceil(b / 1024) + " KB";
+async function addDownloads(fileList) {
+  for (const file of fileList) {
+    if (file.size > 50 * 1048576) { toast(`${file.name} is over 50 MB`); continue; }
+    const safe = file.name.replace(/[^\w.\-]+/g, "-").slice(-80);
+    const item = { path: `${ed._folder}/${Date.now()}-${safe}`, name: file.name, size: file.size, _busy: true };
+    ed.files = [...(ed.files || []), item];
+    readForm(); renderEditor();
+    const { error } = await sb.storage.from("digital-files").upload(item.path, file, { contentType: file.type || "application/octet-stream", upsert: false });
+    if (!ed) return;
+    if (error) { ed.files = ed.files.filter((f) => f !== item); toast("Upload failed: " + error.message); }
+    else delete item._busy;
+    readForm(); renderEditor();
+  }
+}
 function bindEditor() {
+  if ($("eDig")) $("eDig").onchange = () => { readForm(); renderEditor(); };
+  if ($("dlAdd")) $("dlAdd").onclick = () => $("dlPick").click();
+  document.querySelectorAll("[data-dlrm]").forEach((b) => (b.onclick = async () => {
+    const f = ed.files[+b.dataset.dlrm];
+    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Tap again to remove"; return; }
+    ed.files = ed.files.filter((x) => x !== f);
+    await sb.storage.from("digital-files").remove([f.path]).catch(() => {});
+    readForm(); renderEditor(); toast("File removed. Save to update the listing");
+  }));
   const drop = $("drop");
   drop.onclick = () => $("filePick").click();
   drop.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("filePick").click(); } };
@@ -566,6 +614,7 @@ function bindEditor() {
   if ($("ePid")) $("ePid").onchange = () => { readForm(); renderEditor(); };
 }
 $("filePick").addEventListener("change", (e) => { addFiles(e.target.files); e.target.value = ""; });
+$("dlPick").addEventListener("change", (e) => { const f = [...e.target.files]; e.target.value = ""; addDownloads(f); });
 
 $("edBody").addEventListener("click", (e) => {
   const t = e.target;
@@ -638,6 +687,7 @@ $("edSave").onclick = async () => {
   readForm();
   if (!ed.name) return toast("Give the listing a name");
   if (ed.images.some((im) => im._busy)) return toast("Wait for the photos to finish uploading");
+  if ((ed.files || []).some((f) => f._busy)) return toast("Wait for the download file to finish uploading");
   if (ed.price_source === "pricing" && !prices[ed.pricing_id]) return toast("Pick the pricing-app product, or turn off the link");
   if (ed.price_source !== "pricing" && !(ed.price > 0)) return toast("Enter a store price");
   ed.variations = ed.variations.filter((v) => v.name && v.values.length);
@@ -652,7 +702,7 @@ $("edSave").onclick = async () => {
     stock: ed.stock, digital: ed.digital, personalizable: ed.personalizable, visible: ed.visible, sort: ed.sort,
     variations: ed.variations.map((v) => ({ name: v.name, values: v.values })),
     images: ed.images.map(({ card, large, shows }) => (shows ? { card, large, shows } : { card, large })),
-    tags: ed.tags || [], description: ed.description,
+    tags: ed.tags || [], description: ed.description, files: (ed.files || []).map(({ path, name, size }) => ({ path, name, size })),
     pricing_id: ed.price_source === "pricing" ? ed.pricing_id : null, price_source: ed.price_source,
     updated_at: new Date().toISOString(),
   };
