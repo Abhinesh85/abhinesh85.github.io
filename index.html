@@ -92,7 +92,7 @@ nav.links a:hover { color: var(--cream); }
 
 /* live name preview */
 .studio { position: relative; display: grid; place-items: center; min-height: 520px; }
-.mandala { position: absolute; width: min(560px, 115%); aspect-ratio: 1; opacity: .5; }
+.mandala { position: absolute; width: min(560px, 115%); aspect-ratio: 1; opacity: .8; }
 .mandala .rot { transform-box: view-box; transform-origin: 0 0; animation: spin 120s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 .preview { position: relative; display: grid; justify-items: center; gap: 18px; }
@@ -600,14 +600,15 @@ $("track").innerHTML = [...OCCASIONS, ...OCCASIONS].map((o) => `<span>${esc(o)}<
   const k = 0.66, f = (n) => (n * k).toFixed(2);
   const tris = T.map(([x, b, a]) => `<path d="M0 ${f(a)}L${f(-x)} ${f(b)}L${f(x)} ${f(b)}Z"/>`).join("");
   // Lotus petals: each sits on the inner circle, touches its neighbours and comes to a point on the outer circle.
-  const petals = (n, r1, r2, inner) => {
+  const petals = (n, r1, r2, fill) => {
     const h = Math.PI / n, bx = r1 * Math.sin(h), by = -r1 * Math.cos(h), L = r2 - r1;
     const petal = (sx, tip) => `M${-bx * sx} ${by} C ${-bx * sx * 1.15} ${by - L * .5}, ${-bx * sx * .5} ${-tip + L * .2}, 0 ${-tip} C ${bx * sx * .5} ${-tip + L * .2}, ${bx * sx * 1.15} ${by - L * .5}, ${bx * sx} ${by}`;
     let out = "";
     for (let i = 0; i < n; i++) {
       const rot = `transform="rotate(${(i + .5) * 360 / n})"`;
-      out += `<path d="${petal(1, r2)}" ${rot}/>`;
-      if (inner) out += `<path d="${petal(.55, r2 - L * .3)}" ${rot} opacity=".5"/>`;
+      out += `<path d="${petal(1, r2)}Z" ${rot} fill="url(#${fill})"/>`;
+      out += `<path d="${petal(.55, r2 - L * .3)}Z" ${rot} fill="url(#lotusHi)" stroke="#f3c9a0" stroke-width=".4" opacity=".75"/>`;
+      out += `<path d="M0 ${by - 1}L0 ${-r2 + L * .12}" ${rot} stroke="#fff4f7" stroke-width=".35" opacity=".45"/>`;
     }
     return out;
   };
@@ -622,15 +623,20 @@ $("track").innerHTML = [...OCCASIONS, ...OCCASIONS].map((o) => `<span>${esc(o)}<
     }
     return `<path d="M${pts.map(([x, y]) => `${x.toFixed(1)} ${y.toFixed(1)}`).join("L")}Z"/>`;
   };
+  // Petal colour: deep rose at the base fading to soft lotus pink at the tip (radial, so every petal matches).
+  const grad = (id, r1, r2, a, b) => `<radialGradient id="${id}" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="130">
+      <stop offset="${(r1 / 130).toFixed(3)}" stop-color="${a}"/><stop offset="${(r2 / 130).toFixed(3)}" stop-color="${b}"/></radialGradient>`;
   $("mandala").innerHTML = `
+    <defs>${grad("lotus16", 98, 121, "#8e1d45", "#ffa3c2")}${grad("lotus8", 69, 97, "#a3264f", "#ffc6d7")}
+      <radialGradient id="lotusHi" gradientUnits="userSpaceOnUse" cx="0" cy="0" r="130"><stop offset=".55" stop-color="#ffd9e4" stop-opacity="0"/><stop offset=".95" stop-color="#fff1f5" stop-opacity=".55"/></radialGradient></defs>
     <g fill="none" stroke="#d9ab4f" stroke-linejoin="round">
       <g stroke-width=".7" opacity=".85">${gateSquare(150)}${gateSquare(156)}${gateSquare(162)}</g>
       <g class="rot">
         <g stroke-width=".6">${ring(122)}${ring(126, .7)}${ring(130, .45)}</g>
-        <g stroke-width=".75">${ring(98)}${petals(16, 98, 121, true)}</g>
-        <g stroke-width=".75">${ring(69)}${petals(8, 69, 97, true)}</g>
+        <g stroke-width=".75">${ring(98)}${petals(16, 98, 121, "lotus16")}</g>
+        <g stroke-width=".75">${ring(69)}${petals(8, 69, 97, "lotus8")}</g>
         <g stroke-width=".95">${tris}</g>
-        <circle r="1.8" fill="#d9ab4f" stroke="none"/>
+        <circle r="2.2" fill="#c8102e" stroke="#f1c56b" stroke-width=".6"/>
       </g>
     </g>`;
 })();

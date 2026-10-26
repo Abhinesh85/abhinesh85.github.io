@@ -142,6 +142,28 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .co-top .switch input:checked::after { transform: translateX(22px); }
 .co-fees { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
 .co-list[data-paused] .co-row:not(.master) { opacity: .45; }
+/* settings menu */
+.menu-wrap { position: relative; }
+.menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 260px; background: var(--navy); border: 1px solid var(--line); border-radius: 16px; padding: 6px; display: grid; gap: 2px; box-shadow: 0 18px 40px rgba(0, 0, 0, .45); }
+.menu button, .menu a { display: grid; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer; text-decoration: none; }
+.menu small { font-weight: 500; font-size: 12.5px; color: var(--muted); }
+.menu button:hover, .menu a:hover, .menu button:focus-visible, .menu a:focus-visible { background: rgba(245, 236, 220, .06); outline: none; }
+/* two-step sign-in */
+.mfa { position: fixed; inset: 0; z-index: 300; background: rgba(5, 9, 17, .88); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; overflow-y: auto; }
+.mfa-card { width: min(420px, 100%); background: #121722; color: #f5ecdc; border: 1px solid rgba(217, 171, 79, .35); border-radius: 22px; padding: 24px 22px; display: grid; gap: 12px; }
+.mfa-card h2 { margin: 0; font-size: 22px; }
+.mfa-card p, .mfa-card ol { margin: 0; font-size: 14.5px; line-height: 1.5; color: #c9c2b4; }
+.mfa-card ol { padding-left: 20px; display: grid; gap: 4px; }
+.mfa-card a { color: #e9c477; }
+.mfa-qr { width: 180px; height: 180px; justify-self: center; background: #fff; border-radius: 12px; padding: 8px; }
+.mfa-card details { font-size: 13.5px; color: #c9c2b4; }
+.mfa-card code { display: block; margin-top: 6px; padding: 8px 10px; border-radius: 8px; background: #0b0f17; word-break: break-all; font-size: 14px; letter-spacing: .06em; user-select: all; }
+#mfaCode { width: 100%; min-height: 54px; border-radius: 14px; border: 1px solid rgba(217, 171, 79, .45); background: #0b0f17; color: #f5ecdc; font: 700 26px/1 ui-monospace, Menlo, monospace; letter-spacing: .35em; text-align: center; }
+#mfaCode:focus { outline: none; border-color: #e9c477; box-shadow: 0 0 0 3px rgba(217, 171, 79, .2); }
+.mfa-err { color: #ffb4a8 !important; }
+.mfa-go { min-height: 50px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #ecc876, #c99a3f); color: #1b1305; font-weight: 800; font-size: 16px; cursor: pointer; }
+.mfa-go[disabled] { opacity: .6; }
+.mfa-out { background: none; border: 0; color: #9a978f; text-decoration: underline; cursor: pointer; font-size: 14px; justify-self: center; }
 </style>
 </head>
 <body>
@@ -152,8 +174,14 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       <img src="logo.png" alt="">
       <span><b>PRAJO</b><small>Store admin</small></span>
     </a>
-    <a class="btn line" href="./" target="_blank" rel="noopener">View store ↗</a>
-    <button class="btn line" type="button" id="coBtn" hidden>Checkout options</button>
+    <div class="menu-wrap" id="menuWrap" hidden>
+      <button class="btn line" type="button" id="menuBtn" aria-haspopup="menu" aria-expanded="false">⚙ Settings</button>
+      <div class="menu" id="menu" role="menu" hidden>
+        <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
+        <a role="menuitem" href="./" target="_blank" rel="noopener">View store ↗<small>Opens the live shop in a new tab</small></a>
+        <button type="button" role="menuitem" id="outBtn">Sign out</button>
+      </div>
+    </div>
     <button class="btn gold" type="button" id="newBtn" hidden>+ New listing</button>
   </div>
 </header>
@@ -222,15 +250,81 @@ let toastT;
 function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2400); }
 const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "listing";
 
+/* ---------- two-step sign-in: a 6-digit code from an authenticator app (Supabase MFA, TOTP) ---------- */
+// Returns true when this sign-in already passed the second step; otherwise shows the code (or first-time setup) screen.
+async function mfaGate(sb) {
+  let aal = null;
+  try { aal = (await sb.auth.mfa.getAuthenticatorAssuranceLevel()).data; } catch { return true; }   // offline: the database still checks
+  if (!aal || aal.currentLevel === "aal2") return true;
+  const { data: list } = await sb.auth.mfa.listFactors();
+  let factor = (list?.totp || []).find((f) => f.status === "verified");
+  const box = document.createElement("div");
+  box.className = "mfa";
+  box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-labelledby", "mfaTitle");
+  document.body.appendChild(box);
+  const form = (intro) => `
+    <form class="mfa-card" id="mfaForm" novalidate>
+      <h2 id="mfaTitle">${factor && !factor.setup ? "Enter your code" : "Turn on two-step sign-in"}</h2>
+      ${intro}
+      <input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" aria-label="6-digit code">
+      <p class="mfa-err" id="mfaErr" hidden></p>
+      <button class="mfa-go" type="submit">${factor && !factor.setup ? "Continue" : "Turn on and continue"}</button>
+      <button class="mfa-out" type="button" id="mfaOut">Sign out</button>
+    </form>`;
+  if (factor) {
+    box.innerHTML = form(`<p>Open your authenticator app and type the 6-digit code for <b>PrAjo Custom Studio</b>.</p>`);
+  } else {
+    // Clear any half-finished setup, then start a fresh one.
+    for (const f of list?.all || []) if (f.status !== "verified") await sb.auth.mfa.unenroll({ factorId: f.id }).catch(() => {});
+    const { data: en, error } = await sb.auth.mfa.enroll({ factorType: "totp", issuer: "PrAjo Custom Studio", friendlyName: "Authenticator " + new Date().toISOString().slice(0, 10) });
+    if (error) { box.innerHTML = `<div class="mfa-card"><h2 id="mfaTitle">Two-step sign-in</h2><p class="mfa-err">${error.message}</p><button class="mfa-out" type="button" id="mfaOut">Sign out</button></div>`; }
+    else {
+      factor = { id: en.id, setup: true };
+      box.innerHTML = form(`
+        <p>This keeps your shop safe even if someone learns your password. One time only:</p>
+        <ol><li>On your phone, open an authenticator app (iPhone <b>Passwords</b>, Google Authenticator or Authy).</li>
+          <li>Scan this code, or on this phone <a href="${en.totp.uri}">tap here to add it</a>.</li>
+          <li>Type the 6-digit code it shows.</li></ol>
+        <img class="mfa-qr" src="${en.totp.qr_code}" alt="QR code for your authenticator app">
+        <details><summary>Can't scan? Enter this key instead</summary><code>${en.totp.secret}</code></details>`);
+    }
+  }
+  $("mfaOut").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+  const code = $("mfaCode");
+  if (code) {
+    code.focus({ preventScroll: true });
+    code.addEventListener("input", () => { code.value = code.value.replace(/\D/g, "").slice(0, 6); if (code.value.length === 6) $("mfaForm").requestSubmit(); });
+    $("mfaForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const err = $("mfaErr"), btn = $("mfaForm").querySelector(".mfa-go");
+      if (code.value.length !== 6) { err.textContent = "Type the 6-digit code."; err.hidden = false; return; }
+      btn.disabled = true; err.hidden = true;
+      const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: factor.id, code: code.value });
+      btn.disabled = false;
+      if (error) { err.textContent = /invalid|expired/i.test(error.message) ? "That code didn't match. Wait for a fresh code and try again." : error.message; err.hidden = false; code.value = ""; code.focus(); return; }
+      location.reload();
+    };
+  }
+  return false;
+}
+
 /* ---------- sign in ---------- */
 async function boot() {
   const { data } = await sb.auth.getSession();
   const email = data.session?.user?.email?.toLowerCase();
   if (!email) { $("signin").hidden = false; return; }
   if (email !== CFG.owner) { $("signin").hidden = false; $("siErr").textContent = `${email} can't edit this store.`; $("siErr").hidden = false; return; }
-  $("appView").hidden = false; $("newBtn").hidden = false; $("coBtn").hidden = false;
+  if (!(await mfaGate(sb))) return;
+  $("appView").hidden = false; $("newBtn").hidden = false; $("menuWrap").hidden = false;
   await Promise.all([loadRows(), loadPrices()]);
 }
+$("outBtn").onclick = async () => { await sb.auth.signOut(); location.reload(); };
+// Settings menu: everything that isn't a listing lives here.
+const setMenu = (open) => { $("menu").hidden = !open; $("menuBtn").setAttribute("aria-expanded", open); };
+$("menuBtn").onclick = (e) => { e.stopPropagation(); setMenu($("menu").hidden); };
+$("menu").addEventListener("click", () => setMenu(false));
+document.addEventListener("click", (e) => { if (!e.target.closest("#menuWrap")) setMenu(false); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("menu").hidden) { setMenu(false); $("menuBtn").focus(); } });
 $("signin").addEventListener("submit", async (e) => {
   e.preventDefault();
   const { error } = await sb.auth.signInWithPassword({ email: $("siEmail").value.trim(), password: $("siPw").value });
