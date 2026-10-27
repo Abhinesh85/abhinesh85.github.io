@@ -1,0 +1,889 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Design your own · PrAjo Custom Studio</title>
+<meta name="description" content="Design a custom name-tile keychain or hanger. Pick the names, colors and font, preview it, save it and send it to PrAjo Custom Studio to be made.">
+<meta name="theme-color" content="#0a1220">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Cinzel:wght@600;700&family=Fraunces:wght@700&family=Fredoka:wght@700&family=Lilita+One&family=Manrope:wght@400;600;700;800&family=Rubik+Mono+One&family=Zilla+Slab:wght@700&display=swap">
+<style>
+/* Layout: sticky live preview on the left, step-by-step controls on the right; stacks with the preview first on phones. */
+:root {
+  color-scheme: dark;
+  --ink: #0a1220; --navy: #0f1b2e; --panel: #13213a; --panel-2: #182a47;
+  --line: rgba(217, 171, 79, .22); --line-soft: rgba(245, 236, 220, .1);
+  --gold: #d9ab4f; --gold-2: #f3d48a; --leaf: #3bb35a; --danger: #ff7a6b;
+  --cream: #f5ecdc; --muted: #a3adbf;
+  --f-display: "Fraunces", Georgia, serif; --f-body: "Manrope", system-ui, sans-serif; --f-label: "Cinzel", Georgia, serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--ink); color: var(--cream); font: 15px/1.5 var(--f-body); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { position: sticky; top: 0; z-index: 40; background: rgba(10, 18, 32, .88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line-soft); padding-top: env(safe-area-inset-top, 0px); }
+header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 60px; flex-wrap: wrap; padding-block: 8px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
+.brand img { width: 38px; height: 38px; border-radius: 50%; }
+.brand b { font-family: var(--f-label); letter-spacing: .12em; }
+.brand small { display: block; font-size: 11px; color: var(--gold); letter-spacing: .14em; text-transform: uppercase; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid transparent; font-weight: 800; font-size: 14.5px; cursor: pointer; text-decoration: none; background: none; }
+.btn:focus-visible, .chips button:focus-visible, .lrow:focus-visible, canvas:focus-visible, .in:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.gold { background: linear-gradient(135deg, var(--gold-2), var(--gold) 55%, #b98a32); color: #1b1305; }
+.line { border-color: var(--line); background: rgba(245, 236, 220, .03); }
+.line:hover:not([disabled]) { border-color: var(--gold); }
+.small { min-height: 36px; padding: 0 14px; font-size: 13px; }
+.danger { border-color: rgba(255, 122, 107, .35); color: var(--danger); }
+
+.studio { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; padding-top: 22px; padding-bottom: 80px; align-items: start; }
+.stage { position: sticky; top: calc(76px + env(safe-area-inset-top, 0px)); display: grid; gap: 12px; }
+.stage-box { border: 1px solid var(--line-soft); background: var(--panel); border-radius: 20px; padding: 14px; display: grid; place-items: center; min-height: 340px; position: relative; overflow: hidden; }
+#cv { max-width: 100%; touch-action: none; cursor: default; border-radius: 6px;
+  background: #0d182b; }
+#cv.move { cursor: move; }
+.stage-info { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.stage-info b { color: var(--gold-2); font-weight: 800; }
+.stage-tip { font-size: 12.5px; color: var(--muted); }
+.stage-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.controls { display: grid; gap: 14px; }
+.step { border: 1px solid var(--line-soft); background: var(--panel); border-radius: 18px; padding: 16px; display: grid; gap: 14px; }
+.step > h2 { margin: 0; font: 700 12px var(--f-label); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); display: flex; gap: 10px; align-items: center; }
+.step > h2 i { font-style: normal; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 12px; letter-spacing: 0; }
+.f { display: grid; gap: 6px; min-width: 0; }
+.f > span, .lbl { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.in { width: 100%; min-height: 44px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); padding: 9px 12px; font-size: 16px; }
+.in:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217, 171, 79, .18); }
+textarea.in { min-height: 120px; resize: vertical; line-height: 1.5; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row2 > * { min-width: 0; }
+.hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+.err { margin: 0; color: #ffb4a8; font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-soft); background: none; color: var(--muted); font-weight: 700; font-size: 13.5px; cursor: pointer; }
+.chips button[aria-pressed="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+.prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+.prod-grid button { border: 1px solid var(--line-soft); background: var(--ink); border-radius: 14px; padding: 10px 6px; cursor: pointer; display: grid; gap: 4px; justify-items: center; font-weight: 700; font-size: 13px; }
+.prod-grid button span { font-size: 24px; line-height: 1; }
+.prod-grid button[aria-pressed="true"] { border-color: var(--gold); background: rgba(217, 171, 79, .1); }
+.range { display: grid; grid-template-columns: 1fr 52px; gap: 10px; align-items: center; }
+.range output { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; text-align: right; }
+input[type=range] { width: 100%; accent-color: var(--gold); min-height: 28px; }
+input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); padding: 3px; cursor: pointer; }
+.colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.check { display: flex; gap: 10px; align-items: center; cursor: pointer; font-weight: 600; }
+.check input { width: 20px; height: 20px; accent-color: var(--gold); }
+.layers { display: grid; gap: 6px; }
+.lrow { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line-soft); background: var(--ink); border-radius: 12px; padding: 6px 6px 6px 12px; cursor: pointer; min-height: 44px; }
+.lrow[aria-pressed="true"] { border-color: var(--gold); background: rgba(217, 171, 79, .08); }
+.lrow .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.lrow button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line-soft); background: none; cursor: pointer; flex: none; }
+.lrow button:hover { border-color: var(--gold); }
+.icons { display: flex; flex-wrap: wrap; gap: 6px; }
+.icons button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); font-size: 20px; cursor: pointer; }
+.icons button:hover { border-color: var(--gold); }
+.editor { border-top: 1px dashed var(--line-soft); padding-top: 14px; display: grid; gap: 12px; }
+.fontpick { font-size: 18px; }
+
+.submit-card { border-color: var(--line); background: linear-gradient(180deg, rgba(217, 171, 79, .08), var(--panel)); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.actions .gold { flex: 1; min-width: 160px; }
+.code-pill { font-family: ui-monospace, Menlo, Consolas, monospace; background: var(--ink); border: 1px solid var(--line); padding: 4px 10px; border-radius: 8px; color: var(--gold-2); font-weight: 800; letter-spacing: .06em; }
+.done { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 8px 0; }
+.done h3 { margin: 0; font: 700 24px var(--f-display); }
+.paybox { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; background: rgba(217, 171, 79, .06); text-align: left; width: 100%; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatches button { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line-soft); cursor: pointer; padding: 0; }
+.swatches button[aria-pressed="true"] { border-color: var(--cream); box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--gold); }
+.closed { text-align: center; display: grid; gap: 12px; justify-items: center; padding: 60px 0; }
+.closed h1 { margin: 0; font: 700 30px var(--f-display); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+.drawer { position: fixed; inset: 0; z-index: 80; background: rgba(5, 9, 17, .7); backdrop-filter: blur(4px); display: flex; justify-content: flex-end; }
+.drawer .panel { width: min(440px, 100%); height: 100%; background: var(--navy); border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+.panel-head { display: flex; align-items: center; gap: 10px; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; border-bottom: 1px solid var(--line-soft); }
+.panel-head h2 { margin: 0; font: 700 20px var(--f-display); flex: 1; }
+.x { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: none; cursor: pointer; font-size: 20px; }
+.panel-body { flex: 1; overflow-y: auto; padding: 16px; display: grid; gap: 10px; align-content: start; }
+.saved { display: grid; grid-template-columns: 72px 1fr; gap: 12px; border: 1px solid var(--line-soft); background: var(--panel); border-radius: 14px; padding: 10px; align-items: center; }
+.saved img { width: 72px; height: 72px; object-fit: contain; border-radius: 8px; background: #15233c; }
+.saved b { display: block; }
+.saved small { color: var(--muted); display: block; }
+.saved .actions { margin-top: 6px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; background: var(--cream); color: var(--ink); padding: 10px 18px; border-radius: 999px; font-weight: 800; font-size: 14px; max-width: calc(100% - 32px); text-align: center; }
+
+@media (max-width: 900px) {
+  .studio { grid-template-columns: 1fr; gap: 14px; }
+  .stage { position: static; }
+  .stage-box { min-height: 260px; }
+  .row2.keep { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="logo.png" alt="" width="38" height="38"><span><b>PRAJO</b><small>Custom Studio</small></span></a>
+    <button class="btn line small" type="button" id="savedBtn">My designs <span id="savedN"></span></button>
+    <a class="btn line small" href="./">← Back to shop</a>
+  </div>
+</header>
+
+<main class="wrap studio" id="studioMain">
+  <section class="stage" aria-label="Live preview">
+    <div class="stage-box"><canvas id="cv" tabindex="0" aria-label="Design preview. Drag a tile to move it. Arrow keys nudge the selected tile."></canvas></div>
+    <div class="stage-info"><span id="infoSize"></span><span id="infoWarn"></span></div>
+    <p class="stage-tip">Drag a tile to move it. The gold line is where we cut, so every tile has to touch another.</p>
+    <div class="stage-actions">
+      <button class="btn line small" type="button" id="undoBtn" disabled>↶ Undo</button>
+      <button class="btn line small" type="button" id="redoBtn" disabled>↷ Redo</button>
+      <button class="btn line small" type="button" id="resetLayout" disabled>Reset moved tiles</button>
+    </div>
+    <div class="stage-actions" id="adminTools" hidden>
+      <span class="hint" style="align-self:center">Print files:</span>
+      <button class="btn line small" type="button" id="dlColor">Color PNG</button>
+      <button class="btn line small" type="button" id="dlCut">Cut SVG</button>
+      <button class="btn line small" type="button" id="dlJob">job.json</button>
+    </div>
+  </section>
+
+  <section class="controls">
+    <div class="step">
+      <h2><i>1</i> Names</h2>
+      <label class="f"><span>One name or word per line</span>
+        <textarea class="in" id="names" spellcheck="false" maxlength="600" placeholder="LARA&#10;MADISON&#10;ROGER"></textarea></label>
+      <p class="hint" id="namesHint">Up to 12 names. Letters, numbers and &amp; ' - are kept; ♥ ★ ☘ make icon tiles.</p>
+      <label class="f"><span>What goes in the tiles</span><select class="in" id="mode">
+        <option value="names">Names in a layout</option><option value="shape">Names filling a shape</option><option value="image">Names filling my picture</option></select></label>
+      <div id="shapeOpts" hidden style="display:none;gap:12px">
+        <div class="row2">
+          <label class="f"><span>Shape</span><select class="in" id="shape"></select></label>
+          <label class="f"><span>Tile detail</span><select class="in" id="detail">
+            <option value="7">Chunky (7 tiles across)</option><option value="9">Medium (9 across)</option><option value="13">Fine (13 across)</option></select></label>
+        </div>
+      </div>
+      <div id="imgOpts" hidden style="display:none;gap:12px">
+        <div class="actions"><label class="btn gold small" for="imgPick">Choose a picture</label><input type="file" id="imgPick" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
+          <label class="check" style="margin-left:6px"><input type="checkbox" id="invert"> Swap dark and light</label></div>
+        <label class="f"><span>Tile detail</span><select class="in" id="detail2">
+          <option value="9">Chunky (9 tiles across)</option><option value="13">Medium (13 across)</option><option value="17">Fine (17 across)</option></select></label>
+        <p class="hint">Works best with a simple logo or clipart: a dark shape on a light background, or a transparent PNG. Photos turn into messy silhouettes.</p>
+      </div>
+      <div id="fillOpts" hidden style="display:none;gap:12px" class="row2">
+        <label class="f"><span>Between names</span><select class="in" id="sep"><option value="">Nothing</option><option value="♥">♥</option><option value="★">★</option><option value="☘">☘</option><option value="•">•</option></select></label>
+        <label class="check" style="align-self:end;min-height:44px"><input type="checkbox" id="whole"> Keep names whole</label>
+      </div>
+      <div class="row2">
+        <label class="f"><span>Arrangement</span><select class="in" id="layout">
+          <option value="crossword">Interlocking crossword</option><option value="horizontal">Rows</option>
+          <option value="vertical">Columns</option><option value="staircase">Staircase</option></select></label>
+        <label class="f" id="widthF"><span>Size</span><select class="in" id="width">
+          <option value="3.5">Small (about 3.5″ wide)</option><option value="4.5">Standard (about 4.5″ wide)</option><option value="6">Large (about 6″ wide)</option></select></label>
+      </div>
+      <div class="row2" id="crossOpts">
+        <label class="f"><span>Crossword shape</span><select class="in" id="bias">
+          <option value="auto">Best fit for the size</option><option value="square">Square block</option>
+          <option value="wide">Wide and low</option><option value="tall">Tall and narrow</option></select></label>
+      </div>
+      <div class="row2" id="lineOpts" hidden>
+        <label class="f"><span>Word order</span><select class="in" id="order">
+          <option value="entered">As typed</option><option value="longest">Longest first</option>
+          <option value="shortest">Shortest first</option><option value="alpha">A to Z</option></select></label>
+        <label class="f"><span>Alignment</span><select class="in" id="align">
+          <option value="center">Centered</option><option value="left">Start (left / top)</option><option value="right">End (right / bottom)</option></select></label>
+      </div>
+      <div class="actions"><button class="btn line small" type="button" id="reshuffle">Try another arrangement</button></div>
+      <p class="hint" id="modeHint"></p>
+    </div>
+
+    <div class="step">
+      <h2><i>2</i> Look</h2>
+      <div class="f"><span>Tile color</span><div class="swatches" id="tileSw" role="group" aria-label="Tile color"></div></div>
+      <div class="f"><span>Letter color</span><div class="swatches" id="letterSw" role="group" aria-label="Letter color"></div></div>
+      <label class="f"><span>Letter style</span><select class="in fontpick" id="font"></select></label>
+      <label class="check"><input type="checkbox" id="hole"> Add a hanging tab with a hole</label>
+    </div>
+
+    <div class="step submit-card">
+      <h2><i>3</i> Save and send</h2>
+      <div id="formView" style="display:grid;gap:12px">
+        <p class="hint" id="saveHint">Save keeps this design on this device. Send it to us and we'll review it, confirm the price and make it.</p>
+        <div class="actions">
+          <button class="btn line" type="button" id="saveBtn">Save design</button>
+          <button class="btn gold" type="button" id="sendBtn">Send to PrAjo</button>
+        </div>
+        <form id="sendForm" hidden novalidate style="display:none;gap:12px">
+          <div class="row2">
+            <label class="f"><span>Your name</span><input class="in" id="cName" autocomplete="name" maxlength="100" required></label>
+            <label class="f"><span>Email</span><input class="in" id="cEmail" type="email" autocomplete="email" maxlength="200" required></label>
+          </div>
+          <div class="row2">
+            <label class="f"><span>Phone (optional)</span><input class="in" id="cPhone" type="tel" autocomplete="tel" maxlength="40"></label>
+            <label class="f"><span>How many</span><input class="in" id="cQty" type="number" min="1" max="500" value="1" inputmode="numeric"></label>
+          </div>
+          <label class="f"><span>Needed by (optional)</span><input class="in" id="cDate" type="date"></label>
+          <label class="f"><span>Anything we should know?</span><textarea class="in" id="cNotes" style="min-height:90px" maxlength="2000" placeholder="A gift date, spelling of names, where it will hang…"></textarea></label>
+          <input class="hp" id="cWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <p class="err" id="sendErr" hidden></p>
+          <div class="actions"><button class="btn gold" type="submit" id="sendGo">Send my design</button><button class="btn line" type="button" id="sendCancel">Cancel</button></div>
+          <p class="hint">We only use this to reply about your design. Nothing is charged now.</p>
+        </form>
+      </div>
+      <div class="done" id="doneView" hidden>
+        <div style="font-size:40px">🎉</div>
+        <h3>Design sent!</h3>
+        <p style="margin:0">Your design code is <span class="code-pill" id="doneCode"></span></p>
+        <p class="hint" id="doneText"></p>
+        <div class="paybox" id="payBox" hidden>
+          <p style="margin:0"><b>Ready to order?</b> Add it to your cart now: <span id="payPrice"></span>. If anything about the design needs changing we'll message you before we make it.</p>
+          <button class="btn gold" type="button" id="payBtn">Add to cart and check out</button>
+        </div>
+        <button class="btn line" type="button" id="doneNew">Make another design</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<main class="wrap closed" id="closedMain" hidden>
+  <h1>The Design studio is closed right now</h1>
+  <p class="hint" style="font-size:15px">We're not taking online name-tile designs at the moment. Message us and we'll make something with you.</p>
+  <a class="btn gold" href="./#custom">Message us</a>
+</main>
+
+<div class="drawer" id="savedDrawer" hidden role="dialog" aria-modal="true" aria-labelledby="savedTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="savedTitle">My designs</h2><button class="x" type="button" id="savedClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="savedList"></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const SB = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", bucket: "design-previews" };
+const LS_DRAFT = "prajo:design:draft", LS_SAVED = "prajo:designs", LS_CONTACT = "prajo:design:contact";
+const PAY_ID = "custom-design";   // listing id created from admin.html → Custom designs
+const SYMBOLS = ["♥", "★", "☘"];
+const FONTS = [["Archivo Black|400", "Archivo Black (bold block)"], ["Lilita One|400", "Lilita One (chunky)"], ["Fredoka|700", "Fredoka (rounded)"],
+  ["Bebas Neue|400", "Bebas Neue (tall)"], ["Zilla Slab|700", "Zilla Slab (slab serif)"], ["Rubik Mono One|400", "Rubik Mono One (wide)"]];
+const TILE_COLORS = [["#1f3a5f", "Navy"], ["#3d8f4a", "Green"], ["#b3262f", "Red"], ["#6b3fa0", "Purple"], ["#d6528b", "Pink"], ["#1c8c8c", "Teal"], ["#c9962b", "Gold"], ["#1c1c22", "Black"]];
+const LETTER_COLORS = [["#ffffff", "White"], ["#111111", "Black"], ["#f3d48a", "Gold"], ["#f5ecdc", "Cream"]];
+// Fixed production settings, the same ones the print suite defaults to.
+const FIX = { cutOffset: 0.06, cornerR: 0.08, seam: 0.012, letterScale: 0.72, holeD: 0.25, scale: 0.95, maxH: 8 };
+
+const clone = (o) => JSON.parse(JSON.stringify(o));
+const uid = () => Math.random().toString(36).slice(2, 8);
+const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+function newCode() { const a = new Uint8Array(6); crypto.getRandomValues(a); return "D-" + [...a].map((n) => CODE_CHARS[n % CODE_CHARS.length]).join(""); }
+function newDesign() {
+  return { v: 2, code: null, product: "tiles", names: "LARA\nMADISON\nROGER\nWILL", layout: "crossword", seed: 1, width: 4.5, font: "Archivo Black|400",
+    tileColor: "#1f3a5f", letterColor: "#ffffff", hole: true, bias: "auto", order: "entered", align: "center", mode: "names", shape: "heart", detail: 9, sep: "♥", whole: true, invert: false, shapeImg: null, manual: null };
+}
+let D = newDesign();
+const hist = { past: [], future: [] };
+let adminLoaded = false;
+
+/* ---------------- crossword engine (from the print suite) ---------------- */
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const ck = (x, y) => x + "," + y;
+function newGrid() { return { cells: new Map(), words: [], bbox: { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity } }; }
+function putWord(g, word, x, y, dir) {
+  const chars = [...word], dx = dir === "H" ? 1 : 0, dy = dir === "H" ? 0 : 1;
+  chars.forEach((ch, i) => { const k = ck(x + dx * i, y + dy * i); let c = g.cells.get(k); if (!c) { c = { x: x + dx * i, y: y + dy * i, ch, dirs: new Set() }; g.cells.set(k, c); } c.dirs.add(dir); });
+  const b = g.bbox; b.minX = Math.min(b.minX, x); b.minY = Math.min(b.minY, y);
+  b.maxX = Math.max(b.maxX, x + dx * (chars.length - 1)); b.maxY = Math.max(b.maxY, y + dy * (chars.length - 1));
+  g.words.push({ name: word, x, y, dir });
+}
+function canPlace(cells, chars, x, y, dir) {
+  const dx = dir === "H" ? 1 : 0, dy = dir === "H" ? 0 : 1, n = chars.length;
+  if (cells.has(ck(x - dx, y - dy)) || cells.has(ck(x + dx * n, y + dy * n))) return -1;
+  let inter = 0;
+  for (let i = 0; i < n; i++) {
+    const cx = x + dx * i, cy = y + dy * i, c = cells.get(ck(cx, cy));
+    if (c) { if (c.ch !== chars[i] || c.ch === " " || c.dirs.has(dir)) return -1; inter++; }
+    else if (cells.has(ck(cx + dy, cy + dx)) || cells.has(ck(cx - dy, cy - dx))) return -1;
+  }
+  return inter;
+}
+function bestSpot(g, word, rng, aspect) {
+  const chars = [...word]; let best = null;
+  for (const c of g.cells.values()) {
+    if (c.ch === " " || c.dirs.size > 1) continue;
+    const dir = c.dirs.has("H") ? "V" : "H";
+    for (let i = 0; i < chars.length; i++) {
+      if (chars[i] !== c.ch) continue;
+      const x = dir === "H" ? c.x - i : c.x, y = dir === "H" ? c.y : c.y - i;
+      const inter = canPlace(g.cells, chars, x, y, dir); if (inter < 1) continue;
+      const b = g.bbox, ex = dir === "H" ? x + chars.length - 1 : x, ey = dir === "H" ? y : y + chars.length - 1;
+      const w = Math.max(b.maxX, ex) - Math.min(b.minX, x) + 1, h = Math.max(b.maxY, ey) - Math.min(b.minY, y) + 1;
+      const score = inter * 6 - w * h * 0.12 - Math.abs(Math.log((w / h) / aspect)) * 4 + rng() * 0.8;
+      if (!best || score > best.score) best = { x, y, dir, score };
+    }
+  }
+  return best;
+}
+function crosswordLayout(words, seed, aspect) {
+  if (!words.length) return { ...newGrid(), unplaced: [] };
+  const rng = mulberry32(seed * 7919 + 17), attempts = Math.max(6, Math.min(80, 10 + words.length * 8)); let best = null;
+  for (let a = 0; a < attempts; a++) {
+    let order = words.slice().sort((p, q) => [...q].length - [...p].length);
+    if (a > 0 || seed > 1) order = order.map((w) => ({ w, k: [...w].length + rng() * 5 })).sort((p, q) => q.k - p.k).map((o) => o.w);
+    const g = newGrid(); putWord(g, order[0], 0, 0, "H");
+    let pending = order.slice(1);
+    for (let pass = 0; pass < 3 && pending.length; pass++) {
+      const next = [];
+      for (const w of pending) { const s = bestSpot(g, w, rng, aspect); if (s) putWord(g, w, s.x, s.y, s.dir); else next.push(w); }
+      const stalled = next.length === pending.length; pending = next; if (stalled) break;
+    }
+    const b = g.bbox, w = b.maxX - b.minX + 1, h = b.maxY - b.minY + 1; let inter = 0;
+    for (const c of g.cells.values()) if (c.dirs.size > 1) inter++;
+    const score = g.words.length * 1000 + inter * 8 - w * h * 1.2 - Math.abs(Math.log((w / h) / aspect)) * 20;
+    if (!best || score > best.score) best = { ...g, unplaced: pending, score };
+  }
+  return best;
+}
+function orderWords(words, mode) {
+  const w = words.slice();
+  if (mode === "longest") w.sort((a, b) => [...b].length - [...a].length);
+  else if (mode === "shortest") w.sort((a, b) => [...a].length - [...b].length);
+  else if (mode === "alpha") w.sort((a, b) => a.localeCompare(b));
+  return w;
+}
+// Rows, columns or a staircase; `align` places each word along its line.
+function lineLayout(words, kind, align) {
+  const g = newGrid(), lens = words.map((w) => [...w].length), maxLen = Math.max(0, ...lens), vertical = kind === "vertical", n = words.length;
+  words.forEach((w, i) => {
+    let along = align === "left" ? 0 : align === "right" ? maxLen - lens[i] : Math.floor((maxLen - lens[i]) / 2);
+    if (kind === "staircase") along = align === "right" ? n - 1 - i : align === "center" ? i % 2 : i;
+    if (vertical) putWord(g, w, i, along, "V"); else putWord(g, w, along, i, "H");
+  });
+  return { ...g, unplaced: [] };
+}
+function parseNames(text) {
+  const seen = new Set(), list = [];
+  for (const raw of text.split(/\r?\n/)) {
+    const line = raw.trim().toLocaleUpperCase(); let clean = "";
+    for (const ch of line) { if (/[\p{L}\p{N}&'\-]/u.test(ch) || SYMBOLS.includes(ch)) clean += ch; else if (/\s/.test(ch)) clean += " "; }
+    clean = [...clean.replace(/\s+/g, " ").trim()].slice(0, 20).join("");
+    if (!clean || seen.has(clean)) continue; seen.add(clean); list.push(clean);
+    if (list.length >= 12) break;
+  }
+  return list;
+}
+/* ---------------- shapes: tiles fill a silhouette, the names run along the rows ---------------- */
+const inPoly = (pts, x, y) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+const STAR = Array.from({ length: 10 }, (_, k) => { const a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? 0.46 : 1; return [Math.cos(a) * r, Math.sin(a) * r]; });
+const SHAPES = {
+  heart: ["Heart", (u, v) => { const x = u * 1.25, y = -v * 1.25 + 0.15; return (x * x + y * y - 1) ** 3 - x * x * y ** 3 <= 0; }],
+  star: ["Star", (u, v) => inPoly(STAR, u, v)],
+  circle: ["Circle", (u, v) => u * u + v * v <= 1],
+  square: ["Square", () => true],
+  diamond: ["Diamond", (u, v) => Math.abs(u) + Math.abs(v) <= 1],
+  triangle: ["Triangle", (u, v) => Math.abs(u) <= (v + 1) / 2],
+  hexagon: ["Hexagon", (u, v) => Math.abs(v) <= 0.87 && Math.abs(u) + Math.abs(v) * 0.577 <= 1],
+  house: ["House", (u, v) => v < -0.1 ? Math.abs(u) <= (v + 1) / 0.9 : Math.abs(u) <= 0.8],
+  cross: ["Cross", (u, v) => Math.abs(u) <= 0.36 || Math.abs(v) <= 0.36],
+  moon: ["Crescent moon", (u, v) => u * u + v * v <= 1 && (u - 0.5) ** 2 + v * v > 0.72],
+  tree: ["Tree", (u, v) => v < 0.55 ? Math.abs(u) <= (v + 1) / 1.55 * 0.9 : Math.abs(u) <= 0.2],
+  shield: ["Shield", (u, v) => Math.abs(u) <= (v <= 0.1 ? 0.85 : 0.85 * Math.sqrt(Math.max(0, 1 - ((v - 0.1) / 0.9) ** 2)))],
+  paw: ["Paw print", (u, v) => ((u / 0.62) ** 2 + ((v - 0.35) / 0.55) ** 2 <= 1) || [[-0.62, -0.1], [-0.22, -0.52], [0.22, -0.52], [0.62, -0.1]].some(([a, b]) => (u - a) ** 2 + (v - b) ** 2 <= 0.12)],
+};
+function shapeMask(key, n) {
+  const f = (SHAPES[key] || SHAPES.heart)[1], rows = [];
+  for (let j = 0; j < n; j++) { let r = ""; for (let i = 0; i < n; i++) r += f((i + 0.5) / n * 2 - 1, (j + 0.5) / n * 2 - 1) ? "1" : "0"; rows.push(r); }
+  return rows;
+}
+const imgData = new Map();   // picture source → pixels (kept in memory only; the picture itself is stored small inside the design)
+function loadImgData(src) {
+  if (imgData.has(src)) return imgData.get(src);
+  imgData.set(src, null); const im = new Image();
+  im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(im, 0, 0); imgData.set(src, x.getImageData(0, 0, c.width, c.height)); layoutCache.key = ""; schedule(); };
+  im.src = src; return null;
+}
+function imageMask(src, n, invert) {
+  const d = loadImgData(src); if (!d) return null;
+  const m = Math.max(3, Math.min(22, Math.round(n * d.height / d.width))), px = d.data; let hasAlpha = false;
+  for (let i = 3; i < px.length; i += 4) if (px[i] < 250) { hasAlpha = true; break; }
+  const rows = [];
+  for (let j = 0; j < m; j++) {
+    let r = "";
+    for (let i = 0; i < n; i++) {
+      const x0 = Math.floor(i * d.width / n), x1 = Math.max(x0 + 1, Math.floor((i + 1) * d.width / n)), y0 = Math.floor(j * d.height / m), y1 = Math.max(y0 + 1, Math.floor((j + 1) * d.height / m));
+      let on = 0, tot = 0;
+      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { const k = (y * d.width + x) * 4, a = px[k + 3] / 255, luma = (0.299 * px[k] + 0.587 * px[k + 1] + 0.114 * px[k + 2]) / 255; const v = hasAlpha ? a : (1 - luma) * a; on += v > 0.5 ? 1 : 0; tot++; }
+      let filled = on / tot > 0.45; if (invert) filled = !filled; r += filled ? "1" : "0";
+    }
+    rows.push(r);
+  }
+  return rows;
+}
+// Keeps only the largest touching group of tiles so the piece cuts out as one.
+function largestGroup(cells) {
+  const set = new Map(cells.map((c) => [ck(c[0], c[1]), c])), seen = new Set(); let best = [];
+  for (const c of cells) {
+    const k0 = ck(c[0], c[1]); if (seen.has(k0)) continue;
+    const grp = [], stack = [c]; seen.add(k0);
+    while (stack.length) { const [x, y] = stack.pop(); grp.push([x, y]); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = ck(x + dx, y + dy); if (set.has(k) && !seen.has(k)) { seen.add(k); stack.push([x + dx, y + dy]); } } }
+    if (grp.length > best.length) best = grp;
+  }
+  return best;
+}
+function fillMask(rows, names, seed) {
+  const cells = []; rows.forEach((r, j) => { for (let i = 0; i < r.length; i++) if (r[i] === "1") cells.push([i, j]); });
+  const keep = largestGroup(cells), keepSet = new Set(keep.map((c) => ck(c[0], c[1])));
+  const runs = [];
+  rows.forEach((r, j) => { let i = 0; while (i < r.length) { if (r[i] === "1" && keepSet.has(ck(i, j))) { let k = i; while (k < r.length && r[k] === "1" && keepSet.has(ck(k, j))) k++; runs.push({ y: j, x0: i, len: k - i }); i = k; } else i++; } });
+  if (!names.length) return { tiles: [], note: "" };
+  const rot = (seed - 1) % names.length, order = names.slice(rot).concat(names.slice(0, rot)), filler = D.sep || "•";
+  const toks = order.map((n) => [...n].concat(D.sep ? [D.sep] : [])), maxRun = Math.max(...runs.map((r) => r.len));
+  const longest = Math.max(...order.map((n) => [...n].length));
+  const whole = D.whole && longest <= maxRun; let t = 0, off = 0, note = D.whole && !whole ? "Some names are longer than the shape is wide, so they wrap." : "";
+  if (cells.length > keep.length) note = (note ? note + " " : "") + `${cells.length - keep.length} tile${cells.length - keep.length > 1 ? "s" : ""} that didn't touch the main piece were left out.`;
+  const tiles = [];
+  for (const run of runs) {
+    let pos = 0;
+    while (pos < run.len) {
+      const tok = toks[t % toks.length], left = run.len - pos;
+      if (whole) {
+        if (tok.length <= left) { tok.forEach((ch, k) => tiles.push({ x: run.x0 + pos + k, y: run.y, ch })); pos += tok.length; t++; }
+        else { for (; pos < run.len; pos++) tiles.push({ x: run.x0 + pos, y: run.y, ch: filler }); }
+      } else { tiles.push({ x: run.x0 + pos, y: run.y, ch: tok[off] }); pos++; off++; if (off >= tok.length) { off = 0; t++; } }
+    }
+  }
+  return { tiles: tiles.map((c) => ({ id: ck(c.x, c.y), ch: c.ch, gx: c.x, gy: c.y, inter: false })), note };
+}
+
+// Tile positions are rebuilt only when names, arrangement, shape or the shuffle change; hand-moved tiles are kept in D.manual.
+let layoutCache = { key: "", tiles: [], unplaced: [], names: 0, note: "" };
+function ensureLayout() {
+  const list = parseNames(D.names), aspect = D.bias === "square" ? 1 : D.bias === "wide" ? 1.7 : D.bias === "tall" ? 0.58 : Math.max(0.4, Math.min(2.5, D.width / FIX.maxH * 1.15));
+  const key = JSON.stringify([list, D.layout, D.seed, +aspect.toFixed(2), D.order, D.align, D.mode, D.shape, D.detail, D.sep, D.whole, D.invert, D.shapeImg ? D.shapeImg.length : 0, D.shapeImg ? imgData.has(D.shapeImg) && !!imgData.get(D.shapeImg) : 0]);
+  if (layoutCache.key !== key && D.mode !== "names") {
+    let rows = D.mode === "shape" ? shapeMask(D.shape, +D.detail) : (D.shapeImg ? imageMask(D.shapeImg, +D.detail, D.invert) : null);
+    const f = rows && list.length ? fillMask(rows, list, D.seed) : { tiles: [], note: "" };
+    layoutCache = { key, tiles: f.tiles, unplaced: [], names: list.length, note: f.note, needImg: D.mode === "image" && !rows };
+  } else if (layoutCache.key !== key) {
+    const g = D.layout === "crossword" ? crosswordLayout(list, D.seed, aspect) : lineLayout(orderWords(list, D.order), D.layout === "horizontal" ? "horizontal" : D.layout, D.align);
+    layoutCache = { key, tiles: [...g.cells.values()].map((c) => ({ id: ck(c.x, c.y), ch: c.ch, gx: c.x, gy: c.y, inter: c.dirs.size > 1 })), unplaced: g.unplaced, names: list.length, note: "" };
+  }
+  if (D.manual && D.manual.key === key) return D.manual.tiles;
+  if (D.manual && D.manual.key !== key) D.manual = null;
+  return layoutCache.tiles;
+}
+function setTiles(tiles) { D.manual = { key: layoutCache.key, tiles }; }
+
+/* ---------------- geometry (ported from the print suite: tab, outline union, rounded cut path) ---------------- */
+function unionOutline(rects) {
+  const q = (v) => Math.round(v * 1e6) / 1e6;
+  const xs = [...new Set(rects.flatMap((r) => [q(r.x0), q(r.x1)]))].sort((a, b) => a - b);
+  const ys = [...new Set(rects.flatMap((r) => [q(r.y0), q(r.y1)]))].sort((a, b) => a - b);
+  const nx = xs.length - 1, ny = ys.length - 1, filled = new Uint8Array(Math.max(0, nx * ny));
+  for (let j = 0; j < ny; j++) { const my = (ys[j] + ys[j + 1]) / 2; for (let i = 0; i < nx; i++) { const mx = (xs[i] + xs[i + 1]) / 2; for (const r of rects) if (mx > r.x0 && mx < r.x1 && my > r.y0 && my < r.y1) { filled[j * nx + i] = 1; break; } } }
+  const at = (i, j) => (i >= 0 && j >= 0 && i < nx && j < ny) ? filled[j * nx + i] : 0, out = new Map();
+  const addEdge = (ax, ay, bx, by) => { const k = ax + "," + ay; if (!out.has(k)) out.set(k, []); out.get(k).push({ ax, ay, bx, by, used: false }); };
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    if (!at(i, j)) continue;
+    if (!at(i, j - 1)) addEdge(i, j, i + 1, j); if (!at(i + 1, j)) addEdge(i + 1, j, i + 1, j + 1);
+    if (!at(i, j + 1)) addEdge(i + 1, j + 1, i, j + 1); if (!at(i - 1, j)) addEdge(i, j + 1, i, j);
+  }
+  const turn = (dx, dy, c) => dx * (c.by - c.ay) - dy * (c.bx - c.ax), loops = [];
+  for (const list of out.values()) for (const start of list) {
+    if (start.used) continue;
+    const pts = []; let e = start, guard = 0;
+    while (e && !e.used && guard++ < 100000) {
+      e.used = true; pts.push([e.ax, e.ay]);
+      const cands = (out.get(e.bx + "," + e.by) || []).filter((c) => !c.used);
+      if (cands.length <= 1) { e = cands[0]; continue; }
+      const dx = e.bx - e.ax, dy = e.by - e.ay; cands.sort((p, r) => turn(dx, dy, r) - turn(dx, dy, p)); e = cands[0];
+    }
+    const simp = pts.filter((p, idx) => { const a = pts[(idx - 1 + pts.length) % pts.length], c = pts[(idx + 1) % pts.length]; return (p[0] - a[0]) * (c[1] - p[1]) - (p[1] - a[1]) * (c[0] - p[0]) !== 0; });
+    if (simp.length >= 3) loops.push(simp.map(([i, j]) => [xs[i], ys[j]]));
+  }
+  return loops;
+}
+const f4 = (v) => (Math.round(v * 10000) / 10000).toString();
+const signedArea = (l) => l.reduce((a, p, i) => { const q = l[(i + 1) % l.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0) / 2;
+function roundedPath(loops, radius) {
+  let d = "", length = 0;
+  for (const pts of loops) {
+    const n = pts.length;
+    const corners = pts.map((p, k) => {
+      const prev = pts[(k - 1 + n) % n], next = pts[(k + 1) % n], lin = Math.hypot(p[0] - prev[0], p[1] - prev[1]), lout = Math.hypot(next[0] - p[0], next[1] - p[1]);
+      const r = Math.min(radius, lin / 2, lout / 2), din = [(p[0] - prev[0]) / lin, (p[1] - prev[1]) / lin], dout = [(next[0] - p[0]) / lout, (next[1] - p[1]) / lout];
+      const cross = din[0] * dout[1] - din[1] * dout[0];
+      return { r, sweep: cross > 0 ? 1 : 0, t1: [p[0] - din[0] * r, p[1] - din[1] * r], t2: [p[0] + dout[0] * r, p[1] + dout[1] * r] };
+    });
+    d += `M${f4(corners[0].t2[0])} ${f4(corners[0].t2[1])}`;
+    for (let k = 1; k <= n; k++) {
+      const c = corners[k % n], pc = corners[k - 1];
+      d += `L${f4(c.t1[0])} ${f4(c.t1[1])}`; length += Math.hypot(c.t1[0] - pc.t2[0], c.t1[1] - pc.t2[1]);
+      if (c.r > 1e-6) { d += `A${f4(c.r)} ${f4(c.r)} 0 0 ${c.sweep} ${f4(c.t2[0])} ${f4(c.t2[1])}`; length += Math.PI / 2 * c.r; }
+    }
+    d += "Z";
+  }
+  return { d, length };
+}
+function computeJob() {
+  const tiles = ensureLayout(), warnings = [];
+  if (!tiles.length) return { empty: true, warnings, text: layoutCache.needImg ? "Choose a picture to fill with your names." : "Add at least one name to see your design." };
+  if (layoutCache.note) warnings.push(layoutCache.note);
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const t of tiles) { minX = Math.min(minX, t.gx); minY = Math.min(minY, t.gy); maxX = Math.max(maxX, t.gx + 1); maxY = Math.max(maxY, t.gy + 1); }
+  const m = FIX.cutOffset; let tab = null;
+  if (D.hole) {
+    const top = tiles.filter((t) => t.gy < minY + 0.01), mid = (minX + maxX) / 2;
+    top.sort((a, b) => Math.abs(a.gx + 0.5 - mid) - Math.abs(b.gx + 0.5 - mid));
+    tab = { gx: top[0].gx, gy: top[0].gy - 1 }; minY = Math.min(minY, tab.gy);
+  }
+  const bw = maxX - minX, bh = maxY - minY, tile = Math.min((D.width - 2 * m) / bw, (FIX.maxH - 2 * m) / bh) * FIX.scale;
+  const pieceW = bw * tile + 2 * m, pieceH = bh * tile + 2 * m, ox = m - minX * tile, oy = m - minY * tile;
+  if (!(tile > 0.05)) return { empty: true, warnings, text: "Too many names for this size. Pick a larger size or fewer names." };
+  const cells = tiles.map((t) => ({ ...t, x: ox + t.gx * tile, y: oy + t.gy * tile }));
+  const tabRect = tab ? { x: ox + tab.gx * tile, y: oy + tab.gy * tile } : null;
+  const hole = tabRect ? { cx: tabRect.x + tile / 2, cy: tabRect.y + tile / 2, r: FIX.holeD / 2 } : null;
+  const rects = cells.map((c) => ({ x0: c.x - m, y0: c.y - m, x1: c.x + tile + m, y1: c.y + tile + m }));
+  if (tabRect) rects.push({ x0: tabRect.x - m, y0: tabRect.y - m, x1: tabRect.x + tile + m, y1: tabRect.y + tile + m });
+  let loops = unionOutline(rects);
+  const signed = loops.map(signedArea), outerSign = Math.sign(signed.reduce((a, b) => Math.abs(b) > Math.abs(a) ? b : a, 0));
+  const islands = signed.filter((v) => Math.sign(v) === outerSign).length;
+  loops = loops.filter((l, i) => Math.sign(signed[i]) === outerSign);   // bridge enclosed pockets so nothing drops out
+  if (islands > 1) warnings.push(`Tiles form ${islands} separate pieces. Drag them together.`);
+  if (layoutCache.unplaced.length) warnings.push(`Couldn't interlock: ${layoutCache.unplaced.join(", ")}. Try another arrangement.`);
+  if (tile < 0.45) warnings.push(`Tiles are only ${tile.toFixed(2)}″ wide. Pick a larger size for easier reading.`);
+  const cut = roundedPath(loops, FIX.cornerR); if (hole) cut.length += Math.PI * FIX.holeD;
+  return { empty: false, warnings, cells, tab: tabRect, tile, pieceW, pieceH, hole, cutD: cut.d, cutLength: cut.length, islands, area: Math.abs(loops.reduce((a, l) => a + signedArea(l), 0)) };
+}
+
+/* ---------------- drawing ---------------- */
+const fontCss = (spec, px) => { const [fam, wt] = spec.split("|"); return `${wt || 400} ${px}px "${fam}", "Arial Black", Arial, sans-serif`; };
+const darken = (hex, amt) => { const n = parseInt(hex.slice(1), 16); return "#" + [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.round(v * (1 - amt)).toString(16).padStart(2, "0")).join(""); };
+function drawGlyph(ctx, ch, cx, cy, px, cache) {
+  let m = cache.get(ch); if (!m) { m = ctx.measureText(ch); cache.set(ch, m); }
+  const left = m.actualBoundingBoxLeft || 0, right = m.actualBoundingBoxRight || m.width, inkW = left + right, sc = inkW > px * 1.05 ? px * 1.05 / inkW : 1;
+  const asc = m.actualBoundingBoxAscent ?? px * 0.72, desc = m.actualBoundingBoxDescent ?? 0;
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.fillText(ch, (left - right) / 2, (asc - desc) / 2); ctx.restore();
+}
+// Artwork at `dpi` pixels per inch, clipped to the cut outline, hole knocked out.
+function drawArt(ctx, job, dpi) {
+  const P = (v) => v * dpi, tile = job.tile, clip = new Path2D();
+  clip.addPath(new Path2D(job.cutD), new DOMMatrix().scale(dpi, dpi));
+  ctx.save(); ctx.clip(clip);
+  const all = job.tab ? [...job.cells, job.tab] : job.cells, bleed = 0.6;
+  ctx.fillStyle = D.tileColor;
+  for (const c of all) ctx.fillRect(P(c.x) - bleed, P(c.y) - bleed, P(tile) + bleed * 2, P(tile) + bleed * 2);
+  ctx.strokeStyle = darken(D.tileColor, 0.5); ctx.lineWidth = P(FIX.seam); ctx.beginPath();
+  const q = (v) => Math.round(v / tile * 1000), occ = new Set(all.map((c) => ck(q(c.x), q(c.y))));
+  for (const c of all) {
+    if (occ.has(ck(q(c.x + tile), q(c.y)))) { ctx.moveTo(P(c.x + tile), P(c.y)); ctx.lineTo(P(c.x + tile), P(c.y + tile)); }
+    if (occ.has(ck(q(c.x), q(c.y + tile)))) { ctx.moveTo(P(c.x), P(c.y + tile)); ctx.lineTo(P(c.x + tile), P(c.y + tile)); }
+  }
+  ctx.stroke();
+  const px = P(tile * FIX.letterScale), cache = new Map();
+  ctx.font = fontCss(D.font, px); ctx.fillStyle = D.letterColor; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+  for (const c of job.cells) if (c.ch !== " ") drawGlyph(ctx, c.ch, P(c.x + tile / 2), P(c.y + tile / 2), px, cache);
+  ctx.restore();
+  if (job.hole) { ctx.save(); ctx.globalCompositeOperation = "destination-out"; ctx.beginPath(); ctx.arc(P(job.hole.cx), P(job.hole.cy), P(job.hole.r + 0.02), 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+}
+function art(job, dpi) { const c = document.createElement("canvas"); c.width = Math.ceil(job.pieceW * dpi); c.height = Math.ceil(job.pieceH * dpi); drawArt(c.getContext("2d"), job, dpi); return c; }
+
+const cv = $("cv"), cx = cv.getContext("2d"), MARGIN = 40;
+let job = null, vt = null, sel = null, raf = 0, drag = null;
+const fontReady = new Set();
+function ensureFont() {
+  const spec = D.font; if (fontReady.has(spec) || !document.fonts) return; fontReady.add(spec);
+  document.fonts.load(fontCss(spec, 32), "AMRW♥").then(schedule).catch(() => {});
+}
+function schedule() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; paint(); }); }
+function paint() {
+  ensureFont(); job = computeJob();
+  const box = cv.parentElement, dpr = Math.min(2, devicePixelRatio || 1), cw = Math.max(240, box.clientWidth - 28), ch = Math.max(280, Math.min(560, innerHeight - 200));
+  cv.style.width = cw + "px"; cv.style.height = ch + "px";
+  if (cv.width !== Math.round(cw * dpr) || cv.height !== Math.round(ch * dpr)) { cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr); }
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, cw, ch);
+  cx.fillStyle = "#0d182b"; cx.fillRect(0, 0, cw, ch);
+  info();
+  if (job.empty) { vt = null; cx.fillStyle = "#a3adbf"; cx.font = "600 14px Manrope, sans-serif"; cx.textAlign = "center"; cx.fillText(job.text, cw / 2, ch / 2); return; }
+  const ppi = Math.max(8, Math.min((cw - MARGIN * 2) / job.pieceW, (ch - MARGIN * 2) / job.pieceH)), ox = cw / 2 - job.pieceW * ppi / 2, oy = ch / 2 - job.pieceH * ppi / 2;
+  vt = { ppi, ox, oy };
+  cx.save(); cx.translate(ox, oy);
+  cx.strokeStyle = "rgba(255,255,255,0.05)"; cx.lineWidth = 1; cx.beginPath();   // quarter-inch grid
+  for (let x = 0; x <= job.pieceW + 1e-9; x += 0.25) { cx.moveTo(Math.round(x * ppi) + 0.5, -10); cx.lineTo(Math.round(x * ppi) + 0.5, job.pieceH * ppi + 10); }
+  for (let y = 0; y <= job.pieceH + 1e-9; y += 0.25) { cx.moveTo(-10, Math.round(y * ppi) + 0.5); cx.lineTo(job.pieceW * ppi + 10, Math.round(y * ppi) + 0.5); }
+  cx.stroke();
+  const cutPath = new Path2D(job.cutD);
+  cx.save(); cx.scale(ppi, ppi);   // the clear acrylic edge visible around the tiles
+  const clip = new Path2D(job.cutD); if (job.hole) { clip.moveTo(job.hole.cx + job.hole.r, job.hole.cy); clip.arc(job.hole.cx, job.hole.cy, job.hole.r, 0, Math.PI * 2, true); }
+  cx.clip(clip, "evenodd"); cx.fillStyle = "#d9dde3"; cx.fillRect(0, 0, job.pieceW, job.pieceH); cx.restore();
+  cx.drawImage(art(job, ppi * dpr), 0, 0, Math.ceil(job.pieceW * ppi * dpr) / dpr, Math.ceil(job.pieceH * ppi * dpr) / dpr);
+  cx.save(); cx.scale(ppi, ppi); cx.strokeStyle = "rgba(243,212,138,0.95)"; cx.lineWidth = 1.5 / ppi; cx.stroke(cutPath);
+  if (job.hole) { cx.beginPath(); cx.arc(job.hole.cx, job.hole.cy, job.hole.r, 0, Math.PI * 2); cx.stroke(); }
+  cx.restore();
+  const s = job.cells.find((c) => c.id === sel);
+  if (s) { cx.strokeStyle = "#3bb3ff"; cx.lineWidth = 2; cx.strokeRect(s.x * ppi - 3, s.y * ppi - 3, job.tile * ppi + 6, job.tile * ppi + 6); }
+  const pw = job.pieceW * ppi, ph = job.pieceH * ppi;   // size callouts
+  cx.strokeStyle = "#3f4a63"; cx.lineWidth = 1; cx.beginPath();
+  cx.moveTo(0, ph + 18); cx.lineTo(pw, ph + 18); cx.moveTo(0, ph + 13); cx.lineTo(0, ph + 23); cx.moveTo(pw, ph + 13); cx.lineTo(pw, ph + 23);
+  cx.moveTo(pw + 18, 0); cx.lineTo(pw + 18, ph); cx.moveTo(pw + 13, 0); cx.lineTo(pw + 23, 0); cx.moveTo(pw + 13, ph); cx.lineTo(pw + 23, ph); cx.stroke();
+  cx.font = "600 11px ui-monospace, Menlo, monospace"; cx.textAlign = "center";
+  const label = (t, x, y) => { const w = cx.measureText(t).width + 8; cx.fillStyle = "#0d182b"; cx.fillRect(x - w / 2, y - 8, w, 14); cx.fillStyle = "#a3adbf"; cx.fillText(t, x, y + 3); };
+  label(job.pieceW.toFixed(2) + "″", pw / 2, ph + 18);
+  cx.translate(pw + 18, ph / 2); cx.rotate(-Math.PI / 2); label(job.pieceH.toFixed(2) + "″", 0, 0);
+  cx.restore();
+}
+function info() {
+  $("infoSize").innerHTML = job.empty ? "" : `Finished size: <b>${job.pieceW.toFixed(2)}″ × ${job.pieceH.toFixed(2)}″</b> · ${job.cells.length} tiles`;
+  $("infoWarn").textContent = (job.warnings || []).join(" "); $("infoWarn").style.color = job.warnings?.length ? "var(--gold-2)" : "";
+}
+new ResizeObserver(schedule).observe(cv.parentElement);
+
+/* ---------------- moving tiles ---------------- */
+function toPiece(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left - vt.ox) / vt.ppi, y: (e.clientY - r.top - vt.oy) / vt.ppi }; }
+function tileAt(p) { if (!job || job.empty) return null; for (let i = job.cells.length - 1; i >= 0; i--) { const c = job.cells[i]; if (p.x >= c.x && p.x <= c.x + job.tile && p.y >= c.y && p.y <= c.y + job.tile) return c; } return null; }
+cv.addEventListener("pointerdown", (e) => {
+  if (!vt) return; cv.focus({ preventScroll: true });
+  const p = toPiece(e), c = tileAt(p); sel = c ? c.id : null;
+  if (c) { pushHistory(); const t = ensureLayout().find((t) => t.id === c.id); drag = { id: c.id, start: p, gx: t.gx, gy: t.gy, tile: job.tile, moved: false }; cv.setPointerCapture(e.pointerId); e.preventDefault(); }
+  schedule();
+});
+cv.addEventListener("pointermove", (e) => {
+  if (!vt) return;
+  if (!drag) { cv.classList.toggle("move", !!tileAt(toPiece(e))); return; }
+  const p = toPiece(e); let gx = drag.gx + (p.x - drag.start.x) / drag.tile, gy = drag.gy + (p.y - drag.start.y) / drag.tile;
+  if (!e.altKey) { gx = Math.round(gx * 2) / 2; gy = Math.round(gy * 2) / 2; }
+  const tiles = clone(ensureLayout()), t = tiles.find((t) => t.id === drag.id);
+  if (t.gx === gx && t.gy === gy) return; t.gx = gx; t.gy = gy; drag.moved = true; setTiles(tiles); $("resetLayout").disabled = false; schedule();
+});
+const endDrag = () => { if (!drag) return; if (!drag.moved) hist.past.pop(); else autosave(); drag = null; syncUndo(); };
+cv.addEventListener("pointerup", endDrag); cv.addEventListener("pointercancel", endDrag);
+cv.addEventListener("keydown", (e) => {
+  const moves = { ArrowLeft: [-0.5, 0], ArrowRight: [0.5, 0], ArrowUp: [0, -0.5], ArrowDown: [0, 0.5] };
+  if (!sel || !moves[e.key]) return; e.preventDefault(); pushHistory();
+  const tiles = clone(ensureLayout()), t = tiles.find((t) => t.id === sel); if (!t) return;
+  t.gx += moves[e.key][0]; t.gy += moves[e.key][1]; setTiles(tiles); $("resetLayout").disabled = false; autosave(); schedule();
+});
+$("resetLayout").onclick = () => { pushHistory(); D.manual = null; sel = null; $("resetLayout").disabled = true; autosave(); schedule(); };
+
+/* ---------------- controls, undo, autosave ---------------- */
+function pushHistory() { hist.past.push(clone(D)); if (hist.past.length > 60) hist.past.shift(); hist.future = []; syncUndo(); }
+function syncUndo() { $("undoBtn").disabled = !hist.past.length; $("redoBtn").disabled = !hist.future.length; }
+function restore(d) { D = d; ui(); schedule(); autosave(); }
+$("undoBtn").onclick = () => { if (!hist.past.length) return; hist.future.push(clone(D)); restore(hist.past.pop()); syncUndo(); };
+$("redoBtn").onclick = () => { if (!hist.future.length) return; hist.past.push(clone(D)); restore(hist.future.pop()); syncUndo(); };
+let saveT = 0, lastEdit = 0;
+function autosave() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(LS_DRAFT, JSON.stringify(D)); } catch { /* storage full or blocked */ } }, 400); }
+function edit(fn) { const now = Date.now(); if (now - lastEdit > 700) pushHistory(); lastEdit = now; fn(); schedule(); autosave(); }
+const swatches = (el, list, cur, key) => { el.innerHTML = list.map(([hex, name]) => `<button type="button" data-${key}="${hex}" aria-label="${name}" title="${name}" aria-pressed="${hex === cur}" style="background:${hex}"></button>`).join(""); };
+function ui() {
+  if (document.activeElement !== $("names")) $("names").value = D.names;
+  $("layout").value = D.layout; $("bias").value = D.bias || "auto"; $("order").value = D.order || "entered"; $("align").value = D.align || "center";
+  const names = D.mode === "names", show = (id, on, disp = "grid") => { $(id).hidden = !on; $(id).style.display = on ? disp : "none"; };
+  $("mode").value = D.mode; $("shape").innerHTML = Object.entries(SHAPES).map(([k, v]) => `<option value="${k}" ${k === D.shape ? "selected" : ""}>${v[0]}</option>`).join("");
+  $("detail").value = String(D.detail); $("detail2").value = String(D.detail); $("sep").value = D.sep; $("whole").checked = D.whole; $("invert").checked = D.invert;
+  show("shapeOpts", D.mode === "shape"); show("imgOpts", D.mode === "image"); show("fillOpts", !names);
+  $("layout").parentElement.hidden = !names; $("crossOpts").hidden = !names || D.layout !== "crossword"; $("lineOpts").hidden = !names || D.layout === "crossword";
+  $("modeHint").textContent = names ? "" : "The names repeat along the rows to fill the shape. The gold cut line follows the edge of the tiles."; $("width").value = String(D.width); $("hole").checked = D.hole;
+  $("font").innerHTML = FONTS.map(([v, l]) => `<option value="${v}" ${v === D.font ? "selected" : ""}>${l}</option>`).join("");
+  swatches($("tileSw"), TILE_COLORS, D.tileColor, "t"); swatches($("letterSw"), LETTER_COLORS, D.letterColor, "l");
+  $("resetLayout").disabled = !D.manual;
+}
+$("names").oninput = (e) => edit(() => { D.names = e.target.value; D.manual = null; });
+$("mode").onchange = (e) => { edit(() => { D.mode = e.target.value; D.manual = null; if (D.mode === "shape" && +D.detail > 13) D.detail = 9; if (D.mode === "image" && +D.detail < 9) D.detail = 9; }); ui(); };
+$("shape").onchange = (e) => edit(() => { D.shape = e.target.value; D.manual = null; });
+$("detail").onchange = (e) => edit(() => { D.detail = +e.target.value; D.manual = null; });
+$("detail2").onchange = (e) => edit(() => { D.detail = +e.target.value; D.manual = null; });
+$("sep").onchange = (e) => edit(() => { D.sep = e.target.value; D.manual = null; });
+$("whole").onchange = (e) => edit(() => { D.whole = e.target.checked; D.manual = null; });
+$("invert").onchange = (e) => edit(() => { D.invert = e.target.checked; D.manual = null; });
+$("imgPick").addEventListener("change", (e) => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  const url = URL.createObjectURL(f), im = new Image();
+  im.onload = () => {
+    const k = Math.min(1, 160 / Math.max(im.naturalWidth || 160, im.naturalHeight || 160)), c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round((im.naturalWidth || 160) * k)); c.height = Math.max(1, Math.round((im.naturalHeight || 160) * k));
+    c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+    edit(() => { D.shapeImg = c.toDataURL("image/png"); D.manual = null; }); ui();
+  };
+  im.onerror = () => { URL.revokeObjectURL(url); toast("That picture couldn't be opened"); }; im.src = url;
+});
+$("layout").onchange = (e) => { edit(() => { D.layout = e.target.value; D.manual = null; }); ui(); };
+$("bias").onchange = (e) => edit(() => { D.bias = e.target.value; D.manual = null; });
+$("order").onchange = (e) => edit(() => { D.order = e.target.value; D.manual = null; });
+$("align").onchange = (e) => edit(() => { D.align = e.target.value; D.manual = null; });
+$("width").onchange = (e) => edit(() => { D.width = +e.target.value; D.manual = null; });
+$("font").onchange = (e) => edit(() => { D.font = e.target.value; });
+$("hole").onchange = (e) => edit(() => { D.hole = e.target.checked; });
+$("reshuffle").onclick = () => edit(() => { D.seed = (D.seed % 999) + 1; D.manual = null; });
+$("tileSw").addEventListener("click", (e) => { const b = e.target.closest("[data-t]"); if (b) { edit(() => { D.tileColor = b.dataset.t; }); ui(); } });
+$("letterSw").addEventListener("click", (e) => { const b = e.target.closest("[data-l]"); if (b) { edit(() => { D.letterColor = b.dataset.l; }); ui(); } });
+
+/* ---------------- toast, saving on this device ---------------- */
+let toastT;
+function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
+function summary(d = D) { if (d.mode === "shape") return `Name tiles in a ${(SHAPES[d.shape] || [d.shape])[0].toLowerCase()} shape (${d.width}″ wide${d.hole ? ", hang tab" : ""}): ${parseNames(d.names).join(", ")}`.slice(0, 590); if (d.mode === "image") return `Name tiles filling a customer picture (${d.width}″ wide${d.hole ? ", hang tab" : ""}): ${parseNames(d.names).join(", ")}`.slice(0, 590);
+  return `Name tiles (${d.layout}${d.layout !== "crossword" && d.align ? " " + d.align : ""}, ${d.width}″ wide${d.hole ? ", hang tab" : ""}): ${parseNames(d.names).join(", ")}`.slice(0, 590); }
+function previewBlob(maxSide) {
+  const j = computeJob(); if (j.empty) return Promise.resolve(null);
+  const dpi = Math.min(300, maxSide / Math.max(j.pieceW, j.pieceH));
+  return Promise.all([document.fonts.load(fontCss(D.font, 32), "AMRW♥").catch(() => {})]).then(() => new Promise((ok) => art(j, dpi).toBlob(ok, "image/png")));
+}
+function readSaved() { try { const o = JSON.parse(localStorage.getItem(LS_SAVED) || "{}"); return o && typeof o === "object" ? o : {}; } catch { return {}; } }
+function writeSaved(o) { try { localStorage.setItem(LS_SAVED, JSON.stringify(o)); return true; } catch { return false; } }
+async function thumb() { try { const b = await previewBlob(220); return await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(b); }); } catch { return ""; } }
+async function saveLocal(quiet) {
+  if (!D.code) D.code = newCode();
+  const all = readSaved();
+  all[D.code] = { design: clone(D), savedAt: Date.now(), summary: summary(), thumb: await thumb(), submitted: all[D.code]?.submitted || false };
+  if (!writeSaved(all)) { toast("This device is out of storage; the design couldn't be saved here"); return false; }
+  autosave(); savedCount(); if (!quiet) toast(`Saved as ${D.code}`); return true;
+}
+$("saveBtn").onclick = () => saveLocal(false);
+function savedCount() { const n = Object.keys(readSaved()).length; $("savedN").textContent = n ? `(${n})` : ""; }
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
+$("savedBtn").onclick = () => { renderSaved(); $("savedDrawer").hidden = false; document.body.style.overflow = "hidden"; };
+function closeSaved() { $("savedDrawer").hidden = true; document.body.style.overflow = ""; }
+$("savedClose").onclick = closeSaved;
+$("savedDrawer").addEventListener("click", (e) => { if (e.target.id === "savedDrawer") closeSaved(); });
+function renderSaved() {
+  const rows = Object.entries(readSaved()).filter(([, r]) => r.design?.product === "tiles").sort((a, b) => b[1].savedAt - a[1].savedAt);
+  $("savedList").innerHTML = rows.map(([code, r]) => `<div class="saved"><img src="${esc(r.thumb || "")}" alt=""><div><b>${esc(code)}${r.submitted ? " · sent ✓" : ""}</b><small>${esc(r.summary || "")}</small><small>${new Date(r.savedAt).toLocaleDateString()}</small>
+    <div class="actions"><button class="btn gold small" type="button" data-open="${esc(code)}">Open</button><button class="btn line small danger" type="button" data-del="${esc(code)}">Delete</button></div></div></div>`).join("")
+    || `<p class="hint">Nothing saved yet. Press “Save design” and it will appear here.</p>`;
+}
+$("savedList").addEventListener("click", (e) => {
+  const o = e.target.closest("[data-open]"), d = e.target.closest("[data-del]"), all = readSaved();
+  if (o && all[o.dataset.open]) { pushHistory(); D = all[o.dataset.open].design; sel = null; ui(); schedule(); autosave(); closeSaved(); showForm(); toast(`Opened ${D.code}`); }
+  if (d) { delete all[d.dataset.del]; writeSaved(all); renderSaved(); savedCount(); }
+});
+
+/* ---------------- sending to PrAjo ---------------- */
+function showForm() { $("formView").hidden = false; $("doneView").hidden = true; }
+$("sendBtn").onclick = () => {
+  if (!parseNames(D.names).length) return toast("Add at least one name first");
+  if (job && job.islands > 1) return toast("Your tiles form separate pieces. Drag them together first");
+  try { const c = JSON.parse(localStorage.getItem(LS_CONTACT) || "{}"); $("cName").value ||= c.name || ""; $("cEmail").value ||= c.email || ""; $("cPhone").value ||= c.phone || ""; } catch { /* no saved contact */ }
+  const f = $("sendForm"); f.hidden = false; f.style.display = "grid"; $("sendBtn").parentElement.hidden = true; $("saveHint").hidden = true; $("cName").focus();
+};
+$("sendCancel").onclick = () => { $("sendForm").hidden = true; $("sendForm").style.display = "none"; $("sendBtn").parentElement.hidden = false; $("saveHint").hidden = false; };
+$("doneNew").onclick = () => { D = newDesign(); sel = null; hist.past = []; hist.future = []; syncUndo(); ui(); schedule(); autosave(); showForm(); $("sendCancel").onclick(); };
+async function upload(path, blob) {
+  const r = await fetch(`${SB.url}/storage/v1/object/${SB.bucket}/${path}`, { method: "POST", headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
+  if (!r.ok) throw new Error("upload");
+}
+$("sendForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("sendErr"), go = $("sendGo"); err.hidden = true;
+  const name = $("cName").value.trim(), email = $("cEmail").value.trim(), qty = Math.max(1, Math.min(500, parseInt($("cQty").value, 10) || 1));
+  if ($("cWeb").value) return;   // honeypot: bots fill every field
+  if (!name) { err.textContent = "Please add your name."; err.hidden = false; return $("cName").focus(); }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { err.textContent = "Please enter a valid email so we can reply."; err.hidden = false; return $("cEmail").focus(); }
+  go.disabled = true; go.textContent = "Sending…";
+  const parent = D.code, code = newCode();   // each send gets its own code, so changes after sending become a new request
+  try {
+    const out = clone(D); out.code = code; if (parent) out.parent = parent;
+    const jb = computeJob(); out.job = { pieceW: +jb.pieceW.toFixed(3), pieceH: +jb.pieceH.toFixed(3), tile: +jb.tile.toFixed(3), tiles: jb.cells.length };
+    const previewPath = `${code}/preview.png`; await upload(previewPath, await previewBlob(1600));
+    const row = { code, product: "tiles", summary: summary(), design: out, preview_path: previewPath, customer_name: name, customer_email: email,
+      customer_phone: $("cPhone").value.trim() || null, qty, needed_by: $("cDate").value || null, notes: $("cNotes").value.trim() || null };
+    const r = await fetch(`${SB.url}/rest/v1/custom_designs`, { method: "POST", headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(row) });
+    if (!r.ok) throw new Error("save");
+    fetch(`${SB.url}/functions/v1/design-notify`, { method: "POST", headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, "Content-Type": "application/json" }, body: JSON.stringify({ code }) }).catch(() => {});
+    try { localStorage.setItem(LS_CONTACT, JSON.stringify({ name, email, phone: $("cPhone").value.trim() })); } catch { /* optional */ }
+    D.code = code; await saveLocal(true);
+    const all = readSaved(); if (all[code]) { all[code].submitted = true; writeSaved(all); }
+    $("doneCode").textContent = code; $("doneText").textContent = `We'll review it and email ${email} with the price and next steps. Nothing has been charged. Keep your code handy if you message us about it.`;
+    offerPay(code, qty);
+    $("formView").hidden = true; $("doneView").hidden = false; $("doneView").scrollIntoView({ block: "center", behavior: "smooth" });
+  } catch {
+    err.textContent = navigator.onLine ? "We couldn't send your design just now. It's saved on this device, so please try again in a moment or message us." : "You're offline. Reconnect and try again.";
+    err.hidden = false; saveLocal(true);
+  } finally { go.disabled = false; go.textContent = "Send my design"; }
+});
+
+/* ---------------- paying: the shop's "Custom design" listing carries the design code in the cart ---------------- */
+let payState = null;
+async function offerPay(code, qty) {
+  $("payBox").hidden = true; payState = null;
+  try {
+    const r = await fetch(`${SB.url}/rest/v1/listings?select=id,price,visible&id=eq.${PAY_ID}&visible=eq.true`, { headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}` } });
+    const row = r.ok ? (await r.json())[0] : null; if (!row) return;
+    payState = { code, qty, price: Number(row.price) };
+    $("payPrice").textContent = `$${(payState.price * qty).toFixed(2)} for ${qty} (${qty > 1 ? `$${payState.price.toFixed(2)} each` : "base price"}; shipping and tax are added at checkout)`;
+    $("payBox").hidden = false;
+  } catch { /* payment is optional; the design request has already been sent */ }
+}
+$("payBtn").onclick = () => {
+  if (!payState) return;
+  let cart = []; try { cart = JSON.parse(localStorage.getItem("prajo:cart") || "[]"); } catch { /* start a new cart */ }
+  const personalization = `Custom design ${payState.code}: ${summary()}`.slice(0, 200);
+  cart = cart.filter((i) => !(i.id === PAY_ID && String(i.personalization).startsWith(`Custom design ${payState.code}`)));
+  cart.push({ id: PAY_ID, qty: payState.qty, options: {}, personalization });
+  try { localStorage.setItem("prajo:cart", JSON.stringify(cart)); } catch { return toast("Couldn't reach your cart on this device"); }
+  location.href = "./#cart";
+};
+
+/* ---------------- print files (shown only when you open a design from the admin page) ---------------- */
+const jobName = () => parseNames(D.names).join("-").replace(/[^\p{L}\p{N}-]+/gu, "").slice(0, 40) || "job";
+function save(filename, blob) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+function withDpi(buf, dpi) {   // pHYs chunk so print software reads the true size
+  const T = new Uint32Array(256).map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+  const crc = (b) => { let c = 0xFFFFFFFF; for (const x of b) c = T[(c ^ x) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  const src = new Uint8Array(buf), ppm = Math.round(dpi / 0.0254), chunk = new Uint8Array(21), dv = new DataView(chunk.buffer);
+  dv.setUint32(0, 9); chunk.set([0x70, 0x48, 0x59, 0x73], 4); dv.setUint32(8, ppm); dv.setUint32(12, ppm); chunk[16] = 1; dv.setUint32(17, crc(chunk.subarray(4, 17)));
+  const parts = [src.subarray(0, 33), chunk]; let p = 33;
+  while (p < src.length) { const len = new DataView(src.buffer, src.byteOffset + p).getUint32(0), type = String.fromCharCode(...src.subarray(p + 4, p + 8)), end = p + 12 + len; if (type !== "pHYs") parts.push(src.subarray(p, end)); p = end; }
+  return new Blob(parts, { type: "image/png" });
+}
+$("dlColor").onclick = async () => {
+  const j = computeJob(); if (j.empty) return; await document.fonts.load(fontCss(D.font, 32), "AMRW♥").catch(() => {});
+  const dpi = Math.min(300, Math.floor(Math.sqrt(48e6 / (j.pieceW * j.pieceH))));
+  const b = await new Promise((ok) => art(j, dpi).toBlob(ok, "image/png")); save(`${jobName()}_CMYK_${dpi}dpi.png`, withDpi(await b.arrayBuffer(), dpi));
+};
+$("dlCut").onclick = () => {
+  const j = computeJob(); if (j.empty) return; const W = f4(j.pieceW), H = f4(j.pieceH);
+  const hole = j.hole ? `<circle cx="${f4(j.hole.cx)}" cy="${f4(j.hole.cy)}" r="${f4(j.hole.r)}"/>` : "";
+  save(`${jobName()}_CUT.svg`, new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${W}in" height="${H}in" viewBox="0 0 ${W} ${H}"><g id="CutContour" fill="none" stroke="#FF00FF" stroke-width="0.001"><path d="${j.cutD}" fill-rule="evenodd"/>${hole}</g></svg>\n`], { type: "image/svg+xml" }));
+};
+$("dlJob").onclick = () => {
+  const j = computeJob(); if (j.empty) return;
+  save(`${jobName()}_job.json`, new Blob([JSON.stringify({ code: D.code, names: parseNames(D.names), layout: D.layout, handPlaced: !!D.manual, tiles: ensureLayout().map((t) => ({ char: t.ch, col: t.gx, row: t.gy })),
+    piece: { widthIn: +j.pieceW.toFixed(4), heightIn: +j.pieceH.toFixed(4), tileIn: +j.tile.toFixed(4), areaIn2: +j.area.toFixed(3), cutLengthIn: +j.cutLength.toFixed(3) },
+    style: { font: D.font, tileColor: D.tileColor, letterColor: D.letterColor, hangTab: D.hole, holeIn: FIX.holeD, cutOffsetIn: FIX.cutOffset, cornerRadiusIn: FIX.cornerR }, warnings: j.warnings }, null, 2)], { type: "application/json" }));
+};
+
+/* ---------------- boot ---------------- */
+function boot() {
+  try { const d = JSON.parse(localStorage.getItem(LS_DRAFT) || "null"); if (d && d.v === 2 && d.product === "tiles") D = d; } catch { /* start fresh */ }
+  try {
+    if (new URLSearchParams(location.search).has("load")) {
+      const h = JSON.parse(localStorage.getItem("prajo:design:load") || "null");
+      if (h && h.v === 2 && h.product === "tiles") { D = h; adminLoaded = true; localStorage.removeItem("prajo:design:load"); $("adminTools").hidden = false; }
+    }
+  } catch { /* ignore */ }
+  ui(); savedCount(); syncUndo(); document.fonts?.ready.then(schedule); schedule();
+}
+// The studio is switched on from the admin page (Site settings). Until then visitors see a closed notice.
+(async () => {
+  let on = false, S = {};
+  try { S = JSON.parse(localStorage.getItem("prajo:site") || "{}"); on = !!S.studioOn; } catch { /* no cache */ }
+  try {
+    const r = await fetch(`${SB.url}/rest/v1/site_settings?id=eq.1&select=data`, { headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}` } });
+    if (r.ok) { const rows = await r.json(); on = !!rows[0]?.data?.studioOn; }
+  } catch { /* use the cached value */ }
+  if (new URLSearchParams(location.search).has("load")) on = true;
+  $("studioMain").hidden = !on; $("closedMain").hidden = on; $("savedBtn").hidden = !on;
+  if (on) boot();
+})();
+})();
+</script>
+</body>
+</html>

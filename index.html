@@ -383,6 +383,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
     <nav class="links" aria-label="Main">
       <a href="#shop">Shop</a>
       <a href="#how">How it's made</a>
+      <a href="design.html" id="studioNav" hidden>Design yours</a>
       <a href="#custom">Custom orders</a>
       <a href="#reviews">Reviews</a>
       <a href="#about">About</a>
@@ -522,7 +523,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
           <h2 data-s="customTitle">Have something special in mind?</h2>
           <p class="lede" data-s="customIntro">Team names, wedding party gifts, company logos, a photo of someone you love. Tell us the idea and we'll design it with you.</p>
           <div class="hero-cta" style="margin-top:8px">
-            <button class="btn btn-gold" type="button" data-chat>Message us</button>
+            <a class="btn btn-gold" href="design.html" id="studioBtn" hidden>Design your name tiles</a>
+            <button class="btn btn-line" type="button" data-chat>Message us</button>
             <a class="btn btn-line" data-link="etsy" href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Visit our Etsy shop</a>
           </div>
         </div>
@@ -674,6 +676,7 @@ function applySite() {
     $("swatchBox").innerHTML = cols.map((c, i) => `<button type="button" data-c="${shade(c.hex, "black", .62)},${c.hex},${shade(c.hex, "white", .3)},${shade(c.hex, "black", .72)}" aria-pressed="${i === 0}" style="background:${c.hex}" aria-label="${esc(c.name)}"></button>`).join("");
     $("swatchBox").querySelector("button").click();
   }
+  $("studioNav").hidden = $("studioBtn").hidden = !S.studioOn;
   $("vacation").hidden = !vacationOn();
   if (vacationOn()) $("vacText").textContent = vacationText();
   if (shopReady) refreshShop();
@@ -856,14 +859,16 @@ function fromRow(r) {
   return { id: r.id, name: r.name, title: r.title || r.name, category: r.category, price: Number(r.price), currency: r.currency,
     stock: r.stock, sort: r.sort, created: r.created_at ? Date.parse(r.created_at) : 0, bundleIds: r.bundle_ids || [], digital: r.digital, hasFile: (r.files || []).length > 0, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
 }
+let listingsLoaded = false;   // the cart keeps items it can't match yet (e.g. the Custom design item) until the live listings have arrived
 (async function loadListings() {
   try {
     const r = await fetch(`${DB.url}/rest/v1/listings?select=*&visible=eq.true&order=sort.asc,name.asc`, { headers: { apikey: DB.key, Authorization: `Bearer ${DB.key}` } });
     if (!r.ok) return;
     const list = (await r.json()).map(fromRow).filter((p) => p.images.length);
     if (!list.length) return;
-    P0 = list;
+    P0 = list; listingsLoaded = true;
     refreshShop();
+    if (!$("cart").hidden) renderCart();
     if (location.hash.startsWith("#p/")) { $("sheet").hidden = true; route(); }
   } catch { /* keep the built-in copy */ }
 })();
@@ -1261,7 +1266,7 @@ function renderCart() {
     : physical ? `${ways.join(" ")} California sales tax is added at checkout.${known.some((i) => i.p.digital) ? " Downloads are ready right after you pay." : ""}`
     : "💾 Instant download: your files are ready right after you pay. Nothing is shipped.";
   $("checkoutBtn").disabled = !ok;
-  if (items.length !== known.length) cart.set(known.map(({ p, ...i }) => i));
+  if (listingsLoaded && items.length !== known.length) cart.set(known.map(({ p, ...i }) => i));
 }
 $("cartList").addEventListener("click", (e) => {
   if (e.target.id === "cartShop" || e.target.id === "cartSugLink") { closeCart(); return; }
