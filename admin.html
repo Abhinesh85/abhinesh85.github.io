@@ -164,6 +164,9 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .dl-item small { display: block; font-weight: 500; font-size: 12.5px; color: var(--muted); }
 .dl-item.busy { opacity: .6; }
 .dl-none { margin: 0; font-size: 13.5px; color: #ffcf8a; }
+.rtab { display: grid; grid-template-columns: minmax(0, 1.3fr) 1fr 1fr; gap: 8px; align-items: center; font-size: 13.5px; }
+.rtab b { font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.rtab .in { min-height: 40px; padding: 6px 10px; }
 /* site settings */
 .sgroup { border: 1px solid var(--line-soft); border-radius: 16px; background: var(--panel); }
 .sgroup > summary { list-style: none; cursor: pointer; padding: 14px 16px; font-weight: 800; font-size: 15.5px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
@@ -820,8 +823,13 @@ async function coCall(body) {
   if (!r.ok) throw new Error(d.error || `Error ${r.status}`);
   return d;
 }
+const RATE_ROWS = [["tumblers", "Tumblers"], ["mugs", "Mugs"], ["tags", "Badges & tags"], ["apparel", "Apparel"], ["other", "Everything else"]];
+const rateTable = () => `<div class="rtab"><span></span><b>First item ($)</b><b>Each extra ($)</b>${RATE_ROWS.map(([c, l]) => `<span>${l}</span>
+  <input class="in" type="number" inputmode="decimal" min="0" step="0.5" data-rate="${c}:first" value="${co.rates?.[c]?.first ?? 0}" aria-label="${l} first item">
+  <input class="in" type="number" inputmode="decimal" min="0" step="0.5" data-rate="${c}:extra" value="${co.rates?.[c]?.extra ?? 0}" aria-label="${l} each extra item">`).join("")}</div>
+  <p class="hint">An order pays the highest “first item” rate once, then each other item adds its “extra” rate (extra items usually share a box). Printables ship free.</p>`;
 const CO_ROWS = [
-  { k: "shipping", t: "Shipping (USPS)", d: "Mailed anywhere in the US", fees: [["shipFee", "Shipping fee ($)"], ["freeOver", "Free shipping over ($, 0 = never)"]] },
+  { k: "shipping", t: "Shipping (USPS)", d: "Mailed anywhere in the US", fees: [["freeOver", "Free shipping when physical items total over ($, 0 = never)"]] },
   { k: "delivery", t: "Local delivery", d: "You drop it off in the Sacramento area", fees: [["deliveryFee", "Delivery fee ($)"]] },
   { k: "pickup", t: "Free local pickup", d: "Customer collects it in Sacramento", fees: [] },
 ];
@@ -832,6 +840,7 @@ function renderCo() {
   $("coList").innerHTML = `
     <div class="co-row master"><div class="co-top"><div><b>Store checkout</b><small>${co.enabled ? (anyOn ? "On: customers can pay with card, Apple Pay or Google Pay" : "On, but every delivery option is off, so nobody can check out") : "Paused: customers see “Order on Etsy” instead of Add to cart"}</small></div>${sw("enabled", "Store checkout")}</div></div>
     ${CO_ROWS.map((r) => `<div class="co-row ${co[r.k] ? "" : "off"}"><div class="co-top"><div><b>${r.t}</b><small>${r.d}</small></div>${sw(r.k, r.t)}</div>
+      ${r.k === "shipping" && co.shipping ? rateTable() : ""}
       ${r.fees.length && co[r.k] ? `<div class="co-fees">${r.fees.map(([f, l]) => `<label class="f"><span class="hint">${l}</span><input class="in" type="number" inputmode="decimal" min="0" step="0.5" data-fee="${f}" value="${co[f]}"></label>`).join("")}</div>` : ""}</div>`).join("")}`;
 }
 async function saveCo(msg) {
@@ -848,6 +857,10 @@ $("coClose").onclick = () => { $("coSheet").hidden = true; document.body.style.o
 $("coList").addEventListener("change", (e) => {
   const t = e.target;
   if (t.dataset.co) { co[t.dataset.co] = t.checked; saveCo(`${t.dataset.co === "enabled" ? "Store checkout" : CO_ROWS.find((r) => r.k === t.dataset.co).t} ${t.checked ? "on" : "off"}`); }
+  if (t.dataset.rate) {
+    const [c, w] = t.dataset.rate.split(":"), n = Number(t.value); if (!(n >= 0)) return toast("Enter a number");
+    co.rates = { ...(co.rates || {}), [c]: { ...(co.rates?.[c] || {}), [w]: n } }; saveCo("Shipping rates saved");
+  }
   if (t.dataset.fee) { const n = Number(t.value); if (!(n >= 0)) return toast("Enter a number"); co[t.dataset.fee] = n; saveCo("Fee saved"); }
 });
 

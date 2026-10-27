@@ -1146,7 +1146,16 @@ document.addEventListener("click", (e) => {
 /* ---------- cart & checkout (Supabase Edge Function "checkout" → Stripe: cards, Apple Pay, Google Pay) ---------- */
 const CHECKOUT_URL = "https://mrnnrmyvjkyjcjnfomna.supabase.co/functions/v1/checkout";
 // Which options are on is set on the admin page; the checkout function charges the real amounts.
-let CO = { enabled: true, shipping: true, shipFee: 5.95, freeOver: 50, delivery: true, deliveryFee: 7, pickup: true };
+let CO = { enabled: true, shipping: true, shipFee: 8, freeOver: 75, delivery: true, deliveryFee: 7, pickup: true,
+  rates: { tumblers: { first: 12, extra: 4 }, mugs: { first: 12, extra: 4 }, tags: { first: 5, extra: 1.5 }, apparel: { first: 6, extra: 2 }, other: { first: 8, extra: 2 } } };
+// Same math as the checkout function: the priciest item pays its first-item rate, every other item adds its extra rate.
+function shipEstimate(items) {
+  const phys = items.filter((i) => !i.p.digital); if (!phys.length) return 0;
+  if (CO.freeOver > 0 && phys.reduce((t, i) => t + i.p.price * i.qty, 0) >= CO.freeOver) return 0;
+  const rs = []; phys.forEach((i) => { const r = CO.rates?.[i.p.category] || CO.rates?.other || { first: CO.shipFee, extra: 0 }; for (let k = 0; k < i.qty; k++) rs.push(r); });
+  rs.sort((a, b) => b.first - a.first);
+  return Math.round((rs[0].first + rs.slice(1).reduce((t, r) => t + r.extra, 0)) * 100) / 100;
+}
 const canBuy = () => CO.enabled && (CO.shipping || CO.delivery || CO.pickup);
 const buyable = (p) => p.digital ? CO.enabled && !!p.hasFile : canBuy() && !vacationOn() && !soldOut(p);
 // Why a product can't be bought here (shown on its page).
@@ -1242,7 +1251,7 @@ function renderCart() {
   $("cartSuggest").hidden = !sug;
   if (sug) $("cartSuggest").innerHTML = `<span>🎁 Add <b>${esc(sug.name)}</b> (${fmt(sug.price)}) and save ${bundlePct()}% on the lower-priced item.</span><a class="btn btn-line" href="#p/${esc(sug.id)}" id="cartSugLink">See it</a>`;
   const ways = [
-    CO.shipping && (CO.freeOver > 0 && sub >= CO.freeOver ? "🎉 Free shipping unlocked." : `Shipping ${fmt(CO.shipFee)}${CO.freeOver > 0 ? `, free over ${fmt(CO.freeOver)}` : ""}.`),
+    CO.shipping && known.some((i) => !i.p.digital) && (shipEstimate(known) === 0 ? "🎉 Free shipping unlocked." : `Shipping to the US: ${fmt(shipEstimate(known))}${CO.freeOver > 0 ? ` (free when your made-to-order items total ${fmt(CO.freeOver)}+)` : ""}.`),
     CO.delivery && `Local delivery in the Sacramento area ${fmt(CO.deliveryFee)}.`,
     CO.pickup && "Free local pickup in Sacramento.",
   ].filter(Boolean);
