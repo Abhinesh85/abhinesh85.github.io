@@ -163,9 +163,22 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
       <p class="hint" id="namesHint">Up to 12 names. Letters, numbers and &amp; ' - are kept; ♥ ★ ☘ make icon tiles.</p>
       <div class="row2">
         <label class="f"><span>Arrangement</span><select class="in" id="layout">
-          <option value="crossword">Interlocking crossword</option><option value="horizontal">Rows</option></select></label>
+          <option value="crossword">Interlocking crossword</option><option value="horizontal">Rows</option>
+          <option value="vertical">Columns</option><option value="staircase">Staircase</option></select></label>
         <label class="f"><span>Size</span><select class="in" id="width">
           <option value="3.5">Small (about 3.5″ wide)</option><option value="4.5">Standard (about 4.5″ wide)</option><option value="6">Large (about 6″ wide)</option></select></label>
+      </div>
+      <div class="row2" id="crossOpts">
+        <label class="f"><span>Crossword shape</span><select class="in" id="bias">
+          <option value="auto">Best fit for the size</option><option value="square">Square block</option>
+          <option value="wide">Wide and low</option><option value="tall">Tall and narrow</option></select></label>
+      </div>
+      <div class="row2" id="lineOpts" hidden>
+        <label class="f"><span>Word order</span><select class="in" id="order">
+          <option value="entered">As typed</option><option value="longest">Longest first</option>
+          <option value="shortest">Shortest first</option><option value="alpha">A to Z</option></select></label>
+        <label class="f"><span>Alignment</span><select class="in" id="align">
+          <option value="center">Centered</option><option value="left">Start (left / top)</option><option value="right">End (right / bottom)</option></select></label>
       </div>
       <div class="actions"><button class="btn line small" type="button" id="reshuffle">Try another arrangement</button></div>
     </div>
@@ -253,7 +266,7 @@ const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 function newCode() { const a = new Uint8Array(6); crypto.getRandomValues(a); return "D-" + [...a].map((n) => CODE_CHARS[n % CODE_CHARS.length]).join(""); }
 function newDesign() {
   return { v: 2, code: null, product: "tiles", names: "LARA\nMADISON\nROGER\nWILL", layout: "crossword", seed: 1, width: 4.5, font: "Archivo Black|400",
-    tileColor: "#1f3a5f", letterColor: "#ffffff", hole: true, manual: null };
+    tileColor: "#1f3a5f", letterColor: "#ffffff", hole: true, bias: "auto", order: "entered", align: "center", manual: null };
 }
 let D = newDesign();
 const hist = { past: [], future: [] };
@@ -318,9 +331,21 @@ function crosswordLayout(words, seed, aspect) {
   }
   return best;
 }
-function rowLayout(words) {
-  const g = newGrid(), lens = words.map((w) => [...w].length), maxLen = Math.max(0, ...lens);
-  words.forEach((w, i) => putWord(g, w, Math.floor((maxLen - lens[i]) / 2), i, "H"));
+function orderWords(words, mode) {
+  const w = words.slice();
+  if (mode === "longest") w.sort((a, b) => [...b].length - [...a].length);
+  else if (mode === "shortest") w.sort((a, b) => [...a].length - [...b].length);
+  else if (mode === "alpha") w.sort((a, b) => a.localeCompare(b));
+  return w;
+}
+// Rows, columns or a staircase; `align` places each word along its line.
+function lineLayout(words, kind, align) {
+  const g = newGrid(), lens = words.map((w) => [...w].length), maxLen = Math.max(0, ...lens), vertical = kind === "vertical", n = words.length;
+  words.forEach((w, i) => {
+    let along = align === "left" ? 0 : align === "right" ? maxLen - lens[i] : Math.floor((maxLen - lens[i]) / 2);
+    if (kind === "staircase") along = align === "right" ? n - 1 - i : align === "center" ? i % 2 : i;
+    if (vertical) putWord(g, w, i, along, "V"); else putWord(g, w, along, i, "H");
+  });
   return { ...g, unplaced: [] };
 }
 function parseNames(text) {
@@ -337,10 +362,10 @@ function parseNames(text) {
 // Tile positions are rebuilt only when names, arrangement, shape or the shuffle change; hand-moved tiles are kept in D.manual.
 let layoutCache = { key: "", tiles: [], unplaced: [], names: 0 };
 function ensureLayout() {
-  const list = parseNames(D.names), aspect = Math.max(0.4, Math.min(2.5, D.width / FIX.maxH * 1.15));
-  const key = JSON.stringify([list, D.layout, D.seed, +aspect.toFixed(2)]);
+  const list = parseNames(D.names), aspect = D.bias === "square" ? 1 : D.bias === "wide" ? 1.7 : D.bias === "tall" ? 0.58 : Math.max(0.4, Math.min(2.5, D.width / FIX.maxH * 1.15));
+  const key = JSON.stringify([list, D.layout, D.seed, +aspect.toFixed(2), D.order, D.align]);
   if (layoutCache.key !== key) {
-    const g = D.layout === "crossword" ? crosswordLayout(list, D.seed, aspect) : rowLayout(list);
+    const g = D.layout === "crossword" ? crosswordLayout(list, D.seed, aspect) : lineLayout(orderWords(list, D.order), D.layout === "horizontal" ? "horizontal" : D.layout, D.align);
     layoutCache = { key, tiles: [...g.cells.values()].map((c) => ({ id: ck(c.x, c.y), ch: c.ch, gx: c.x, gy: c.y, inter: c.dirs.size > 1 })), unplaced: g.unplaced, names: list.length };
   }
   if (D.manual && D.manual.key === key) return D.manual.tiles;
@@ -551,13 +576,17 @@ function edit(fn) { const now = Date.now(); if (now - lastEdit > 700) pushHistor
 const swatches = (el, list, cur, key) => { el.innerHTML = list.map(([hex, name]) => `<button type="button" data-${key}="${hex}" aria-label="${name}" title="${name}" aria-pressed="${hex === cur}" style="background:${hex}"></button>`).join(""); };
 function ui() {
   if (document.activeElement !== $("names")) $("names").value = D.names;
-  $("layout").value = D.layout; $("width").value = String(D.width); $("hole").checked = D.hole;
+  $("layout").value = D.layout; $("bias").value = D.bias || "auto"; $("order").value = D.order || "entered"; $("align").value = D.align || "center";
+  $("crossOpts").hidden = D.layout !== "crossword"; $("lineOpts").hidden = D.layout === "crossword"; $("width").value = String(D.width); $("hole").checked = D.hole;
   $("font").innerHTML = FONTS.map(([v, l]) => `<option value="${v}" ${v === D.font ? "selected" : ""}>${l}</option>`).join("");
   swatches($("tileSw"), TILE_COLORS, D.tileColor, "t"); swatches($("letterSw"), LETTER_COLORS, D.letterColor, "l");
   $("resetLayout").disabled = !D.manual;
 }
 $("names").oninput = (e) => edit(() => { D.names = e.target.value; D.manual = null; });
-$("layout").onchange = (e) => edit(() => { D.layout = e.target.value; D.manual = null; });
+$("layout").onchange = (e) => { edit(() => { D.layout = e.target.value; D.manual = null; }); ui(); };
+$("bias").onchange = (e) => edit(() => { D.bias = e.target.value; D.manual = null; });
+$("order").onchange = (e) => edit(() => { D.order = e.target.value; D.manual = null; });
+$("align").onchange = (e) => edit(() => { D.align = e.target.value; D.manual = null; });
 $("width").onchange = (e) => edit(() => { D.width = +e.target.value; D.manual = null; });
 $("font").onchange = (e) => edit(() => { D.font = e.target.value; });
 $("hole").onchange = (e) => edit(() => { D.hole = e.target.checked; });
@@ -568,7 +597,7 @@ $("letterSw").addEventListener("click", (e) => { const b = e.target.closest("[da
 /* ---------------- toast, saving on this device ---------------- */
 let toastT;
 function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
-function summary(d = D) { return `Name tiles (${d.layout}, ${d.width}″ wide${d.hole ? ", hang tab" : ""}): ${parseNames(d.names).join(", ")}`.slice(0, 590); }
+function summary(d = D) { return `Name tiles (${d.layout}${d.layout !== "crossword" && d.align ? " " + d.align : ""}, ${d.width}″ wide${d.hole ? ", hang tab" : ""}): ${parseNames(d.names).join(", ")}`.slice(0, 590); }
 function previewBlob(maxSide) {
   const j = computeJob(); if (j.empty) return Promise.resolve(null);
   const dpi = Math.min(300, maxSide / Math.max(j.pieceW, j.pieceH));
