@@ -161,11 +161,31 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
       <label class="f"><span>One name or word per line</span>
         <textarea class="in" id="names" spellcheck="false" maxlength="600" placeholder="LARA&#10;MADISON&#10;ROGER"></textarea></label>
       <p class="hint" id="namesHint">Up to 12 names. Letters, numbers and &amp; ' - are kept; ♥ ★ ☘ make icon tiles.</p>
+      <label class="f"><span>What goes in the tiles</span><select class="in" id="mode">
+        <option value="names">Names in a layout</option><option value="shape">Names filling a shape</option><option value="image">Names filling my picture</option></select></label>
+      <div id="shapeOpts" hidden style="display:none;gap:12px">
+        <div class="row2">
+          <label class="f"><span>Shape</span><select class="in" id="shape"></select></label>
+          <label class="f"><span>Tile detail</span><select class="in" id="detail">
+            <option value="7">Chunky (7 tiles across)</option><option value="9">Medium (9 across)</option><option value="13">Fine (13 across)</option></select></label>
+        </div>
+      </div>
+      <div id="imgOpts" hidden style="display:none;gap:12px">
+        <div class="actions"><label class="btn gold small" for="imgPick">Choose a picture</label><input type="file" id="imgPick" accept="image/png,image/jpeg,image/webp,image/svg+xml" hidden>
+          <label class="check" style="margin-left:6px"><input type="checkbox" id="invert"> Swap dark and light</label></div>
+        <label class="f"><span>Tile detail</span><select class="in" id="detail2">
+          <option value="9">Chunky (9 tiles across)</option><option value="13">Medium (13 across)</option><option value="17">Fine (17 across)</option></select></label>
+        <p class="hint">Works best with a simple logo or clipart: a dark shape on a light background, or a transparent PNG. Photos turn into messy silhouettes.</p>
+      </div>
+      <div id="fillOpts" hidden style="display:none;gap:12px" class="row2">
+        <label class="f"><span>Between names</span><select class="in" id="sep"><option value="">Nothing</option><option value="♥">♥</option><option value="★">★</option><option value="☘">☘</option><option value="•">•</option></select></label>
+        <label class="check" style="align-self:end;min-height:44px"><input type="checkbox" id="whole"> Keep names whole</label>
+      </div>
       <div class="row2">
         <label class="f"><span>Arrangement</span><select class="in" id="layout">
           <option value="crossword">Interlocking crossword</option><option value="horizontal">Rows</option>
           <option value="vertical">Columns</option><option value="staircase">Staircase</option></select></label>
-        <label class="f"><span>Size</span><select class="in" id="width">
+        <label class="f" id="widthF"><span>Size</span><select class="in" id="width">
           <option value="3.5">Small (about 3.5″ wide)</option><option value="4.5">Standard (about 4.5″ wide)</option><option value="6">Large (about 6″ wide)</option></select></label>
       </div>
       <div class="row2" id="crossOpts">
@@ -181,6 +201,7 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
           <option value="center">Centered</option><option value="left">Start (left / top)</option><option value="right">End (right / bottom)</option></select></label>
       </div>
       <div class="actions"><button class="btn line small" type="button" id="reshuffle">Try another arrangement</button></div>
+      <p class="hint" id="modeHint"></p>
     </div>
 
     <div class="step">
@@ -266,7 +287,7 @@ const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 function newCode() { const a = new Uint8Array(6); crypto.getRandomValues(a); return "D-" + [...a].map((n) => CODE_CHARS[n % CODE_CHARS.length]).join(""); }
 function newDesign() {
   return { v: 2, code: null, product: "tiles", names: "LARA\nMADISON\nROGER\nWILL", layout: "crossword", seed: 1, width: 4.5, font: "Archivo Black|400",
-    tileColor: "#1f3a5f", letterColor: "#ffffff", hole: true, bias: "auto", order: "entered", align: "center", manual: null };
+    tileColor: "#1f3a5f", letterColor: "#ffffff", hole: true, bias: "auto", order: "entered", align: "center", mode: "names", shape: "heart", detail: 9, sep: "♥", whole: true, invert: false, shapeImg: null, manual: null };
 }
 let D = newDesign();
 const hist = { past: [], future: [] };
@@ -359,14 +380,101 @@ function parseNames(text) {
   }
   return list;
 }
+/* ---------------- shapes: tiles fill a silhouette, the names run along the rows ---------------- */
+const inPoly = (pts, x, y) => { let c = false; for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) { const [xi, yi] = pts[i], [xj, yj] = pts[j]; if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+const STAR = Array.from({ length: 10 }, (_, k) => { const a = -Math.PI / 2 + k * Math.PI / 5, r = k % 2 ? 0.46 : 1; return [Math.cos(a) * r, Math.sin(a) * r]; });
+const SHAPES = {
+  heart: ["Heart", (u, v) => { const x = u * 1.25, y = -v * 1.25 + 0.15; return (x * x + y * y - 1) ** 3 - x * x * y ** 3 <= 0; }],
+  star: ["Star", (u, v) => inPoly(STAR, u, v)],
+  circle: ["Circle", (u, v) => u * u + v * v <= 1],
+  square: ["Square", () => true],
+  diamond: ["Diamond", (u, v) => Math.abs(u) + Math.abs(v) <= 1],
+  triangle: ["Triangle", (u, v) => Math.abs(u) <= (v + 1) / 2],
+  hexagon: ["Hexagon", (u, v) => Math.abs(v) <= 0.87 && Math.abs(u) + Math.abs(v) * 0.577 <= 1],
+  house: ["House", (u, v) => v < -0.1 ? Math.abs(u) <= (v + 1) / 0.9 : Math.abs(u) <= 0.8],
+  cross: ["Cross", (u, v) => Math.abs(u) <= 0.36 || Math.abs(v) <= 0.36],
+  moon: ["Crescent moon", (u, v) => u * u + v * v <= 1 && (u - 0.5) ** 2 + v * v > 0.72],
+  tree: ["Tree", (u, v) => v < 0.55 ? Math.abs(u) <= (v + 1) / 1.55 * 0.9 : Math.abs(u) <= 0.2],
+  shield: ["Shield", (u, v) => Math.abs(u) <= (v <= 0.1 ? 0.85 : 0.85 * Math.sqrt(Math.max(0, 1 - ((v - 0.1) / 0.9) ** 2)))],
+  paw: ["Paw print", (u, v) => ((u / 0.62) ** 2 + ((v - 0.35) / 0.55) ** 2 <= 1) || [[-0.62, -0.1], [-0.22, -0.52], [0.22, -0.52], [0.62, -0.1]].some(([a, b]) => (u - a) ** 2 + (v - b) ** 2 <= 0.12)],
+};
+function shapeMask(key, n) {
+  const f = (SHAPES[key] || SHAPES.heart)[1], rows = [];
+  for (let j = 0; j < n; j++) { let r = ""; for (let i = 0; i < n; i++) r += f((i + 0.5) / n * 2 - 1, (j + 0.5) / n * 2 - 1) ? "1" : "0"; rows.push(r); }
+  return rows;
+}
+const imgData = new Map();   // picture source → pixels (kept in memory only; the picture itself is stored small inside the design)
+function loadImgData(src) {
+  if (imgData.has(src)) return imgData.get(src);
+  imgData.set(src, null); const im = new Image();
+  im.onload = () => { const c = document.createElement("canvas"); c.width = im.naturalWidth; c.height = im.naturalHeight; const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(im, 0, 0); imgData.set(src, x.getImageData(0, 0, c.width, c.height)); layoutCache.key = ""; schedule(); };
+  im.src = src; return null;
+}
+function imageMask(src, n, invert) {
+  const d = loadImgData(src); if (!d) return null;
+  const m = Math.max(3, Math.min(22, Math.round(n * d.height / d.width))), px = d.data; let hasAlpha = false;
+  for (let i = 3; i < px.length; i += 4) if (px[i] < 250) { hasAlpha = true; break; }
+  const rows = [];
+  for (let j = 0; j < m; j++) {
+    let r = "";
+    for (let i = 0; i < n; i++) {
+      const x0 = Math.floor(i * d.width / n), x1 = Math.max(x0 + 1, Math.floor((i + 1) * d.width / n)), y0 = Math.floor(j * d.height / m), y1 = Math.max(y0 + 1, Math.floor((j + 1) * d.height / m));
+      let on = 0, tot = 0;
+      for (let y = y0; y < y1; y++) for (let x = x0; x < x1; x++) { const k = (y * d.width + x) * 4, a = px[k + 3] / 255, luma = (0.299 * px[k] + 0.587 * px[k + 1] + 0.114 * px[k + 2]) / 255; const v = hasAlpha ? a : (1 - luma) * a; on += v > 0.5 ? 1 : 0; tot++; }
+      let filled = on / tot > 0.45; if (invert) filled = !filled; r += filled ? "1" : "0";
+    }
+    rows.push(r);
+  }
+  return rows;
+}
+// Keeps only the largest touching group of tiles so the piece cuts out as one.
+function largestGroup(cells) {
+  const set = new Map(cells.map((c) => [ck(c[0], c[1]), c])), seen = new Set(); let best = [];
+  for (const c of cells) {
+    const k0 = ck(c[0], c[1]); if (seen.has(k0)) continue;
+    const grp = [], stack = [c]; seen.add(k0);
+    while (stack.length) { const [x, y] = stack.pop(); grp.push([x, y]); for (const [dx, dy] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) { const k = ck(x + dx, y + dy); if (set.has(k) && !seen.has(k)) { seen.add(k); stack.push([x + dx, y + dy]); } } }
+    if (grp.length > best.length) best = grp;
+  }
+  return best;
+}
+function fillMask(rows, names, seed) {
+  const cells = []; rows.forEach((r, j) => { for (let i = 0; i < r.length; i++) if (r[i] === "1") cells.push([i, j]); });
+  const keep = largestGroup(cells), keepSet = new Set(keep.map((c) => ck(c[0], c[1])));
+  const runs = [];
+  rows.forEach((r, j) => { let i = 0; while (i < r.length) { if (r[i] === "1" && keepSet.has(ck(i, j))) { let k = i; while (k < r.length && r[k] === "1" && keepSet.has(ck(k, j))) k++; runs.push({ y: j, x0: i, len: k - i }); i = k; } else i++; } });
+  if (!names.length) return { tiles: [], note: "" };
+  const rot = (seed - 1) % names.length, order = names.slice(rot).concat(names.slice(0, rot)), filler = D.sep || "•";
+  const toks = order.map((n) => [...n].concat(D.sep ? [D.sep] : [])), maxRun = Math.max(...runs.map((r) => r.len));
+  const longest = Math.max(...order.map((n) => [...n].length));
+  const whole = D.whole && longest <= maxRun; let t = 0, off = 0, note = D.whole && !whole ? "Some names are longer than the shape is wide, so they wrap." : "";
+  if (cells.length > keep.length) note = (note ? note + " " : "") + `${cells.length - keep.length} tile${cells.length - keep.length > 1 ? "s" : ""} that didn't touch the main piece were left out.`;
+  const tiles = [];
+  for (const run of runs) {
+    let pos = 0;
+    while (pos < run.len) {
+      const tok = toks[t % toks.length], left = run.len - pos;
+      if (whole) {
+        if (tok.length <= left) { tok.forEach((ch, k) => tiles.push({ x: run.x0 + pos + k, y: run.y, ch })); pos += tok.length; t++; }
+        else { for (; pos < run.len; pos++) tiles.push({ x: run.x0 + pos, y: run.y, ch: filler }); }
+      } else { tiles.push({ x: run.x0 + pos, y: run.y, ch: tok[off] }); pos++; off++; if (off >= tok.length) { off = 0; t++; } }
+    }
+  }
+  return { tiles: tiles.map((c) => ({ id: ck(c.x, c.y), ch: c.ch, gx: c.x, gy: c.y, inter: false })), note };
+}
+
 // Tile positions are rebuilt only when names, arrangement, shape or the shuffle change; hand-moved tiles are kept in D.manual.
-let layoutCache = { key: "", tiles: [], unplaced: [], names: 0 };
+let layoutCache = { key: "", tiles: [], unplaced: [], names: 0, note: "" };
 function ensureLayout() {
   const list = parseNames(D.names), aspect = D.bias === "square" ? 1 : D.bias === "wide" ? 1.7 : D.bias === "tall" ? 0.58 : Math.max(0.4, Math.min(2.5, D.width / FIX.maxH * 1.15));
-  const key = JSON.stringify([list, D.layout, D.seed, +aspect.toFixed(2), D.order, D.align]);
-  if (layoutCache.key !== key) {
+  const key = JSON.stringify([list, D.layout, D.seed, +aspect.toFixed(2), D.order, D.align, D.mode, D.shape, D.detail, D.sep, D.whole, D.invert, D.shapeImg ? D.shapeImg.length : 0, D.shapeImg ? imgData.has(D.shapeImg) && !!imgData.get(D.shapeImg) : 0]);
+  if (layoutCache.key !== key && D.mode !== "names") {
+    let rows = D.mode === "shape" ? shapeMask(D.shape, +D.detail) : (D.shapeImg ? imageMask(D.shapeImg, +D.detail, D.invert) : null);
+    const f = rows && list.length ? fillMask(rows, list, D.seed) : { tiles: [], note: "" };
+    layoutCache = { key, tiles: f.tiles, unplaced: [], names: list.length, note: f.note, needImg: D.mode === "image" && !rows };
+  } else if (layoutCache.key !== key) {
     const g = D.layout === "crossword" ? crosswordLayout(list, D.seed, aspect) : lineLayout(orderWords(list, D.order), D.layout === "horizontal" ? "horizontal" : D.layout, D.align);
-    layoutCache = { key, tiles: [...g.cells.values()].map((c) => ({ id: ck(c.x, c.y), ch: c.ch, gx: c.x, gy: c.y, inter: c.dirs.size > 1 })), unplaced: g.unplaced, names: list.length };
+    layoutCache = { key, tiles: [...g.cells.values()].map((c) => ({ id: ck(c.x, c.y), ch: c.ch, gx: c.x, gy: c.y, inter: c.dirs.size > 1 })), unplaced: g.unplaced, names: list.length, note: "" };
   }
   if (D.manual && D.manual.key === key) return D.manual.tiles;
   if (D.manual && D.manual.key !== key) D.manual = null;
@@ -427,7 +535,8 @@ function roundedPath(loops, radius) {
 }
 function computeJob() {
   const tiles = ensureLayout(), warnings = [];
-  if (!tiles.length) return { empty: true, warnings, text: "Add at least one name to see your design." };
+  if (!tiles.length) return { empty: true, warnings, text: layoutCache.needImg ? "Choose a picture to fill with your names." : "Add at least one name to see your design." };
+  if (layoutCache.note) warnings.push(layoutCache.note);
   let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
   for (const t of tiles) { minX = Math.min(minX, t.gx); minY = Math.min(minY, t.gy); maxX = Math.max(maxX, t.gx + 1); maxY = Math.max(maxY, t.gy + 1); }
   const m = FIX.cutOffset; let tab = null;
@@ -577,12 +686,35 @@ const swatches = (el, list, cur, key) => { el.innerHTML = list.map(([hex, name])
 function ui() {
   if (document.activeElement !== $("names")) $("names").value = D.names;
   $("layout").value = D.layout; $("bias").value = D.bias || "auto"; $("order").value = D.order || "entered"; $("align").value = D.align || "center";
-  $("crossOpts").hidden = D.layout !== "crossword"; $("lineOpts").hidden = D.layout === "crossword"; $("width").value = String(D.width); $("hole").checked = D.hole;
+  const names = D.mode === "names", show = (id, on, disp = "grid") => { $(id).hidden = !on; $(id).style.display = on ? disp : "none"; };
+  $("mode").value = D.mode; $("shape").innerHTML = Object.entries(SHAPES).map(([k, v]) => `<option value="${k}" ${k === D.shape ? "selected" : ""}>${v[0]}</option>`).join("");
+  $("detail").value = String(D.detail); $("detail2").value = String(D.detail); $("sep").value = D.sep; $("whole").checked = D.whole; $("invert").checked = D.invert;
+  show("shapeOpts", D.mode === "shape"); show("imgOpts", D.mode === "image"); show("fillOpts", !names);
+  $("layout").parentElement.hidden = !names; $("crossOpts").hidden = !names || D.layout !== "crossword"; $("lineOpts").hidden = !names || D.layout === "crossword";
+  $("modeHint").textContent = names ? "" : "The names repeat along the rows to fill the shape. The gold cut line follows the edge of the tiles."; $("width").value = String(D.width); $("hole").checked = D.hole;
   $("font").innerHTML = FONTS.map(([v, l]) => `<option value="${v}" ${v === D.font ? "selected" : ""}>${l}</option>`).join("");
   swatches($("tileSw"), TILE_COLORS, D.tileColor, "t"); swatches($("letterSw"), LETTER_COLORS, D.letterColor, "l");
   $("resetLayout").disabled = !D.manual;
 }
 $("names").oninput = (e) => edit(() => { D.names = e.target.value; D.manual = null; });
+$("mode").onchange = (e) => { edit(() => { D.mode = e.target.value; D.manual = null; if (D.mode === "shape" && +D.detail > 13) D.detail = 9; if (D.mode === "image" && +D.detail < 9) D.detail = 9; }); ui(); };
+$("shape").onchange = (e) => edit(() => { D.shape = e.target.value; D.manual = null; });
+$("detail").onchange = (e) => edit(() => { D.detail = +e.target.value; D.manual = null; });
+$("detail2").onchange = (e) => edit(() => { D.detail = +e.target.value; D.manual = null; });
+$("sep").onchange = (e) => edit(() => { D.sep = e.target.value; D.manual = null; });
+$("whole").onchange = (e) => edit(() => { D.whole = e.target.checked; D.manual = null; });
+$("invert").onchange = (e) => edit(() => { D.invert = e.target.checked; D.manual = null; });
+$("imgPick").addEventListener("change", (e) => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  const url = URL.createObjectURL(f), im = new Image();
+  im.onload = () => {
+    const k = Math.min(1, 160 / Math.max(im.naturalWidth || 160, im.naturalHeight || 160)), c = document.createElement("canvas");
+    c.width = Math.max(1, Math.round((im.naturalWidth || 160) * k)); c.height = Math.max(1, Math.round((im.naturalHeight || 160) * k));
+    c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+    edit(() => { D.shapeImg = c.toDataURL("image/png"); D.manual = null; }); ui();
+  };
+  im.onerror = () => { URL.revokeObjectURL(url); toast("That picture couldn't be opened"); }; im.src = url;
+});
 $("layout").onchange = (e) => { edit(() => { D.layout = e.target.value; D.manual = null; }); ui(); };
 $("bias").onchange = (e) => edit(() => { D.bias = e.target.value; D.manual = null; });
 $("order").onchange = (e) => edit(() => { D.order = e.target.value; D.manual = null; });
@@ -597,7 +729,8 @@ $("letterSw").addEventListener("click", (e) => { const b = e.target.closest("[da
 /* ---------------- toast, saving on this device ---------------- */
 let toastT;
 function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
-function summary(d = D) { return `Name tiles (${d.layout}${d.layout !== "crossword" && d.align ? " " + d.align : ""}, ${d.width}″ wide${d.hole ? ", hang tab" : ""}): ${parseNames(d.names).join(", ")}`.slice(0, 590); }
+function summary(d = D) { if (d.mode === "shape") return `Name tiles in a ${(SHAPES[d.shape] || [d.shape])[0].toLowerCase()} shape (${d.width}″ wide${d.hole ? ", hang tab" : ""}): ${parseNames(d.names).join(", ")}`.slice(0, 590); if (d.mode === "image") return `Name tiles filling a customer picture (${d.width}″ wide${d.hole ? ", hang tab" : ""}): ${parseNames(d.names).join(", ")}`.slice(0, 590);
+  return `Name tiles (${d.layout}${d.layout !== "crossword" && d.align ? " " + d.align : ""}, ${d.width}″ wide${d.hole ? ", hang tab" : ""}): ${parseNames(d.names).join(", ")}`.slice(0, 590); }
 function previewBlob(maxSide) {
   const j = computeJob(); if (j.empty) return Promise.resolve(null);
   const dpi = Math.min(300, maxSide / Math.max(j.pieceW, j.pieceH));
