@@ -164,6 +164,21 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 .card:focus-visible .ph { outline: 2px solid var(--gold-2); outline-offset: 3px; }
 .badge { position: absolute; top: 10px; left: 10px; z-index: 2; font-size: 11px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 5px 9px; border-radius: 999px; background: rgba(10, 18, 32, .82); border: 1px solid var(--line); color: var(--gold-2); backdrop-filter: blur(6px); }
 .badge.low { color: #ffd0c4; border-color: rgba(255, 122, 107, .4); }
+.badge.out { background: rgba(10, 18, 32, .92); color: #ffb4a8; border-color: rgba(255, 122, 107, .5); }
+.badge.new { left: auto; right: 10px; background: linear-gradient(180deg, #ecc876, #c99a3f); color: #1b1305; border-color: transparent; }
+.card.soldout .ph img { filter: grayscale(.85) brightness(.7); }
+.card.soldout .nm, .card.soldout .pr { opacity: .6; }
+.vacation { background: linear-gradient(90deg, #2d6a6a, #3b8f8a, #2d6a6a); color: #f2fffd; text-align: center; font-weight: 700; font-size: 14px; padding: 10px 16px; }
+.pnote { border-radius: 14px; padding: 12px 14px; font-size: 14px; line-height: 1.45; background: rgba(60, 200, 190, .1); border: 1px solid rgba(60, 200, 190, .3); }
+.pnote.out { background: rgba(255, 122, 107, .1); border-color: rgba(255, 122, 107, .35); }
+.bundle { display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px; align-items: center; padding: 12px; border-radius: 16px; border: 1px dashed var(--gold); background: rgba(217, 171, 79, .06); }
+.bundle img { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; }
+.bundle b { display: block; font-size: 14.5px; line-height: 1.3; }
+.bundle small { color: var(--muted); font-size: 12.5px; }
+.bundle .bgo { grid-column: 1 / -1; display: flex; gap: 8px; }
+.bundle .bgo .btn { flex: 1; min-height: 42px; }
+.cart-foot .disc { display: flex; justify-content: space-between; color: #7fd99a; font-weight: 700; font-size: 14.5px; }
+.cart-foot .suggest { border: 1px dashed var(--gold); border-radius: 14px; padding: 10px 12px; font-size: 13.5px; display: grid; gap: 8px; }
 .card .nm { font-weight: 700; font-size: 15px; line-height: 1.3; }
 .card .pr { font-family: var(--f-display); font-size: 18px; color: var(--gold-2); }
 .card .pr small { font-family: var(--f-body); font-size: 12.5px; color: var(--muted); font-weight: 600; }
@@ -357,6 +372,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 </head>
 <body>
 <div class="announce" id="announce" hidden><span id="announceText"></span></div>
+<div class="vacation" id="vacation" hidden>🌴 <span id="vacText"></span></div>
 
 <header class="top">
   <div class="wrap">
@@ -579,6 +595,8 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
     <div class="cart-list" id="cartList"></div>
     <div class="cart-foot" id="cartFoot">
       <div class="tot"><span>Subtotal</span><b id="cartSub">$0</b></div>
+      <div class="disc" id="cartDisc" hidden></div>
+      <div class="suggest" id="cartSuggest" hidden></div>
       <p class="note" id="cartNote"></p>
       <p class="chat-err" id="cartErr" hidden></p>
       <button class="btn btn-gold pay-btn" type="button" id="checkoutBtn">Checkout</button>
@@ -617,7 +635,12 @@ let P = window.PRAJO_PRODUCTS || [];   // built-in copy; replaced by the live li
 const SHARE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4M12 2v14"/></svg>`;
 let SHOP = "https://www.etsy.com/shop/PrAjoCustomStudio";
 /* ---------- site settings (edited in admin: ⚙ Settings → Site settings). Empty fields keep the text in this page. ---------- */
-let SITE = {};
+let SITE = {}, shopReady = false;
+const vacationOn = () => !!SITE.vacationOn;
+const vacationText = () => SITE.vacationMsg || `We're on a short break${SITE.vacationBack ? `, back ${SITE.vacationBack}` : ""}. Made-to-order items are paused. Printables are still available instantly!`;
+const newDays = () => Number(SITE.newDays) > 0 ? Number(SITE.newDays) : 14;
+const lowAt = () => Number(SITE.lowStockAt) >= 0 && SITE.lowStockAt !== undefined && SITE.lowStockAt !== "" ? Number(SITE.lowStockAt) : 3;
+const bundlePct = () => SITE.bundleOff ? 0 : Math.min(50, Math.max(0, SITE.bundlePct !== undefined && SITE.bundlePct !== "" ? Number(SITE.bundlePct) : 10));
 try { SITE = JSON.parse(localStorage.getItem("prajo:site") || "{}"); } catch {}
 const richText = (t) => esc(t).replace(/\*\*(.+?)\*\*/g, "<b>$1</b>").replace(/\n/g, "<br>");
 const shade = (hex, to, amt) => {
@@ -651,6 +674,9 @@ function applySite() {
     $("swatchBox").innerHTML = cols.map((c, i) => `<button type="button" data-c="${shade(c.hex, "black", .62)},${c.hex},${shade(c.hex, "white", .3)},${shade(c.hex, "black", .72)}" aria-pressed="${i === 0}" style="background:${c.hex}" aria-label="${esc(c.name)}"></button>`).join("");
     $("swatchBox").querySelector("button").click();
   }
+  $("vacation").hidden = !vacationOn();
+  if (vacationOn()) $("vacText").textContent = vacationText();
+  if (shopReady) refreshShop();
   if (S.occasions) $("track").innerHTML = [...Array(2)].flatMap(() => S.occasions.split("\n").map((x) => x.trim()).filter(Boolean)).map((o) => `<span>${esc(o)}</span>`).join("");
 }
 const SITE_KEY = "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b";
@@ -772,24 +798,34 @@ $("colls").addEventListener("click", (e) => {
 });
 
 /* ---------- shop grid ---------- */
-let filter = "all";
+let filter = "all", P0 = P;
+// Newest first by default; "My custom order" (Site settings) uses the drag order from the admin page.
+function applyOrder() {
+  const custom = SITE.productOrder === "custom" || !P0.every((x) => x.created);   // custom = the order from the admin page (already sorted by the database)
+  P = custom ? [...P0] : [...P0].sort((a, b) => b.created - a.created || (a.sort ?? 0) - (b.sort ?? 0));
+}
+function refreshShop() { applyOrder(); renderCollections(); setFilter(filter); }
+const isNew = (p) => p.created && (Date.now() - p.created) / 86400000 <= newDays();
+const soldOut = (p) => !p.digital && p.stock <= 0;
 function setFilter(f) {
   filter = f;
   $("filters").innerHTML = [{ id: "all", label: "All" }, ...CATS].filter((c) => c.id === "all" || byCat(c.id).length)
     .map((c) => `<button type="button" data-f="${c.id}" aria-pressed="${c.id === filter}">${esc(c.label)}</button>`).join("");
   const list = filter === "all" ? P : byCat(filter);
   $("grid").innerHTML = list.map((p) => {
-    const badge = p.digital ? `<span class="badge">Instant download</span>`
-      : p.stock > 0 && p.stock <= 3 ? `<span class="badge low">Only ${p.stock} left</span>`
+    const badge = soldOut(p) ? `<span class="badge out">Sold out</span>`
+      : p.digital ? `<span class="badge">Instant download</span>`
+      : p.stock > 0 && p.stock <= lowAt() ? `<span class="badge low">Only ${p.stock} left</span>`
       : p.personalizable ? `<span class="badge">Personalizable</span>` : "";
-    return `<a class="card" href="#p/${esc(p.id)}">
-      <span class="ph">${badge}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy">${p.images[1] ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
+    return `<a class="card${soldOut(p) ? " soldout" : ""}" href="#p/${esc(p.id)}">
+      <span class="ph">${badge}${isNew(p) && !soldOut(p) ? `<span class="badge new">New</span>` : ""}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy">${p.images[1] ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
       <span class="nm">${esc(p.name)}</span>
       <span class="pr">${priceHtml(p)}</span></a>`;
   }).join("");
 }
 $("filters").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setFilter(b.dataset.f); });
 setFilter("all");
+shopReady = true;
 
 /* ---------- live listings (edited in admin.html, stored in Supabase) ---------- */
 const DB = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" };
@@ -818,7 +854,7 @@ function fromRow(r) {
     return Object.keys(photos).length ? { ...v, photos } : { ...v };
   });
   return { id: r.id, name: r.name, title: r.title || r.name, category: r.category, price: Number(r.price), currency: r.currency,
-    stock: r.stock, digital: r.digital, hasFile: (r.files || []).length > 0, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
+    stock: r.stock, sort: r.sort, created: r.created_at ? Date.parse(r.created_at) : 0, bundleIds: r.bundle_ids || [], digital: r.digital, hasFile: (r.files || []).length > 0, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
 }
 (async function loadListings() {
   try {
@@ -826,8 +862,8 @@ function fromRow(r) {
     if (!r.ok) return;
     const list = (await r.json()).map(fromRow).filter((p) => p.images.length);
     if (!list.length) return;
-    P = list;
-    renderCollections(); setFilter(filter);
+    P0 = list;
+    refreshShop();
     if (location.hash.startsWith("#p/")) { $("sheet").hidden = true; route(); }
   } catch { /* keep the built-in copy */ }
 })();
@@ -869,8 +905,8 @@ function openProduct(id) {
     <div class="pr">${priceHtml(p)}${p.stock > 0 && p.stock <= 3 && !p.digital ? ` <small>· only ${p.stock} left</small>` : ""}</div>
     ${p.variations.map((v, vi) => `<div class="opt"><span>${esc(v.name)}</span><div class="chips">${v.values.map((x, i) => `<button type="button" data-v="${vi}" data-val="${esc(x)}" aria-pressed="${i === 0}">${esc(/^\d+$/.test(x) ? x + "oz" : x)}</button>`).join("")}</div></div>`).join("")}
     <div class="perks">${perks.map((x) => `<span>${esc(x)}</span>`).join("")}</div>
-    ${!buyable(p) ? `<div class="actions">
-      <a class="btn btn-gold" href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">${p.digital ? "Get it on Etsy" : "Order on Etsy"}</a>
+    ${!buyable(p) ? `${whyNot(p) ? `<div class="pnote ${whyNot(p).cls}">${esc(whyNot(p).t)}</div>` : ""}<div class="actions">
+      ${whyNot(p) ? "" : `<a class="btn btn-gold" href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">${p.digital ? "Get it on Etsy" : "Order on Etsy"}</a>`}
       <div class="ask-row"><button class="btn btn-line" type="button" data-ask>Ask about this item</button><button class="btn btn-line" type="button" data-share aria-label="Share this product">${SHARE_ICON} Share</button></div>
     </div>` : `
     ${p.personalizable && !p.digital ? `<label class="personal opt"><span>Personalization</span><input id="pPersonal" maxlength="200" placeholder="Name or text to print (leave empty if none)" autocomplete="off"></label>` : ""}
@@ -883,6 +919,10 @@ function openProduct(id) {
       <div class="ask-row"><button class="btn btn-line" type="button" data-ask>Ask about this item</button><button class="btn btn-line" type="button" data-share aria-label="Share this product">${SHARE_ICON} Share</button></div>
       <p class="etsy-link">Prefer Etsy? <a href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">Order it there</a></p>
     </div>`}
+    ${(() => { const q = buyable(p) ? bundlePartner(p) : null; if (!q) return "";
+      const plain = !q.variations.length && !(q.personalizable && !q.digital);
+      return `<div class="bundle"><img src="${esc(q.images[0].card)}" alt=""><span><b>🎁 Bundle &amp; save ${bundlePct()}%</b><small>Add <b style="display:inline">${esc(q.name)}</b> (${fmt(q.price)}) and take ${bundlePct()}% off the lower-priced item.</small></span>
+        <span class="bgo"><a class="btn btn-line" href="#p/${esc(q.id)}">View</a>${plain ? `<button class="btn btn-gold" type="button" data-bundle="${esc(q.id)}">+ Add to cart</button>` : ""}</span></div>`; })()}
     <div class="desc">${descHtml(p.description)}</div>`;
   pQty = 1;
   $("sheet").hidden = false;
@@ -1108,7 +1148,28 @@ const CHECKOUT_URL = "https://mrnnrmyvjkyjcjnfomna.supabase.co/functions/v1/chec
 // Which options are on is set on the admin page; the checkout function charges the real amounts.
 let CO = { enabled: true, shipping: true, shipFee: 5.95, freeOver: 50, delivery: true, deliveryFee: 7, pickup: true };
 const canBuy = () => CO.enabled && (CO.shipping || CO.delivery || CO.pickup);
-const buyable = (p) => p.digital ? CO.enabled && !!p.hasFile : canBuy();
+const buyable = (p) => p.digital ? CO.enabled && !!p.hasFile : canBuy() && !vacationOn() && !soldOut(p);
+// Why a product can't be bought here (shown on its page).
+const whyNot = (p) => soldOut(p) ? { cls: "out", t: "Sold out right now. Message us and we'll tell you when it's back, or ask about a custom version." }
+  : !p.digital && vacationOn() ? { cls: "", t: "🌴 " + vacationText() } : null;
+
+/* ---------- bundle & save: pick two related products, get a discount on the lower-priced one ---------- */
+// Related = same category, or linked as "goes well with" in the admin page.
+const related = (a, b) => a.id !== b.id && (a.category === b.category || a.bundleIds.includes(b.id) || b.bundleIds.includes(a.id));
+function bundlePartner(p) {
+  if (!bundlePct()) return null;
+  const sc = (q) => (p.bundleIds.includes(q.id) || q.bundleIds.includes(p.id) ? 1000 : 0) + (q.tags || []).filter((t) => (p.tags || []).includes(t)).length * 10 - Math.abs(q.price - p.price) / 5;
+  return P.filter((q) => related(p, q) && buyable(q) && q.digital === p.digital).sort((a, b) => sc(b) - sc(a))[0] || null;
+}
+// Same rule the checkout function applies: the cheapest item that has a related item in the cart gets the discount.
+function bundleCalc(prods) {
+  const pct = bundlePct(); if (!pct) return { amt: 0, pct: 0 };
+  const uniq = [...new Map(prods.map((q) => [q.id, q])).values()];
+  const part = uniq.filter((a) => uniq.some((b) => related(a, b)));
+  if (!part.length) return { amt: 0, pct };
+  const low = part.reduce((m, q) => (q.price < m.price ? q : m));
+  return { amt: Math.round(Math.round(low.price * 100) * pct / 100) / 100, pct, item: low };
+}
 fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "settings" }) })
   .then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && typeof d.enabled === "boolean") { CO = d; renderCartBadge(); } }).catch(() => {});
 const cart = {
@@ -1132,6 +1193,12 @@ function chosenOptions() {
 $("info").addEventListener("click", (e) => {
   const q = e.target.closest("[data-qty]");
   if (q) { pQty = Math.max(1, Math.min(50, pQty + +q.dataset.qty)); $("pQty").textContent = pQty; return; }
+  const bq = e.target.closest("[data-bundle]");
+  if (bq) {
+    const q = P.find((x) => x.id === bq.dataset.bundle);
+    if (q) { const it = cart.get(); if (!it.some((i) => i.id === q.id)) it.push({ id: q.id, qty: 1, options: {}, personalization: "", ...(q.digital ? { digital: true } : {}) }); cart.set(it); toast(`${q.name} added`); closeProduct(false); openCart(); }
+    return;
+  }
   if (e.target.closest("#addCart") && cur) {
     const options = chosenOptions(), personalization = ($("pPersonal")?.value || "").trim();
     const items = cart.get();
@@ -1167,21 +1234,28 @@ function renderCart() {
         ${i.p.digital ? `<small>💾 Download</small>` : `<div class="qty"><button type="button" data-cq="-1" aria-label="One less">−</button><span>${i.qty}</span><button type="button" data-cq="1" aria-label="One more">+</button></div>`}
         <button class="rm" type="button" data-crm>Remove</button></div></div>`;
   }).join("");
-  $("cartSub").textContent = fmt(sub);
+  const bd = bundleCalc(known.map((i) => i.p));
+  $("cartSub").textContent = fmt(sub - bd.amt);
+  $("cartDisc").hidden = !bd.amt;
+  if (bd.amt) $("cartDisc").innerHTML = `<span>🎁 Bundle &amp; save ${bd.pct}%</span><span>−${fmt(bd.amt)}</span>`;
+  const inCart = new Set(known.map((i) => i.id)), sug = !bd.amt && known.length ? known.map((i) => bundlePartner(i.p)).find((q) => q && !inCart.has(q.id)) : null;
+  $("cartSuggest").hidden = !sug;
+  if (sug) $("cartSuggest").innerHTML = `<span>🎁 Add <b>${esc(sug.name)}</b> (${fmt(sug.price)}) and save ${bundlePct()}% on the lower-priced item.</span><a class="btn btn-line" href="#p/${esc(sug.id)}" id="cartSugLink">See it</a>`;
   const ways = [
     CO.shipping && (CO.freeOver > 0 && sub >= CO.freeOver ? "🎉 Free shipping unlocked." : `Shipping ${fmt(CO.shipFee)}${CO.freeOver > 0 ? `, free over ${fmt(CO.freeOver)}` : ""}.`),
     CO.delivery && `Local delivery in the Sacramento area ${fmt(CO.deliveryFee)}.`,
     CO.pickup && "Free local pickup in Sacramento.",
   ].filter(Boolean);
   const physical = known.some((i) => !i.p.digital), ok = known.every((i) => buyable(i.p));
-  $("cartNote").textContent = !ok ? "Online checkout is paused right now. Please order on Etsy or message us."
+  const blocked = known.find((i) => !buyable(i.p));
+  $("cartNote").textContent = !ok ? (blocked && soldOut(blocked.p) ? `${blocked.p.name} just sold out. Please remove it to continue.` : vacationOn() && physical ? vacationText() + " Remove made-to-order items to buy printables now." : "Online checkout is paused right now. Please order on Etsy or message us.")
     : physical ? `${ways.join(" ")} California sales tax is added at checkout.${known.some((i) => i.p.digital) ? " Downloads are ready right after you pay." : ""}`
     : "💾 Instant download: your files are ready right after you pay. Nothing is shipped.";
   $("checkoutBtn").disabled = !ok;
   if (items.length !== known.length) cart.set(known.map(({ p, ...i }) => i));
 }
 $("cartList").addEventListener("click", (e) => {
-  if (e.target.id === "cartShop") { closeCart(); return; }
+  if (e.target.id === "cartShop" || e.target.id === "cartSugLink") { closeCart(); return; }
   const row = e.target.closest(".ci"); if (!row) return;
   const items = cart.get(), i = items[+row.dataset.idx];
   if (e.target.closest("[data-cq]")) { i.qty = Math.max(1, Math.min(50, i.qty + +e.target.closest("[data-cq]").dataset.cq)); }

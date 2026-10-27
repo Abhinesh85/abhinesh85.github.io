@@ -151,6 +151,12 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .menu button, .menu a { display: grid; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer; text-decoration: none; }
 .menu small { font-weight: 500; font-size: 12.5px; color: var(--muted); }
 .menu button:hover, .menu a:hover, .menu button:focus-visible, .menu a:focus-visible { background: rgba(245, 236, 220, .06); outline: none; }
+.stks { display: flex; gap: 8px; flex-wrap: wrap; font-size: 11.5px; font-weight: 800; }
+.stk { color: var(--muted); }
+.stk.out { color: #ff8f8f; }
+.stk.low { color: #ffcf8a; }
+.stk.new { color: var(--gold-2); }
+.bchips { display: flex; flex-wrap: wrap; gap: 6px; }
 /* download files */
 .dl-list { display: grid; gap: 8px; }
 .dl-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--panel); font-weight: 700; font-size: 14.5px; }
@@ -200,6 +206,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     <div class="menu-wrap" id="menuWrap" hidden>
       <button class="btn line" type="button" id="menuBtn" aria-haspopup="menu" aria-expanded="false">⚙ Settings</button>
       <div class="menu" id="menu" role="menu" hidden>
+        <button type="button" role="menuitem" id="vacBtn">🌴 Vacation mode<small id="vacState">Checking…</small></button>
         <button type="button" role="menuitem" id="siteBtn">Site settings<small>Homepage text, announcement, colors, links</small></button>
         <button type="button" role="menuitem" id="bulkBtn">Attach download files<small>Add files to many digital listings at once</small></button>
         <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
@@ -406,8 +413,21 @@ async function boot() {
   $("appView").hidden = false; $("newBtn").hidden = false; $("menuWrap").hidden = false;
   let resetting = false; try { resetting = sessionStorage.getItem("prajo:setpw") === "1"; } catch {}
   if (resetting) openPw(true);
-  await Promise.all([loadRows(), loadPrices()]);
+  await Promise.all([loadRows(), loadPrices(), paintVac()]);
 }
+/* ---------- vacation mode: one tap from the menu (full text in Site settings) ---------- */
+async function readSiteRow() { const { data } = await sb.from("site_settings").select("data").eq("id", 1).maybeSingle(); return data?.data || {}; }
+async function paintVac() {
+  try { const on = !!(await readSiteRow()).vacationOn; $("vacState").textContent = on ? "ON: made-to-order paused. Tap to turn off" : "Off. Tap to pause made-to-order items"; $("vacBtn").dataset.on = on ? "1" : ""; }
+  catch { $("vacState").textContent = "Set up Site settings first"; }
+}
+$("vacBtn").onclick = async () => {
+  const cur = await readSiteRow(), next = { ...cur };
+  if (cur.vacationOn) delete next.vacationOn; else next.vacationOn = true;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+  if (error) return toast("Couldn't change vacation mode: " + error.message);
+  toast(next.vacationOn ? "Vacation mode ON. Made-to-order items are paused" : "Vacation mode OFF. The shop is open"); paintVac();
+};
 $("outBtn").onclick = async () => { await sb.auth.signOut({ scope: "local" }).catch(() => {}); location.reload(); };   // this device only
 // Settings menu: everything that isn't a listing lives here.
 const setMenu = (open) => { $("menu").hidden = !open; $("menuBtn").setAttribute("aria-expanded", open); };
@@ -435,6 +455,12 @@ async function loadPrices() {
 const priceOf = (r) => r.price_source === "pricing" && prices[r.pricing_id] ? prices[r.pricing_id].sell : Number(r.price);
 
 /* ---------- list ---------- */
+function stockTag(r) {
+  const out = [];
+  if (!r.digital) out.push(r.stock <= 0 ? `<span class="stk out">● Sold out</span>` : r.stock <= 3 ? `<span class="stk low">● ${r.stock} left</span>` : `<span class="stk">${r.stock} in stock</span>`);
+  if (r.created_at && Date.now() - Date.parse(r.created_at) < 14 * 86400000) out.push(`<span class="stk new">✦ New</span>`);
+  return out.length ? `<div class="stks">${out.join("")}</div>` : "";
+}
 function render() {
   const q = $("search").value.trim().toLowerCase();
   $("cats").innerHTML = [{ id: "all", label: "All" }, ...CATS.filter((c) => rows.some((r) => r.category === c.id)), { id: "hidden", label: "Hidden" }]
@@ -456,6 +482,7 @@ function render() {
       <div class="meta">
         <span class="nm" data-edit>${esc(r.name)}</span>
         <div class="pr"><b>${money(priceOf(r))}</b>${r.price_source === "pricing" ? `<small>⟲ from app</small>` : ""}</div>
+        ${stockTag(r)}
         <label class="switch"><input type="checkbox" data-vis ${r.visible ? "checked" : ""} aria-label="Show on store"> On store</label>
       </div>
     </div>`).join("");
@@ -596,6 +623,13 @@ function renderEditor() {
     </section>
 
     <section class="sec">
+      <div class="lbl">Goes well with</div>
+      <p class="hint">Bundle suggestions: customers who add this and one of these get the bundle discount. Products in the same category are suggested automatically; pick specific ones here to choose your own pairs.</p>
+      <div class="bchips">${(ed.bundle_ids || []).map((id) => { const r = rows.find((x) => x.id === id); return `<span class="val">${esc(r ? r.name : id)}<button type="button" data-bdel="${esc(id)}" aria-label="Remove">×</button></span>`; }).join("")}</div>
+      <select class="in" id="bundleAdd"><option value="">+ Add a product…</option>${rows.filter((r) => r.id !== ed.id && !(ed.bundle_ids || []).includes(r.id)).map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join("")}</select>
+    </section>
+
+    <section class="sec">
       <div class="lbl">Description</div>
       <textarea class="in" id="eDesc" placeholder="What it is, sizes, materials, care. Start lines with • for bullet points, and write headings in CAPITALS.">${esc(ed.description)}</textarea>
     </section>`;
@@ -630,6 +664,8 @@ async function addDownloads(fileList) {
   }
 }
 function bindEditor() {
+  if ($("bundleAdd")) $("bundleAdd").onchange = () => { const v = $("bundleAdd").value; if (!v) return; readForm(); ed.bundle_ids = [...(ed.bundle_ids || []), v]; renderEditor(); };
+  document.querySelectorAll("[data-bdel]").forEach((b) => (b.onclick = () => { readForm(); ed.bundle_ids = (ed.bundle_ids || []).filter((x) => x !== b.dataset.bdel); renderEditor(); }));
   if ($("eDig")) $("eDig").onchange = () => { readForm(); renderEditor(); };
   if ($("dlAdd")) $("dlAdd").onclick = () => $("dlPick").click();
   document.querySelectorAll("[data-dlrm]").forEach((b) => (b.onclick = async () => {
@@ -748,7 +784,7 @@ $("edSave").onclick = async () => {
     stock: ed.stock, digital: ed.digital, personalizable: ed.personalizable, visible: ed.visible, sort: ed.sort,
     variations: ed.variations.map((v) => ({ name: v.name, values: v.values })),
     images: ed.images.map(({ card, large, shows }) => (shows ? { card, large, shows } : { card, large })),
-    tags: ed.tags || [], description: ed.description, files: (ed.files || []).map(({ path, name, size }) => ({ path, name, size })),
+    tags: ed.tags || [], description: ed.description, bundle_ids: ed.bundle_ids || [], files: (ed.files || []).map(({ path, name, size }) => ({ path, name, size })),
     pricing_id: ed.price_source === "pricing" ? ed.pricing_id : null, price_source: ed.price_source,
     updated_at: new Date().toISOString(),
   };
@@ -818,6 +854,16 @@ $("coList").addEventListener("change", (e) => {
 /* ---------- site settings: text and choices the store page reads at load (table site_settings) ---------- */
 // Empty fields use the store's built-in text (shown here as the gray placeholder). **word** makes a word bold.
 const SITE_FIELDS = [
+  { g: "Vacation mode", d: "Pause made-to-order items while you're away. Printables stay available.", f: [
+    ["vacationOn", "Vacation mode is ON", "switch"],
+    ["vacationBack", "Back on (optional)", "text", "e.g. Nov 12"],
+    ["vacationMsg", "Message (optional)", "area", "We're on a short break, back Nov 12. Made-to-order items are paused. Printables are still available instantly!"] ] },
+  { g: "Shop display", d: "Order of products, New and low-stock badges, bundle discount", f: [
+    ["productOrder", "Show products", "select", [["", "Newest first (recommended)"], ["custom", "My custom order (the drag order on this page)"]]],
+    ["newDays", "Show the “New” badge for (days)", "number", "14"],
+    ["lowStockAt", "Show “Only N left” when stock is at or below", "number", "3"],
+    ["bundleOff", "Turn OFF bundle discounts", "switch"],
+    ["bundlePct", "Bundle discount (%) off the lower-priced item", "number", "10"] ] },
   { g: "Announcement bar", d: "A gold strip across the top of every page", f: [
     ["announceOn", "Show the announcement bar", "switch"],
     ["announceText", "Message", "text", "e.g. Holiday orders close **Dec 15**"],
@@ -875,10 +921,11 @@ function colorRows(list) {
 function renderSite() {
   $("siteBody").innerHTML = `<p class="hint">Change any text on the store. Leave a field empty to keep the text shown in gray. Put <b>**two stars**</b> around words to make them bold. Press <b>Save changes</b> to publish.</p>` +
     SITE_FIELDS.map((grp, gi) => `<details class="sgroup"${gi === 0 ? " open" : ""}><summary><span>${grp.g}<small>${grp.d}</small></span></summary><div class="sfields">${grp.f.map(([k, label, type, ph]) => {
+      if (type === "select") return `<label class="f"><span>${label}</span><select class="in" data-k="${k}">${ph.map(([v, l]) => `<option value="${v}"${(site[k] || "") === v ? " selected" : ""}>${l}</option>`).join("")}</select></label>`;
       if (type === "switch") return `<label class="ssw"><span class="switch"><input type="checkbox" data-k="${k}" ${site[k] ? "checked" : ""}></span>${label}</label>`;
       if (type === "colors") return `<div class="f"><span>${label}</span><div id="colList" style="display:grid;gap:8px">${colorRows(site.tumblerColors?.length ? site.tumblerColors : DEFAULT_COLORS)}</div></div>`;
       const v = esc(site[k] || ""), p = esc(ph || "");
-      return `<label class="f"><span>${label}</span>${type === "area" || type === "lines" ? `<textarea class="in" data-k="${k}" placeholder="${p}" rows="${type === "lines" ? 5 : 3}">${v}</textarea>` : `<input class="in" data-k="${k}" type="${type === "url" ? "url" : type === "email" ? "email" : type === "tel" ? "tel" : "text"}" value="${v}" placeholder="${p}">`}</label>`;
+      return `<label class="f"><span>${label}</span>${type === "area" || type === "lines" ? `<textarea class="in" data-k="${k}" placeholder="${p}" rows="${type === "lines" ? 5 : 3}">${v}</textarea>` : `<input class="in" data-k="${k}" type="${type === "number" ? "number" : type === "url" ? "url" : type === "email" ? "email" : type === "tel" ? "tel" : "text"}" value="${v}" placeholder="${p}">`}</label>`;
     }).join("")}</div></details>`).join("");
 }
 function readColors() {
@@ -891,7 +938,8 @@ function readSite() {
     if (v) out[el.dataset.k] = v;
   });
   const cols = readColors();
-  if (JSON.stringify(cols) !== JSON.stringify(DEFAULT_COLORS)) out.tumblerColors = cols;
+  const key = (l) => JSON.stringify(l.map((c) => [c.name, c.hex.toLowerCase()]));
+  if (key(cols) !== key(DEFAULT_COLORS)) out.tumblerColors = cols;
   return out;
 }
 async function openSite() {
