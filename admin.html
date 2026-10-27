@@ -303,6 +303,9 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     </div>
     <div class="panel-body">
       <div class="chips" id="dsChips" role="group" aria-label="Filter by status"></div>
+      <div class="empty" id="dsPay" hidden style="padding:16px"><b style="font-size:17px">Let customers pay for designs</b>
+        <p class="hint">Create the “Custom design” store item once. Customers who send a design then get an “Add to cart” button, and the design code travels with the order. Set its price, photo and shipping category later in the normal listing editor.</p>
+        <button class="btn gold" type="button" id="dsMakeItem">Create the Custom design item</button></div>
       <div id="dsList" class="ds-list"><p class="hint">Loading…</p></div>
     </div>
   </div>
@@ -867,7 +870,16 @@ async function openDesigns() {
   const { data, error } = await sb.from("custom_designs").select("*").order("created_at", { ascending: false }).limit(200);
   if (error) { $("dsList").innerHTML = `<div class="empty"><b>Custom designs aren't set up yet</b><p class="hint">Run custom-designs-setup.sql in Supabase first. (${esc(error.message)})</p></div>`; return; }
   dsRows = data; renderDesigns();
+  const { data: item } = await sb.from("listings").select("id").eq("id", "custom-design").maybeSingle();
+  $("dsPay").hidden = !!item;
 }
+$("dsMakeItem").onclick = async () => {
+  const img = location.origin + "/share-card.jpg";
+  const { error } = await sb.from("listings").upsert({ id: "custom-design", name: "Custom Design", title: "Custom Design (made from your design)", category: "other", price: 25, currency: "USD", stock: 999,
+    digital: false, personalizable: true, visible: true, sort: 9990, variations: [], images: [{ card: img, large: img }], tags: ["custom"], description: "Your own design, made to order. We confirm the details with you before we print.\n• Design code is shown on your order", bundle_ids: [], files: [], pricing_id: null, price_source: "manual", updated_at: new Date().toISOString() });
+  if (error) return toast("Couldn't create it: " + error.message);
+  $("dsPay").hidden = true; toast("Created. Edit its price in the listings (search “Custom Design”)"); loadRows();
+};
 function renderDesigns() {
   const open = (r) => !["done", "cancelled"].includes(r.status);
   $("dsChips").innerHTML = [["open", "Open"], ["new", "New"], ["all", "All"]].map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${dsFilter === k}">${l}</button>`).join("");

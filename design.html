@@ -98,6 +98,7 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
 .code-pill { font-family: ui-monospace, Menlo, Consolas, monospace; background: var(--ink); border: 1px solid var(--line); padding: 4px 10px; border-radius: 8px; color: var(--gold-2); font-weight: 800; letter-spacing: .06em; }
 .done { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 8px 0; }
 .done h3 { margin: 0; font: 700 24px var(--f-display); }
+.paybox { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; background: rgba(217, 171, 79, .06); text-align: left; width: 100%; }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
 .drawer { position: fixed; inset: 0; z-index: 80; background: rgba(5, 9, 17, .7); backdrop-filter: blur(4px); display: flex; justify-content: flex-end; }
@@ -232,6 +233,10 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
         <h3>Design sent!</h3>
         <p style="margin:0">Your design code is <span class="code-pill" id="doneCode"></span></p>
         <p class="hint" id="doneText"></p>
+        <div class="paybox" id="payBox" hidden>
+          <p style="margin:0"><b>Ready to order?</b> Add it to your cart now: <span id="payPrice"></span>. If anything about the design needs changing we'll message you before we print.</p>
+          <button class="btn gold" type="button" id="payBtn">Add to cart and check out</button>
+        </div>
         <button class="btn line" type="button" id="doneNew">Make another design</button>
       </div>
     </div>
@@ -270,6 +275,7 @@ const PRODUCTS = {
   tumbler: { label: "Tumbler wrap", icon: "🥤", sizes: [["20", "20 oz skinny", 9, 7.5], ["30", "30 oz skinny", 9, 8.5]], hint: "The flat wrap that goes around the cup. Keep key text near the middle so the seam doesn't cut it." },
   tag:     { label: "Tag / keychain", icon: "🏷️", sizes: [["3x1.75", "3″ × 1.75″", 3, 1.75], ["2.5x2.5", "2.5″ square", 2.5, 2.5]], hole: true, hint: "A small tag for a bag, badge or keys." },
 };
+const PAY_ID = "custom-design";   // listing id created from admin.html → Custom designs
 const STATUS_PAD = 0.12;   // inches of breathing room around the piece in the preview
 
 /* ---------------- state ---------------- */
@@ -807,12 +813,35 @@ $("sendForm").addEventListener("submit", async (e) => {
     D.code = code; await saveLocal(true);
     const all = readSaved(); if (all[code]) { all[code].submitted = true; writeSaved(all); }
     $("doneCode").textContent = code; $("doneText").textContent = `We'll review it and email ${email} with the price and next steps. Nothing has been charged. Keep your code handy if you message us about it.`;
+    offerPay(code, qty);
     $("formView").hidden = true; $("doneView").hidden = false; $("doneView").scrollIntoView({ block: "center", behavior: "smooth" });
   } catch {
     err.textContent = navigator.onLine ? "We couldn't send your design just now. It's saved on this device, so please try again in a moment or message us." : "You're offline. Reconnect and try again.";
     err.hidden = false; saveLocal(true);
   } finally { go.disabled = false; go.textContent = "Send my design"; }
 });
+
+/* ---------------- paying: the shop's "Custom design" listing (id custom-design) carries the design code in the cart ---------------- */
+let payState = null;
+async function offerPay(code, qty) {
+  $("payBox").hidden = true; payState = null;
+  try {
+    const r = await fetch(`${SB.url}/rest/v1/listings?select=id,price,visible&id=eq.${PAY_ID}&visible=eq.true`, { headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}` } });
+    const row = r.ok ? (await r.json())[0] : null; if (!row) return;
+    payState = { code, qty, price: Number(row.price) };
+    $("payPrice").textContent = `$${(payState.price * qty).toFixed(2)} for ${qty} (${qty > 1 ? `$${payState.price.toFixed(2)} each` : "base price"}; shipping and tax are added at checkout)`;
+    $("payBox").hidden = false;
+  } catch { /* payment is optional; the design request has already been sent */ }
+}
+$("payBtn").onclick = () => {
+  if (!payState) return;
+  let cart = []; try { cart = JSON.parse(localStorage.getItem("prajo:cart") || "[]"); } catch { /* start a new cart */ }
+  const personalization = `Custom design ${payState.code}: ${summary()}`.slice(0, 200);
+  cart = cart.filter((i) => !(i.id === PAY_ID && String(i.personalization).startsWith(`Custom design ${payState.code}`)));
+  cart.push({ id: PAY_ID, qty: payState.qty, options: {}, personalization });
+  try { localStorage.setItem("prajo:cart", JSON.stringify(cart)); } catch { return toast("Couldn't reach your cart on this device"); }
+  location.href = "./#cart";
+};
 
 /* ---------------- boot ---------------- */
 buildStatic();

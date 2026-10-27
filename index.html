@@ -858,14 +858,16 @@ function fromRow(r) {
   return { id: r.id, name: r.name, title: r.title || r.name, category: r.category, price: Number(r.price), currency: r.currency,
     stock: r.stock, sort: r.sort, created: r.created_at ? Date.parse(r.created_at) : 0, bundleIds: r.bundle_ids || [], digital: r.digital, hasFile: (r.files || []).length > 0, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
 }
+let listingsLoaded = false;   // the cart keeps items it can't match yet (e.g. the Custom design item) until the live listings have arrived
 (async function loadListings() {
   try {
     const r = await fetch(`${DB.url}/rest/v1/listings?select=*&visible=eq.true&order=sort.asc,name.asc`, { headers: { apikey: DB.key, Authorization: `Bearer ${DB.key}` } });
     if (!r.ok) return;
     const list = (await r.json()).map(fromRow).filter((p) => p.images.length);
     if (!list.length) return;
-    P0 = list;
+    P0 = list; listingsLoaded = true;
     refreshShop();
+    if (!$("cart").hidden) renderCart();
     if (location.hash.startsWith("#p/")) { $("sheet").hidden = true; route(); }
   } catch { /* keep the built-in copy */ }
 })();
@@ -1263,7 +1265,7 @@ function renderCart() {
     : physical ? `${ways.join(" ")} California sales tax is added at checkout.${known.some((i) => i.p.digital) ? " Downloads are ready right after you pay." : ""}`
     : "💾 Instant download: your files are ready right after you pay. Nothing is shipped.";
   $("checkoutBtn").disabled = !ok;
-  if (items.length !== known.length) cart.set(known.map(({ p, ...i }) => i));
+  if (listingsLoaded && items.length !== known.length) cart.set(known.map(({ p, ...i }) => i));
 }
 $("cartList").addEventListener("click", (e) => {
   if (e.target.id === "cartShop" || e.target.id === "cartSugLink") { closeCart(); return; }
