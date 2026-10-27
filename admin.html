@@ -126,6 +126,26 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .linked { font-size: 13.5px; color: var(--muted); }
 .linked b { color: var(--gold-2); font-family: var(--f-display); font-size: 18px; }
 
+/* custom designs from the Design studio */
+.ds-list { display: grid; gap: 12px; }
+.ds { border: 1px solid var(--line-soft); background: var(--panel); border-radius: 16px; overflow: hidden; }
+.ds-top { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 10px; cursor: pointer; align-items: center; }
+.ds-top img { width: 84px; height: 84px; object-fit: contain; border-radius: 10px; background: #15233c; }
+.ds-top .ph { width: 84px; height: 84px; border-radius: 10px; background: #15233c; display: grid; place-items: center; color: var(--muted); font-size: 11px; }
+.ds-top b { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.ds-top small { display: block; color: var(--muted); }
+.ds-code { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--gold-2); }
+.ds-badge { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); }
+.ds-badge.new { background: var(--gold-2); color: #1b1305; border-color: var(--gold-2); }
+.ds-more { border-top: 1px solid var(--line-soft); padding: 12px; display: grid; gap: 12px; }
+.ds-more img.big { width: 100%; max-height: 360px; object-fit: contain; border-radius: 12px; background: #15233c; }
+.ds-more dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
+.ds-more dt { color: var(--muted); }
+.ds-more dd { margin: 0; overflow-wrap: anywhere; }
+.ds-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ds-actions .btn { min-height: 38px; padding: 0 14px; font-size: 13px; }
+.ds-actions select { max-width: 180px; min-height: 38px; }
+
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; background: var(--cream); color: var(--ink); padding: 10px 18px; border-radius: 999px; font-weight: 800; font-size: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
 
 .signin { max-width: 400px; margin: 12vh auto 0; padding: 26px; border-radius: 24px; border: 1px solid var(--line); background: var(--navy); display: grid; gap: 14px; }
@@ -212,6 +232,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <button type="button" role="menuitem" id="vacBtn">🌴 Vacation mode<small id="vacState">Checking…</small></button>
         <button type="button" role="menuitem" id="siteBtn">Site settings<small>Homepage text, announcement, colors, links</small></button>
         <button type="button" role="menuitem" id="bulkBtn">Attach download files<small>Add files to many digital listings at once</small></button>
+        <button type="button" role="menuitem" id="dsBtn">🎨 Custom designs<small id="dsState">Designs customers sent from the Design studio</small></button>
         <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
         <button type="button" role="menuitem" id="pwBtn">Change password<small>For this admin page and the pricing app</small></button>
         <a role="menuitem" href="/PrAjoCustomStudio/" target="_blank" rel="noopener">Open pricing app ↗<small>Costs, orders, messages, invoices</small></a>
@@ -270,6 +291,19 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     <div class="panel-body">
       <p class="hint">Switch things on or off for store customers. Changes save and go live straight away.</p>
       <div class="co-list" id="coList"><p class="hint">Loading…</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="dsSheet" hidden role="dialog" aria-modal="true" aria-labelledby="dsTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="dsTitle">Custom designs</h2>
+      <button class="x" type="button" id="dsClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body">
+      <div class="chips" id="dsChips" role="group" aria-label="Filter by status"></div>
+      <div id="dsList" class="ds-list"><p class="hint">Loading…</p></div>
     </div>
   </div>
 </div>
@@ -416,7 +450,7 @@ async function boot() {
   $("appView").hidden = false; $("newBtn").hidden = false; $("menuWrap").hidden = false;
   let resetting = false; try { resetting = sessionStorage.getItem("prajo:setpw") === "1"; } catch {}
   if (resetting) openPw(true);
-  await Promise.all([loadRows(), loadPrices(), paintVac()]);
+  await Promise.all([loadRows(), loadPrices(), paintVac(), dsCount()]);
 }
 /* ---------- vacation mode: one tap from the menu (full text in Site settings) ---------- */
 async function readSiteRow() { const { data } = await sb.from("site_settings").select("data").eq("id", 1).maybeSingle(); return data?.data || {}; }
@@ -812,6 +846,89 @@ $("edDelete").onclick = async () => {
   if (error) return toast("Couldn't delete: " + error.message);
   toast("Listing deleted"); closeEditor(); loadRows();
 };
+
+
+/* ---------- custom designs: what customers sent from design.html (table custom_designs, bucket design-previews) ---------- */
+const DS_STATUS = [["new", "New"], ["reviewing", "Reviewing"], ["quoted", "Quoted"], ["approved", "Approved"], ["in_production", "Making"], ["done", "Done"], ["cancelled", "Cancelled"]];
+let dsRows = [], dsFilter = "open", dsOpen = null;
+const dsThumbs = new Map();
+async function dsUrl(path) {
+  if (!path) return "";
+  if (!dsThumbs.has(path)) { const { data } = await sb.storage.from("design-previews").createSignedUrl(path, 3600); dsThumbs.set(path, data?.signedUrl || ""); }
+  return dsThumbs.get(path);
+}
+async function dsCount() {
+  const { count, error } = await sb.from("custom_designs").select("id", { count: "exact", head: true }).eq("status", "new");
+  if (error) { $("dsState").textContent = "Run custom-designs-setup.sql in Supabase first"; return; }
+  $("dsState").textContent = count ? `${count} new to look at` : "Designs customers sent from the Design studio";
+}
+async function openDesigns() {
+  $("dsSheet").hidden = false; document.body.style.overflow = "hidden";
+  const { data, error } = await sb.from("custom_designs").select("*").order("created_at", { ascending: false }).limit(200);
+  if (error) { $("dsList").innerHTML = `<div class="empty"><b>Custom designs aren't set up yet</b><p class="hint">Run custom-designs-setup.sql in Supabase first. (${esc(error.message)})</p></div>`; return; }
+  dsRows = data; renderDesigns();
+}
+function renderDesigns() {
+  const open = (r) => !["done", "cancelled"].includes(r.status);
+  $("dsChips").innerHTML = [["open", "Open"], ["new", "New"], ["all", "All"]].map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${dsFilter === k}">${l}</button>`).join("");
+  const rows = dsRows.filter((r) => dsFilter === "all" || (dsFilter === "open" ? open(r) : r.status === dsFilter));
+  $("dsList").innerHTML = rows.map((r) => `<div class="ds" data-id="${r.id}">
+    <div class="ds-top" data-top><span class="ph" data-ph="${esc(r.preview_path || "")}">…</span>
+      <div><b><span class="ds-code">${esc(r.code)}</span><span class="ds-badge ${r.status === "new" ? "new" : ""}">${esc((DS_STATUS.find((x) => x[0] === r.status) || [0, r.status])[1])}</span></b>
+      <span>${esc(r.summary)}</span><small>${esc(r.customer_name)} · qty ${r.qty} · ${new Date(r.created_at).toLocaleDateString()}</small></div></div>
+    ${dsOpen === r.id ? `<div class="ds-more" id="dsMore"></div>` : ""}</div>`).join("") || `<div class="empty"><b>No designs here</b><p class="hint">When a customer sends a design from the Design studio it shows up here.</p></div>`;
+  $("dsList").querySelectorAll("[data-ph]").forEach(async (el) => { const u = await dsUrl(el.dataset.ph); if (u) el.outerHTML = `<img src="${u}" alt="">`; });
+  if (dsOpen) fillDesign(dsRows.find((r) => r.id === dsOpen));
+}
+async function fillDesign(r) {
+  const box = $("dsMore"); if (!r || !box) return;
+  const u = await dsUrl(r.preview_path);
+  const imgs = (r.design?.layers || []).filter((l) => l.type === "img").length;
+  box.innerHTML = `${u ? `<img class="big" src="${u}" alt="Design preview">` : ""}
+    <dl><dt>Design</dt><dd>${esc(r.summary)}</dd><dt>Customer</dt><dd>${esc(r.customer_name)} · <a href="mailto:${esc(r.customer_email)}?subject=${encodeURIComponent("Your PrAjo design " + r.code)}">${esc(r.customer_email)}</a>${r.customer_phone ? " · " + esc(r.customer_phone) : ""}</dd>
+    <dt>Quantity</dt><dd>${r.qty}${r.needed_by ? ` · needed by ${esc(r.needed_by)}` : ""}</dd>${r.notes ? `<dt>Notes</dt><dd>${esc(r.notes)}</dd>` : ""}
+    ${r.design?.parent ? `<dt>Revises</dt><dd class="ds-code">${esc(r.design.parent)}</dd>` : ""}${imgs ? `<dt>Pictures</dt><dd>${imgs} uploaded by the customer (open in studio to see them)</dd>` : ""}</dl>
+    <label class="f"><span>Your private notes</span><textarea class="in" id="dsNotes" style="min-height:80px">${esc(r.owner_notes || "")}</textarea></label>
+    <div class="ds-actions"><select class="in" id="dsStatus" aria-label="Status">${DS_STATUS.map(([k, l]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${l}</option>`).join("")}</select>
+      <button class="btn gold" type="button" id="dsSave">Save</button>
+      <button class="btn line" type="button" id="dsStudio">Open in studio</button>
+      ${u ? `<a class="btn line" href="${u}" download="${esc(r.code)}.png" target="_blank" rel="noopener">Preview PNG</a>` : ""}
+      <button class="btn danger" type="button" id="dsDel">Delete</button></div>`;
+}
+// Opens the studio with this design loaded; customer pictures are fetched from storage and inlined so the studio can draw and export them.
+async function dsStudio(r) {
+  const d = JSON.parse(JSON.stringify(r.design));
+  for (const L of d.layers || []) if (L.type === "img" && String(L.src).startsWith("storage:")) {
+    const { data, error } = await sb.storage.from("design-previews").download(L.src.slice(8));
+    if (error || !data) { toast("Couldn't fetch a picture: " + (error?.message || "missing")); continue; }
+    L.src = await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(data); });
+  }
+  try { localStorage.setItem("prajo:design:load", JSON.stringify(d)); } catch { return toast("Couldn't hand the design over (storage full)"); }
+  window.open("design.html?load=1", "_blank");
+}
+$("dsBtn").onclick = openDesigns;
+$("dsClose").onclick = () => { $("dsSheet").hidden = true; document.body.style.overflow = ""; dsCount(); };
+$("dsChips").addEventListener("click", (e) => { const b = e.target.closest("[data-f]"); if (b) { dsFilter = b.dataset.f; renderDesigns(); } });
+$("dsList").addEventListener("click", async (e) => {
+  const card = e.target.closest(".ds"); if (!card) return;
+  const r = dsRows.find((x) => x.id === card.dataset.id);
+  if (e.target.closest("[data-top]")) { dsOpen = dsOpen === r.id ? null : r.id; renderDesigns(); return; }
+  if (e.target.id === "dsSave") {
+    const patch = { status: $("dsStatus").value, owner_notes: $("dsNotes").value.trim() || null };
+    const { error } = await sb.from("custom_designs").update(patch).eq("id", r.id);
+    if (error) return toast("Couldn't save: " + error.message);
+    Object.assign(r, patch); toast("Saved"); renderDesigns();
+  }
+  if (e.target.id === "dsStudio") dsStudio(r);
+  if (e.target.id === "dsDel") {
+    if (e.target.dataset.armed !== "1") { e.target.dataset.armed = "1"; e.target.textContent = "Tap again to delete"; return; }
+    const paths = [r.preview_path, ...(r.design?.layers || []).filter((l) => l.type === "img").map((l) => String(l.src).replace(/^storage:/, ""))].filter(Boolean);
+    const { error } = await sb.from("custom_designs").delete().eq("id", r.id);
+    if (error) return toast("Couldn't delete: " + error.message);
+    if (paths.length) await sb.storage.from("design-previews").remove(paths).catch(() => {});
+    dsRows = dsRows.filter((x) => x.id !== r.id); dsOpen = null; toast("Design deleted"); renderDesigns();
+  }
+});
 
 /* ---------- checkout options (saved by the "checkout" Edge Function) ---------- */
 const CO_URL = CFG.url + "/functions/v1/checkout";

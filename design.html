@@ -1,0 +1,836 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Design your own · PrAjo Custom Studio</title>
+<meta name="description" content="Design a custom name-tile set, ornament, plaque, tumbler or tag. Pick fonts and colors, preview it, save it and send it to PrAjo Custom Studio to be made.">
+<meta name="theme-color" content="#0a1220">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Cinzel:wght@600;700&family=Dancing+Script:wght@700&family=Fraunces:wght@700&family=Fredoka:wght@600&family=Great+Vibes&family=Lilita+One&family=Manrope:wght@400;600;700;800&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:wght@700&family=Rubik+Mono+One&family=Zilla+Slab:wght@700&display=swap">
+<style>
+/* Layout: sticky live preview on the left, step-by-step controls on the right; stacks with the preview first on phones. */
+:root {
+  color-scheme: dark;
+  --ink: #0a1220; --navy: #0f1b2e; --panel: #13213a; --panel-2: #182a47;
+  --line: rgba(217, 171, 79, .22); --line-soft: rgba(245, 236, 220, .1);
+  --gold: #d9ab4f; --gold-2: #f3d48a; --leaf: #3bb35a; --danger: #ff7a6b;
+  --cream: #f5ecdc; --muted: #a3adbf;
+  --f-display: "Fraunces", Georgia, serif; --f-body: "Manrope", system-ui, sans-serif; --f-label: "Cinzel", Georgia, serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--ink); color: var(--cream); font: 15px/1.5 var(--f-body); -webkit-font-smoothing: antialiased; }
+button, input, select, textarea { font: inherit; color: inherit; }
+a { color: inherit; }
+.wrap { max-width: 1240px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+header.top { position: sticky; top: 0; z-index: 40; background: rgba(10, 18, 32, .88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line-soft); padding-top: env(safe-area-inset-top, 0px); }
+header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 60px; flex-wrap: wrap; padding-block: 8px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; }
+.brand img { width: 38px; height: 38px; border-radius: 50%; }
+.brand b { font-family: var(--f-label); letter-spacing: .12em; }
+.brand small { display: block; font-size: 11px; color: var(--gold); letter-spacing: .14em; text-transform: uppercase; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid transparent; font-weight: 800; font-size: 14.5px; cursor: pointer; text-decoration: none; background: none; }
+.btn:focus-visible, .chips button:focus-visible, .lrow:focus-visible, canvas:focus-visible, .in:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.gold { background: linear-gradient(135deg, var(--gold-2), var(--gold) 55%, #b98a32); color: #1b1305; }
+.line { border-color: var(--line); background: rgba(245, 236, 220, .03); }
+.line:hover:not([disabled]) { border-color: var(--gold); }
+.small { min-height: 36px; padding: 0 14px; font-size: 13px; }
+.danger { border-color: rgba(255, 122, 107, .35); color: var(--danger); }
+
+.studio { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 24px; padding-top: 22px; padding-bottom: 80px; align-items: start; }
+.stage { position: sticky; top: calc(76px + env(safe-area-inset-top, 0px)); display: grid; gap: 12px; }
+.stage-box { border: 1px solid var(--line-soft); background: var(--panel); border-radius: 20px; padding: 14px; display: grid; place-items: center; min-height: 340px; position: relative; overflow: hidden; }
+#cv { max-width: 100%; touch-action: none; cursor: default; border-radius: 6px;
+  background: repeating-conic-gradient(#1b2a45 0% 25%, #15233c 0% 50%) 50% / 20px 20px; }
+#cv.move { cursor: move; }
+.stage-info { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; font-size: 13px; color: var(--muted); }
+.stage-info b { color: var(--gold-2); font-weight: 800; }
+.stage-tip { font-size: 12.5px; color: var(--muted); }
+.stage-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+
+.controls { display: grid; gap: 14px; }
+.step { border: 1px solid var(--line-soft); background: var(--panel); border-radius: 18px; padding: 16px; display: grid; gap: 14px; }
+.step > h2 { margin: 0; font: 700 12px var(--f-label); letter-spacing: .22em; text-transform: uppercase; color: var(--gold); display: flex; gap: 10px; align-items: center; }
+.step > h2 i { font-style: normal; width: 24px; height: 24px; border-radius: 50%; border: 1px solid var(--line); display: grid; place-items: center; font-size: 12px; letter-spacing: 0; }
+.f { display: grid; gap: 6px; min-width: 0; }
+.f > span, .lbl { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.in { width: 100%; min-height: 44px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); padding: 9px 12px; font-size: 16px; }
+.in:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217, 171, 79, .18); }
+textarea.in { min-height: 120px; resize: vertical; line-height: 1.5; }
+.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.row2 > * { min-width: 0; }
+.hint { margin: 0; font-size: 12.5px; color: var(--muted); }
+.err { margin: 0; color: #ffb4a8; font-size: 14px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-soft); background: none; color: var(--muted); font-weight: 700; font-size: 13.5px; cursor: pointer; }
+.chips button[aria-pressed="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+.prod-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(112px, 1fr)); gap: 8px; }
+.prod-grid button { border: 1px solid var(--line-soft); background: var(--ink); border-radius: 14px; padding: 10px 6px; cursor: pointer; display: grid; gap: 4px; justify-items: center; font-weight: 700; font-size: 13px; }
+.prod-grid button span { font-size: 24px; line-height: 1; }
+.prod-grid button[aria-pressed="true"] { border-color: var(--gold); background: rgba(217, 171, 79, .1); }
+.range { display: grid; grid-template-columns: 1fr 52px; gap: 10px; align-items: center; }
+.range output { font-variant-numeric: tabular-nums; color: var(--muted); font-size: 13px; text-align: right; }
+input[type=range] { width: 100%; accent-color: var(--gold); min-height: 28px; }
+input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); padding: 3px; cursor: pointer; }
+.colors { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.check { display: flex; gap: 10px; align-items: center; cursor: pointer; font-weight: 600; }
+.check input { width: 20px; height: 20px; accent-color: var(--gold); }
+.layers { display: grid; gap: 6px; }
+.lrow { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line-soft); background: var(--ink); border-radius: 12px; padding: 6px 6px 6px 12px; cursor: pointer; min-height: 44px; }
+.lrow[aria-pressed="true"] { border-color: var(--gold); background: rgba(217, 171, 79, .08); }
+.lrow .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.lrow button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line-soft); background: none; cursor: pointer; flex: none; }
+.lrow button:hover { border-color: var(--gold); }
+.icons { display: flex; flex-wrap: wrap; gap: 6px; }
+.icons button { width: 44px; height: 44px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); font-size: 20px; cursor: pointer; }
+.icons button:hover { border-color: var(--gold); }
+.editor { border-top: 1px dashed var(--line-soft); padding-top: 14px; display: grid; gap: 12px; }
+.fontpick { font-size: 18px; }
+
+.submit-card { border-color: var(--line); background: linear-gradient(180deg, rgba(217, 171, 79, .08), var(--panel)); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.actions .gold { flex: 1; min-width: 160px; }
+.code-pill { font-family: ui-monospace, Menlo, Consolas, monospace; background: var(--ink); border: 1px solid var(--line); padding: 4px 10px; border-radius: 8px; color: var(--gold-2); font-weight: 800; letter-spacing: .06em; }
+.done { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 8px 0; }
+.done h3 { margin: 0; font: 700 24px var(--f-display); }
+.hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+
+.drawer { position: fixed; inset: 0; z-index: 80; background: rgba(5, 9, 17, .7); backdrop-filter: blur(4px); display: flex; justify-content: flex-end; }
+.drawer .panel { width: min(440px, 100%); height: 100%; background: var(--navy); border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+.panel-head { display: flex; align-items: center; gap: 10px; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; border-bottom: 1px solid var(--line-soft); }
+.panel-head h2 { margin: 0; font: 700 20px var(--f-display); flex: 1; }
+.x { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: none; cursor: pointer; font-size: 20px; }
+.panel-body { flex: 1; overflow-y: auto; padding: 16px; display: grid; gap: 10px; align-content: start; }
+.saved { display: grid; grid-template-columns: 72px 1fr; gap: 12px; border: 1px solid var(--line-soft); background: var(--panel); border-radius: 14px; padding: 10px; align-items: center; }
+.saved img { width: 72px; height: 72px; object-fit: contain; border-radius: 8px; background: #15233c; }
+.saved b { display: block; }
+.saved small { color: var(--muted); display: block; }
+.saved .actions { margin-top: 6px; }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; background: var(--cream); color: var(--ink); padding: 10px 18px; border-radius: 999px; font-weight: 800; font-size: 14px; max-width: calc(100% - 32px); text-align: center; }
+
+@media (max-width: 900px) {
+  .studio { grid-template-columns: 1fr; gap: 14px; }
+  .stage { position: static; }
+  .stage-box { min-height: 260px; }
+  .row2.keep { grid-template-columns: 1fr 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./"><img src="logo.png" alt="" width="38" height="38"><span><b>PRAJO</b><small>Custom Studio</small></span></a>
+    <button class="btn line small" type="button" id="savedBtn">My designs <span id="savedN"></span></button>
+    <a class="btn line small" href="./">← Back to shop</a>
+  </div>
+</header>
+
+<main class="wrap studio">
+  <section class="stage" aria-label="Live preview">
+    <div class="stage-box"><canvas id="cv" tabindex="0" aria-label="Design preview. Drag text or pictures to move them. Arrow keys nudge the selected item."></canvas></div>
+    <div class="stage-info"><span id="infoSize"></span><span id="infoWarn"></span></div>
+    <p class="stage-tip" id="tip"></p>
+    <div class="stage-actions">
+      <button class="btn line small" type="button" id="undoBtn" disabled>↶ Undo</button>
+      <button class="btn line small" type="button" id="redoBtn" disabled>↷ Redo</button>
+      <button class="btn line small" type="button" id="dlBtn">Download picture</button>
+      <button class="btn line small danger" type="button" id="resetBtn">Start over</button>
+    </div>
+  </section>
+
+  <section class="controls">
+    <div class="step">
+      <h2><i>1</i> What are we making?</h2>
+      <div class="prod-grid" id="prodGrid" role="group" aria-label="Product"></div>
+      <div class="row2" id="sizeRow">
+        <label class="f"><span id="sizeLbl">Size</span><select class="in" id="size"></select></label>
+        <label class="f" id="orientF"><span>Direction</span><select class="in" id="orient"><option value="land">Wide</option><option value="port">Tall</option></select></label>
+      </div>
+      <p class="hint" id="prodHint"></p>
+    </div>
+
+    <div class="step" id="stepTiles" hidden>
+      <h2><i>2</i> Names</h2>
+      <label class="f"><span>One name or word per line</span>
+        <textarea class="in" id="names" spellcheck="false" maxlength="600" placeholder="LARA&#10;MADISON&#10;ROGER"></textarea></label>
+      <div class="row2">
+        <label class="f"><span>Arrangement</span><select class="in" id="tLayout">
+          <option value="crossword">Interlocking crossword</option><option value="horizontal">Rows</option>
+          <option value="vertical">Columns</option><option value="staircase">Staircase</option></select></label>
+        <label class="f"><span>Tile size</span><select class="in" id="tSize">
+          <option value="0.75">0.75″ small</option><option value="1">1″ standard</option><option value="1.25">1.25″ large</option></select></label>
+      </div>
+      <div class="actions"><button class="btn line small" type="button" id="reshuffle">Try another arrangement</button></div>
+      <p class="hint" id="namesHint"></p>
+      <label class="f"><span>Letter style</span><select class="in fontpick" id="tFont"></select></label>
+      <label class="f"><span>Letter size in tile</span>
+        <div class="range"><input type="range" id="tScale" min="40" max="95" step="1" aria-label="Letter size in tile"><output id="tScaleO"></output></div></label>
+      <div class="colors">
+        <label class="f"><span>Tile</span><input type="color" id="tTile"></label>
+        <label class="f"><span>Letters</span><input type="color" id="tLetter"></label>
+        <label class="f"><span>Seams</span><input type="color" id="tSeam"></label>
+      </div>
+    </div>
+
+    <div class="step" id="stepLayers" hidden>
+      <h2><i>2</i> Text and pictures</h2>
+      <div class="actions">
+        <button class="btn gold small" type="button" id="addText">+ Add text</button>
+        <label class="btn line small" for="imgPick">+ Add a picture</label>
+        <input type="file" id="imgPick" accept="image/png,image/jpeg,image/webp" hidden>
+      </div>
+      <div class="layers" id="layerList" role="group" aria-label="Items on your design"></div>
+      <div>
+        <span class="lbl">Add an icon</span>
+        <div class="icons" id="iconRow" style="margin-top:6px"></div>
+      </div>
+      <div class="editor" id="editor" hidden></div>
+    </div>
+
+    <div class="step" id="stepLook">
+      <h2><i id="lookNum">3</i> Base color and finish</h2>
+      <div class="colors" id="baseColors">
+        <label class="f"><span>Base color</span><input type="color" id="bg"></label>
+      </div>
+      <label class="check" id="clearRow"><input type="checkbox" id="clear"> Clear / no base color (print directly on the surface)</label>
+      <label class="check" id="holeRow"><input type="checkbox" id="hole"> Add a hanging hole</label>
+    </div>
+
+    <div class="step submit-card">
+      <h2><i id="sendNum">4</i> Save and send</h2>
+      <div id="formView" style="display:grid;gap:12px">
+        <p class="hint" id="saveHint">Save keeps this design on this device. Send it to us and we'll review it, confirm the price and make it.</p>
+        <div class="actions">
+          <button class="btn line" type="button" id="saveBtn">Save design</button>
+          <button class="btn gold" type="button" id="sendBtn">Send to PrAjo</button>
+        </div>
+        <form id="sendForm" hidden novalidate style="display:none;gap:12px">
+          <div class="row2">
+            <label class="f"><span>Your name</span><input class="in" id="cName" autocomplete="name" maxlength="100" required></label>
+            <label class="f"><span>Email</span><input class="in" id="cEmail" type="email" autocomplete="email" maxlength="200" required></label>
+          </div>
+          <div class="row2">
+            <label class="f"><span>Phone (optional)</span><input class="in" id="cPhone" type="tel" autocomplete="tel" maxlength="40"></label>
+            <label class="f"><span>How many</span><input class="in" id="cQty" type="number" min="1" max="500" value="1" inputmode="numeric"></label>
+          </div>
+          <label class="f"><span>Needed by (optional)</span><input class="in" id="cDate" type="date"></label>
+          <label class="f"><span>Anything we should know?</span><textarea class="in" id="cNotes" style="min-height:90px" maxlength="2000" placeholder="Colors that must match, a gift date, spelling of names…"></textarea></label>
+          <input class="hp" id="cWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
+          <p class="err" id="sendErr" hidden></p>
+          <div class="actions"><button class="btn gold" type="submit" id="sendGo">Send my design</button><button class="btn line" type="button" id="sendCancel">Cancel</button></div>
+          <p class="hint">We only use this to reply about your design. Nothing is charged now.</p>
+        </form>
+      </div>
+      <div class="done" id="doneView" hidden>
+        <div style="font-size:40px">🎉</div>
+        <h3>Design sent!</h3>
+        <p style="margin:0">Your design code is <span class="code-pill" id="doneCode"></span></p>
+        <p class="hint" id="doneText"></p>
+        <button class="btn line" type="button" id="doneNew">Make another design</button>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div class="drawer" id="savedDrawer" hidden role="dialog" aria-modal="true" aria-labelledby="savedTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="savedTitle">My designs</h2><button class="x" type="button" id="savedClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="savedList"></div>
+  </div>
+</div>
+<div class="toast" id="toast" hidden role="status"></div>
+
+<script>
+(() => {
+"use strict";
+const $ = (id) => document.getElementById(id);
+const SB = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", bucket: "design-previews" };
+const LS_DRAFT = "prajo:design:draft", LS_SAVED = "prajo:designs", LS_CONTACT = "prajo:design:contact";
+const SYMBOLS = ["♥", "★", "☘", "✿", "❄", "☾", "✦", "♪", "☀", "✝", "☮", "⚓"];
+
+// Fonts offered to customers: value is "CSS family|weight".
+const FONTS = [
+  ["Archivo Black|400", "Archivo Black (bold block)"], ["Lilita One|400", "Lilita One (chunky)"], ["Fredoka|600", "Fredoka (rounded)"],
+  ["Bebas Neue|400", "Bebas Neue (tall)"], ["Zilla Slab|700", "Zilla Slab (slab serif)"], ["Rubik Mono One|400", "Rubik Mono One (wide)"],
+  ["Playfair Display|700", "Playfair Display (elegant)"], ["Cinzel|700", "Cinzel (classic caps)"], ["Fraunces|700", "Fraunces (soft serif)"],
+  ["Great Vibes|400", "Great Vibes (script)"], ["Dancing Script|700", "Dancing Script (script)"], ["Pacifico|400", "Pacifico (retro script)"],
+  ["Permanent Marker|400", "Permanent Marker (handwritten)"], ["Manrope|800", "Manrope (clean)"],
+];
+// Sizes are inches. Tumbler wrap areas are approximate; PrAjo confirms the final fit before printing.
+const PRODUCTS = {
+  tiles:   { label: "Name tiles", icon: "🔤", hint: "Letters on tiles that interlock like a crossword. Each tile is cut and printed, so the whole piece is as big as the arrangement." },
+  circle:  { label: "Round ornament", icon: "⭕", sizes: [["3", "3″ round", 3, 3], ["3.5", "3.5″ round", 3.5, 3.5], ["4", "4″ round", 4, 4]], hole: true, hint: "A flat round piece with a hole for a ribbon." },
+  plaque:  { label: "Plaque / sign", icon: "▭", sizes: [["5x3", "5″ × 3″", 5, 3], ["6x4", "6″ × 4″", 6, 4], ["8x5", "8″ × 5″", 8, 5], ["10x6", "10″ × 6″", 10, 6]], orient: true, hole: true, hint: "A flat rectangular piece for a desk, shelf or door." },
+  tumbler: { label: "Tumbler wrap", icon: "🥤", sizes: [["20", "20 oz skinny", 9, 7.5], ["30", "30 oz skinny", 9, 8.5]], hint: "The flat wrap that goes around the cup. Keep key text near the middle so the seam doesn't cut it." },
+  tag:     { label: "Tag / keychain", icon: "🏷️", sizes: [["3x1.75", "3″ × 1.75″", 3, 1.75], ["2.5x2.5", "2.5″ square", 2.5, 2.5]], hole: true, hint: "A small tag for a bag, badge or keys." },
+};
+const STATUS_PAD = 0.12;   // inches of breathing room around the piece in the preview
+
+/* ---------------- state ---------------- */
+const uid = () => Math.random().toString(36).slice(2, 8);
+const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+function newCode() { const a = new Uint8Array(6); crypto.getRandomValues(a); return "D-" + [...a].map((n) => CODE_CHARS[n % CODE_CHARS.length]).join(""); }
+
+function textLayer(over = {}) {
+  return { id: uid(), type: "text", text: "Your Name", font: "Playfair Display|700", color: "#ffffff", size: 16, curve: 0, rot: 0, x: 0.5, y: 0.5, stroke: "#000000", strokeW: 0, ...over };
+}
+function newDesign(product = "circle") {
+  const P = PRODUCTS[product];
+  const d = { v: 1, code: null, product, size: P.sizes ? P.sizes[0][0] : "", orient: "land", bg: "#1f3a5f", clear: false, hole: !!P.hole, layers: [],
+    tiles: { names: "LARA\nMADISON\nROGER\nWILL", layout: "crossword", seed: 1, tile: 1, font: "Archivo Black|400", scale: 72, tileColor: "#1f3a5f", letterColor: "#ffffff", seamColor: "#0d1b2e" } };
+  if (product === "circle") d.layers = [textLayer({ text: "The Smiths", size: 15, y: 0.48 }), textLayer({ text: "Our first Christmas", size: 7, curve: 70, y: 0.2, color: "#f3d48a", font: "Dancing Script|700" })];
+  if (product === "plaque") d.layers = [textLayer({ text: "Home Sweet Home", size: 20, y: 0.45 }), textLayer({ text: "Est. 2026", size: 9, y: 0.75, color: "#f3d48a", font: "Cinzel|700" })];
+  if (product === "tumbler") d.layers = [textLayer({ text: "Madison", size: 22, y: 0.45, font: "Great Vibes|400", color: "#f3d48a" }), textLayer({ text: "BRIDESMAID", size: 8, y: 0.68, font: "Cinzel|700" })];
+  if (product === "tag") d.layers = [textLayer({ text: "LARA", size: 34, y: 0.5, font: "Archivo Black|400" })];
+  if (product === "tumbler") d.clear = true;
+  return d;
+}
+let D = newDesign("circle");
+let sel = null;            // selected layer id
+const hist = { past: [], future: [] };
+
+const clone = (o) => JSON.parse(JSON.stringify(o));
+function sizeInfo(d = D) {
+  const P = PRODUCTS[d.product];
+  if (d.product === "tiles") { const g = tileGrid(); return { w: g.cols * d.tiles.tile, h: g.rows * d.tiles.tile }; }
+  const s = P.sizes.find((x) => x[0] === d.size) || P.sizes[0];
+  let w = s[2], h = s[3];
+  if (P.orient && d.orient === "port") [w, h] = [h, w];
+  return { w, h };
+}
+
+/* ---------------- crossword engine (ported from the production suite) ---------------- */
+function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const ck = (x, y) => x + "," + y;
+function newGrid() { return { cells: new Map(), words: [], bbox: { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity } }; }
+function putWord(g, word, x, y, dir) {
+  const chars = [...word], dx = dir === "H" ? 1 : 0, dy = dir === "H" ? 0 : 1;
+  chars.forEach((ch, i) => {
+    const k = ck(x + dx * i, y + dy * i); let c = g.cells.get(k);
+    if (!c) { c = { x: x + dx * i, y: y + dy * i, ch, dirs: new Set() }; g.cells.set(k, c); }
+    c.dirs.add(dir);
+  });
+  const b = g.bbox;
+  b.minX = Math.min(b.minX, x); b.minY = Math.min(b.minY, y);
+  b.maxX = Math.max(b.maxX, x + dx * (chars.length - 1)); b.maxY = Math.max(b.maxY, y + dy * (chars.length - 1));
+  g.words.push({ name: word, x, y, dir });
+}
+function canPlace(cells, chars, x, y, dir) {
+  const dx = dir === "H" ? 1 : 0, dy = dir === "H" ? 0 : 1, n = chars.length;
+  if (cells.has(ck(x - dx, y - dy)) || cells.has(ck(x + dx * n, y + dy * n))) return -1;
+  let inter = 0;
+  for (let i = 0; i < n; i++) {
+    const cx = x + dx * i, cy = y + dy * i, c = cells.get(ck(cx, cy));
+    if (c) { if (c.ch !== chars[i] || c.ch === " " || c.dirs.has(dir)) return -1; inter++; }
+    else if (cells.has(ck(cx + dy, cy + dx)) || cells.has(ck(cx - dy, cy - dx))) return -1;
+  }
+  return inter;
+}
+function bestSpot(g, word, rng, aspect) {
+  const chars = [...word]; let best = null;
+  for (const c of g.cells.values()) {
+    if (c.ch === " " || c.dirs.size > 1) continue;
+    const dir = c.dirs.has("H") ? "V" : "H";
+    for (let i = 0; i < chars.length; i++) {
+      if (chars[i] !== c.ch) continue;
+      const x = dir === "H" ? c.x - i : c.x, y = dir === "H" ? c.y : c.y - i;
+      const inter = canPlace(g.cells, chars, x, y, dir); if (inter < 1) continue;
+      const b = g.bbox, ex = dir === "H" ? x + chars.length - 1 : x, ey = dir === "H" ? y : y + chars.length - 1;
+      const w = Math.max(b.maxX, ex) - Math.min(b.minX, x) + 1, h = Math.max(b.maxY, ey) - Math.min(b.minY, y) + 1;
+      const score = inter * 6 - w * h * 0.12 - Math.abs(Math.log((w / h) / aspect)) * 4 + rng() * 0.8;
+      if (!best || score > best.score) best = { x, y, dir, score };
+    }
+  }
+  return best;
+}
+function crosswordLayout(words, seed, aspect) {
+  if (!words.length) return { ...newGrid(), unplaced: [] };
+  const rng = mulberry32(seed * 7919 + 17), attempts = Math.max(6, Math.min(80, 10 + words.length * 8)); let best = null;
+  for (let a = 0; a < attempts; a++) {
+    let order = words.slice().sort((p, q) => [...q].length - [...p].length);
+    if (a > 0 || seed > 1) order = order.map((w) => ({ w, k: [...w].length + rng() * 5 })).sort((p, q) => q.k - p.k).map((o) => o.w);
+    const g = newGrid(); putWord(g, order[0], 0, 0, "H");
+    let pending = order.slice(1);
+    for (let pass = 0; pass < 3 && pending.length; pass++) {
+      const next = [];
+      for (const w of pending) { const s = bestSpot(g, w, rng, aspect); if (s) putWord(g, w, s.x, s.y, s.dir); else next.push(w); }
+      const stalled = next.length === pending.length; pending = next; if (stalled) break;
+    }
+    const b = g.bbox, w = b.maxX - b.minX + 1, h = b.maxY - b.minY + 1; let inter = 0;
+    for (const c of g.cells.values()) if (c.dirs.size > 1) inter++;
+    const score = g.words.length * 1000 + inter * 8 - w * h * 1.2 - Math.abs(Math.log((w / h) / aspect)) * 20;
+    if (!best || score > best.score) best = { ...g, unplaced: pending, score };
+  }
+  return best;
+}
+function lineLayout(words, kind) {
+  const g = newGrid(), lens = words.map((w) => [...w].length), maxLen = Math.max(0, ...lens), vertical = kind === "vertical";
+  words.forEach((w, i) => {
+    let along = Math.floor((maxLen - lens[i]) / 2);
+    if (kind === "staircase") along = i;
+    if (vertical) putWord(g, w, i, along, "V"); else putWord(g, w, along, i, "H");
+  });
+  return { ...g, unplaced: [] };
+}
+function parseNames(text) {
+  const seen = new Set(), list = [];
+  for (const raw of text.split(/\r?\n/)) {
+    let line = raw.trim().toLocaleUpperCase(), clean = "";
+    for (const ch of line) { if (/[\p{L}\p{N}&'\-]/u.test(ch) || SYMBOLS.includes(ch)) clean += ch; else if (/\s/.test(ch)) clean += " "; }
+    clean = [...clean.replace(/\s+/g, " ").trim()].slice(0, 20).join("");
+    if (!clean || seen.has(clean)) continue; seen.add(clean); list.push(clean);
+    if (list.length >= 12) break;
+  }
+  return list;
+}
+let gridCache = { key: "", grid: null };
+function tileGrid() {
+  const t = D.tiles, list = parseNames(t.names), key = JSON.stringify([list, t.layout, t.seed]);
+  if (gridCache.key !== key) {
+    const g = t.layout === "crossword" ? crosswordLayout(list, t.seed, 1.3) : lineLayout(list, t.layout);
+    const b = g.bbox, cells = [...g.cells.values()];
+    gridCache = { key, grid: { cells, cols: cells.length ? b.maxX - b.minX + 1 : 1, rows: cells.length ? b.maxY - b.minY + 1 : 1, minX: b.minX, minY: b.minY, unplaced: g.unplaced, names: list.length } };
+  }
+  return gridCache.grid;
+}
+
+/* ---------------- drawing (everything is in inches; ppi turns it into pixels) ---------------- */
+const imgCache = new Map();
+function getImg(src) {
+  let e = imgCache.get(src);
+  if (!e) { const im = new Image(); e = { im, ok: false }; im.onload = () => { e.ok = true; schedule(); }; im.src = src; imgCache.set(src, e); }
+  return e.ok ? e.im : null;
+}
+function fontCss(spec, px) { const [fam, wt] = spec.split("|"); return `${wt || 400} ${px}px "${fam}", system-ui, sans-serif`; }
+const fontReady = new Set();
+function ensureFonts(specs) {
+  for (const s of specs) {
+    if (fontReady.has(s) || !document.fonts) continue;
+    fontReady.add(s);
+    document.fonts.load(fontCss(s, 32), "Aa").then(schedule).catch(() => {});
+  }
+}
+function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
+function shapePath(ctx, w, h) {
+  if (D.product === "circle") { ctx.beginPath(); ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, Math.PI * 2); }
+  else if (D.product === "tag") rr(ctx, 0, 0, w, h, Math.min(0.3, h / 4));
+  else if (D.product === "plaque") rr(ctx, 0, 0, w, h, 0.12);
+  else { ctx.beginPath(); ctx.rect(0, 0, w, h); }
+}
+function holePos(w, h) { return D.product === "tag" ? [0.28, h / 2] : [w / 2, 0.28]; }
+
+// Text along an arc: curve>0 arches up, curve<0 makes a smile. 100 bends the text through half a circle.
+function drawText(ctx, L, w, h, measureOnly) {
+  const px = L.size / 100 * h;
+  ctx.font = fontCss(L.font, px); ctx.textBaseline = "middle"; ctx.textAlign = "left";
+  const tw = ctx.measureText(L.text).width;
+  const c = Math.max(-100, Math.min(100, L.curve)) / 100, th = Math.abs(c) * Math.PI;
+  const box = { cx: L.x * w, cy: L.y * h, hw: tw / 2, hh: px * 0.62, rot: L.rot * Math.PI / 180, ox: 0, oy: 0 };
+  let r = 0;
+  if (th > 0.02) {
+    r = tw / th;
+    const chord = 2 * r * Math.sin(th / 2), sag = r * (1 - Math.cos(th / 2));
+    box.hw = chord / 2 + px * 0.3; box.hh = sag / 2 + px * 0.62; box.oy = (c > 0 ? 1 : -1) * sag / 2;
+  }
+  L._box = box;
+  if (measureOnly) return;
+  ctx.save();
+  ctx.translate(box.cx, box.cy); ctx.rotate(box.rot);
+  ctx.fillStyle = L.color; ctx.strokeStyle = L.stroke; ctx.lineJoin = "round"; ctx.lineWidth = px * L.strokeW / 100 * 2;
+  const paint = (s, x, y) => { if (L.strokeW > 0) ctx.strokeText(s, x, y); ctx.fillText(s, x, y); };
+  if (r === 0) paint(L.text, -tw / 2, 0);
+  else {
+    let off = -tw / 2;
+    for (const ch of L.text) {
+      const cw = ctx.measureText(ch).width, mid = off + cw / 2;
+      let a, x, y, rot;
+      if (c > 0) { a = -Math.PI / 2 + mid / r; x = r * Math.cos(a); y = r * Math.sin(a) + r; rot = a + Math.PI / 2; }
+      else { a = Math.PI / 2 - mid / r; x = r * Math.cos(a); y = r * Math.sin(a) - r; rot = a - Math.PI / 2; }
+      ctx.save(); ctx.translate(x, y); ctx.rotate(rot); paint(ch, -cw / 2, 0); ctx.restore();
+      off += cw;
+    }
+  }
+  ctx.restore();
+}
+function drawImageLayer(ctx, L, w, h, measureOnly) {
+  const im = getImg(L.src), ar = im ? im.naturalHeight / im.naturalWidth : (L._ar || 1);
+  const iw = L.size / 100 * w, ih = iw * ar;
+  L._ar = ar; L._box = { cx: L.x * w, cy: L.y * h, hw: iw / 2, hh: ih / 2, rot: L.rot * Math.PI / 180, ox: 0, oy: 0 };
+  if (measureOnly || !im) return;
+  ctx.save(); ctx.translate(L._box.cx, L._box.cy); ctx.rotate(L._box.rot); ctx.drawImage(im, -iw / 2, -ih / 2, iw, ih); ctx.restore();
+}
+function drawTiles(ctx) {
+  const t = D.tiles, g = tileGrid(), s = t.tile, px = s * t.scale / 100;
+  ctx.font = fontCss(t.font, px); ctx.textAlign = "center"; ctx.textBaseline = "middle";
+  for (const c of g.cells) {
+    const x = (c.x - g.minX) * s, y = (c.y - g.minY) * s;
+    if (!D.clear) { ctx.fillStyle = t.tileColor; ctx.fillRect(x, y, s, s); }
+    ctx.fillStyle = t.letterColor; ctx.fillText(c.ch, x + s / 2, y + s / 2 + px * 0.04);
+  }
+  ctx.strokeStyle = t.seamColor; ctx.lineWidth = Math.max(0.012, s * 0.02);
+  for (const c of g.cells) ctx.strokeRect((c.x - g.minX) * s, (c.y - g.minY) * s, s, s);
+}
+// opts: pad (inches around the piece), selected (draw handles), bare (no preview extras)
+function render(ctx, ppi, opts = {}) {
+  const { w, h } = sizeInfo(), pad = opts.pad || 0;
+  ctx.save(); ctx.scale(ppi, ppi); ctx.translate(pad, pad);
+  if (D.product === "tiles") drawTiles(ctx);
+  else {
+    ctx.save();
+    shapePath(ctx, w, h);
+    if (!D.clear) { ctx.fillStyle = D.bg; ctx.fill(); }
+    ctx.clip();
+    for (const L of D.layers) (L.type === "img" ? drawImageLayer : drawText)(ctx, L, w, h, false);
+    ctx.restore();
+    if (D.hole && PRODUCTS[D.product].hole) {
+      const [hx, hy] = holePos(w, h);
+      ctx.save(); ctx.globalCompositeOperation = "destination-out"; ctx.beginPath(); ctx.arc(hx, hy, 0.1, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+      if (!opts.bare) { ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 0.012; ctx.beginPath(); ctx.arc(hx, hy, 0.1, 0, Math.PI * 2); ctx.stroke(); }
+    }
+    if (!opts.bare) {
+      ctx.save(); shapePath(ctx, w, h); ctx.strokeStyle = "rgba(243,212,138,.55)"; ctx.setLineDash([0.06, 0.05]); ctx.lineWidth = 0.014; ctx.stroke(); ctx.restore();
+      const L = D.layers.find((l) => l.id === sel);
+      if (L && L._box) {
+        const b = L._box;
+        ctx.save(); ctx.translate(b.cx, b.cy); ctx.rotate(b.rot); ctx.strokeStyle = "#3bb3ff"; ctx.lineWidth = 0.014; ctx.setLineDash([0.05, 0.04]);
+        ctx.strokeRect(b.ox - b.hw, b.oy - b.hh, b.hw * 2, b.hh * 2); ctx.restore();
+      }
+    }
+  }
+  ctx.restore();
+}
+
+/* ---------------- preview canvas ---------------- */
+const cv = $("cv"), cx = cv.getContext("2d");
+let ppi = 80, raf = 0;
+function schedule() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; paint(); }); }
+function paint() {
+  const { w, h } = sizeInfo(), box = cv.parentElement;
+  const avail = Math.max(220, box.clientWidth - 28), maxH = Math.max(260, Math.min(560, innerHeight - 220));
+  ppi = Math.max(10, Math.min(avail / (w + STATUS_PAD * 2), maxH / (h + STATUS_PAD * 2), 160));
+  const dpr = Math.min(2, devicePixelRatio || 1), cw = (w + STATUS_PAD * 2) * ppi, ch = (h + STATUS_PAD * 2) * ppi;
+  cv.style.width = cw + "px"; cv.style.height = ch + "px";
+  if (cv.width !== Math.round(cw * dpr) || cv.height !== Math.round(ch * dpr)) { cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr); }
+  cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height);
+  cx.scale(dpr, dpr);
+  ensureFonts(D.product === "tiles" ? [D.tiles.font] : D.layers.filter((l) => l.type === "text").map((l) => l.font));
+  render(cx, ppi, { pad: STATUS_PAD });
+  info();
+}
+function info() {
+  const { w, h } = sizeInfo(), g = D.product === "tiles" ? tileGrid() : null;
+  $("infoSize").innerHTML = `Finished size: <b>${w.toFixed(2).replace(/\.?0+$/, "")}″ × ${h.toFixed(2).replace(/\.?0+$/, "")}″</b>${g ? ` · ${g.cells.length} tiles` : ""}`;
+  const warn = [];
+  if (g && g.unplaced.length) warn.push(`${g.unplaced.length} name(s) couldn't interlock; try another arrangement`);
+  if (g && (g.cols * D.tiles.tile > 14 || g.rows * D.tiles.tile > 14)) warn.push("Large piece: we'll check it fits our bed");
+  if (!g) {
+    const out = D.layers.filter((L) => L._box && (L._box.cx - L._box.hw < -0.05 || L._box.cx + L._box.hw > w + 0.05 || L._box.cy - L._box.hh < -0.05 || L._box.cy + L._box.hh > h + 0.05));
+    if (out.length) warn.push("Something runs past the edge and will be cut off");
+  }
+  $("infoWarn").textContent = warn.join(" · ");
+  $("infoWarn").style.color = warn.length ? "var(--gold-2)" : "";
+}
+new ResizeObserver(schedule).observe(cv.parentElement);
+
+/* ---------------- dragging on the canvas ---------------- */
+let drag = null;
+function toInches(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / ppi - STATUS_PAD, (e.clientY - r.top) / ppi - STATUS_PAD]; }
+function hit(px, py) {
+  for (let i = D.layers.length - 1; i >= 0; i--) {
+    const L = D.layers[i], b = L._box; if (!b) continue;
+    const dx = px - b.cx, dy = py - b.cy, c = Math.cos(-b.rot), s = Math.sin(-b.rot);
+    const lx = dx * c - dy * s - b.ox, ly = dx * s + dy * c - b.oy;
+    if (Math.abs(lx) <= b.hw + 0.05 && Math.abs(ly) <= b.hh + 0.05) return L;
+  }
+  return null;
+}
+cv.addEventListener("pointerdown", (e) => {
+  if (D.product === "tiles") return;
+  const [px, py] = toInches(e), L = hit(px, py);
+  setSel(L ? L.id : null);
+  if (!L) return;
+  pushHistory();
+  const { w, h } = sizeInfo();
+  drag = { id: L.id, dx: px - L.x * w, dy: py - L.y * h, moved: false };
+  cv.setPointerCapture(e.pointerId); e.preventDefault();
+});
+cv.addEventListener("pointermove", (e) => {
+  const [px, py] = toInches(e), { w, h } = sizeInfo();
+  if (!drag) { cv.classList.toggle("move", D.product !== "tiles" && !!hit(px, py)); return; }
+  const L = D.layers.find((l) => l.id === drag.id); if (!L) return;
+  L.x = Math.max(0, Math.min(1, (px - drag.dx) / w)); L.y = Math.max(0, Math.min(1, (py - drag.dy) / h)); drag.moved = true;
+  schedule();
+});
+const endDrag = () => { if (drag) { if (!drag.moved) hist.past.pop(); else { autosave(); } drag = null; syncUndo(); } };
+cv.addEventListener("pointerup", endDrag); cv.addEventListener("pointercancel", endDrag);
+cv.addEventListener("keydown", (e) => {
+  const L = D.layers.find((l) => l.id === sel); if (!L || !e.key.startsWith("Arrow")) return;
+  e.preventDefault(); const { w, h } = sizeInfo(), step = (e.shiftKey ? 0.25 : 0.05);
+  pushHistory();
+  if (e.key === "ArrowLeft") L.x = Math.max(0, L.x - step / w); if (e.key === "ArrowRight") L.x = Math.min(1, L.x + step / w);
+  if (e.key === "ArrowUp") L.y = Math.max(0, L.y - step / h); if (e.key === "ArrowDown") L.y = Math.min(1, L.y + step / h);
+  autosave(); schedule();
+});
+
+/* ---------------- undo / autosave ---------------- */
+function pushHistory() { hist.past.push(clone(D)); if (hist.past.length > 60) hist.past.shift(); hist.future = []; syncUndo(); }
+function syncUndo() { $("undoBtn").disabled = !hist.past.length; $("redoBtn").disabled = !hist.future.length; }
+function restore(d) { D = d; if (!D.layers.some((l) => l.id === sel)) sel = null; uiFromDesign(); schedule(); autosave(); }
+$("undoBtn").onclick = () => { if (!hist.past.length) return; hist.future.push(clone(D)); restore(hist.past.pop()); syncUndo(); };
+$("redoBtn").onclick = () => { if (!hist.future.length) return; hist.past.push(clone(D)); restore(hist.future.pop()); syncUndo(); };
+let saveT = 0;
+function autosave() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(LS_DRAFT, JSON.stringify(D)); } catch { /* storage full or blocked */ } }, 400); }
+// Every control change goes through here: snapshot for undo (once per burst), mutate, redraw.
+let lastEdit = 0;
+function edit(fn, rebuild) {
+  const now = Date.now(); if (now - lastEdit > 700) pushHistory(); lastEdit = now;
+  fn(); if (rebuild) uiLayers(); schedule(); autosave();
+}
+
+/* ---------------- controls ---------------- */
+function fontOptions(cur) { return FONTS.map(([v, l]) => `<option value="${v}" ${v === cur ? "selected" : ""} style="font-family:'${v.split("|")[0]}'">${l}</option>`).join(""); }
+function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]); }
+function buildStatic() {
+  $("prodGrid").innerHTML = Object.entries(PRODUCTS).map(([k, p]) => `<button type="button" data-prod="${k}" aria-pressed="false"><span>${p.icon}</span>${p.label}</button>`).join("");
+  $("tFont").innerHTML = fontOptions(""); $("iconRow").innerHTML = SYMBOLS.map((s) => `<button type="button" data-icon="${s}" aria-label="Add ${s}">${s}</button>`).join("");
+}
+$("prodGrid").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-prod]"); if (!b || b.dataset.prod === D.product) return;
+  if (D.layers.length && D.product !== "tiles" && !confirm("Switching product starts a new layout. Continue?")) return;
+  pushHistory(); const keep = D.code; D = newDesign(b.dataset.prod); D.code = null; sel = null; void keep;
+  uiFromDesign(); schedule(); autosave();
+});
+function uiFromDesign() {
+  const P = PRODUCTS[D.product], tiles = D.product === "tiles";
+  document.querySelectorAll("[data-prod]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.prod === D.product));
+  $("prodHint").textContent = P.hint;
+  $("sizeRow").hidden = tiles; $("orientF").hidden = !P.orient;
+  if (!tiles) { $("size").innerHTML = P.sizes.map((s) => `<option value="${s[0]}" ${s[0] === D.size ? "selected" : ""}>${s[1]}</option>`).join(""); $("sizeLbl").textContent = D.product === "tumbler" ? "Cup size" : "Size"; }
+  $("orient").value = D.orient;
+  $("stepTiles").hidden = !tiles; $("stepLayers").hidden = tiles;
+  $("lookNum").textContent = "3"; $("sendNum").textContent = "4";
+  $("baseColors").hidden = tiles; $("holeRow").hidden = tiles || !P.hole;
+  $("clearRow").hidden = false;
+  $("clear").checked = D.clear; $("hole").checked = D.hole; $("bg").value = D.bg;
+  const t = D.tiles;
+  if (document.activeElement !== $("names")) $("names").value = t.names;
+  $("tLayout").value = t.layout; $("tSize").value = String(t.tile); $("tFont").innerHTML = fontOptions(t.font); $("tScale").value = t.scale; $("tScaleO").textContent = t.scale + "%";
+  $("tTile").value = t.tileColor; $("tLetter").value = t.letterColor; $("tSeam").value = t.seamColor;
+  $("tip").textContent = tiles ? "Tip: use “Try another arrangement” until the layout looks right." : "Tip: drag text and pictures on the preview to move them. Tap one to edit it.";
+  uiLayers();
+}
+function layerName(L) { return L.type === "img" ? "🖼 Picture" : (SYMBOLS.includes(L.text.trim()) ? "" : "") + (L.text.trim() || "(empty)"); }
+function uiLayers() {
+  $("layerList").innerHTML = D.layers.map((L, i) => `<div class="lrow" role="button" tabindex="0" data-lid="${L.id}" aria-pressed="${L.id === sel}">
+    <span class="nm">${esc(layerName(L))}</span>
+    <button type="button" data-act="up" aria-label="Bring forward" ${i === D.layers.length - 1 ? "disabled" : ""}>↑</button>
+    <button type="button" data-act="down" aria-label="Send back" ${i === 0 ? "disabled" : ""}>↓</button>
+    <button type="button" data-act="dup" aria-label="Duplicate">⧉</button>
+    <button type="button" data-act="del" aria-label="Delete">🗑</button></div>`).join("") || `<p class="hint">Nothing yet. Add some text or a picture.</p>`;
+  const L = D.layers.find((l) => l.id === sel), ed = $("editor");
+  ed.hidden = !L; if (!L) return;
+  const rng = (k, label, min, max, step, val, unit) => `<label class="f"><span>${label}</span><div class="range"><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${val}" aria-label="${label}"><output>${val}${unit}</output></div></label>`;
+  ed.innerHTML = L.type === "img"
+    ? `${rng("size", "Picture size", 5, 100, 1, L.size, "%")}${rng("rot", "Rotate", -180, 180, 1, L.rot, "°")}`
+    : `<label class="f"><span>Text</span><input class="in" data-k="text" value="${esc(L.text)}" maxlength="60"></label>
+       <label class="f"><span>Font</span><select class="in fontpick" data-k="font">${fontOptions(L.font)}</select></label>
+       <div class="colors"><label class="f"><span>Color</span><input type="color" data-k="color" value="${L.color}"></label>
+       <label class="f"><span>Outline</span><input type="color" data-k="stroke" value="${L.stroke}"></label></div>
+       ${rng("size", "Size", 2, 70, 1, L.size, "")}${rng("curve", "Curve (− smile · + arch)", -100, 100, 5, L.curve, "")}${rng("rot", "Rotate", -180, 180, 1, L.rot, "°")}${rng("strokeW", "Outline thickness", 0, 20, 1, L.strokeW, "")}`;
+}
+function setSel(id) { if (sel === id) return; sel = id; uiLayers(); schedule(); }
+$("layerList").addEventListener("click", (e) => {
+  const row = e.target.closest("[data-lid]"); if (!row) return;
+  const i = D.layers.findIndex((l) => l.id === row.dataset.lid), act = e.target.closest("[data-act]")?.dataset.act;
+  if (!act) { setSel(row.dataset.lid); return; }
+  pushHistory();
+  if (act === "del") { D.layers.splice(i, 1); if (sel === row.dataset.lid) sel = null; }
+  if (act === "dup") { const c = clone(D.layers[i]); c.id = uid(); c.x = Math.min(1, c.x + 0.04); c.y = Math.min(1, c.y + 0.04); delete c._box; D.layers.splice(i + 1, 0, c); sel = c.id; }
+  if (act === "up" && i < D.layers.length - 1) [D.layers[i], D.layers[i + 1]] = [D.layers[i + 1], D.layers[i]];
+  if (act === "down" && i > 0) [D.layers[i], D.layers[i - 1]] = [D.layers[i - 1], D.layers[i]];
+  uiLayers(); schedule(); autosave();
+});
+$("layerList").addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target.matches("[data-lid]")) { e.preventDefault(); setSel(e.target.dataset.lid); } });
+$("editor").addEventListener("input", (e) => {
+  const k = e.target.dataset.k, L = D.layers.find((l) => l.id === sel); if (!k || !L) return;
+  const num = e.target.type === "range";
+  edit(() => { L[k] = num ? +e.target.value : e.target.value; });
+  if (num) e.target.nextElementSibling.textContent = e.target.value + (k === "rot" ? "°" : k === "size" && L.type === "img" ? "%" : "");
+  if (k === "text") { const nm = document.querySelector(`[data-lid="${L.id}"] .nm`); if (nm) nm.textContent = layerName(L); }
+});
+$("addText").onclick = () => { pushHistory(); const L = textLayer({ text: "New text", y: 0.5 }); D.layers.push(L); sel = L.id; uiLayers(); schedule(); autosave(); };
+$("iconRow").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-icon]"); if (!b) return;
+  pushHistory(); const L = textLayer({ text: b.dataset.icon, font: "Manrope|800", size: 24, color: "#f3d48a", y: 0.5 }); D.layers.push(L); sel = L.id; uiLayers(); schedule(); autosave();
+});
+// Customer pictures are shrunk before use so a phone photo can't blow up storage or the upload.
+$("imgPick").addEventListener("change", async (e) => {
+  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+  if (D.layers.filter((l) => l.type === "img").length >= 3) return toast("Up to 3 pictures per design");
+  try {
+    const src = await shrink(f, 800);
+    pushHistory(); const L = { id: uid(), type: "img", src, size: 40, rot: 0, x: 0.5, y: 0.5 };
+    D.layers.push(L); sel = L.id; uiLayers(); schedule(); autosave();
+  } catch { toast("That picture couldn't be opened"); }
+});
+function shrink(file, max) {
+  return new Promise((ok, no) => {
+    const url = URL.createObjectURL(file), im = new Image();
+    im.onload = () => {
+      const k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement("canvas");
+      c.width = Math.max(1, Math.round(im.naturalWidth * k)); c.height = Math.max(1, Math.round(im.naturalHeight * k));
+      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
+      ok(c.toDataURL(file.type === "image/jpeg" ? "image/jpeg" : "image/png", 0.88));
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); no(); }; im.src = url;
+  });
+}
+// Product-level controls
+$("size").onchange = (e) => edit(() => { D.size = e.target.value; });
+$("orient").onchange = (e) => edit(() => { D.orient = e.target.value; });
+$("bg").oninput = (e) => edit(() => { D.bg = e.target.value; });
+$("clear").onchange = (e) => edit(() => { D.clear = e.target.checked; });
+$("hole").onchange = (e) => edit(() => { D.hole = e.target.checked; });
+$("names").oninput = (e) => edit(() => { D.tiles.names = e.target.value; $("namesHint").textContent = ""; });
+$("tLayout").onchange = (e) => edit(() => { D.tiles.layout = e.target.value; });
+$("tSize").onchange = (e) => edit(() => { D.tiles.tile = +e.target.value; });
+$("tFont").onchange = (e) => edit(() => { D.tiles.font = e.target.value; });
+$("tScale").oninput = (e) => edit(() => { D.tiles.scale = +e.target.value; $("tScaleO").textContent = e.target.value + "%"; });
+$("tTile").oninput = (e) => edit(() => { D.tiles.tileColor = e.target.value; });
+$("tLetter").oninput = (e) => edit(() => { D.tiles.letterColor = e.target.value; });
+$("tSeam").oninput = (e) => edit(() => { D.tiles.seamColor = e.target.value; });
+$("reshuffle").onclick = () => edit(() => { D.tiles.seed = (D.tiles.seed % 999) + 1; });
+$("names").addEventListener("blur", () => { $("namesHint").textContent = `${parseNames(D.tiles.names).length} name(s) placed. Up to 12 names, 20 characters each. Letters, numbers, & ' - and ♥ ★ ☘ are kept.`; });
+
+/* ---------------- toast, download, reset ---------------- */
+let toastT;
+function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
+async function renderBlob(maxSide, forceBg) {
+  const { w, h } = sizeInfo(), q = Math.min(300, maxSide / Math.max(w, h)), c = document.createElement("canvas");
+  c.width = Math.max(1, Math.round(w * q)); c.height = Math.max(1, Math.round(h * q));
+  const ctx = c.getContext("2d");
+  if (forceBg) { ctx.fillStyle = "#13213a"; ctx.fillRect(0, 0, c.width, c.height); }
+  await Promise.all([...new Set(D.product === "tiles" ? [D.tiles.font] : D.layers.filter((l) => l.type === "text").map((l) => l.font))].map((s) => document.fonts.load(fontCss(s, 32), "Aa").catch(() => {})));
+  await Promise.all(D.layers.filter((l) => l.type === "img").map((l) => new Promise((ok) => { const e = imgCache.get(l.src) || (getImg(l.src), imgCache.get(l.src)); if (e.ok) ok(); else { e.im.addEventListener("load", ok, { once: true }); e.im.addEventListener("error", ok, { once: true }); } })));
+  render(ctx, q, { bare: true });
+  return new Promise((ok) => c.toBlob(ok, "image/png"));
+}
+$("dlBtn").onclick = async () => {
+  const b = await renderBlob(2400, false), a = document.createElement("a");
+  a.href = URL.createObjectURL(b); a.download = `prajo-design-${D.code || "draft"}.png`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+};
+$("resetBtn").onclick = () => { if (!confirm("Clear this design and start over?")) return; pushHistory(); D = newDesign(D.product); sel = null; uiFromDesign(); schedule(); autosave(); showForm(); };
+
+/* ---------------- saving on this device ---------------- */
+function readSaved() { try { const o = JSON.parse(localStorage.getItem(LS_SAVED) || "{}"); return o && typeof o === "object" ? o : {}; } catch { return {}; } }
+function writeSaved(o) { try { localStorage.setItem(LS_SAVED, JSON.stringify(o)); return true; } catch { return false; } }
+async function thumb() { try { const b = await renderBlob(220, false); return await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(b); }); } catch { return ""; } }
+function summary(d = D) {
+  const P = PRODUCTS[d.product], s = P.sizes ? (P.sizes.find((x) => x[0] === d.size) || P.sizes[0])[1] : "";
+  if (d.product === "tiles") { const n = parseNames(d.tiles.names); return `Name tiles (${d.tiles.layout}, ${d.tiles.tile}″ tiles): ${n.join(", ")}`.slice(0, 590); }
+  const txt = d.layers.filter((l) => l.type === "text").map((l) => l.text).join(" / "), pics = d.layers.filter((l) => l.type === "img").length;
+  return `${P.label} ${s}${P.orient && d.orient === "port" ? " tall" : ""}: ${txt}${pics ? ` + ${pics} picture${pics > 1 ? "s" : ""}` : ""}`.slice(0, 590);
+}
+async function saveLocal(quiet) {
+  if (!D.code) D.code = newCode();
+  const all = readSaved();
+  all[D.code] = { design: clone(D), savedAt: Date.now(), summary: summary(), thumb: await thumb(), submitted: all[D.code]?.submitted || false };
+  if (!writeSaved(all)) { toast("This device is out of storage; the design couldn't be saved here"); return false; }
+  autosave(); savedCount();
+  if (!quiet) toast(`Saved as ${D.code}`);
+  return true;
+}
+$("saveBtn").onclick = () => saveLocal(false);
+function savedCount() { const n = Object.keys(readSaved()).length; $("savedN").textContent = n ? `(${n})` : ""; }
+$("savedBtn").onclick = () => { renderSaved(); $("savedDrawer").hidden = false; document.body.style.overflow = "hidden"; };
+function closeSaved() { $("savedDrawer").hidden = true; document.body.style.overflow = ""; }
+$("savedClose").onclick = closeSaved;
+$("savedDrawer").addEventListener("click", (e) => { if (e.target.id === "savedDrawer") closeSaved(); });
+function renderSaved() {
+  const rows = Object.entries(readSaved()).sort((a, b) => b[1].savedAt - a[1].savedAt);
+  $("savedList").innerHTML = rows.map(([code, r]) => `<div class="saved"><img src="${esc(r.thumb || "")}" alt=""><div><b>${esc(code)}${r.submitted ? " · sent ✓" : ""}</b><small>${esc(r.summary || "")}</small><small>${new Date(r.savedAt).toLocaleDateString()}</small>
+    <div class="actions"><button class="btn gold small" type="button" data-open="${esc(code)}">Open</button><button class="btn line small danger" type="button" data-del="${esc(code)}">Delete</button></div></div></div>`).join("")
+    || `<p class="hint">Nothing saved yet. Press “Save design” and it will appear here.</p>`;
+}
+$("savedList").addEventListener("click", (e) => {
+  const o = e.target.closest("[data-open]"), d = e.target.closest("[data-del]"), all = readSaved();
+  if (o && all[o.dataset.open]) { pushHistory(); D = all[o.dataset.open].design; sel = null; uiFromDesign(); schedule(); autosave(); closeSaved(); showForm(); toast(`Opened ${D.code}`); }
+  if (d) { delete all[d.dataset.del]; writeSaved(all); renderSaved(); savedCount(); }
+});
+
+/* ---------------- sending to PrAjo ---------------- */
+function showForm() { $("formView").hidden = false; $("doneView").hidden = true; }
+$("sendBtn").onclick = () => {
+  if (D.product === "tiles" ? !parseNames(D.tiles.names).length : !D.layers.length) return toast("Add something to your design first");
+  try { const c = JSON.parse(localStorage.getItem(LS_CONTACT) || "{}"); $("cName").value ||= c.name || ""; $("cEmail").value ||= c.email || ""; $("cPhone").value ||= c.phone || ""; } catch { /* no saved contact */ }
+  const f = $("sendForm"); f.hidden = false; f.style.display = "grid"; $("sendBtn").parentElement.hidden = true; $("saveHint").hidden = true; $("cName").focus();
+};
+$("sendCancel").onclick = () => { $("sendForm").hidden = true; $("sendForm").style.display = "none"; $("sendBtn").parentElement.hidden = false; $("saveHint").hidden = false; };
+$("doneNew").onclick = () => { D = newDesign(D.product); sel = null; hist.past = []; hist.future = []; syncUndo(); uiFromDesign(); schedule(); autosave(); showForm(); $("sendCancel").onclick(); };
+
+async function upload(path, blob) {
+  const r = await fetch(`${SB.url}/storage/v1/object/${SB.bucket}/${path}`, { method: "POST", headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
+  if (!r.ok) throw new Error("upload");
+}
+const dataToBlob = (u) => fetch(u).then((r) => r.blob());
+$("sendForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("sendErr"), go = $("sendGo"); err.hidden = true;
+  const name = $("cName").value.trim(), email = $("cEmail").value.trim(), qty = Math.max(1, Math.min(500, parseInt($("cQty").value, 10) || 1));
+  if ($("cWeb").value) return;   // honeypot: bots fill every field
+  if (!name) { err.textContent = "Please add your name."; err.hidden = false; return $("cName").focus(); }
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { err.textContent = "Please enter a valid email so we can reply."; err.hidden = false; return $("cEmail").focus(); }
+  go.disabled = true; go.textContent = "Sending…";
+  const parent = D.code, code = newCode();   // each send gets its own code, so changes after sending become a new request
+  try {
+    const out = clone(D); out.code = code; if (parent) out.parent = parent;
+    // Pictures go to storage; the design row keeps only their paths.
+    let n = 0;
+    for (const L of out.layers) if (L.type === "img") {
+      n++; const b = await dataToBlob(L.src), ext = b.type === "image/jpeg" ? "jpg" : "png", path = `${code}/img${n}.${ext}`;
+      await upload(path, b); L.src = "storage:" + path;
+    }
+    const prev = await renderBlob(1600, false), previewPath = `${code}/preview.png`;
+    await upload(previewPath, prev);
+    const row = { code, product: out.product, summary: summary(), design: out, preview_path: previewPath, customer_name: name, customer_email: email,
+      customer_phone: $("cPhone").value.trim() || null, qty, needed_by: $("cDate").value || null, notes: $("cNotes").value.trim() || null };
+    const r = await fetch(`${SB.url}/rest/v1/custom_designs`, { method: "POST", headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(row) });
+    if (!r.ok) throw new Error("save");
+    fetch(`${SB.url}/functions/v1/design-notify`, { method: "POST", headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, "Content-Type": "application/json" }, body: JSON.stringify({ code }) }).catch(() => {});
+    try { localStorage.setItem(LS_CONTACT, JSON.stringify({ name, email, phone: $("cPhone").value.trim() })); } catch { /* optional */ }
+    D.code = code; await saveLocal(true);
+    const all = readSaved(); if (all[code]) { all[code].submitted = true; writeSaved(all); }
+    $("doneCode").textContent = code; $("doneText").textContent = `We'll review it and email ${email} with the price and next steps. Nothing has been charged. Keep your code handy if you message us about it.`;
+    $("formView").hidden = true; $("doneView").hidden = false; $("doneView").scrollIntoView({ block: "center", behavior: "smooth" });
+  } catch {
+    err.textContent = navigator.onLine ? "We couldn't send your design just now. It's saved on this device, so please try again in a moment or message us." : "You're offline. Reconnect and try again.";
+    err.hidden = false; saveLocal(true);
+  } finally { go.disabled = false; go.textContent = "Send my design"; }
+});
+
+/* ---------------- boot ---------------- */
+buildStatic();
+try {
+  const draft = JSON.parse(localStorage.getItem(LS_DRAFT) || "null");
+  if (draft && draft.v === 1 && PRODUCTS[draft.product] && Array.isArray(draft.layers)) D = draft;
+} catch { /* start fresh */ }
+// "Open in studio" from the admin page hands over a design this way.
+try {
+  if (new URLSearchParams(location.search).has("load")) {
+    const h = JSON.parse(localStorage.getItem("prajo:design:load") || "null");
+    if (h && h.v === 1 && PRODUCTS[h.product]) { D = h; localStorage.removeItem("prajo:design:load"); }
+  }
+} catch { /* ignore */ }
+uiFromDesign(); savedCount(); syncUndo();
+document.fonts?.ready.then(schedule);
+schedule();
+})();
+</script>
+</body>
+</html>
