@@ -232,6 +232,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <button type="button" role="menuitem" id="vacBtn">🌴 Vacation mode<small id="vacState">Checking…</small></button>
         <button type="button" role="menuitem" id="siteBtn">Site settings<small>Homepage text, announcement, colors, links</small></button>
         <button type="button" role="menuitem" id="bulkBtn">Attach download files<small>Add files to many digital listings at once</small></button>
+        <button type="button" role="menuitem" id="studioToggle">🔤 Design studio on the store<small id="studioState">Checking…</small></button>
         <button type="button" role="menuitem" id="dsBtn">🎨 Custom designs<small id="dsState">Designs customers sent from the Design studio</small></button>
         <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
         <button type="button" role="menuitem" id="pwBtn">Change password<small>For this admin page and the pricing app</small></button>
@@ -453,7 +454,7 @@ async function boot() {
   $("appView").hidden = false; $("newBtn").hidden = false; $("menuWrap").hidden = false;
   let resetting = false; try { resetting = sessionStorage.getItem("prajo:setpw") === "1"; } catch {}
   if (resetting) openPw(true);
-  await Promise.all([loadRows(), loadPrices(), paintVac(), dsCount()]);
+  await Promise.all([loadRows(), loadPrices(), paintVac(), paintStudio(), dsCount()]);
 }
 /* ---------- vacation mode: one tap from the menu (full text in Site settings) ---------- */
 async function readSiteRow() { const { data } = await sb.from("site_settings").select("data").eq("id", 1).maybeSingle(); return data?.data || {}; }
@@ -467,6 +468,17 @@ $("vacBtn").onclick = async () => {
   const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
   if (error) return toast("Couldn't change vacation mode: " + error.message);
   toast(next.vacationOn ? "Vacation mode ON. Made-to-order items are paused" : "Vacation mode OFF. The shop is open"); paintVac();
+};
+async function paintStudio() {
+  try { const on = !!(await readSiteRow()).studioOn; $("studioState").textContent = on ? "ON: customers can design name tiles. Tap to turn off" : "Off: hidden from the store. Tap to turn on"; }
+  catch { $("studioState").textContent = "Set up Site settings first"; }
+}
+$("studioToggle").onclick = async () => {
+  const cur = await readSiteRow(), next = { ...cur };
+  if (cur.studioOn) delete next.studioOn; else next.studioOn = true;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+  if (error) return toast("Couldn't change the Design studio: " + error.message);
+  toast(next.studioOn ? "Design studio is ON. Customers can see it" : "Design studio is OFF. Hidden from the store"); paintStudio();
 };
 $("outBtn").onclick = async () => { await sb.auth.signOut({ scope: "local" }).catch(() => {}); location.reload(); };   // this device only
 // Settings menu: everything that isn't a listing lives here.
@@ -1000,6 +1012,8 @@ const SITE_FIELDS = [
     ["vacationOn", "Vacation mode is ON", "switch"],
     ["vacationBack", "Back on (optional)", "text", "e.g. Nov 12"],
     ["vacationMsg", "Message (optional)", "area", "We're on a short break, back Nov 12. Made-to-order items are paused. Printables are still available instantly!"] ] },
+  { g: "Design studio", d: "Lets customers design name tiles on the store. Also in the menu for a quick switch.", f: [
+    ["studioOn", "Design studio is ON", "switch"] ] },
   { g: "Shop display", d: "Order of products, New and low-stock badges, bundle discount", f: [
     ["productOrder", "Show products", "select", [["", "Newest first (recommended)"], ["custom", "My custom order (the drag order on this page)"]]],
     ["newDays", "Show the “New” badge for (days)", "number", "14"],

@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Design your own · PrAjo Custom Studio</title>
-<meta name="description" content="Design a custom name-tile set, ornament, plaque, tumbler or tag. Pick fonts and colors, preview it, save it and send it to PrAjo Custom Studio to be made.">
+<meta name="description" content="Design a custom name-tile keychain or hanger. Pick the names, colors and font, preview it, save it and send it to PrAjo Custom Studio to be made.">
 <meta name="theme-color" content="#0a1220">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Cinzel:wght@600;700&family=Dancing+Script:wght@700&family=Fraunces:wght@700&family=Fredoka:wght@600&family=Great+Vibes&family=Lilita+One&family=Manrope:wght@400;600;700;800&family=Pacifico&family=Permanent+Marker&family=Playfair+Display:wght@700&family=Rubik+Mono+One&family=Zilla+Slab:wght@700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Bebas+Neue&family=Cinzel:wght@600;700&family=Fraunces:wght@700&family=Fredoka:wght@700&family=Lilita+One&family=Manrope:wght@400;600;700;800&family=Rubik+Mono+One&family=Zilla+Slab:wght@700&display=swap">
 <style>
 /* Layout: sticky live preview on the left, step-by-step controls on the right; stacks with the preview first on phones. */
 :root {
@@ -46,7 +46,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 60
 .stage { position: sticky; top: calc(76px + env(safe-area-inset-top, 0px)); display: grid; gap: 12px; }
 .stage-box { border: 1px solid var(--line-soft); background: var(--panel); border-radius: 20px; padding: 14px; display: grid; place-items: center; min-height: 340px; position: relative; overflow: hidden; }
 #cv { max-width: 100%; touch-action: none; cursor: default; border-radius: 6px;
-  background: repeating-conic-gradient(#1b2a45 0% 25%, #15233c 0% 50%) 50% / 20px 20px; }
+  background: #0d182b; }
 #cv.move { cursor: move; }
 .stage-info { display: flex; flex-wrap: wrap; gap: 6px 16px; justify-content: space-between; font-size: 13px; color: var(--muted); }
 .stage-info b { color: var(--gold-2); font-weight: 800; }
@@ -99,6 +99,11 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
 .done { text-align: center; display: grid; gap: 10px; justify-items: center; padding: 8px 0; }
 .done h3 { margin: 0; font: 700 24px var(--f-display); }
 .paybox { border: 1px solid var(--line); border-radius: 14px; padding: 14px; display: grid; gap: 10px; background: rgba(217, 171, 79, .06); text-align: left; width: 100%; }
+.swatches { display: flex; flex-wrap: wrap; gap: 8px; }
+.swatches button { width: 40px; height: 40px; border-radius: 50%; border: 2px solid var(--line-soft); cursor: pointer; padding: 0; }
+.swatches button[aria-pressed="true"] { border-color: var(--cream); box-shadow: 0 0 0 2px var(--ink), 0 0 0 4px var(--gold); }
+.closed { text-align: center; display: grid; gap: 12px; justify-items: center; padding: 60px 0; }
+.closed h1 { margin: 0; font: 700 30px var(--f-display); }
 .hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
 
 .drawer { position: fixed; inset: 0; z-index: 80; background: rgba(5, 9, 17, .7); backdrop-filter: blur(4px); display: flex; justify-content: flex-end; }
@@ -132,79 +137,49 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
   </div>
 </header>
 
-<main class="wrap studio">
+<main class="wrap studio" id="studioMain">
   <section class="stage" aria-label="Live preview">
-    <div class="stage-box"><canvas id="cv" tabindex="0" aria-label="Design preview. Drag text or pictures to move them. Arrow keys nudge the selected item."></canvas></div>
+    <div class="stage-box"><canvas id="cv" tabindex="0" aria-label="Design preview. Drag a tile to move it. Arrow keys nudge the selected tile."></canvas></div>
     <div class="stage-info"><span id="infoSize"></span><span id="infoWarn"></span></div>
-    <p class="stage-tip" id="tip"></p>
+    <p class="stage-tip">Drag a tile to move it. The gold line is where we cut, so every tile has to touch another.</p>
     <div class="stage-actions">
       <button class="btn line small" type="button" id="undoBtn" disabled>↶ Undo</button>
       <button class="btn line small" type="button" id="redoBtn" disabled>↷ Redo</button>
-      <button class="btn line small" type="button" id="dlBtn">Download picture</button>
-      <button class="btn line small danger" type="button" id="resetBtn">Start over</button>
+      <button class="btn line small" type="button" id="resetLayout" disabled>Reset moved tiles</button>
+    </div>
+    <div class="stage-actions" id="adminTools" hidden>
+      <span class="hint" style="align-self:center">Print files:</span>
+      <button class="btn line small" type="button" id="dlColor">Color PNG</button>
+      <button class="btn line small" type="button" id="dlCut">Cut SVG</button>
+      <button class="btn line small" type="button" id="dlJob">job.json</button>
     </div>
   </section>
 
   <section class="controls">
     <div class="step">
-      <h2><i>1</i> What are we making?</h2>
-      <div class="prod-grid" id="prodGrid" role="group" aria-label="Product"></div>
-      <div class="row2" id="sizeRow">
-        <label class="f"><span id="sizeLbl">Size</span><select class="in" id="size"></select></label>
-        <label class="f" id="orientF"><span>Direction</span><select class="in" id="orient"><option value="land">Wide</option><option value="port">Tall</option></select></label>
-      </div>
-      <p class="hint" id="prodHint"></p>
-    </div>
-
-    <div class="step" id="stepTiles" hidden>
-      <h2><i>2</i> Names</h2>
+      <h2><i>1</i> Names</h2>
       <label class="f"><span>One name or word per line</span>
         <textarea class="in" id="names" spellcheck="false" maxlength="600" placeholder="LARA&#10;MADISON&#10;ROGER"></textarea></label>
+      <p class="hint" id="namesHint">Up to 12 names. Letters, numbers and &amp; ' - are kept; ♥ ★ ☘ make icon tiles.</p>
       <div class="row2">
-        <label class="f"><span>Arrangement</span><select class="in" id="tLayout">
-          <option value="crossword">Interlocking crossword</option><option value="horizontal">Rows</option>
-          <option value="vertical">Columns</option><option value="staircase">Staircase</option></select></label>
-        <label class="f"><span>Tile size</span><select class="in" id="tSize">
-          <option value="0.75">0.75″ small</option><option value="1">1″ standard</option><option value="1.25">1.25″ large</option></select></label>
+        <label class="f"><span>Arrangement</span><select class="in" id="layout">
+          <option value="crossword">Interlocking crossword</option><option value="horizontal">Rows</option></select></label>
+        <label class="f"><span>Size</span><select class="in" id="width">
+          <option value="3.5">Small (about 3.5″ wide)</option><option value="4.5">Standard (about 4.5″ wide)</option><option value="6">Large (about 6″ wide)</option></select></label>
       </div>
       <div class="actions"><button class="btn line small" type="button" id="reshuffle">Try another arrangement</button></div>
-      <p class="hint" id="namesHint"></p>
-      <label class="f"><span>Letter style</span><select class="in fontpick" id="tFont"></select></label>
-      <label class="f"><span>Letter size in tile</span>
-        <div class="range"><input type="range" id="tScale" min="40" max="95" step="1" aria-label="Letter size in tile"><output id="tScaleO"></output></div></label>
-      <div class="colors">
-        <label class="f"><span>Tile</span><input type="color" id="tTile"></label>
-        <label class="f"><span>Letters</span><input type="color" id="tLetter"></label>
-        <label class="f"><span>Seams</span><input type="color" id="tSeam"></label>
-      </div>
     </div>
 
-    <div class="step" id="stepLayers" hidden>
-      <h2><i>2</i> Text and pictures</h2>
-      <div class="actions">
-        <button class="btn gold small" type="button" id="addText">+ Add text</button>
-        <label class="btn line small" for="imgPick">+ Add a picture</label>
-        <input type="file" id="imgPick" accept="image/png,image/jpeg,image/webp" hidden>
-      </div>
-      <div class="layers" id="layerList" role="group" aria-label="Items on your design"></div>
-      <div>
-        <span class="lbl">Add an icon</span>
-        <div class="icons" id="iconRow" style="margin-top:6px"></div>
-      </div>
-      <div class="editor" id="editor" hidden></div>
-    </div>
-
-    <div class="step" id="stepLook">
-      <h2><i id="lookNum">3</i> Base color and finish</h2>
-      <div class="colors" id="baseColors">
-        <label class="f"><span>Base color</span><input type="color" id="bg"></label>
-      </div>
-      <label class="check" id="clearRow"><input type="checkbox" id="clear"> Clear / no base color (print directly on the surface)</label>
-      <label class="check" id="holeRow"><input type="checkbox" id="hole"> Add a hanging hole</label>
+    <div class="step">
+      <h2><i>2</i> Look</h2>
+      <div class="f"><span>Tile color</span><div class="swatches" id="tileSw" role="group" aria-label="Tile color"></div></div>
+      <div class="f"><span>Letter color</span><div class="swatches" id="letterSw" role="group" aria-label="Letter color"></div></div>
+      <label class="f"><span>Letter style</span><select class="in fontpick" id="font"></select></label>
+      <label class="check"><input type="checkbox" id="hole"> Add a hanging tab with a hole</label>
     </div>
 
     <div class="step submit-card">
-      <h2><i id="sendNum">4</i> Save and send</h2>
+      <h2><i>3</i> Save and send</h2>
       <div id="formView" style="display:grid;gap:12px">
         <p class="hint" id="saveHint">Save keeps this design on this device. Send it to us and we'll review it, confirm the price and make it.</p>
         <div class="actions">
@@ -221,7 +196,7 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
             <label class="f"><span>How many</span><input class="in" id="cQty" type="number" min="1" max="500" value="1" inputmode="numeric"></label>
           </div>
           <label class="f"><span>Needed by (optional)</span><input class="in" id="cDate" type="date"></label>
-          <label class="f"><span>Anything we should know?</span><textarea class="in" id="cNotes" style="min-height:90px" maxlength="2000" placeholder="Colors that must match, a gift date, spelling of names…"></textarea></label>
+          <label class="f"><span>Anything we should know?</span><textarea class="in" id="cNotes" style="min-height:90px" maxlength="2000" placeholder="A gift date, spelling of names, where it will hang…"></textarea></label>
           <input class="hp" id="cWeb" tabindex="-1" autocomplete="off" aria-hidden="true">
           <p class="err" id="sendErr" hidden></p>
           <div class="actions"><button class="btn gold" type="submit" id="sendGo">Send my design</button><button class="btn line" type="button" id="sendCancel">Cancel</button></div>
@@ -234,13 +209,19 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
         <p style="margin:0">Your design code is <span class="code-pill" id="doneCode"></span></p>
         <p class="hint" id="doneText"></p>
         <div class="paybox" id="payBox" hidden>
-          <p style="margin:0"><b>Ready to order?</b> Add it to your cart now: <span id="payPrice"></span>. If anything about the design needs changing we'll message you before we print.</p>
+          <p style="margin:0"><b>Ready to order?</b> Add it to your cart now: <span id="payPrice"></span>. If anything about the design needs changing we'll message you before we make it.</p>
           <button class="btn gold" type="button" id="payBtn">Add to cart and check out</button>
         </div>
         <button class="btn line" type="button" id="doneNew">Make another design</button>
       </div>
     </div>
   </section>
+</main>
+
+<main class="wrap closed" id="closedMain" hidden>
+  <h1>The Design studio is closed right now</h1>
+  <p class="hint" style="font-size:15px">We're not taking online name-tile designs at the moment. Message us and we'll make something with you.</p>
+  <a class="btn gold" href="./#custom">Message us</a>
 </main>
 
 <div class="drawer" id="savedDrawer" hidden role="dialog" aria-modal="true" aria-labelledby="savedTitle">
@@ -257,73 +238,35 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
 const $ = (id) => document.getElementById(id);
 const SB = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", bucket: "design-previews" };
 const LS_DRAFT = "prajo:design:draft", LS_SAVED = "prajo:designs", LS_CONTACT = "prajo:design:contact";
-const SYMBOLS = ["♥", "★", "☘", "✿", "❄", "☾", "✦", "♪", "☀", "✝", "☮", "⚓"];
-
-// Fonts offered to customers: value is "CSS family|weight".
-const FONTS = [
-  ["Archivo Black|400", "Archivo Black (bold block)"], ["Lilita One|400", "Lilita One (chunky)"], ["Fredoka|600", "Fredoka (rounded)"],
-  ["Bebas Neue|400", "Bebas Neue (tall)"], ["Zilla Slab|700", "Zilla Slab (slab serif)"], ["Rubik Mono One|400", "Rubik Mono One (wide)"],
-  ["Playfair Display|700", "Playfair Display (elegant)"], ["Cinzel|700", "Cinzel (classic caps)"], ["Fraunces|700", "Fraunces (soft serif)"],
-  ["Great Vibes|400", "Great Vibes (script)"], ["Dancing Script|700", "Dancing Script (script)"], ["Pacifico|400", "Pacifico (retro script)"],
-  ["Permanent Marker|400", "Permanent Marker (handwritten)"], ["Manrope|800", "Manrope (clean)"],
-];
-// Sizes are inches. Tumbler wrap areas are approximate; PrAjo confirms the final fit before printing.
-const PRODUCTS = {
-  tiles:   { label: "Name tiles", icon: "🔤", hint: "Letters on tiles that interlock like a crossword. Each tile is cut and printed, so the whole piece is as big as the arrangement." },
-  circle:  { label: "Round ornament", icon: "⭕", sizes: [["3", "3″ round", 3, 3], ["3.5", "3.5″ round", 3.5, 3.5], ["4", "4″ round", 4, 4]], hole: true, hint: "A flat round piece with a hole for a ribbon." },
-  plaque:  { label: "Plaque / sign", icon: "▭", sizes: [["5x3", "5″ × 3″", 5, 3], ["6x4", "6″ × 4″", 6, 4], ["8x5", "8″ × 5″", 8, 5], ["10x6", "10″ × 6″", 10, 6]], orient: true, hole: true, hint: "A flat rectangular piece for a desk, shelf or door." },
-  tumbler: { label: "Tumbler wrap", icon: "🥤", sizes: [["20", "20 oz skinny", 9, 7.5], ["30", "30 oz skinny", 9, 8.5]], hint: "The flat wrap that goes around the cup. Keep key text near the middle so the seam doesn't cut it." },
-  tag:     { label: "Tag / keychain", icon: "🏷️", sizes: [["3x1.75", "3″ × 1.75″", 3, 1.75], ["2.5x2.5", "2.5″ square", 2.5, 2.5]], hole: true, hint: "A small tag for a bag, badge or keys." },
-};
 const PAY_ID = "custom-design";   // listing id created from admin.html → Custom designs
-const STATUS_PAD = 0.12;   // inches of breathing room around the piece in the preview
+const SYMBOLS = ["♥", "★", "☘"];
+const FONTS = [["Archivo Black|400", "Archivo Black (bold block)"], ["Lilita One|400", "Lilita One (chunky)"], ["Fredoka|700", "Fredoka (rounded)"],
+  ["Bebas Neue|400", "Bebas Neue (tall)"], ["Zilla Slab|700", "Zilla Slab (slab serif)"], ["Rubik Mono One|400", "Rubik Mono One (wide)"]];
+const TILE_COLORS = [["#1f3a5f", "Navy"], ["#3d8f4a", "Green"], ["#b3262f", "Red"], ["#6b3fa0", "Purple"], ["#d6528b", "Pink"], ["#1c8c8c", "Teal"], ["#c9962b", "Gold"], ["#1c1c22", "Black"]];
+const LETTER_COLORS = [["#ffffff", "White"], ["#111111", "Black"], ["#f3d48a", "Gold"], ["#f5ecdc", "Cream"]];
+// Fixed production settings, the same ones the print suite defaults to.
+const FIX = { cutOffset: 0.06, cornerR: 0.08, seam: 0.012, letterScale: 0.72, holeD: 0.25, scale: 0.95, maxH: 8 };
 
-/* ---------------- state ---------------- */
+const clone = (o) => JSON.parse(JSON.stringify(o));
 const uid = () => Math.random().toString(36).slice(2, 8);
 const CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
 function newCode() { const a = new Uint8Array(6); crypto.getRandomValues(a); return "D-" + [...a].map((n) => CODE_CHARS[n % CODE_CHARS.length]).join(""); }
-
-function textLayer(over = {}) {
-  return { id: uid(), type: "text", text: "Your Name", font: "Playfair Display|700", color: "#ffffff", size: 16, curve: 0, rot: 0, x: 0.5, y: 0.5, stroke: "#000000", strokeW: 0, ...over };
+function newDesign() {
+  return { v: 2, code: null, product: "tiles", names: "LARA\nMADISON\nROGER\nWILL", layout: "crossword", seed: 1, width: 4.5, font: "Archivo Black|400",
+    tileColor: "#1f3a5f", letterColor: "#ffffff", hole: true, manual: null };
 }
-function newDesign(product = "circle") {
-  const P = PRODUCTS[product];
-  const d = { v: 1, code: null, product, size: P.sizes ? P.sizes[0][0] : "", orient: "land", bg: "#1f3a5f", clear: false, hole: !!P.hole, layers: [],
-    tiles: { names: "LARA\nMADISON\nROGER\nWILL", layout: "crossword", seed: 1, tile: 1, font: "Archivo Black|400", scale: 72, tileColor: "#1f3a5f", letterColor: "#ffffff", seamColor: "#0d1b2e" } };
-  if (product === "circle") d.layers = [textLayer({ text: "The Smiths", size: 15, y: 0.48 }), textLayer({ text: "Our first Christmas", size: 7, curve: 70, y: 0.2, color: "#f3d48a", font: "Dancing Script|700" })];
-  if (product === "plaque") d.layers = [textLayer({ text: "Home Sweet Home", size: 20, y: 0.45 }), textLayer({ text: "Est. 2026", size: 9, y: 0.75, color: "#f3d48a", font: "Cinzel|700" })];
-  if (product === "tumbler") d.layers = [textLayer({ text: "Madison", size: 22, y: 0.45, font: "Great Vibes|400", color: "#f3d48a" }), textLayer({ text: "BRIDESMAID", size: 8, y: 0.68, font: "Cinzel|700" })];
-  if (product === "tag") d.layers = [textLayer({ text: "LARA", size: 34, y: 0.5, font: "Archivo Black|400" })];
-  if (product === "tumbler") d.clear = true;
-  return d;
-}
-let D = newDesign("circle");
-let sel = null;            // selected layer id
+let D = newDesign();
 const hist = { past: [], future: [] };
+let adminLoaded = false;
 
-const clone = (o) => JSON.parse(JSON.stringify(o));
-function sizeInfo(d = D) {
-  const P = PRODUCTS[d.product];
-  if (d.product === "tiles") { const g = tileGrid(); return { w: g.cols * d.tiles.tile, h: g.rows * d.tiles.tile }; }
-  const s = P.sizes.find((x) => x[0] === d.size) || P.sizes[0];
-  let w = s[2], h = s[3];
-  if (P.orient && d.orient === "port") [w, h] = [h, w];
-  return { w, h };
-}
-
-/* ---------------- crossword engine (ported from the production suite) ---------------- */
+/* ---------------- crossword engine (from the print suite) ---------------- */
 function mulberry32(a) { return function () { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
 const ck = (x, y) => x + "," + y;
 function newGrid() { return { cells: new Map(), words: [], bbox: { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity } }; }
 function putWord(g, word, x, y, dir) {
   const chars = [...word], dx = dir === "H" ? 1 : 0, dy = dir === "H" ? 0 : 1;
-  chars.forEach((ch, i) => {
-    const k = ck(x + dx * i, y + dy * i); let c = g.cells.get(k);
-    if (!c) { c = { x: x + dx * i, y: y + dy * i, ch, dirs: new Set() }; g.cells.set(k, c); }
-    c.dirs.add(dir);
-  });
-  const b = g.bbox;
-  b.minX = Math.min(b.minX, x); b.minY = Math.min(b.minY, y);
+  chars.forEach((ch, i) => { const k = ck(x + dx * i, y + dy * i); let c = g.cells.get(k); if (!c) { c = { x: x + dx * i, y: y + dy * i, ch, dirs: new Set() }; g.cells.set(k, c); } c.dirs.add(dir); });
+  const b = g.bbox; b.minX = Math.min(b.minX, x); b.minY = Math.min(b.minY, y);
   b.maxX = Math.max(b.maxX, x + dx * (chars.length - 1)); b.maxY = Math.max(b.maxY, y + dy * (chars.length - 1));
   g.words.push({ name: word, x, y, dir });
 }
@@ -375,19 +318,15 @@ function crosswordLayout(words, seed, aspect) {
   }
   return best;
 }
-function lineLayout(words, kind) {
-  const g = newGrid(), lens = words.map((w) => [...w].length), maxLen = Math.max(0, ...lens), vertical = kind === "vertical";
-  words.forEach((w, i) => {
-    let along = Math.floor((maxLen - lens[i]) / 2);
-    if (kind === "staircase") along = i;
-    if (vertical) putWord(g, w, i, along, "V"); else putWord(g, w, along, i, "H");
-  });
+function rowLayout(words) {
+  const g = newGrid(), lens = words.map((w) => [...w].length), maxLen = Math.max(0, ...lens);
+  words.forEach((w, i) => putWord(g, w, Math.floor((maxLen - lens[i]) / 2), i, "H"));
   return { ...g, unplaced: [] };
 }
 function parseNames(text) {
   const seen = new Set(), list = [];
   for (const raw of text.split(/\r?\n/)) {
-    let line = raw.trim().toLocaleUpperCase(), clean = "";
+    const line = raw.trim().toLocaleUpperCase(); let clean = "";
     for (const ch of line) { if (/[\p{L}\p{N}&'\-]/u.test(ch) || SYMBOLS.includes(ch)) clean += ch; else if (/\s/.test(ch)) clean += " "; }
     clean = [...clean.replace(/\s+/g, " ").trim()].slice(0, 20).join("");
     if (!clean || seen.has(clean)) continue; seen.add(clean); list.push(clean);
@@ -395,396 +334,289 @@ function parseNames(text) {
   }
   return list;
 }
-let gridCache = { key: "", grid: null };
-function tileGrid() {
-  const t = D.tiles, list = parseNames(t.names), key = JSON.stringify([list, t.layout, t.seed]);
-  if (gridCache.key !== key) {
-    const g = t.layout === "crossword" ? crosswordLayout(list, t.seed, 1.3) : lineLayout(list, t.layout);
-    const b = g.bbox, cells = [...g.cells.values()];
-    gridCache = { key, grid: { cells, cols: cells.length ? b.maxX - b.minX + 1 : 1, rows: cells.length ? b.maxY - b.minY + 1 : 1, minX: b.minX, minY: b.minY, unplaced: g.unplaced, names: list.length } };
+// Tile positions are rebuilt only when names, arrangement, shape or the shuffle change; hand-moved tiles are kept in D.manual.
+let layoutCache = { key: "", tiles: [], unplaced: [], names: 0 };
+function ensureLayout() {
+  const list = parseNames(D.names), aspect = Math.max(0.4, Math.min(2.5, D.width / FIX.maxH * 1.15));
+  const key = JSON.stringify([list, D.layout, D.seed, +aspect.toFixed(2)]);
+  if (layoutCache.key !== key) {
+    const g = D.layout === "crossword" ? crosswordLayout(list, D.seed, aspect) : rowLayout(list);
+    layoutCache = { key, tiles: [...g.cells.values()].map((c) => ({ id: ck(c.x, c.y), ch: c.ch, gx: c.x, gy: c.y, inter: c.dirs.size > 1 })), unplaced: g.unplaced, names: list.length };
   }
-  return gridCache.grid;
+  if (D.manual && D.manual.key === key) return D.manual.tiles;
+  if (D.manual && D.manual.key !== key) D.manual = null;
+  return layoutCache.tiles;
+}
+function setTiles(tiles) { D.manual = { key: layoutCache.key, tiles }; }
+
+/* ---------------- geometry (ported from the print suite: tab, outline union, rounded cut path) ---------------- */
+function unionOutline(rects) {
+  const q = (v) => Math.round(v * 1e6) / 1e6;
+  const xs = [...new Set(rects.flatMap((r) => [q(r.x0), q(r.x1)]))].sort((a, b) => a - b);
+  const ys = [...new Set(rects.flatMap((r) => [q(r.y0), q(r.y1)]))].sort((a, b) => a - b);
+  const nx = xs.length - 1, ny = ys.length - 1, filled = new Uint8Array(Math.max(0, nx * ny));
+  for (let j = 0; j < ny; j++) { const my = (ys[j] + ys[j + 1]) / 2; for (let i = 0; i < nx; i++) { const mx = (xs[i] + xs[i + 1]) / 2; for (const r of rects) if (mx > r.x0 && mx < r.x1 && my > r.y0 && my < r.y1) { filled[j * nx + i] = 1; break; } } }
+  const at = (i, j) => (i >= 0 && j >= 0 && i < nx && j < ny) ? filled[j * nx + i] : 0, out = new Map();
+  const addEdge = (ax, ay, bx, by) => { const k = ax + "," + ay; if (!out.has(k)) out.set(k, []); out.get(k).push({ ax, ay, bx, by, used: false }); };
+  for (let j = 0; j < ny; j++) for (let i = 0; i < nx; i++) {
+    if (!at(i, j)) continue;
+    if (!at(i, j - 1)) addEdge(i, j, i + 1, j); if (!at(i + 1, j)) addEdge(i + 1, j, i + 1, j + 1);
+    if (!at(i, j + 1)) addEdge(i + 1, j + 1, i, j + 1); if (!at(i - 1, j)) addEdge(i, j + 1, i, j);
+  }
+  const turn = (dx, dy, c) => dx * (c.by - c.ay) - dy * (c.bx - c.ax), loops = [];
+  for (const list of out.values()) for (const start of list) {
+    if (start.used) continue;
+    const pts = []; let e = start, guard = 0;
+    while (e && !e.used && guard++ < 100000) {
+      e.used = true; pts.push([e.ax, e.ay]);
+      const cands = (out.get(e.bx + "," + e.by) || []).filter((c) => !c.used);
+      if (cands.length <= 1) { e = cands[0]; continue; }
+      const dx = e.bx - e.ax, dy = e.by - e.ay; cands.sort((p, r) => turn(dx, dy, r) - turn(dx, dy, p)); e = cands[0];
+    }
+    const simp = pts.filter((p, idx) => { const a = pts[(idx - 1 + pts.length) % pts.length], c = pts[(idx + 1) % pts.length]; return (p[0] - a[0]) * (c[1] - p[1]) - (p[1] - a[1]) * (c[0] - p[0]) !== 0; });
+    if (simp.length >= 3) loops.push(simp.map(([i, j]) => [xs[i], ys[j]]));
+  }
+  return loops;
+}
+const f4 = (v) => (Math.round(v * 10000) / 10000).toString();
+const signedArea = (l) => l.reduce((a, p, i) => { const q = l[(i + 1) % l.length]; return a + p[0] * q[1] - q[0] * p[1]; }, 0) / 2;
+function roundedPath(loops, radius) {
+  let d = "", length = 0;
+  for (const pts of loops) {
+    const n = pts.length;
+    const corners = pts.map((p, k) => {
+      const prev = pts[(k - 1 + n) % n], next = pts[(k + 1) % n], lin = Math.hypot(p[0] - prev[0], p[1] - prev[1]), lout = Math.hypot(next[0] - p[0], next[1] - p[1]);
+      const r = Math.min(radius, lin / 2, lout / 2), din = [(p[0] - prev[0]) / lin, (p[1] - prev[1]) / lin], dout = [(next[0] - p[0]) / lout, (next[1] - p[1]) / lout];
+      const cross = din[0] * dout[1] - din[1] * dout[0];
+      return { r, sweep: cross > 0 ? 1 : 0, t1: [p[0] - din[0] * r, p[1] - din[1] * r], t2: [p[0] + dout[0] * r, p[1] + dout[1] * r] };
+    });
+    d += `M${f4(corners[0].t2[0])} ${f4(corners[0].t2[1])}`;
+    for (let k = 1; k <= n; k++) {
+      const c = corners[k % n], pc = corners[k - 1];
+      d += `L${f4(c.t1[0])} ${f4(c.t1[1])}`; length += Math.hypot(c.t1[0] - pc.t2[0], c.t1[1] - pc.t2[1]);
+      if (c.r > 1e-6) { d += `A${f4(c.r)} ${f4(c.r)} 0 0 ${c.sweep} ${f4(c.t2[0])} ${f4(c.t2[1])}`; length += Math.PI / 2 * c.r; }
+    }
+    d += "Z";
+  }
+  return { d, length };
+}
+function computeJob() {
+  const tiles = ensureLayout(), warnings = [];
+  if (!tiles.length) return { empty: true, warnings, text: "Add at least one name to see your design." };
+  let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+  for (const t of tiles) { minX = Math.min(minX, t.gx); minY = Math.min(minY, t.gy); maxX = Math.max(maxX, t.gx + 1); maxY = Math.max(maxY, t.gy + 1); }
+  const m = FIX.cutOffset; let tab = null;
+  if (D.hole) {
+    const top = tiles.filter((t) => t.gy < minY + 0.01), mid = (minX + maxX) / 2;
+    top.sort((a, b) => Math.abs(a.gx + 0.5 - mid) - Math.abs(b.gx + 0.5 - mid));
+    tab = { gx: top[0].gx, gy: top[0].gy - 1 }; minY = Math.min(minY, tab.gy);
+  }
+  const bw = maxX - minX, bh = maxY - minY, tile = Math.min((D.width - 2 * m) / bw, (FIX.maxH - 2 * m) / bh) * FIX.scale;
+  const pieceW = bw * tile + 2 * m, pieceH = bh * tile + 2 * m, ox = m - minX * tile, oy = m - minY * tile;
+  if (!(tile > 0.05)) return { empty: true, warnings, text: "Too many names for this size. Pick a larger size or fewer names." };
+  const cells = tiles.map((t) => ({ ...t, x: ox + t.gx * tile, y: oy + t.gy * tile }));
+  const tabRect = tab ? { x: ox + tab.gx * tile, y: oy + tab.gy * tile } : null;
+  const hole = tabRect ? { cx: tabRect.x + tile / 2, cy: tabRect.y + tile / 2, r: FIX.holeD / 2 } : null;
+  const rects = cells.map((c) => ({ x0: c.x - m, y0: c.y - m, x1: c.x + tile + m, y1: c.y + tile + m }));
+  if (tabRect) rects.push({ x0: tabRect.x - m, y0: tabRect.y - m, x1: tabRect.x + tile + m, y1: tabRect.y + tile + m });
+  let loops = unionOutline(rects);
+  const signed = loops.map(signedArea), outerSign = Math.sign(signed.reduce((a, b) => Math.abs(b) > Math.abs(a) ? b : a, 0));
+  const islands = signed.filter((v) => Math.sign(v) === outerSign).length;
+  loops = loops.filter((l, i) => Math.sign(signed[i]) === outerSign);   // bridge enclosed pockets so nothing drops out
+  if (islands > 1) warnings.push(`Tiles form ${islands} separate pieces. Drag them together.`);
+  if (layoutCache.unplaced.length) warnings.push(`Couldn't interlock: ${layoutCache.unplaced.join(", ")}. Try another arrangement.`);
+  if (tile < 0.45) warnings.push(`Tiles are only ${tile.toFixed(2)}″ wide. Pick a larger size for easier reading.`);
+  const cut = roundedPath(loops, FIX.cornerR); if (hole) cut.length += Math.PI * FIX.holeD;
+  return { empty: false, warnings, cells, tab: tabRect, tile, pieceW, pieceH, hole, cutD: cut.d, cutLength: cut.length, islands, area: Math.abs(loops.reduce((a, l) => a + signedArea(l), 0)) };
 }
 
-/* ---------------- drawing (everything is in inches; ppi turns it into pixels) ---------------- */
-const imgCache = new Map();
-function getImg(src) {
-  let e = imgCache.get(src);
-  if (!e) { const im = new Image(); e = { im, ok: false }; im.onload = () => { e.ok = true; schedule(); }; im.src = src; imgCache.set(src, e); }
-  return e.ok ? e.im : null;
+/* ---------------- drawing ---------------- */
+const fontCss = (spec, px) => { const [fam, wt] = spec.split("|"); return `${wt || 400} ${px}px "${fam}", "Arial Black", Arial, sans-serif`; };
+const darken = (hex, amt) => { const n = parseInt(hex.slice(1), 16); return "#" + [n >> 16, (n >> 8) & 255, n & 255].map((v) => Math.round(v * (1 - amt)).toString(16).padStart(2, "0")).join(""); };
+function drawGlyph(ctx, ch, cx, cy, px, cache) {
+  let m = cache.get(ch); if (!m) { m = ctx.measureText(ch); cache.set(ch, m); }
+  const left = m.actualBoundingBoxLeft || 0, right = m.actualBoundingBoxRight || m.width, inkW = left + right, sc = inkW > px * 1.05 ? px * 1.05 / inkW : 1;
+  const asc = m.actualBoundingBoxAscent ?? px * 0.72, desc = m.actualBoundingBoxDescent ?? 0;
+  ctx.save(); ctx.translate(cx, cy); ctx.scale(sc, sc); ctx.fillText(ch, (left - right) / 2, (asc - desc) / 2); ctx.restore();
 }
-function fontCss(spec, px) { const [fam, wt] = spec.split("|"); return `${wt || 400} ${px}px "${fam}", system-ui, sans-serif`; }
+// Artwork at `dpi` pixels per inch, clipped to the cut outline, hole knocked out.
+function drawArt(ctx, job, dpi) {
+  const P = (v) => v * dpi, tile = job.tile, clip = new Path2D();
+  clip.addPath(new Path2D(job.cutD), new DOMMatrix().scale(dpi, dpi));
+  ctx.save(); ctx.clip(clip);
+  const all = job.tab ? [...job.cells, job.tab] : job.cells, bleed = 0.6;
+  ctx.fillStyle = D.tileColor;
+  for (const c of all) ctx.fillRect(P(c.x) - bleed, P(c.y) - bleed, P(tile) + bleed * 2, P(tile) + bleed * 2);
+  ctx.strokeStyle = darken(D.tileColor, 0.5); ctx.lineWidth = P(FIX.seam); ctx.beginPath();
+  const q = (v) => Math.round(v / tile * 1000), occ = new Set(all.map((c) => ck(q(c.x), q(c.y))));
+  for (const c of all) {
+    if (occ.has(ck(q(c.x + tile), q(c.y)))) { ctx.moveTo(P(c.x + tile), P(c.y)); ctx.lineTo(P(c.x + tile), P(c.y + tile)); }
+    if (occ.has(ck(q(c.x), q(c.y + tile)))) { ctx.moveTo(P(c.x), P(c.y + tile)); ctx.lineTo(P(c.x + tile), P(c.y + tile)); }
+  }
+  ctx.stroke();
+  const px = P(tile * FIX.letterScale), cache = new Map();
+  ctx.font = fontCss(D.font, px); ctx.fillStyle = D.letterColor; ctx.textAlign = "center"; ctx.textBaseline = "alphabetic";
+  for (const c of job.cells) if (c.ch !== " ") drawGlyph(ctx, c.ch, P(c.x + tile / 2), P(c.y + tile / 2), px, cache);
+  ctx.restore();
+  if (job.hole) { ctx.save(); ctx.globalCompositeOperation = "destination-out"; ctx.beginPath(); ctx.arc(P(job.hole.cx), P(job.hole.cy), P(job.hole.r + 0.02), 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+}
+function art(job, dpi) { const c = document.createElement("canvas"); c.width = Math.ceil(job.pieceW * dpi); c.height = Math.ceil(job.pieceH * dpi); drawArt(c.getContext("2d"), job, dpi); return c; }
+
+const cv = $("cv"), cx = cv.getContext("2d"), MARGIN = 40;
+let job = null, vt = null, sel = null, raf = 0, drag = null;
 const fontReady = new Set();
-function ensureFonts(specs) {
-  for (const s of specs) {
-    if (fontReady.has(s) || !document.fonts) continue;
-    fontReady.add(s);
-    document.fonts.load(fontCss(s, 32), "Aa").then(schedule).catch(() => {});
-  }
+function ensureFont() {
+  const spec = D.font; if (fontReady.has(spec) || !document.fonts) return; fontReady.add(spec);
+  document.fonts.load(fontCss(spec, 32), "AMRW♥").then(schedule).catch(() => {});
 }
-function rr(ctx, x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
-function shapePath(ctx, w, h) {
-  if (D.product === "circle") { ctx.beginPath(); ctx.arc(w / 2, h / 2, Math.min(w, h) / 2, 0, Math.PI * 2); }
-  else if (D.product === "tag") rr(ctx, 0, 0, w, h, Math.min(0.3, h / 4));
-  else if (D.product === "plaque") rr(ctx, 0, 0, w, h, 0.12);
-  else { ctx.beginPath(); ctx.rect(0, 0, w, h); }
-}
-function holePos(w, h) { return D.product === "tag" ? [0.28, h / 2] : [w / 2, 0.28]; }
-
-// Text along an arc: curve>0 arches up, curve<0 makes a smile. 100 bends the text through half a circle.
-function drawText(ctx, L, w, h, measureOnly) {
-  const px = L.size / 100 * h;
-  ctx.font = fontCss(L.font, px); ctx.textBaseline = "middle"; ctx.textAlign = "left";
-  const tw = ctx.measureText(L.text).width;
-  const c = Math.max(-100, Math.min(100, L.curve)) / 100, th = Math.abs(c) * Math.PI;
-  const box = { cx: L.x * w, cy: L.y * h, hw: tw / 2, hh: px * 0.62, rot: L.rot * Math.PI / 180, ox: 0, oy: 0 };
-  let r = 0;
-  if (th > 0.02) {
-    r = tw / th;
-    const chord = 2 * r * Math.sin(th / 2), sag = r * (1 - Math.cos(th / 2));
-    box.hw = chord / 2 + px * 0.3; box.hh = sag / 2 + px * 0.62; box.oy = (c > 0 ? 1 : -1) * sag / 2;
-  }
-  L._box = box;
-  if (measureOnly) return;
-  ctx.save();
-  ctx.translate(box.cx, box.cy); ctx.rotate(box.rot);
-  ctx.fillStyle = L.color; ctx.strokeStyle = L.stroke; ctx.lineJoin = "round"; ctx.lineWidth = px * L.strokeW / 100 * 2;
-  const paint = (s, x, y) => { if (L.strokeW > 0) ctx.strokeText(s, x, y); ctx.fillText(s, x, y); };
-  if (r === 0) paint(L.text, -tw / 2, 0);
-  else {
-    let off = -tw / 2;
-    for (const ch of L.text) {
-      const cw = ctx.measureText(ch).width, mid = off + cw / 2;
-      let a, x, y, rot;
-      if (c > 0) { a = -Math.PI / 2 + mid / r; x = r * Math.cos(a); y = r * Math.sin(a) + r; rot = a + Math.PI / 2; }
-      else { a = Math.PI / 2 - mid / r; x = r * Math.cos(a); y = r * Math.sin(a) - r; rot = a - Math.PI / 2; }
-      ctx.save(); ctx.translate(x, y); ctx.rotate(rot); paint(ch, -cw / 2, 0); ctx.restore();
-      off += cw;
-    }
-  }
-  ctx.restore();
-}
-function drawImageLayer(ctx, L, w, h, measureOnly) {
-  const im = getImg(L.src), ar = im ? im.naturalHeight / im.naturalWidth : (L._ar || 1);
-  const iw = L.size / 100 * w, ih = iw * ar;
-  L._ar = ar; L._box = { cx: L.x * w, cy: L.y * h, hw: iw / 2, hh: ih / 2, rot: L.rot * Math.PI / 180, ox: 0, oy: 0 };
-  if (measureOnly || !im) return;
-  ctx.save(); ctx.translate(L._box.cx, L._box.cy); ctx.rotate(L._box.rot); ctx.drawImage(im, -iw / 2, -ih / 2, iw, ih); ctx.restore();
-}
-function drawTiles(ctx) {
-  const t = D.tiles, g = tileGrid(), s = t.tile, px = s * t.scale / 100;
-  ctx.font = fontCss(t.font, px); ctx.textAlign = "center"; ctx.textBaseline = "middle";
-  for (const c of g.cells) {
-    const x = (c.x - g.minX) * s, y = (c.y - g.minY) * s;
-    if (!D.clear) { ctx.fillStyle = t.tileColor; ctx.fillRect(x, y, s, s); }
-    ctx.fillStyle = t.letterColor; ctx.fillText(c.ch, x + s / 2, y + s / 2 + px * 0.04);
-  }
-  ctx.strokeStyle = t.seamColor; ctx.lineWidth = Math.max(0.012, s * 0.02);
-  for (const c of g.cells) ctx.strokeRect((c.x - g.minX) * s, (c.y - g.minY) * s, s, s);
-}
-// opts: pad (inches around the piece), selected (draw handles), bare (no preview extras)
-function render(ctx, ppi, opts = {}) {
-  const { w, h } = sizeInfo(), pad = opts.pad || 0;
-  ctx.save(); ctx.scale(ppi, ppi); ctx.translate(pad, pad);
-  if (D.product === "tiles") drawTiles(ctx);
-  else {
-    ctx.save();
-    shapePath(ctx, w, h);
-    if (!D.clear) { ctx.fillStyle = D.bg; ctx.fill(); }
-    ctx.clip();
-    for (const L of D.layers) (L.type === "img" ? drawImageLayer : drawText)(ctx, L, w, h, false);
-    ctx.restore();
-    if (D.hole && PRODUCTS[D.product].hole) {
-      const [hx, hy] = holePos(w, h);
-      ctx.save(); ctx.globalCompositeOperation = "destination-out"; ctx.beginPath(); ctx.arc(hx, hy, 0.1, 0, Math.PI * 2); ctx.fill(); ctx.restore();
-      if (!opts.bare) { ctx.strokeStyle = "rgba(255,255,255,.55)"; ctx.lineWidth = 0.012; ctx.beginPath(); ctx.arc(hx, hy, 0.1, 0, Math.PI * 2); ctx.stroke(); }
-    }
-    if (!opts.bare) {
-      ctx.save(); shapePath(ctx, w, h); ctx.strokeStyle = "rgba(243,212,138,.55)"; ctx.setLineDash([0.06, 0.05]); ctx.lineWidth = 0.014; ctx.stroke(); ctx.restore();
-      const L = D.layers.find((l) => l.id === sel);
-      if (L && L._box) {
-        const b = L._box;
-        ctx.save(); ctx.translate(b.cx, b.cy); ctx.rotate(b.rot); ctx.strokeStyle = "#3bb3ff"; ctx.lineWidth = 0.014; ctx.setLineDash([0.05, 0.04]);
-        ctx.strokeRect(b.ox - b.hw, b.oy - b.hh, b.hw * 2, b.hh * 2); ctx.restore();
-      }
-    }
-  }
-  ctx.restore();
-}
-
-/* ---------------- preview canvas ---------------- */
-const cv = $("cv"), cx = cv.getContext("2d");
-let ppi = 80, raf = 0;
 function schedule() { if (!raf) raf = requestAnimationFrame(() => { raf = 0; paint(); }); }
 function paint() {
-  const { w, h } = sizeInfo(), box = cv.parentElement;
-  const avail = Math.max(220, box.clientWidth - 28), maxH = Math.max(260, Math.min(560, innerHeight - 220));
-  ppi = Math.max(10, Math.min(avail / (w + STATUS_PAD * 2), maxH / (h + STATUS_PAD * 2), 160));
-  const dpr = Math.min(2, devicePixelRatio || 1), cw = (w + STATUS_PAD * 2) * ppi, ch = (h + STATUS_PAD * 2) * ppi;
+  ensureFont(); job = computeJob();
+  const box = cv.parentElement, dpr = Math.min(2, devicePixelRatio || 1), cw = Math.max(240, box.clientWidth - 28), ch = Math.max(280, Math.min(560, innerHeight - 200));
   cv.style.width = cw + "px"; cv.style.height = ch + "px";
   if (cv.width !== Math.round(cw * dpr) || cv.height !== Math.round(ch * dpr)) { cv.width = Math.round(cw * dpr); cv.height = Math.round(ch * dpr); }
-  cx.setTransform(1, 0, 0, 1, 0, 0); cx.clearRect(0, 0, cv.width, cv.height);
-  cx.scale(dpr, dpr);
-  ensureFonts(D.product === "tiles" ? [D.tiles.font] : D.layers.filter((l) => l.type === "text").map((l) => l.font));
-  render(cx, ppi, { pad: STATUS_PAD });
+  cx.setTransform(dpr, 0, 0, dpr, 0, 0); cx.clearRect(0, 0, cw, ch);
+  cx.fillStyle = "#0d182b"; cx.fillRect(0, 0, cw, ch);
   info();
+  if (job.empty) { vt = null; cx.fillStyle = "#a3adbf"; cx.font = "600 14px Manrope, sans-serif"; cx.textAlign = "center"; cx.fillText(job.text, cw / 2, ch / 2); return; }
+  const ppi = Math.max(8, Math.min((cw - MARGIN * 2) / job.pieceW, (ch - MARGIN * 2) / job.pieceH)), ox = cw / 2 - job.pieceW * ppi / 2, oy = ch / 2 - job.pieceH * ppi / 2;
+  vt = { ppi, ox, oy };
+  cx.save(); cx.translate(ox, oy);
+  cx.strokeStyle = "rgba(255,255,255,0.05)"; cx.lineWidth = 1; cx.beginPath();   // quarter-inch grid
+  for (let x = 0; x <= job.pieceW + 1e-9; x += 0.25) { cx.moveTo(Math.round(x * ppi) + 0.5, -10); cx.lineTo(Math.round(x * ppi) + 0.5, job.pieceH * ppi + 10); }
+  for (let y = 0; y <= job.pieceH + 1e-9; y += 0.25) { cx.moveTo(-10, Math.round(y * ppi) + 0.5); cx.lineTo(job.pieceW * ppi + 10, Math.round(y * ppi) + 0.5); }
+  cx.stroke();
+  const cutPath = new Path2D(job.cutD);
+  cx.save(); cx.scale(ppi, ppi);   // the clear acrylic edge visible around the tiles
+  const clip = new Path2D(job.cutD); if (job.hole) { clip.moveTo(job.hole.cx + job.hole.r, job.hole.cy); clip.arc(job.hole.cx, job.hole.cy, job.hole.r, 0, Math.PI * 2, true); }
+  cx.clip(clip, "evenodd"); cx.fillStyle = "#d9dde3"; cx.fillRect(0, 0, job.pieceW, job.pieceH); cx.restore();
+  cx.drawImage(art(job, ppi * dpr), 0, 0, Math.ceil(job.pieceW * ppi * dpr) / dpr, Math.ceil(job.pieceH * ppi * dpr) / dpr);
+  cx.save(); cx.scale(ppi, ppi); cx.strokeStyle = "rgba(243,212,138,0.95)"; cx.lineWidth = 1.5 / ppi; cx.stroke(cutPath);
+  if (job.hole) { cx.beginPath(); cx.arc(job.hole.cx, job.hole.cy, job.hole.r, 0, Math.PI * 2); cx.stroke(); }
+  cx.restore();
+  const s = job.cells.find((c) => c.id === sel);
+  if (s) { cx.strokeStyle = "#3bb3ff"; cx.lineWidth = 2; cx.strokeRect(s.x * ppi - 3, s.y * ppi - 3, job.tile * ppi + 6, job.tile * ppi + 6); }
+  const pw = job.pieceW * ppi, ph = job.pieceH * ppi;   // size callouts
+  cx.strokeStyle = "#3f4a63"; cx.lineWidth = 1; cx.beginPath();
+  cx.moveTo(0, ph + 18); cx.lineTo(pw, ph + 18); cx.moveTo(0, ph + 13); cx.lineTo(0, ph + 23); cx.moveTo(pw, ph + 13); cx.lineTo(pw, ph + 23);
+  cx.moveTo(pw + 18, 0); cx.lineTo(pw + 18, ph); cx.moveTo(pw + 13, 0); cx.lineTo(pw + 23, 0); cx.moveTo(pw + 13, ph); cx.lineTo(pw + 23, ph); cx.stroke();
+  cx.font = "600 11px ui-monospace, Menlo, monospace"; cx.textAlign = "center";
+  const label = (t, x, y) => { const w = cx.measureText(t).width + 8; cx.fillStyle = "#0d182b"; cx.fillRect(x - w / 2, y - 8, w, 14); cx.fillStyle = "#a3adbf"; cx.fillText(t, x, y + 3); };
+  label(job.pieceW.toFixed(2) + "″", pw / 2, ph + 18);
+  cx.translate(pw + 18, ph / 2); cx.rotate(-Math.PI / 2); label(job.pieceH.toFixed(2) + "″", 0, 0);
+  cx.restore();
 }
 function info() {
-  const { w, h } = sizeInfo(), g = D.product === "tiles" ? tileGrid() : null;
-  $("infoSize").innerHTML = `Finished size: <b>${w.toFixed(2).replace(/\.?0+$/, "")}″ × ${h.toFixed(2).replace(/\.?0+$/, "")}″</b>${g ? ` · ${g.cells.length} tiles` : ""}`;
-  const warn = [];
-  if (g && g.unplaced.length) warn.push(`${g.unplaced.length} name(s) couldn't interlock; try another arrangement`);
-  if (g && (g.cols * D.tiles.tile > 14 || g.rows * D.tiles.tile > 14)) warn.push("Large piece: we'll check it fits our bed");
-  if (!g) {
-    const out = D.layers.filter((L) => L._box && (L._box.cx - L._box.hw < -0.05 || L._box.cx + L._box.hw > w + 0.05 || L._box.cy - L._box.hh < -0.05 || L._box.cy + L._box.hh > h + 0.05));
-    if (out.length) warn.push("Something runs past the edge and will be cut off");
-  }
-  $("infoWarn").textContent = warn.join(" · ");
-  $("infoWarn").style.color = warn.length ? "var(--gold-2)" : "";
+  $("infoSize").innerHTML = job.empty ? "" : `Finished size: <b>${job.pieceW.toFixed(2)}″ × ${job.pieceH.toFixed(2)}″</b> · ${job.cells.length} tiles`;
+  $("infoWarn").textContent = (job.warnings || []).join(" "); $("infoWarn").style.color = job.warnings?.length ? "var(--gold-2)" : "";
 }
 new ResizeObserver(schedule).observe(cv.parentElement);
 
-/* ---------------- dragging on the canvas ---------------- */
-let drag = null;
-function toInches(e) { const r = cv.getBoundingClientRect(); return [(e.clientX - r.left) / ppi - STATUS_PAD, (e.clientY - r.top) / ppi - STATUS_PAD]; }
-function hit(px, py) {
-  for (let i = D.layers.length - 1; i >= 0; i--) {
-    const L = D.layers[i], b = L._box; if (!b) continue;
-    const dx = px - b.cx, dy = py - b.cy, c = Math.cos(-b.rot), s = Math.sin(-b.rot);
-    const lx = dx * c - dy * s - b.ox, ly = dx * s + dy * c - b.oy;
-    if (Math.abs(lx) <= b.hw + 0.05 && Math.abs(ly) <= b.hh + 0.05) return L;
-  }
-  return null;
-}
+/* ---------------- moving tiles ---------------- */
+function toPiece(e) { const r = cv.getBoundingClientRect(); return { x: (e.clientX - r.left - vt.ox) / vt.ppi, y: (e.clientY - r.top - vt.oy) / vt.ppi }; }
+function tileAt(p) { if (!job || job.empty) return null; for (let i = job.cells.length - 1; i >= 0; i--) { const c = job.cells[i]; if (p.x >= c.x && p.x <= c.x + job.tile && p.y >= c.y && p.y <= c.y + job.tile) return c; } return null; }
 cv.addEventListener("pointerdown", (e) => {
-  if (D.product === "tiles") return;
-  const [px, py] = toInches(e), L = hit(px, py);
-  setSel(L ? L.id : null);
-  if (!L) return;
-  pushHistory();
-  const { w, h } = sizeInfo();
-  drag = { id: L.id, dx: px - L.x * w, dy: py - L.y * h, moved: false };
-  cv.setPointerCapture(e.pointerId); e.preventDefault();
-});
-cv.addEventListener("pointermove", (e) => {
-  const [px, py] = toInches(e), { w, h } = sizeInfo();
-  if (!drag) { cv.classList.toggle("move", D.product !== "tiles" && !!hit(px, py)); return; }
-  const L = D.layers.find((l) => l.id === drag.id); if (!L) return;
-  L.x = Math.max(0, Math.min(1, (px - drag.dx) / w)); L.y = Math.max(0, Math.min(1, (py - drag.dy) / h)); drag.moved = true;
+  if (!vt) return; cv.focus({ preventScroll: true });
+  const p = toPiece(e), c = tileAt(p); sel = c ? c.id : null;
+  if (c) { pushHistory(); const t = ensureLayout().find((t) => t.id === c.id); drag = { id: c.id, start: p, gx: t.gx, gy: t.gy, tile: job.tile, moved: false }; cv.setPointerCapture(e.pointerId); e.preventDefault(); }
   schedule();
 });
-const endDrag = () => { if (drag) { if (!drag.moved) hist.past.pop(); else { autosave(); } drag = null; syncUndo(); } };
+cv.addEventListener("pointermove", (e) => {
+  if (!vt) return;
+  if (!drag) { cv.classList.toggle("move", !!tileAt(toPiece(e))); return; }
+  const p = toPiece(e); let gx = drag.gx + (p.x - drag.start.x) / drag.tile, gy = drag.gy + (p.y - drag.start.y) / drag.tile;
+  if (!e.altKey) { gx = Math.round(gx * 2) / 2; gy = Math.round(gy * 2) / 2; }
+  const tiles = clone(ensureLayout()), t = tiles.find((t) => t.id === drag.id);
+  if (t.gx === gx && t.gy === gy) return; t.gx = gx; t.gy = gy; drag.moved = true; setTiles(tiles); $("resetLayout").disabled = false; schedule();
+});
+const endDrag = () => { if (!drag) return; if (!drag.moved) hist.past.pop(); else autosave(); drag = null; syncUndo(); };
 cv.addEventListener("pointerup", endDrag); cv.addEventListener("pointercancel", endDrag);
 cv.addEventListener("keydown", (e) => {
-  const L = D.layers.find((l) => l.id === sel); if (!L || !e.key.startsWith("Arrow")) return;
-  e.preventDefault(); const { w, h } = sizeInfo(), step = (e.shiftKey ? 0.25 : 0.05);
-  pushHistory();
-  if (e.key === "ArrowLeft") L.x = Math.max(0, L.x - step / w); if (e.key === "ArrowRight") L.x = Math.min(1, L.x + step / w);
-  if (e.key === "ArrowUp") L.y = Math.max(0, L.y - step / h); if (e.key === "ArrowDown") L.y = Math.min(1, L.y + step / h);
-  autosave(); schedule();
+  const moves = { ArrowLeft: [-0.5, 0], ArrowRight: [0.5, 0], ArrowUp: [0, -0.5], ArrowDown: [0, 0.5] };
+  if (!sel || !moves[e.key]) return; e.preventDefault(); pushHistory();
+  const tiles = clone(ensureLayout()), t = tiles.find((t) => t.id === sel); if (!t) return;
+  t.gx += moves[e.key][0]; t.gy += moves[e.key][1]; setTiles(tiles); $("resetLayout").disabled = false; autosave(); schedule();
 });
+$("resetLayout").onclick = () => { pushHistory(); D.manual = null; sel = null; $("resetLayout").disabled = true; autosave(); schedule(); };
 
-/* ---------------- undo / autosave ---------------- */
+/* ---------------- controls, undo, autosave ---------------- */
 function pushHistory() { hist.past.push(clone(D)); if (hist.past.length > 60) hist.past.shift(); hist.future = []; syncUndo(); }
 function syncUndo() { $("undoBtn").disabled = !hist.past.length; $("redoBtn").disabled = !hist.future.length; }
-function restore(d) { D = d; if (!D.layers.some((l) => l.id === sel)) sel = null; uiFromDesign(); schedule(); autosave(); }
+function restore(d) { D = d; ui(); schedule(); autosave(); }
 $("undoBtn").onclick = () => { if (!hist.past.length) return; hist.future.push(clone(D)); restore(hist.past.pop()); syncUndo(); };
 $("redoBtn").onclick = () => { if (!hist.future.length) return; hist.past.push(clone(D)); restore(hist.future.pop()); syncUndo(); };
-let saveT = 0;
+let saveT = 0, lastEdit = 0;
 function autosave() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(LS_DRAFT, JSON.stringify(D)); } catch { /* storage full or blocked */ } }, 400); }
-// Every control change goes through here: snapshot for undo (once per burst), mutate, redraw.
-let lastEdit = 0;
-function edit(fn, rebuild) {
-  const now = Date.now(); if (now - lastEdit > 700) pushHistory(); lastEdit = now;
-  fn(); if (rebuild) uiLayers(); schedule(); autosave();
+function edit(fn) { const now = Date.now(); if (now - lastEdit > 700) pushHistory(); lastEdit = now; fn(); schedule(); autosave(); }
+const swatches = (el, list, cur, key) => { el.innerHTML = list.map(([hex, name]) => `<button type="button" data-${key}="${hex}" aria-label="${name}" title="${name}" aria-pressed="${hex === cur}" style="background:${hex}"></button>`).join(""); };
+function ui() {
+  if (document.activeElement !== $("names")) $("names").value = D.names;
+  $("layout").value = D.layout; $("width").value = String(D.width); $("hole").checked = D.hole;
+  $("font").innerHTML = FONTS.map(([v, l]) => `<option value="${v}" ${v === D.font ? "selected" : ""}>${l}</option>`).join("");
+  swatches($("tileSw"), TILE_COLORS, D.tileColor, "t"); swatches($("letterSw"), LETTER_COLORS, D.letterColor, "l");
+  $("resetLayout").disabled = !D.manual;
 }
-
-/* ---------------- controls ---------------- */
-function fontOptions(cur) { return FONTS.map(([v, l]) => `<option value="${v}" ${v === cur ? "selected" : ""} style="font-family:'${v.split("|")[0]}'">${l}</option>`).join(""); }
-function esc(s) { return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]); }
-function buildStatic() {
-  $("prodGrid").innerHTML = Object.entries(PRODUCTS).map(([k, p]) => `<button type="button" data-prod="${k}" aria-pressed="false"><span>${p.icon}</span>${p.label}</button>`).join("");
-  $("tFont").innerHTML = fontOptions(""); $("iconRow").innerHTML = SYMBOLS.map((s) => `<button type="button" data-icon="${s}" aria-label="Add ${s}">${s}</button>`).join("");
-}
-$("prodGrid").addEventListener("click", (e) => {
-  const b = e.target.closest("[data-prod]"); if (!b || b.dataset.prod === D.product) return;
-  if (D.layers.length && D.product !== "tiles" && !confirm("Switching product starts a new layout. Continue?")) return;
-  pushHistory(); const keep = D.code; D = newDesign(b.dataset.prod); D.code = null; sel = null; void keep;
-  uiFromDesign(); schedule(); autosave();
-});
-function uiFromDesign() {
-  const P = PRODUCTS[D.product], tiles = D.product === "tiles";
-  document.querySelectorAll("[data-prod]").forEach((b) => b.setAttribute("aria-pressed", b.dataset.prod === D.product));
-  $("prodHint").textContent = P.hint;
-  $("sizeRow").hidden = tiles; $("orientF").hidden = !P.orient;
-  if (!tiles) { $("size").innerHTML = P.sizes.map((s) => `<option value="${s[0]}" ${s[0] === D.size ? "selected" : ""}>${s[1]}</option>`).join(""); $("sizeLbl").textContent = D.product === "tumbler" ? "Cup size" : "Size"; }
-  $("orient").value = D.orient;
-  $("stepTiles").hidden = !tiles; $("stepLayers").hidden = tiles;
-  $("lookNum").textContent = "3"; $("sendNum").textContent = "4";
-  $("baseColors").hidden = tiles; $("holeRow").hidden = tiles || !P.hole;
-  $("clearRow").hidden = false;
-  $("clear").checked = D.clear; $("hole").checked = D.hole; $("bg").value = D.bg;
-  const t = D.tiles;
-  if (document.activeElement !== $("names")) $("names").value = t.names;
-  $("tLayout").value = t.layout; $("tSize").value = String(t.tile); $("tFont").innerHTML = fontOptions(t.font); $("tScale").value = t.scale; $("tScaleO").textContent = t.scale + "%";
-  $("tTile").value = t.tileColor; $("tLetter").value = t.letterColor; $("tSeam").value = t.seamColor;
-  $("tip").textContent = tiles ? "Tip: use “Try another arrangement” until the layout looks right." : "Tip: drag text and pictures on the preview to move them. Tap one to edit it.";
-  uiLayers();
-}
-function layerName(L) { return L.type === "img" ? "🖼 Picture" : (SYMBOLS.includes(L.text.trim()) ? "" : "") + (L.text.trim() || "(empty)"); }
-function uiLayers() {
-  $("layerList").innerHTML = D.layers.map((L, i) => `<div class="lrow" role="button" tabindex="0" data-lid="${L.id}" aria-pressed="${L.id === sel}">
-    <span class="nm">${esc(layerName(L))}</span>
-    <button type="button" data-act="up" aria-label="Bring forward" ${i === D.layers.length - 1 ? "disabled" : ""}>↑</button>
-    <button type="button" data-act="down" aria-label="Send back" ${i === 0 ? "disabled" : ""}>↓</button>
-    <button type="button" data-act="dup" aria-label="Duplicate">⧉</button>
-    <button type="button" data-act="del" aria-label="Delete">🗑</button></div>`).join("") || `<p class="hint">Nothing yet. Add some text or a picture.</p>`;
-  const L = D.layers.find((l) => l.id === sel), ed = $("editor");
-  ed.hidden = !L; if (!L) return;
-  const rng = (k, label, min, max, step, val, unit) => `<label class="f"><span>${label}</span><div class="range"><input type="range" data-k="${k}" min="${min}" max="${max}" step="${step}" value="${val}" aria-label="${label}"><output>${val}${unit}</output></div></label>`;
-  ed.innerHTML = L.type === "img"
-    ? `${rng("size", "Picture size", 5, 100, 1, L.size, "%")}${rng("rot", "Rotate", -180, 180, 1, L.rot, "°")}`
-    : `<label class="f"><span>Text</span><input class="in" data-k="text" value="${esc(L.text)}" maxlength="60"></label>
-       <label class="f"><span>Font</span><select class="in fontpick" data-k="font">${fontOptions(L.font)}</select></label>
-       <div class="colors"><label class="f"><span>Color</span><input type="color" data-k="color" value="${L.color}"></label>
-       <label class="f"><span>Outline</span><input type="color" data-k="stroke" value="${L.stroke}"></label></div>
-       ${rng("size", "Size", 2, 70, 1, L.size, "")}${rng("curve", "Curve (− smile · + arch)", -100, 100, 5, L.curve, "")}${rng("rot", "Rotate", -180, 180, 1, L.rot, "°")}${rng("strokeW", "Outline thickness", 0, 20, 1, L.strokeW, "")}`;
-}
-function setSel(id) { if (sel === id) return; sel = id; uiLayers(); schedule(); }
-$("layerList").addEventListener("click", (e) => {
-  const row = e.target.closest("[data-lid]"); if (!row) return;
-  const i = D.layers.findIndex((l) => l.id === row.dataset.lid), act = e.target.closest("[data-act]")?.dataset.act;
-  if (!act) { setSel(row.dataset.lid); return; }
-  pushHistory();
-  if (act === "del") { D.layers.splice(i, 1); if (sel === row.dataset.lid) sel = null; }
-  if (act === "dup") { const c = clone(D.layers[i]); c.id = uid(); c.x = Math.min(1, c.x + 0.04); c.y = Math.min(1, c.y + 0.04); delete c._box; D.layers.splice(i + 1, 0, c); sel = c.id; }
-  if (act === "up" && i < D.layers.length - 1) [D.layers[i], D.layers[i + 1]] = [D.layers[i + 1], D.layers[i]];
-  if (act === "down" && i > 0) [D.layers[i], D.layers[i - 1]] = [D.layers[i - 1], D.layers[i]];
-  uiLayers(); schedule(); autosave();
-});
-$("layerList").addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target.matches("[data-lid]")) { e.preventDefault(); setSel(e.target.dataset.lid); } });
-$("editor").addEventListener("input", (e) => {
-  const k = e.target.dataset.k, L = D.layers.find((l) => l.id === sel); if (!k || !L) return;
-  const num = e.target.type === "range";
-  edit(() => { L[k] = num ? +e.target.value : e.target.value; });
-  if (num) e.target.nextElementSibling.textContent = e.target.value + (k === "rot" ? "°" : k === "size" && L.type === "img" ? "%" : "");
-  if (k === "text") { const nm = document.querySelector(`[data-lid="${L.id}"] .nm`); if (nm) nm.textContent = layerName(L); }
-});
-$("addText").onclick = () => { pushHistory(); const L = textLayer({ text: "New text", y: 0.5 }); D.layers.push(L); sel = L.id; uiLayers(); schedule(); autosave(); };
-$("iconRow").addEventListener("click", (e) => {
-  const b = e.target.closest("[data-icon]"); if (!b) return;
-  pushHistory(); const L = textLayer({ text: b.dataset.icon, font: "Manrope|800", size: 24, color: "#f3d48a", y: 0.5 }); D.layers.push(L); sel = L.id; uiLayers(); schedule(); autosave();
-});
-// Customer pictures are shrunk before use so a phone photo can't blow up storage or the upload.
-$("imgPick").addEventListener("change", async (e) => {
-  const f = e.target.files[0]; e.target.value = ""; if (!f) return;
-  if (D.layers.filter((l) => l.type === "img").length >= 3) return toast("Up to 3 pictures per design");
-  try {
-    const src = await shrink(f, 800);
-    pushHistory(); const L = { id: uid(), type: "img", src, size: 40, rot: 0, x: 0.5, y: 0.5 };
-    D.layers.push(L); sel = L.id; uiLayers(); schedule(); autosave();
-  } catch { toast("That picture couldn't be opened"); }
-});
-function shrink(file, max) {
-  return new Promise((ok, no) => {
-    const url = URL.createObjectURL(file), im = new Image();
-    im.onload = () => {
-      const k = Math.min(1, max / Math.max(im.naturalWidth, im.naturalHeight)), c = document.createElement("canvas");
-      c.width = Math.max(1, Math.round(im.naturalWidth * k)); c.height = Math.max(1, Math.round(im.naturalHeight * k));
-      c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); URL.revokeObjectURL(url);
-      ok(c.toDataURL(file.type === "image/jpeg" ? "image/jpeg" : "image/png", 0.88));
-    };
-    im.onerror = () => { URL.revokeObjectURL(url); no(); }; im.src = url;
-  });
-}
-// Product-level controls
-$("size").onchange = (e) => edit(() => { D.size = e.target.value; });
-$("orient").onchange = (e) => edit(() => { D.orient = e.target.value; });
-$("bg").oninput = (e) => edit(() => { D.bg = e.target.value; });
-$("clear").onchange = (e) => edit(() => { D.clear = e.target.checked; });
+$("names").oninput = (e) => edit(() => { D.names = e.target.value; D.manual = null; });
+$("layout").onchange = (e) => edit(() => { D.layout = e.target.value; D.manual = null; });
+$("width").onchange = (e) => edit(() => { D.width = +e.target.value; D.manual = null; });
+$("font").onchange = (e) => edit(() => { D.font = e.target.value; });
 $("hole").onchange = (e) => edit(() => { D.hole = e.target.checked; });
-$("names").oninput = (e) => edit(() => { D.tiles.names = e.target.value; $("namesHint").textContent = ""; });
-$("tLayout").onchange = (e) => edit(() => { D.tiles.layout = e.target.value; });
-$("tSize").onchange = (e) => edit(() => { D.tiles.tile = +e.target.value; });
-$("tFont").onchange = (e) => edit(() => { D.tiles.font = e.target.value; });
-$("tScale").oninput = (e) => edit(() => { D.tiles.scale = +e.target.value; $("tScaleO").textContent = e.target.value + "%"; });
-$("tTile").oninput = (e) => edit(() => { D.tiles.tileColor = e.target.value; });
-$("tLetter").oninput = (e) => edit(() => { D.tiles.letterColor = e.target.value; });
-$("tSeam").oninput = (e) => edit(() => { D.tiles.seamColor = e.target.value; });
-$("reshuffle").onclick = () => edit(() => { D.tiles.seed = (D.tiles.seed % 999) + 1; });
-$("names").addEventListener("blur", () => { $("namesHint").textContent = `${parseNames(D.tiles.names).length} name(s) placed. Up to 12 names, 20 characters each. Letters, numbers, & ' - and ♥ ★ ☘ are kept.`; });
+$("reshuffle").onclick = () => edit(() => { D.seed = (D.seed % 999) + 1; D.manual = null; });
+$("tileSw").addEventListener("click", (e) => { const b = e.target.closest("[data-t]"); if (b) { edit(() => { D.tileColor = b.dataset.t; }); ui(); } });
+$("letterSw").addEventListener("click", (e) => { const b = e.target.closest("[data-l]"); if (b) { edit(() => { D.letterColor = b.dataset.l; }); ui(); } });
 
-/* ---------------- toast, download, reset ---------------- */
+/* ---------------- toast, saving on this device ---------------- */
 let toastT;
 function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2600); }
-async function renderBlob(maxSide, forceBg) {
-  const { w, h } = sizeInfo(), q = Math.min(300, maxSide / Math.max(w, h)), c = document.createElement("canvas");
-  c.width = Math.max(1, Math.round(w * q)); c.height = Math.max(1, Math.round(h * q));
-  const ctx = c.getContext("2d");
-  if (forceBg) { ctx.fillStyle = "#13213a"; ctx.fillRect(0, 0, c.width, c.height); }
-  await Promise.all([...new Set(D.product === "tiles" ? [D.tiles.font] : D.layers.filter((l) => l.type === "text").map((l) => l.font))].map((s) => document.fonts.load(fontCss(s, 32), "Aa").catch(() => {})));
-  await Promise.all(D.layers.filter((l) => l.type === "img").map((l) => new Promise((ok) => { const e = imgCache.get(l.src) || (getImg(l.src), imgCache.get(l.src)); if (e.ok) ok(); else { e.im.addEventListener("load", ok, { once: true }); e.im.addEventListener("error", ok, { once: true }); } })));
-  render(ctx, q, { bare: true });
-  return new Promise((ok) => c.toBlob(ok, "image/png"));
+function summary(d = D) { return `Name tiles (${d.layout}, ${d.width}″ wide${d.hole ? ", hang tab" : ""}): ${parseNames(d.names).join(", ")}`.slice(0, 590); }
+function previewBlob(maxSide) {
+  const j = computeJob(); if (j.empty) return Promise.resolve(null);
+  const dpi = Math.min(300, maxSide / Math.max(j.pieceW, j.pieceH));
+  return Promise.all([document.fonts.load(fontCss(D.font, 32), "AMRW♥").catch(() => {})]).then(() => new Promise((ok) => art(j, dpi).toBlob(ok, "image/png")));
 }
-$("dlBtn").onclick = async () => {
-  const b = await renderBlob(2400, false), a = document.createElement("a");
-  a.href = URL.createObjectURL(b); a.download = `prajo-design-${D.code || "draft"}.png`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-};
-$("resetBtn").onclick = () => { if (!confirm("Clear this design and start over?")) return; pushHistory(); D = newDesign(D.product); sel = null; uiFromDesign(); schedule(); autosave(); showForm(); };
-
-/* ---------------- saving on this device ---------------- */
 function readSaved() { try { const o = JSON.parse(localStorage.getItem(LS_SAVED) || "{}"); return o && typeof o === "object" ? o : {}; } catch { return {}; } }
 function writeSaved(o) { try { localStorage.setItem(LS_SAVED, JSON.stringify(o)); return true; } catch { return false; } }
-async function thumb() { try { const b = await renderBlob(220, false); return await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(b); }); } catch { return ""; } }
-function summary(d = D) {
-  const P = PRODUCTS[d.product], s = P.sizes ? (P.sizes.find((x) => x[0] === d.size) || P.sizes[0])[1] : "";
-  if (d.product === "tiles") { const n = parseNames(d.tiles.names); return `Name tiles (${d.tiles.layout}, ${d.tiles.tile}″ tiles): ${n.join(", ")}`.slice(0, 590); }
-  const txt = d.layers.filter((l) => l.type === "text").map((l) => l.text).join(" / "), pics = d.layers.filter((l) => l.type === "img").length;
-  return `${P.label} ${s}${P.orient && d.orient === "port" ? " tall" : ""}: ${txt}${pics ? ` + ${pics} picture${pics > 1 ? "s" : ""}` : ""}`.slice(0, 590);
-}
+async function thumb() { try { const b = await previewBlob(220); return await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(b); }); } catch { return ""; } }
 async function saveLocal(quiet) {
   if (!D.code) D.code = newCode();
   const all = readSaved();
   all[D.code] = { design: clone(D), savedAt: Date.now(), summary: summary(), thumb: await thumb(), submitted: all[D.code]?.submitted || false };
   if (!writeSaved(all)) { toast("This device is out of storage; the design couldn't be saved here"); return false; }
-  autosave(); savedCount();
-  if (!quiet) toast(`Saved as ${D.code}`);
-  return true;
+  autosave(); savedCount(); if (!quiet) toast(`Saved as ${D.code}`); return true;
 }
 $("saveBtn").onclick = () => saveLocal(false);
 function savedCount() { const n = Object.keys(readSaved()).length; $("savedN").textContent = n ? `(${n})` : ""; }
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]);
 $("savedBtn").onclick = () => { renderSaved(); $("savedDrawer").hidden = false; document.body.style.overflow = "hidden"; };
 function closeSaved() { $("savedDrawer").hidden = true; document.body.style.overflow = ""; }
 $("savedClose").onclick = closeSaved;
 $("savedDrawer").addEventListener("click", (e) => { if (e.target.id === "savedDrawer") closeSaved(); });
 function renderSaved() {
-  const rows = Object.entries(readSaved()).sort((a, b) => b[1].savedAt - a[1].savedAt);
+  const rows = Object.entries(readSaved()).filter(([, r]) => r.design?.product === "tiles").sort((a, b) => b[1].savedAt - a[1].savedAt);
   $("savedList").innerHTML = rows.map(([code, r]) => `<div class="saved"><img src="${esc(r.thumb || "")}" alt=""><div><b>${esc(code)}${r.submitted ? " · sent ✓" : ""}</b><small>${esc(r.summary || "")}</small><small>${new Date(r.savedAt).toLocaleDateString()}</small>
     <div class="actions"><button class="btn gold small" type="button" data-open="${esc(code)}">Open</button><button class="btn line small danger" type="button" data-del="${esc(code)}">Delete</button></div></div></div>`).join("")
     || `<p class="hint">Nothing saved yet. Press “Save design” and it will appear here.</p>`;
 }
 $("savedList").addEventListener("click", (e) => {
   const o = e.target.closest("[data-open]"), d = e.target.closest("[data-del]"), all = readSaved();
-  if (o && all[o.dataset.open]) { pushHistory(); D = all[o.dataset.open].design; sel = null; uiFromDesign(); schedule(); autosave(); closeSaved(); showForm(); toast(`Opened ${D.code}`); }
+  if (o && all[o.dataset.open]) { pushHistory(); D = all[o.dataset.open].design; sel = null; ui(); schedule(); autosave(); closeSaved(); showForm(); toast(`Opened ${D.code}`); }
   if (d) { delete all[d.dataset.del]; writeSaved(all); renderSaved(); savedCount(); }
 });
 
 /* ---------------- sending to PrAjo ---------------- */
 function showForm() { $("formView").hidden = false; $("doneView").hidden = true; }
 $("sendBtn").onclick = () => {
-  if (D.product === "tiles" ? !parseNames(D.tiles.names).length : !D.layers.length) return toast("Add something to your design first");
+  if (!parseNames(D.names).length) return toast("Add at least one name first");
+  if (job && job.islands > 1) return toast("Your tiles form separate pieces. Drag them together first");
   try { const c = JSON.parse(localStorage.getItem(LS_CONTACT) || "{}"); $("cName").value ||= c.name || ""; $("cEmail").value ||= c.email || ""; $("cPhone").value ||= c.phone || ""; } catch { /* no saved contact */ }
   const f = $("sendForm"); f.hidden = false; f.style.display = "grid"; $("sendBtn").parentElement.hidden = true; $("saveHint").hidden = true; $("cName").focus();
 };
 $("sendCancel").onclick = () => { $("sendForm").hidden = true; $("sendForm").style.display = "none"; $("sendBtn").parentElement.hidden = false; $("saveHint").hidden = false; };
-$("doneNew").onclick = () => { D = newDesign(D.product); sel = null; hist.past = []; hist.future = []; syncUndo(); uiFromDesign(); schedule(); autosave(); showForm(); $("sendCancel").onclick(); };
-
+$("doneNew").onclick = () => { D = newDesign(); sel = null; hist.past = []; hist.future = []; syncUndo(); ui(); schedule(); autosave(); showForm(); $("sendCancel").onclick(); };
 async function upload(path, blob) {
   const r = await fetch(`${SB.url}/storage/v1/object/${SB.bucket}/${path}`, { method: "POST", headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, "Content-Type": blob.type, "x-upsert": "false" }, body: blob });
   if (!r.ok) throw new Error("upload");
 }
-const dataToBlob = (u) => fetch(u).then((r) => r.blob());
 $("sendForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const err = $("sendErr"), go = $("sendGo"); err.hidden = true;
@@ -796,15 +628,9 @@ $("sendForm").addEventListener("submit", async (e) => {
   const parent = D.code, code = newCode();   // each send gets its own code, so changes after sending become a new request
   try {
     const out = clone(D); out.code = code; if (parent) out.parent = parent;
-    // Pictures go to storage; the design row keeps only their paths.
-    let n = 0;
-    for (const L of out.layers) if (L.type === "img") {
-      n++; const b = await dataToBlob(L.src), ext = b.type === "image/jpeg" ? "jpg" : "png", path = `${code}/img${n}.${ext}`;
-      await upload(path, b); L.src = "storage:" + path;
-    }
-    const prev = await renderBlob(1600, false), previewPath = `${code}/preview.png`;
-    await upload(previewPath, prev);
-    const row = { code, product: out.product, summary: summary(), design: out, preview_path: previewPath, customer_name: name, customer_email: email,
+    const jb = computeJob(); out.job = { pieceW: +jb.pieceW.toFixed(3), pieceH: +jb.pieceH.toFixed(3), tile: +jb.tile.toFixed(3), tiles: jb.cells.length };
+    const previewPath = `${code}/preview.png`; await upload(previewPath, await previewBlob(1600));
+    const row = { code, product: "tiles", summary: summary(), design: out, preview_path: previewPath, customer_name: name, customer_email: email,
       customer_phone: $("cPhone").value.trim() || null, qty, needed_by: $("cDate").value || null, notes: $("cNotes").value.trim() || null };
     const r = await fetch(`${SB.url}/rest/v1/custom_designs`, { method: "POST", headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}`, "Content-Type": "application/json", Prefer: "return=minimal" }, body: JSON.stringify(row) });
     if (!r.ok) throw new Error("save");
@@ -821,7 +647,7 @@ $("sendForm").addEventListener("submit", async (e) => {
   } finally { go.disabled = false; go.textContent = "Send my design"; }
 });
 
-/* ---------------- paying: the shop's "Custom design" listing (id custom-design) carries the design code in the cart ---------------- */
+/* ---------------- paying: the shop's "Custom design" listing carries the design code in the cart ---------------- */
 let payState = null;
 async function offerPay(code, qty) {
   $("payBox").hidden = true; payState = null;
@@ -843,22 +669,58 @@ $("payBtn").onclick = () => {
   location.href = "./#cart";
 };
 
+/* ---------------- print files (shown only when you open a design from the admin page) ---------------- */
+const jobName = () => parseNames(D.names).join("-").replace(/[^\p{L}\p{N}-]+/gu, "").slice(0, 40) || "job";
+function save(filename, blob) { const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = filename; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+function withDpi(buf, dpi) {   // pHYs chunk so print software reads the true size
+  const T = new Uint32Array(256).map((_, n) => { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; return c >>> 0; });
+  const crc = (b) => { let c = 0xFFFFFFFF; for (const x of b) c = T[(c ^ x) & 0xFF] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; };
+  const src = new Uint8Array(buf), ppm = Math.round(dpi / 0.0254), chunk = new Uint8Array(21), dv = new DataView(chunk.buffer);
+  dv.setUint32(0, 9); chunk.set([0x70, 0x48, 0x59, 0x73], 4); dv.setUint32(8, ppm); dv.setUint32(12, ppm); chunk[16] = 1; dv.setUint32(17, crc(chunk.subarray(4, 17)));
+  const parts = [src.subarray(0, 33), chunk]; let p = 33;
+  while (p < src.length) { const len = new DataView(src.buffer, src.byteOffset + p).getUint32(0), type = String.fromCharCode(...src.subarray(p + 4, p + 8)), end = p + 12 + len; if (type !== "pHYs") parts.push(src.subarray(p, end)); p = end; }
+  return new Blob(parts, { type: "image/png" });
+}
+$("dlColor").onclick = async () => {
+  const j = computeJob(); if (j.empty) return; await document.fonts.load(fontCss(D.font, 32), "AMRW♥").catch(() => {});
+  const dpi = Math.min(300, Math.floor(Math.sqrt(48e6 / (j.pieceW * j.pieceH))));
+  const b = await new Promise((ok) => art(j, dpi).toBlob(ok, "image/png")); save(`${jobName()}_CMYK_${dpi}dpi.png`, withDpi(await b.arrayBuffer(), dpi));
+};
+$("dlCut").onclick = () => {
+  const j = computeJob(); if (j.empty) return; const W = f4(j.pieceW), H = f4(j.pieceH);
+  const hole = j.hole ? `<circle cx="${f4(j.hole.cx)}" cy="${f4(j.hole.cy)}" r="${f4(j.hole.r)}"/>` : "";
+  save(`${jobName()}_CUT.svg`, new Blob([`<?xml version="1.0" encoding="UTF-8"?>\n<svg xmlns="http://www.w3.org/2000/svg" width="${W}in" height="${H}in" viewBox="0 0 ${W} ${H}"><g id="CutContour" fill="none" stroke="#FF00FF" stroke-width="0.001"><path d="${j.cutD}" fill-rule="evenodd"/>${hole}</g></svg>\n`], { type: "image/svg+xml" }));
+};
+$("dlJob").onclick = () => {
+  const j = computeJob(); if (j.empty) return;
+  save(`${jobName()}_job.json`, new Blob([JSON.stringify({ code: D.code, names: parseNames(D.names), layout: D.layout, handPlaced: !!D.manual, tiles: ensureLayout().map((t) => ({ char: t.ch, col: t.gx, row: t.gy })),
+    piece: { widthIn: +j.pieceW.toFixed(4), heightIn: +j.pieceH.toFixed(4), tileIn: +j.tile.toFixed(4), areaIn2: +j.area.toFixed(3), cutLengthIn: +j.cutLength.toFixed(3) },
+    style: { font: D.font, tileColor: D.tileColor, letterColor: D.letterColor, hangTab: D.hole, holeIn: FIX.holeD, cutOffsetIn: FIX.cutOffset, cornerRadiusIn: FIX.cornerR }, warnings: j.warnings }, null, 2)], { type: "application/json" }));
+};
+
 /* ---------------- boot ---------------- */
-buildStatic();
-try {
-  const draft = JSON.parse(localStorage.getItem(LS_DRAFT) || "null");
-  if (draft && draft.v === 1 && PRODUCTS[draft.product] && Array.isArray(draft.layers)) D = draft;
-} catch { /* start fresh */ }
-// "Open in studio" from the admin page hands over a design this way.
-try {
-  if (new URLSearchParams(location.search).has("load")) {
-    const h = JSON.parse(localStorage.getItem("prajo:design:load") || "null");
-    if (h && h.v === 1 && PRODUCTS[h.product]) { D = h; localStorage.removeItem("prajo:design:load"); }
-  }
-} catch { /* ignore */ }
-uiFromDesign(); savedCount(); syncUndo();
-document.fonts?.ready.then(schedule);
-schedule();
+function boot() {
+  try { const d = JSON.parse(localStorage.getItem(LS_DRAFT) || "null"); if (d && d.v === 2 && d.product === "tiles") D = d; } catch { /* start fresh */ }
+  try {
+    if (new URLSearchParams(location.search).has("load")) {
+      const h = JSON.parse(localStorage.getItem("prajo:design:load") || "null");
+      if (h && h.v === 2 && h.product === "tiles") { D = h; adminLoaded = true; localStorage.removeItem("prajo:design:load"); $("adminTools").hidden = false; }
+    }
+  } catch { /* ignore */ }
+  ui(); savedCount(); syncUndo(); document.fonts?.ready.then(schedule); schedule();
+}
+// The studio is switched on from the admin page (Site settings). Until then visitors see a closed notice.
+(async () => {
+  let on = false, S = {};
+  try { S = JSON.parse(localStorage.getItem("prajo:site") || "{}"); on = !!S.studioOn; } catch { /* no cache */ }
+  try {
+    const r = await fetch(`${SB.url}/rest/v1/site_settings?id=eq.1&select=data`, { headers: { apikey: SB.key, Authorization: `Bearer ${SB.key}` } });
+    if (r.ok) { const rows = await r.json(); on = !!rows[0]?.data?.studioOn; }
+  } catch { /* use the cached value */ }
+  if (new URLSearchParams(location.search).has("load")) on = true;
+  $("studioMain").hidden = !on; $("closedMain").hidden = on; $("savedBtn").hidden = !on;
+  if (on) boot();
+})();
 })();
 </script>
 </body>
