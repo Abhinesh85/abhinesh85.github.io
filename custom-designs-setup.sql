@@ -30,6 +30,13 @@ create index if not exists custom_designs_created_idx on public.custom_designs (
 
 alter table public.custom_designs enable row level security;
 
+-- Table privileges. Row-level security only filters rows; without these grants Postgres answers
+-- "permission denied for table custom_designs" before any policy is checked (newer Supabase projects
+-- no longer grant new tables to the API roles automatically).
+grant insert on public.custom_designs to anon;
+grant select, insert, update, delete on public.custom_designs to authenticated;
+grant all on public.custom_designs to service_role;
+
 drop policy if exists "customers add designs" on public.custom_designs;
 create policy "customers add designs" on public.custom_designs
   for insert to anon, authenticated
