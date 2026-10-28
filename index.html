@@ -81,7 +81,10 @@ nav.links { display: flex; gap: 28px; font-size: 14.5px; font-weight: 600; }
 nav.links a { text-decoration: none; color: var(--muted); transition: color .2s; }
 nav.links a:hover { color: var(--cream); }
 .top .btn { min-height: 42px; padding: 0 18px; font-size: 14px; }
-@media (max-width: 860px) { nav.links { display: none; } .brand small { display: none; } }
+@media (max-width: 980px) { nav.links { display: none; } .brand small { display: none; } }
+nav.links a { white-space: nowrap; }
+.top .btn, .brand small { white-space: nowrap; }
+@media (max-width: 1100px) { .brand small { display: none; } nav.links { gap: 20px; } }
 
 /* hero */
 .hero { position: relative; overflow: hidden; padding: clamp(36px, 7vw, 90px) 0 clamp(40px, 6vw, 80px); }
@@ -108,7 +111,9 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .preview { position: relative; display: grid; justify-items: center; gap: 16px; width: 100%; }
 .stage { width: min(250px, 62vw); aspect-ratio: 496 / 1086; border-radius: 26px; overflow: hidden; background: #ededed; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .08); }
 .stage canvas { display: block; width: 100%; height: 100%; }
-@media (min-width: 901px) { .preview { grid-template-columns: auto minmax(250px, 1fr); align-items: center; gap: 28px; } .stage { width: 220px; } .preview .try { width: 100%; min-width: 0; } }
+@media (min-width: 901px) and (max-width: 1199px) { .hero .wrap { grid-template-columns: 1fr; } .studio { justify-self: center; width: min(760px, 100%); } }
+@media (min-width: 1200px) { .hero .wrap { grid-template-columns: .8fr 1.2fr; } }
+@media (min-width: 901px) { .hero h1 { font-size: clamp(44px, 6.2vw, 80px); } .preview { grid-template-columns: auto minmax(300px, 1fr); align-items: center; gap: 36px; } .stage { width: 236px; position: sticky; top: 90px; } .preview .try { width: 100%; min-width: 0; } }
 .styles { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .styles .lbl { font-size: 12px; color: var(--muted); margin-right: 2px; }
 .styles button { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-soft); background: transparent; color: var(--cream); font: 600 14px var(--f-body); cursor: pointer; }
@@ -118,7 +123,7 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .styles button[role="switch"][aria-checked="true"] { border-color: var(--gold-2); background: rgba(217, 171, 79, .16); }
 .styles .ink { width: 40px; padding: 0; position: relative; }
 .styles .ink i { position: absolute; inset: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .3); }
-.try .btn { width: 100%; }
+.try .btn { width: 100%; min-height: 50px; font-size: 15px; padding: 0 12px; white-space: nowrap; }
 .stage { cursor: grab; touch-action: pan-y; position: relative; }
 .stage:active { cursor: grabbing; }
 .stage:focus-visible { outline: 3px solid var(--gold-2); outline-offset: 3px; }
@@ -129,7 +134,16 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .designs button { flex: none; width: 46px; height: 46px; padding: 0; border-radius: 12px; border: 2px solid transparent; background: #222 center / cover no-repeat; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .2); font: 700 11px var(--f-body); color: var(--cream); }
 .designs button[aria-pressed="true"] { border-color: var(--gold-2); box-shadow: 0 0 0 3px rgba(217, 171, 79, .35); }
 .designs button.none { background: transparent; }
-.try { width: min(330px, 86vw); display: grid; gap: 10px; padding: 14px; border-radius: 20px; background: rgba(19, 33, 58, .75); border: 1px solid var(--line); backdrop-filter: blur(8px); }
+.try { width: min(360px, 90vw); display: grid; gap: 14px; padding: 18px; border-radius: 20px; background: rgba(19, 33, 58, .75); border: 1px solid var(--line); backdrop-filter: blur(8px); }
+.ctl { display: grid; gap: 9px; min-width: 0; }
+.ctl-h { font-family: var(--f-label); font-size: 11.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); display: flex; align-items: baseline; gap: 10px; }
+.ctl-h b { font: 600 13px var(--f-body); letter-spacing: 0; text-transform: none; color: var(--cream); }
+.try .ctl label.ctl-h { margin: 0; }
+.try .swatches .swbox { flex-wrap: nowrap; overflow-x: auto; padding: 4px 4px 6px; margin: 0 -4px; gap: 8px; scrollbar-width: none; }
+.swatches .swbox::-webkit-scrollbar { display: none; }
+.try .swatches button { flex: none; width: 34px; height: 34px; }
+.designs { padding: 4px 4px 10px; margin: 0 -4px; }
+.designs button { width: 48px; height: 48px; }
 .try label { font-family: var(--f-label); font-size: 11.5px; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); }
 .try input { width: 100%; min-height: 46px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); color: var(--cream); font: 600 17px var(--f-body); padding: 0 14px; }
 .try input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217, 171, 79, .2); }
@@ -137,7 +151,7 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .swatches button { width: 30px; height: 30px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .25); padding: 0; }
 .swatches button[aria-pressed="true"] { border-color: var(--gold-2); box-shadow: 0 0 0 3px rgba(217, 171, 79, .35); }
 .swatches .swbox { display: flex; gap: 10px; flex-wrap: wrap; margin: 0; }
-.swatches #swName { font-size: 13px; color: var(--muted); margin-left: auto; }
+
 
 /* marquee */
 .marquee { border-block: 1px solid var(--line); background: linear-gradient(90deg, rgba(217, 171, 79, .08), rgba(242, 138, 36, .08)); overflow: hidden; }
@@ -410,7 +424,7 @@ nav.links a { padding: 12px 4px; }
 .navsheet nav a { display: flex; align-items: center; min-height: 52px; padding: 0 6px; font-size: 19px; font-weight: 700; color: var(--cream); text-decoration: none; border-bottom: 1px solid rgba(245, 236, 220, .08); }
 .navsheet nav a.gold { color: var(--gold-2, #e8c872); }
 .navsheet .nav-x { justify-self: end; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(245, 236, 220, .22); background: transparent; color: var(--cream); font-size: 24px; cursor: pointer; margin-bottom: 8px; }
-@media (max-width: 860px) { .nav-btn { display: inline-grid; } .top .btn.btn-gold { display: none; } .top-actions { display: flex; gap: 8px; align-items: center; } }
+@media (max-width: 980px) { .nav-btn { display: inline-grid; } .top .btn.btn-gold { display: none; } .top-actions { display: flex; gap: 8px; align-items: center; } }
 
 /* ---- upgrade: shop controls ---- */
 .shopbar { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; margin: 0 0 18px; }
@@ -520,27 +534,28 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
         <div class="preview">
           <div class="stage" id="stage" tabindex="0" aria-label="Tumbler preview. Drag, or use the left and right arrow keys, to spin it."><canvas id="tCanvas" width="992" height="2172" role="img" aria-label="Tumbler preview with your name"></canvas><span class="spinhint" id="spinHint">Drag to spin</span></div>
           <div class="try">
-            <label for="nameIn">Try your name</label>
-            <input id="nameIn" maxlength="14" value="Aleesa" autocomplete="off" spellcheck="false">
-            <div class="swatches" role="group" aria-label="Tumbler color">
-              <span class="swbox" id="swatchBox"><button type="button" data-c="#14161b,#3a3f4a,#5a606c,#0d0f13" aria-pressed="true" style="background:#2b2f37" aria-label="Black"></button>
+            <div class="ctl"><label class="ctl-h" for="nameIn">Your name</label>
+              <input id="nameIn" maxlength="14" value="Aleesa" autocomplete="off" spellcheck="false">
+              <div class="styles" role="group" aria-label="Name options">
+                <button type="button" id="nameToggle" role="switch" aria-checked="true">Show name: On</button>
+                <button type="button" id="moveToggle" role="switch" aria-checked="false">Move name</button>
+                <button type="button" id="nameReset" hidden>Reset</button></div></div>
+            <div class="ctl"><div class="ctl-h">Color <b id="swName">Black</b></div>
+              <div class="swatches" role="group" aria-label="Tumbler color"><span class="swbox" id="swatchBox"><button type="button" data-c="#14161b,#3a3f4a,#5a606c,#0d0f13" aria-pressed="true" style="background:#2b2f37" aria-label="Black"></button>
               <button type="button" data-c="#5a2a3a,#c77d8f,#f0b6c3,#4a1f2c" aria-pressed="false" style="background:#d48a9b" aria-label="Rose pink"></button>
               <button type="button" data-c="#0e1d3a,#26457a,#3e64a3,#0a1428" aria-pressed="false" style="background:#2c4c86" aria-label="Navy"></button>
               <button type="button" data-c="#1e3b2a,#3f7a55,#62a57a,#16301f" aria-pressed="false" style="background:#4c8c63" aria-label="Green"></button>
-              <button type="button" data-c="#cfc8bb,#f4f0e8,#ffffff,#b9b2a4" aria-pressed="false" style="background:#efe9de" aria-label="White"></button></span>
-              <span id="swName">Black</span>
-            </div>
-            <div class="designs" role="group" aria-label="Design on the tumbler" id="designBox"><span class="lbl">Design</span>
-              <button type="button" class="none" data-d="" aria-pressed="true" aria-label="No design (plain tumbler)">None</button></div>
-            <div class="styles" role="group" aria-label="Name on the tumbler"><span class="lbl">Name</span>
-              <button type="button" id="nameToggle" role="switch" aria-checked="true">Show name: On</button>
-              <button type="button" id="moveToggle" role="switch" aria-checked="false">Move name</button>
-              <button type="button" id="nameReset" hidden>Reset position</button></div>
-            <div class="styles scrollrow" role="group" aria-label="Lettering style" id="fontBox"><span class="lbl">Font</span></div>
-            <div class="styles" role="group" aria-label="Lettering color" id="inkBox"><span class="lbl">Ink</span>
-              <button type="button" class="ink" data-i="gold" aria-pressed="true" aria-label="Gold"><i style="background:linear-gradient(135deg,#fff3cf,#d9a441 55%,#b8862c)"></i></button>
-              <button type="button" class="ink" data-i="black" aria-pressed="false" aria-label="Black"><i style="background:#15171c"></i></button>
-              <button type="button" class="ink" data-i="white" aria-pressed="false" aria-label="White"><i style="background:#fff"></i></button></div>
+              <button type="button" data-c="#cfc8bb,#f4f0e8,#ffffff,#b9b2a4" aria-pressed="false" style="background:#efe9de" aria-label="White"></button></span></div></div>
+            <div class="ctl"><div class="ctl-h">Design <b id="dsName">None</b></div>
+              <div class="designs" role="group" aria-label="Design on the tumbler" id="designBox">
+                <button type="button" class="none" data-d="" aria-pressed="true" aria-label="No design (plain tumbler)">None</button></div></div>
+            <div class="ctl"><div class="ctl-h">Font</div>
+              <div class="styles scrollrow" role="group" aria-label="Lettering style" id="fontBox"></div></div>
+            <div class="ctl"><div class="ctl-h">Ink</div>
+              <div class="styles" role="group" aria-label="Lettering color" id="inkBox">
+                <button type="button" class="ink" data-i="gold" aria-pressed="true" aria-label="Gold"><i style="background:linear-gradient(135deg,#fff3cf,#d9a441 55%,#b8862c)"></i></button>
+                <button type="button" class="ink" data-i="black" aria-pressed="false" aria-label="Black"><i style="background:#15171c"></i></button>
+                <button type="button" class="ink" data-i="white" aria-pressed="false" aria-label="White"><i style="background:#fff"></i></button></div></div>
             <button class="btn btn-gold" type="button" id="orderName">Order a tumbler with this name →</button>
           </div>
         </div>
@@ -1024,7 +1039,7 @@ nameIn.addEventListener("input", () => { nameIn.dataset.touched = "1"; if (!PV.s
 document.querySelector(".swatches").addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (!b) return;
   document.querySelectorAll(".swatches button").forEach((x) => x.setAttribute("aria-pressed", x === b));
-  PV.tint = b.dataset.c.split(",")[1] || null; PV.design = null; setDesignUi(); $("swName").textContent = b.getAttribute("aria-label"); rebuildBase(); rebuildName(); requestDraw();
+  PV.tint = b.dataset.c.split(",")[1] || null; PV.design = null; $("dsName").textContent = "None"; setDesignUi(); $("swName").textContent = b.getAttribute("aria-label"); rebuildBase(); rebuildName(); requestDraw();
 });
 $("fontBox").insertAdjacentHTML("beforeend", Object.entries(FONTS).map(([id, F]) => `<button type="button" data-f="${id}" aria-pressed="${id === PV.font}" style="font-family:${F.fam.replace(/"/g, "'")};font-weight:${F.wt};font-style:${F.style || "normal"};font-size:17px">${F.label}</button>`).join(""));
 $("fontBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-f]"); if (!b) return; PV.font = b.dataset.f; $("fontBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); setName(true); });
@@ -1040,7 +1055,8 @@ $("designBox").addEventListener("click", (e) => {
   const b = e.target.closest("button"); if (!b) return; const id = b.dataset.d || "";
   PV.design = id ? DESIGNS.find((d) => d.id === id) : null;
   if (PV.design && !dImgs[id]) { const im = new Image(); im.onload = () => { rebuildBase(); requestDraw(); }; im.src = `designs/${id}.jpg`; dImgs[id] = im; }
-  if (PV.design) { document.querySelectorAll(".swatches button").forEach((x) => x.setAttribute("aria-pressed", "false")); $("swName").textContent = PV.design.name; }
+  if (PV.design) document.querySelectorAll(".swatches button").forEach((x) => x.setAttribute("aria-pressed", "false"));
+  $("dsName").textContent = PV.design ? PV.design.name : "None"; if (PV.design) $("swName").textContent = "—";
   setDesignUi(); rebuildBase(); rebuildName(); requestDraw();
 });
 $("orderName").addEventListener("click", () => {
