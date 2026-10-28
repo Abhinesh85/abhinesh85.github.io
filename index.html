@@ -111,9 +111,19 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .preview { position: relative; display: grid; justify-items: center; gap: 16px; width: 100%; }
 .stage { width: min(250px, 62vw); aspect-ratio: 496 / 1086; border-radius: 26px; overflow: hidden; background: #ededed; box-shadow: 0 30px 60px -20px rgba(0, 0, 0, .6), 0 0 0 1px rgba(255, 255, 255, .08); }
 .stage canvas { display: block; width: 100%; height: 100%; }
-@media (min-width: 901px) and (max-width: 1199px) { .hero .wrap { grid-template-columns: 1fr; } .studio { justify-self: center; width: min(760px, 100%); } }
-@media (min-width: 1200px) { .hero .wrap { grid-template-columns: .8fr 1.2fr; } }
-@media (min-width: 901px) { .hero h1 { font-size: clamp(44px, 6.2vw, 80px); } .preview { grid-template-columns: auto minmax(300px, 1fr); align-items: center; gap: 36px; } .stage { width: 236px; position: sticky; top: 90px; } .preview .try { width: 100%; min-width: 0; } }
+.teaser { display: grid; justify-items: center; gap: 18px; position: relative; }
+.teaser::before { content: ""; position: absolute; inset: -6% -10%; background: radial-gradient(ellipse 55% 50% at 50% 48%, rgba(217, 171, 79, .22), transparent 70%); pointer-events: none; }
+.tcards { position: relative; width: min(520px, 92vw); aspect-ratio: 10 / 9; }
+.tcard { position: absolute; bottom: 0; display: block; border-radius: 22px; overflow: hidden; background: #ededed; box-shadow: 0 34px 60px -22px rgba(0, 0, 0, .75), 0 0 0 1px rgba(255, 255, 255, .08); transition: transform .45s cubic-bezier(.2, .8, .2, 1), box-shadow .45s; animation: bob 7s ease-in-out infinite; }
+.tcard img { display: block; width: 100%; height: auto; }
+.t-a { left: 1%; width: 35%; rotate: -5deg; translate: 0 12px; animation-delay: -2s; }
+.t-b { left: 31.5%; width: 38%; z-index: 2; animation-delay: 0s; }
+.t-c { right: 1%; width: 35%; rotate: 5deg; translate: 0 12px; animation-delay: -4s; }
+@keyframes bob { 50% { transform: translateY(-9px); } }
+.tcard:hover, .tcard:focus-visible { transform: translateY(-14px) scale(1.03); z-index: 3; box-shadow: 0 44px 70px -22px rgba(0, 0, 0, .85), 0 0 0 2px var(--gold-2); animation-play-state: paused; outline: none; }
+.teaser-cta { min-height: 54px; padding: 0 30px; font-size: 16px; }
+.teaser-sub { margin: 0; color: var(--muted); font-size: 14px; position: relative; }
+@media (prefers-reduced-motion: reduce) { .tcard { animation: none; } }
 .styles { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .styles .lbl { font-size: 12px; color: var(--muted); margin-right: 2px; }
 .styles button { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-soft); background: transparent; color: var(--cream); font: 600 14px var(--f-body); cursor: pointer; }
@@ -469,6 +479,26 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 .track-steps span.now { color: var(--gold-2, #e8c872); } .track-steps span.now::before { border-color: var(--gold-2, #e8c872); background: var(--gold-2, #e8c872); }
 @media (max-width: 600px) { .chat-fab { font-size: 0; gap: 0; width: 56px; height: 56px; padding: 0; justify-content: center; } .chat-fab svg { width: 26px; height: 26px; } .chat-fab .dot { position: absolute; top: 8px; right: 8px; } }
 @media (max-width: 600px) { .hero .wrap { padding-top: 6px; } .hero h1 { font-size: clamp(38px, 11.5vw, 56px); margin: 10px 0 14px; } .hero .lede { font-size: 16px; } .hero-cta { gap: 10px; } }
+/* ---- 3D design gallery ---- */
+#gallery { overflow: hidden; }
+.gal-wrap { position: relative; user-select: none; -webkit-user-select: none; }
+.gal { position: relative; height: clamp(330px, 31vw, 430px); perspective: 1500px; perspective-origin: 50% 46%; cursor: grab; touch-action: pan-y; user-select: none; -webkit-user-select: none; outline-offset: 6px; }
+.gal:active { cursor: grabbing; }
+.gal:focus-visible { outline: 3px solid var(--gold-2); border-radius: 18px; }
+.gal::before { content: ""; position: absolute; inset: 8% 6%; background: radial-gradient(ellipse 50% 45% at 50% 55%, rgba(217, 171, 79, .22), transparent 70%); pointer-events: none; }
+.gal-ring { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
+.gal-item { position: absolute; left: calc(var(--W) / -2); top: calc(var(--H) / -2); width: var(--W); height: var(--H); transform-style: preserve-3d; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 16px; overflow: hidden; background: #1a2238; box-shadow: 0 24px 40px -18px rgba(0, 0, 0, .8), 0 0 0 1px rgba(255, 255, 255, .1); display: block; text-decoration: none; }
+.gal-item img { width: 100%; height: 100%; object-fit: cover; display: block; pointer-events: none; -webkit-user-drag: none; }
+.gal-item::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(8, 12, 24, .5), transparent 30%, transparent 70%, rgba(8, 12, 24, .5)); pointer-events: none; }
+.gal-item.front { box-shadow: 0 30px 50px -16px rgba(0, 0, 0, .85), 0 0 0 2px var(--gold-2), 0 0 44px rgba(217, 171, 79, .35); }
+.gal-item.front::after { opacity: 0; }
+.gal-nav { position: absolute; top: 50%; translate: 0 -50%; width: 48px; height: 48px; border-radius: 50%; border: 1px solid var(--line); background: rgba(14, 22, 40, .8); color: var(--cream); font-size: 22px; cursor: pointer; z-index: 5; display: grid; place-items: center; backdrop-filter: blur(6px); }
+.gal-nav:hover { border-color: var(--gold-2); }
+.gal-prev { left: 0; } .gal-next { right: 0; }
+.gal-cap { display: grid; justify-items: center; gap: 12px; margin-top: 6px; text-align: center; }
+.gal-cap b { font-family: var(--f-display); font-size: clamp(22px, 3vw, 30px); }
+.gal-cap small { color: var(--muted); font-size: 14px; }
+@media (max-width: 600px) { .gal-nav { width: 42px; height: 42px; } .gal { height: 290px; perspective: 1000px; } }
 </style>
 </head>
 <body>
@@ -485,7 +515,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     <nav class="links" aria-label="Main">
       <a href="#shop">Shop</a>
       <a href="#how">How it's made</a>
-      <a href="design.html" id="studioNav" hidden>Design yours</a>
+      <a href="tumbler.html">Design your tumbler</a>
       <a href="#custom">Custom orders</a>
       <a href="#reviews">Reviews</a>
       <a href="#about">About</a>
@@ -502,7 +532,8 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
   <nav aria-label="Menu">
     <button class="nav-x" type="button" id="navX" aria-label="Close menu">×</button>
     <a href="#shop">Shop</a>
-    <a class="gold" href="design.html" id="studioNav2" hidden>🔤 Design yours</a>
+    <a class="gold" href="tumbler.html">🥤 Design your tumbler</a>
+    <a href="design.html" id="studioNav2" hidden>🔤 Name tiles</a>
     <a href="#custom">Custom &amp; bulk orders</a>
     <a href="#how">How it's made</a>
     <a href="#reviews">Reviews</a>
@@ -521,7 +552,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
         <p class="lede" data-s="heroIntro">Custom tumblers, mugs and keepsakes, UV printed in full color or laser engraved for life. Every piece is made by hand, one order at a time.</p>
         <div class="hero-cta">
           <a class="btn btn-gold" href="#shop">Shop the collection</a>
-          <a class="btn btn-line" href="#custom">Design something custom</a>
+          <a class="btn btn-line" href="tumbler.html">Design your tumbler</a>
         </div>
         <div class="proof">
           <span><span class="stars">★★★★★</span> <span data-s="proof1"><b>5.0</b> on Etsy</span></span>
@@ -530,40 +561,36 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
         </div>
       </div>
 
-      <div class="studio" aria-label="Try your name on a tumbler">
-        <div class="preview">
-          <div class="stage" id="stage" tabindex="0" aria-label="Tumbler preview. Drag, or use the left and right arrow keys, to spin it."><canvas id="tCanvas" width="992" height="2172" role="img" aria-label="Tumbler preview with your name"></canvas><span class="spinhint" id="spinHint">Drag to spin</span></div>
-          <div class="try">
-            <div class="ctl"><label class="ctl-h" for="nameIn">Your name</label>
-              <input id="nameIn" maxlength="14" value="Aleesa" autocomplete="off" spellcheck="false">
-              <div class="styles" role="group" aria-label="Name options">
-                <button type="button" id="nameToggle" role="switch" aria-checked="true">Show name: On</button>
-                <button type="button" id="moveToggle" role="switch" aria-checked="false">Move name</button>
-                <button type="button" id="nameReset" hidden>Reset</button></div></div>
-            <div class="ctl"><div class="ctl-h">Color <b id="swName">Black</b></div>
-              <div class="swatches" role="group" aria-label="Tumbler color"><span class="swbox" id="swatchBox"><button type="button" data-c="#14161b,#3a3f4a,#5a606c,#0d0f13" aria-pressed="true" style="background:#2b2f37" aria-label="Black"></button>
-              <button type="button" data-c="#5a2a3a,#c77d8f,#f0b6c3,#4a1f2c" aria-pressed="false" style="background:#d48a9b" aria-label="Rose pink"></button>
-              <button type="button" data-c="#0e1d3a,#26457a,#3e64a3,#0a1428" aria-pressed="false" style="background:#2c4c86" aria-label="Navy"></button>
-              <button type="button" data-c="#1e3b2a,#3f7a55,#62a57a,#16301f" aria-pressed="false" style="background:#4c8c63" aria-label="Green"></button>
-              <button type="button" data-c="#cfc8bb,#f4f0e8,#ffffff,#b9b2a4" aria-pressed="false" style="background:#efe9de" aria-label="White"></button></span></div></div>
-            <div class="ctl"><div class="ctl-h">Design <b id="dsName">None</b></div>
-              <div class="designs" role="group" aria-label="Design on the tumbler" id="designBox">
-                <button type="button" class="none" data-d="" aria-pressed="true" aria-label="No design (plain tumbler)">None</button></div></div>
-            <div class="ctl"><div class="ctl-h">Font</div>
-              <div class="styles scrollrow" role="group" aria-label="Lettering style" id="fontBox"></div></div>
-            <div class="ctl"><div class="ctl-h">Ink</div>
-              <div class="styles" role="group" aria-label="Lettering color" id="inkBox">
-                <button type="button" class="ink" data-i="gold" aria-pressed="true" aria-label="Gold"><i style="background:linear-gradient(135deg,#fff3cf,#d9a441 55%,#b8862c)"></i></button>
-                <button type="button" class="ink" data-i="black" aria-pressed="false" aria-label="Black"><i style="background:#15171c"></i></button>
-                <button type="button" class="ink" data-i="white" aria-pressed="false" aria-label="White"><i style="background:#fff"></i></button></div></div>
-            <button class="btn btn-gold" type="button" id="orderName">Order a tumbler with this name →</button>
-          </div>
+      <div class="teaser" aria-label="Designs you can try on a tumbler">
+        <div class="tcards">
+          <a class="tcard t-a" href="tumbler.html?d=sunflowers&name=Grace&f=dancing&i=black"><img src="teaser/t1.jpg" width="480" height="1051" alt="Sunflower tumbler personalized with the name Grace"></a>
+          <a class="tcard t-b" href="tumbler.html?d=roses&name=Isabella&f=script&i=gold"><img src="teaser/t2.jpg" width="480" height="1051" alt="Gothic roses tumbler personalized with the name Isabella"></a>
+          <a class="tcard t-c" href="tumbler.html?d=eagle1776&name=Marcus&f=bebas&i=white"><img src="teaser/t3.jpg" width="480" height="1051" alt="Eagle tumbler personalized with the name Marcus"></a>
         </div>
+        <a class="btn btn-gold teaser-cta" href="tumbler.html">Design your tumbler <span aria-hidden="true">→</span></a>
+        <p class="teaser-sub">Try your name on <span id="teaserCount">29</span> designs, then spin it around.</p>
       </div>
     </div>
   </section>
 
   <div class="marquee" aria-hidden="true"><div class="track" id="track"></div></div>
+
+  <section class="band" id="gallery" aria-labelledby="galTitle">
+    <div class="wrap">
+      <div class="head">
+        <div><div class="eyebrow">Design gallery</div><h2 id="galTitle">Pick a design, make it yours</h2></div>
+        <a class="btn btn-line" href="tumbler.html">Open the designer →</a>
+      </div>
+      <div class="gal-wrap">
+        <div class="gal" id="gal" tabindex="0" role="group" aria-roledescription="carousel" aria-label="Tumbler designs. Drag, or use the left and right arrow keys, to turn it.">
+          <ul class="gal-ring" id="galRing" style="list-style:none;margin:0;padding:0"></ul>
+          <button class="gal-nav gal-prev" type="button" id="galPrev" aria-label="Previous design">‹</button>
+          <button class="gal-nav gal-next" type="button" id="galNext" aria-label="Next design">›</button>
+        </div>
+        <div class="gal-cap" aria-live="polite"><b id="galName">Gothic Roses</b><small>Tap the design in front to try it on a tumbler with your name</small></div>
+      </div>
+    </div>
+  </section>
 
   <section class="band" id="collections">
     <div class="wrap">
@@ -652,7 +679,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
   <section class="band" id="faq" style="padding-top:0">
     <div class="wrap">
       <div class="head"><div><div class="eyebrow">Good to know</div><h2>Shipping, returns &amp; FAQ</h2></div></div>
-      <div class="faq">
+      <div class="faq" id="faqList">
         <details><summary>How long does an order take?</summary><p>Every piece is made to order. We'll message you if anything about your timeline changes. Need it by a date? Say so in the personalization box or message us before you order.</p></details>
         <details><summary>How much is shipping?</summary><p>Shipping is by USPS to anywhere in the US and depends on what you order, shown in your cart before you pay. Made-to-order items totaling $75 or more ship free. Digital downloads never ship.</p></details>
         <details><summary>Can I personalize my order?</summary><p>Yes. Choose "Add name" or type your text in the personalization box on the product page. For logos, photos or a layout of your own, request a quote or message us.</p></details>
@@ -828,16 +855,15 @@ function applySite() {
   if (S.email) social.push(`<a href="mailto:${esc(S.email)}">${esc(S.email)}</a>`);
   if (S.phone) social.push(`<a href="tel:${esc(S.phone.replace(/[^\d+]/g, ""))}">${esc(S.phone)}</a>`);
   $("social").innerHTML = social.join("");
-  if (S.tumblerName && !nameIn.dataset.touched) { nameIn.value = S.tumblerName; sizeName(); }
-  const cols = (S.tumblerColors || []).filter((c) => c && /^#[0-9a-f]{6}$/i.test(c.hex) && c.name);
-  if (cols.length) {
-    $("swatchBox").innerHTML = cols.map((c, i) => `<button type="button" data-c="${shade(c.hex, "black", .62)},${c.hex},${shade(c.hex, "white", .3)},${shade(c.hex, "black", .72)}" aria-pressed="${i === 0}" style="background:${c.hex}" aria-label="${esc(c.name)}"></button>`).join("");
-    $("swatchBox").querySelector("button").click();
-  }
-  $("studioNav").hidden = $("studioNav2").hidden = $("studioBtn").hidden = !S.studioOn;
+  $("studioNav2").hidden = $("studioBtn").hidden = !S.studioOn;
   $("vacation").hidden = !vacationOn();
   if (vacationOn()) $("vacText").textContent = vacationText();
   if (shopReady) refreshShop();
+  const fl = $("faqList"); if (fl) {
+    if (!fl.dataset.def) fl.dataset.def = fl.innerHTML;
+    const items = (S.faq || "").split(/\n\s*\n/).map((b) => b.trim()).filter(Boolean).map((b) => { const [q, ...a] = b.split("\n"); return [q.trim(), a.join("\n").trim()]; }).filter(([q, a]) => q && a);
+    fl.innerHTML = items.length ? items.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${richText(a).replace(/\n/g, "<br>")}</p></details>`).join("") : fl.dataset.def;
+  }
   if (S.occasions) $("track").innerHTML = [...Array(2)].flatMap(() => S.occasions.split("\n").map((x) => x.trim()).filter(Boolean)).map((o) => `<span>${esc(o)}</span>`).join("");
 }
 const SITE_KEY = "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b";
@@ -872,202 +898,6 @@ $("revs").innerHTML = REVIEWS.map((r) => `
 const OCCASIONS = ["Mother's Day", "Graduations", "Weddings", "Teachers", "Nurses", "Firefighters", "Birthdays", "Heritage pride", "Corporate gifts", "Christmas"];
 $("track").innerHTML = [...OCCASIONS, ...OCCASIONS].map((o) => `<span>${esc(o)}</span>`).join("");
 
-/* ---------- live preview: your real tumbler photo, recolored or wrapped with a design, spinnable ---------- */
-const nameIn = $("nameIn"), cv = $("tCanvas"), cx2 = cv.getContext("2d"), stage = $("stage");
-const PH = { W: 496, H: 1086, SY: 100, L: 112, R: 388, T: 194, B: 1036, CX: 250, RAD: 138, TY: 560 };   // geometry of the tumbler body inside tumbler-white.jpg
-const K = 2, TAU = Math.PI * 2;
-const PV = { tint: null, font: "script", ink: "gold", design: null, showName: true, na: 0, ny: PH.TY, moveMode: false, rot: 0, vel: 0, auto: true, drag: false, ready: false };
-const DESIGNS = [
-  { id: "grill", name: "King of the Grill" }, { id: "nurse", name: "Saving Lives" }, { id: "eagle", name: "Freedom Eagle" }, { id: "mexico", name: "Mexican Flag" },
-  { id: "dreamcatcher", name: "Dream Catcher" }, { id: "boho", name: "Boho Dreamcatcher" }, { id: "bee", name: "Golden Bee" }, { id: "cards", name: "Cards Deck" },
-  { id: "flames", name: "Flaming Cards" }, { id: "lucky", name: "Lucky Books" }, { id: "fairytales", name: "Fairytales" }, { id: "gothic", name: "Gothic Roses" }, { id: "blossom", name: "Cherry Blossom Moon" },
-  { id: "roses", name: "Gothic Roses & Butterflies" }, { id: "eagle1776", name: "1776 Eagle" }, { id: "constitution", name: "We The People" }, { id: "mexusa", name: "Mexican American Pride" },
-  { id: "firefighter", name: "Firefighter" }, { id: "phleb", name: "Phlebotomist" }, { id: "memorial", name: "In Loving Memory" },
-  { id: "jingle", name: "Jingle Juice" }, { id: "merry", name: "Merry Christmas" }, { id: "peppermint", name: "Peppermint Bows" }, { id: "gnomes", name: "Christmas Gnomes" }, { id: "tealtree", name: "Teal Christmas Tree" }, { id: "snowflakes", name: "Teal Snowflakes" },
-  { id: "purple", name: "Purple Butterflies" }, { id: "sunflowers", name: "Sunflowers" }, { id: "pinkglitter", name: "Pink Glitter Floral" },
-];
-const dImgs = {};
-const photo = new Image();
-photo.onload = () => { PV.ready = true; rebuildBase(); rebuildName(); requestDraw(); };
-photo.src = "tumbler-white.jpg";
-const FONTS = {
-  script:   { label: "Script",    fam: '"Great Vibes", cursive',          wt: 400, size: 130, upper: false },
-  pacifico: { label: "Casual",    fam: '"Pacifico", cursive',             wt: 400, size: 96,  upper: false },
-  dancing:  { label: "Signature", fam: '"Dancing Script", cursive',       wt: 700, size: 112, upper: false },
-  satisfy:  { label: "Brush",     fam: '"Satisfy", cursive',              wt: 400, size: 112, upper: false },
-  lobster:  { label: "Retro",     fam: '"Lobster", cursive',              wt: 400, size: 100, upper: false },
-  caveat:   { label: "Handwritten", fam: '"Caveat", cursive',             wt: 700, size: 120, upper: false },
-  serif:    { label: "Serif",     fam: '"Fraunces", Georgia, serif',      wt: 700, size: 96,  upper: false },
-  playfair: { label: "Elegant",   fam: '"Playfair Display", Georgia, serif', wt: 700, size: 96, upper: false, style: "italic" },
-  classic:  { label: "Classic",   fam: '"Cinzel", Georgia, serif',        wt: 700, size: 84,  upper: true, ls: 3 },
-  block:    { label: "Block",     fam: '"Manrope", sans-serif',           wt: 800, size: 84,  upper: true },
-  bebas:    { label: "Tall",      fam: '"Bebas Neue", Impact, sans-serif', wt: 400, size: 120, upper: true, ls: 2 },
-  marker:   { label: "Marker",    fam: '"Permanent Marker", cursive',     wt: 400, size: 84,  upper: false },
-};
-const fontStr = (F, px) => `${F.style || "normal"} ${F.wt} ${px}px ${F.fam}`;
-function bodyPath(c) {
-  const { L, R, T, B } = PH, r = 24; c.beginPath(); c.moveTo(L, T); c.lineTo(R, T); c.lineTo(R, B - r); c.quadraticCurveTo(R, B, R - r, B); c.lineTo(L + r, B); c.quadraticCurveTo(L, B, L, B - r); c.closePath();
-}
-const gloss = (c, a1, a2) => {   // the bright vertical reflections of the glossy tumbler
-  const { L, R, T, B } = PH, g = c.createLinearGradient(L, 0, R, 0);
-  g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(.17, "rgba(255,255,255,0)"); g.addColorStop(.25, `rgba(255,255,255,${a1})`); g.addColorStop(.33, "rgba(255,255,255,0)");
-  g.addColorStop(.8, "rgba(255,255,255,0)"); g.addColorStop(.89, `rgba(255,255,255,${a2})`); g.addColorStop(.95, "rgba(255,255,255,0)");
-  c.globalCompositeOperation = "screen"; c.fillStyle = g; c.fillRect(L, T, R - L, B - T);
-};
-// base = the photo, plus the color tint when no design is chosen (cached: only rebuilt when the color changes)
-const base = document.createElement("canvas"); base.width = PH.W * K; base.height = PH.H * K;
-function rebuildBase() {
-  if (!PV.ready) return;
-  const c = base.getContext("2d"), { W, H, SY, L, R, T, B } = PH;
-  c.setTransform(K, 0, 0, K, 0, 0); c.globalCompositeOperation = "source-over"; c.drawImage(photo, 0, SY, W, H, 0, 0, W, H);
-  if (PV.tint && !PV.design) {
-    c.save(); bodyPath(c); c.clip(); c.globalCompositeOperation = "multiply"; c.fillStyle = PV.tint; c.fillRect(0, 0, W, H); gloss(c, .5, .34); c.restore();
-  }
-}
-// name sprite: the name drawn flat (cached: only rebuilt when the name, font or ink changes)
-let nm = null;
-function rebuildName() {
-  if (!PV.ready) return;
-  const name = nameIn.value.trim() || "Name", F = FONTS[PV.font], text = F.upper ? name.toUpperCase() : name, { RAD } = PH;
-  const m = document.createElement("canvas").getContext("2d"); m.font = fontStr(F, F.size); if ("letterSpacing" in m) m.letterSpacing = (F.ls || 0) + "px";
-  let tw = m.measureText(text).width; const fs = F.size * Math.min(1, (RAD * 2.0) / Math.max(tw, 1)); tw = tw * fs / F.size;
-  const pad = 24, oh = Math.ceil(fs * 1.7), o = document.createElement("canvas"); o.width = Math.ceil((tw + pad * 2) * K); o.height = oh * K;
-  const oc = o.getContext("2d"); oc.scale(K, K); oc.font = fontStr(F, fs); if ("letterSpacing" in oc) oc.letterSpacing = (F.ls || 0) * fs / F.size + "px"; oc.textAlign = "center"; oc.textBaseline = "middle";
-  const mid = oh / 2, x0 = (tw + pad * 2) / 2;
-  if (PV.ink === "gold") {
-    const g = oc.createLinearGradient(0, mid - fs * .5, 0, mid + fs * .5); g.addColorStop(0, "#fff3cf"); g.addColorStop(.45, "#e9c46a"); g.addColorStop(1, "#a97a22");
-    oc.shadowColor = "rgba(60,35,5,.6)"; oc.shadowBlur = 2; oc.shadowOffsetY = 1.4; oc.fillStyle = g;
-  } else if (PV.ink === "white") { oc.shadowColor = "rgba(0,0,0,.45)"; oc.shadowBlur = 3; oc.shadowOffsetY = 1; oc.fillStyle = "#ffffff"; }
-  else oc.fillStyle = "#15171c";
-  oc.fillText(text, x0, mid);
-  nm = { o, tw, oh, x0, name };
-  cv.setAttribute("aria-label", `Tumbler preview with the name ${name}${PV.design ? " and the " + PV.design.name + " design" : ""}`);
-}
-const layer = document.createElement("canvas"); layer.width = PH.W * K; layer.height = PH.H * K;
-function drawPreview() {
-  if (!PV.ready || !nm) return;
-  const c = cx2, { W, H, L, R, T, B, CX, RAD, TY } = PH, moving = PV.drag || Math.abs(PV.vel) > .0006 || PV.auto, step = moving ? 1 : .5;
-  c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "source-over"; c.globalAlpha = 1; c.drawImage(base, 0, 0);
-  c.setTransform(K, 0, 0, K, 0, 0);
-  c.save(); bodyPath(c); c.clip();
-  const half = RAD * .995, rot = PV.rot;
-  // design: a full wrap, one column at a time, so it bends around the cylinder as it turns
-  const di = PV.design && dImgs[PV.design.id];
-  if (di && di.complete && di.naturalWidth) {
-    // "cover": the art fills the whole body, top to bottom and all the way round (any extra is cropped from the sides or top and bottom)
-    const iw = di.naturalWidth, ih = di.naturalHeight, aw = TAU * RAD, ah = B - T, sc = Math.max(aw / iw, ah / ih);
-    const fx = aw / (iw * sc), fy = ah / (ih * sc), sy = (1 - fy) / 2 * ih, shh = fy * ih, ay = T;
-    // slices go onto their own layer (overlap there is harmless), then the layer is multiplied onto the glossy photo once
-    const lc = layer.getContext("2d"); lc.setTransform(1, 0, 0, 1, 0, 0); lc.clearRect(0, 0, layer.width, layer.height); lc.setTransform(K, 0, 0, K, 0, 0);
-    for (let dx = -half; dx < half; dx += step) {
-      const th = Math.asin(dx / RAD), u = (((th + rot) / TAU + .5) % 1 + 1) % 1, sx = ((1 - fx) / 2 + u * fx) * iw; let sw = (step / Math.cos(th)) * (iw * fx / aw); sw = Math.min(sw, iw - sx);
-      if (sw > 0) lc.drawImage(di, sx, sy, sw, shh, CX + dx, ay, step + .5, ah);
-    }
-    c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "multiply"; c.drawImage(layer, 0, 0); c.setTransform(K, 0, 0, K, 0, 0); c.globalCompositeOperation = "source-over";
-  }
-  // name: sits on the surface and turns with it, disappearing behind the edge
-  const y = PV.ny - nm.oh / 2, nc = layer.getContext("2d"); nc.setTransform(1, 0, 0, 1, 0, 0); nc.clearRect(0, 0, layer.width, layer.height); nc.setTransform(K, 0, 0, K, 0, 0);
-  for (let dx = -half; PV.showName && dx < half; dx += step) {
-    const th = Math.asin(dx / RAD); let al = th + rot - PV.na; al = ((al + Math.PI) % TAU + TAU) % TAU - Math.PI;
-    const u = RAD * al; if (Math.abs(u) > nm.tw / 2 + 6) continue;
-    const sx = (nm.x0 + u) * K, sw = (step / Math.cos(th)) * K; if (sx < 0 || sx + sw > nm.o.width) continue;
-    nc.drawImage(nm.o, sx, 0, sw, nm.o.height, CX + dx, y, step + .25, nm.oh);
-  }
-  c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = PV.ink === "black" && !di ? "multiply" : "source-over"; c.drawImage(layer, 0, 0); c.setTransform(K, 0, 0, K, 0, 0); c.globalCompositeOperation = "source-over";
-  // light: gloss reflections, and the edges fall into shadow over the lettering and design too
-  c.globalCompositeOperation = "source-over"; if (di) gloss(c, .32, .22);
-  c.globalCompositeOperation = "multiply";
-  const e = c.createLinearGradient(L, 0, R, 0);
-  e.addColorStop(0, "rgba(40,40,50,.55)"); e.addColorStop(.1, "rgba(40,40,50,.14)"); e.addColorStop(.3, "rgba(255,255,255,0)"); e.addColorStop(.72, "rgba(255,255,255,0)"); e.addColorStop(.92, "rgba(40,40,50,.16)"); e.addColorStop(1, "rgba(40,40,50,.5)");
-  c.fillStyle = e; c.fillRect(L, T, R - L, B - T);
-  c.restore();
-}
-// animation loop: runs only while it is moving and visible
-const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
-let raf = 0, last = 0, visible = true;
-function requestDraw() { if (!raf) raf = requestAnimationFrame(tick); }
-function tick(t) {
-  raf = 0; const dt = Math.min(48, t - (last || t)); last = t;
-  if (!PV.drag) {
-    if (PV.auto && !reduceMotion) { PV.rot = Math.sin(t / 1900) * .55; }
-    else if (Math.abs(PV.vel) > .0006) { PV.rot += PV.vel * dt; PV.vel *= Math.pow(.99, dt); }
-  }
-  drawPreview();
-  if (visible && (PV.drag || (PV.auto && !reduceMotion) || Math.abs(PV.vel) > .0006)) raf = requestAnimationFrame(tick); else last = 0;
-}
-new IntersectionObserver(([en]) => { visible = en.isIntersecting; if (visible) requestDraw(); }).observe(stage);
-const stopAuto = () => { if (PV.auto) { PV.auto = false; $("spinHint").classList.add("off"); } };
-let px = 0, pt = 0;
-// Drag the tumbler to spin it. With "Move name" on (or by grabbing the name with a mouse) dragging moves the name instead: sideways around the tumbler, up and down along it.
-const stageXY = (e) => { const r = stage.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * PH.W, (e.clientY - r.top) / r.height * PH.H]; };
-function nameHit(e) {
-  if (!PV.showName || !nm) return false; const [x, y] = stageXY(e), { CX, RAD } = PH, ph = PV.na - PV.rot;
-  if (Math.cos(ph) <= .1) return false; const cx = CX + RAD * Math.sin(ph), hw = nm.tw / 2 * Math.cos(ph) + 12;
-  return Math.abs(x - cx) <= hw && Math.abs(y - PV.ny) <= nm.oh / 2;
-}
-let mode = "spin", grab = null;
-stage.addEventListener("pointerdown", (e) => {
-  stopAuto(); PV.vel = 0; px = e.clientX; pt = performance.now(); PV.drag = true; stage.setPointerCapture(e.pointerId);
-  if (PV.showName && (PV.moveMode || (e.pointerType === "mouse" && nameHit(e)))) {
-    mode = "name"; const [x, y] = stageXY(e), th = Math.asin(Math.max(-1, Math.min(1, (x - PH.CX) / PH.RAD)));
-    grab = { da: PV.na - (th + PV.rot), dy: PV.ny - y };
-  } else mode = "spin";
-  requestDraw();
-});
-stage.addEventListener("pointermove", (e) => {
-  if (!PV.drag) { if (e.pointerType === "mouse") stage.style.cursor = nameHit(e) ? "move" : ""; return; }
-  if (mode === "name") {
-    const [x, y] = stageXY(e), th = Math.asin(Math.max(-.97, Math.min(.97, (x - PH.CX) / PH.RAD)));
-    PV.na = th + PV.rot + grab.da; PV.ny = Math.max(PH.T + nm.oh / 2 - 20, Math.min(PH.B - nm.oh / 2 + 20, y + grab.dy));
-    $("nameReset").hidden = false; requestDraw(); return;
-  }
-  const now = performance.now(), dxp = e.clientX - px, per = PH.W / stage.getBoundingClientRect().width;   // css px -> photo px
-  const dr = dxp * per / PH.RAD; PV.rot += dr; PV.vel = Math.max(-.0035, Math.min(.0035, dr / Math.max(8, now - pt))); px = e.clientX; pt = now; requestDraw();
-});
-const endDrag = () => { PV.drag = false; if (mode === "name") PV.vel = 0; requestDraw(); };
-stage.addEventListener("pointerup", endDrag); stage.addEventListener("pointercancel", endDrag);
-$("moveToggle").addEventListener("click", () => {
-  PV.moveMode = !PV.moveMode; $("moveToggle").setAttribute("aria-checked", PV.moveMode); stage.style.touchAction = PV.moveMode ? "none" : "";
-  $("spinHint").textContent = PV.moveMode ? "Drag the name to place it" : "Drag to spin"; $("spinHint").classList.remove("off");
-  if (PV.moveMode && !PV.showName) setName(true);
-});
-$("nameReset").addEventListener("click", () => { PV.na = 0; PV.ny = PH.TY; $("nameReset").hidden = true; requestDraw(); });
-stage.addEventListener("keydown", (e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stopAuto(); PV.rot += (e.key === "ArrowLeft" ? -1 : 1) * .35; requestDraw(); } });
-
-function sizeName() { rebuildName(); requestDraw(); }
-nameIn.addEventListener("input", () => { nameIn.dataset.touched = "1"; if (!PV.showName) setName(true); else sizeName(); });
-document.querySelector(".swatches").addEventListener("click", (e) => {
-  const b = e.target.closest("button"); if (!b) return;
-  document.querySelectorAll(".swatches button").forEach((x) => x.setAttribute("aria-pressed", x === b));
-  PV.tint = b.dataset.c.split(",")[1] || null; PV.design = null; $("dsName").textContent = "None"; setDesignUi(); $("swName").textContent = b.getAttribute("aria-label"); rebuildBase(); rebuildName(); requestDraw();
-});
-$("fontBox").insertAdjacentHTML("beforeend", Object.entries(FONTS).map(([id, F]) => `<button type="button" data-f="${id}" aria-pressed="${id === PV.font}" style="font-family:${F.fam.replace(/"/g, "'")};font-weight:${F.wt};font-style:${F.style || "normal"};font-size:17px">${F.label}</button>`).join(""));
-$("fontBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-f]"); if (!b) return; PV.font = b.dataset.f; $("fontBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); setName(true); });
-function setName(on) {
-  PV.showName = on; const t = $("nameToggle"); t.setAttribute("aria-checked", on); t.textContent = "Show name: " + (on ? "On" : "Off");
-  $("orderName").textContent = on ? "Order a tumbler with this name →" : "Order a tumbler →"; sizeName();
-}
-$("nameToggle").addEventListener("click", () => setName(!PV.showName));
-$("inkBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-i]"); if (!b) return; PV.ink = b.dataset.i; $("inkBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); sizeName(); });
-function setDesignUi() { $("designBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", (x.dataset.d || "") === (PV.design ? PV.design.id : ""))); }
-$("designBox").insertAdjacentHTML("beforeend", DESIGNS.map((d) => `<button type="button" data-d="${d.id}" aria-pressed="false" aria-label="${d.name} design" title="${d.name}" style="background-image:url(designs/th-${d.id}.jpg)"></button>`).join(""));
-$("designBox").addEventListener("click", (e) => {
-  const b = e.target.closest("button"); if (!b) return; const id = b.dataset.d || "";
-  PV.design = id ? DESIGNS.find((d) => d.id === id) : null;
-  if (PV.design && !dImgs[id]) { const im = new Image(); im.onload = () => { rebuildBase(); requestDraw(); }; im.src = `designs/${id}.jpg`; dImgs[id] = im; }
-  if (PV.design) document.querySelectorAll(".swatches button").forEach((x) => x.setAttribute("aria-pressed", "false"));
-  $("dsName").textContent = PV.design ? PV.design.name : "None"; if (PV.design) $("swName").textContent = "—";
-  setDesignUi(); rebuildBase(); rebuildName(); requestDraw();
-});
-$("orderName").addEventListener("click", () => {
-  window.__prefill = PV.showName ? nameIn.value.trim() : "";
-  if (byCat("tumblers").length) setFilter("tumblers");
-  $("shop").scrollIntoView({ behavior: "smooth" });
-});
-(document.fonts && document.fonts.load ? Promise.all(Object.values(FONTS).map((F) => document.fonts.load(fontStr(F, 40), "Aa"))) : Promise.resolve()).then(sizeName, sizeName);
-document.querySelector(".swatches button")?.click();
-applySite();
-
 /* ---------- collections ---------- */
 const byCat = (c) => P.filter((p) => p.category === c);
 function renderCollections() {
@@ -1089,6 +919,8 @@ $("colls").addEventListener("click", (e) => {
 
 /* ---------- shop grid ---------- */
 let filter = "all", P0 = P;
+const _qp = new URLSearchParams(location.search);   // arriving from tumbler.html with the design details
+if (_qp.get("prefill")) { window.__prefill = _qp.get("prefill").slice(0, 200); filter = "tumblers"; history.replaceState(null, "", location.pathname + "#shop"); }
 // Newest first by default; "My custom order" (Site settings) uses the drag order from the admin page.
 function applyOrder() {
   const custom = SITE.productOrder === "custom" || !P0.every((x) => x.created);   // custom = the order from the admin page (already sorted by the database)
@@ -1125,8 +957,13 @@ $("filters").addEventListener("click", (e) => { const b = e.target.closest("butt
 $("sortSel").onchange = () => { sortBy = $("sortSel").value; setFilter(filter); };
 $("occSel").onchange = () => { occ = $("occSel").value; setFilter(filter); };
 $("grid").addEventListener("click", (e) => { if (e.target.id === "clearOcc") { occ = sortBy = ""; $("occSel").value = $("sortSel").value = ""; setFilter(filter); } });
-setFilter("all");
+setFilter(filter);
 shopReady = true;
+if (window.__prefill) {
+  const note = document.createElement("p"); note.className = "pnote"; note.style.cssText = "margin:0 0 14px;padding:12px 16px;border-radius:14px;background:rgba(217,171,79,.12);border:1px solid var(--gold);color:var(--cream)";
+  note.innerHTML = `✨ Your design: <b>${esc(window.__prefill)}</b>. Pick a tumbler below and we'll add this to your order.`; $("grid").before(note);
+  setTimeout(() => $("shop").scrollIntoView({ behavior: "smooth" }), 500);
+}
 
 /* ---------- live listings (edited in admin.html, stored in Supabase) ---------- */
 const DB = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" };
@@ -1297,6 +1134,7 @@ $("quoteForm").addEventListener("submit", async (e) => {
   } catch (x) { err.textContent = x.message; err.hidden = false; go.disabled = false; go.textContent = "Send request"; }
 });
 function openTrack() { $("tOut").hidden = $("tErr").hidden = true; openDlg("trackDlg"); }
+if (location.hash === "#track") setTimeout(openTrack, 300);
 const TRACK = [["new", "Order received"], ["production", "In production"], ["ready", "Ready"], ["shipped", "Shipped"], ["completed", "Completed"]];
 $("trackForm").addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -1748,6 +1586,84 @@ document.addEventListener("click", (e) => {
 });
 renderCartBadge();
 route();
+</script>
+<script>
+/* ---------- 3D design gallery: a ring of artwork panels you can turn; the one in front opens the designer ---------- */
+(function () {
+  const D = [["eagle1776", "1776 Eagle"], ["roses", "Gothic Roses & Butterflies"], ["sunflowers", "Sunflowers"], ["nurse", "Saving Lives"], ["jingle", "Jingle Juice"], ["dreamcatcher", "Dream Catcher"],
+    ["firefighter", "Firefighter"], ["merry", "Merry Christmas"], ["mexusa", "Mexican American Pride"], ["fairytales", "Fairytales"], ["purple", "Purple Butterflies"], ["grill", "King of the Grill"],
+    ["gnomes", "Christmas Gnomes"], ["constitution", "We The People"], ["bee", "Golden Bee"], ["pinkglitter", "Pink Glitter Floral"], ["memorial", "In Loving Memory"], ["tealtree", "Teal Christmas Tree"],
+    ["eagle", "Freedom Eagle"], ["boho", "Boho Dreamcatcher"], ["phleb", "Phlebotomist"], ["peppermint", "Peppermint Bows"], ["lucky", "Lucky Books"], ["snowflakes", "Teal Snowflakes"],
+    ["gothic", "Gothic Roses"], ["flames", "Flaming Cards"], ["mexico", "Mexican Flag"], ["cards", "Cards Deck"], ["blossom", "Cherry Blossom Moon"]];
+  let D2 = D.map(([id, nm]) => ({ id, name: nm, card: `designs/c-${id}.jpg` }));
+  try { const c = JSON.parse(localStorage.getItem("prajo:gallery") || "null"); if (Array.isArray(c) && c.length) D2 = c; } catch { /* use the built-in list */ }
+  const gal = document.getElementById("gal"), ring = document.getElementById("galRing"), nameEl = document.getElementById("galName");
+  let N, STEP, items = [];
+  function build() {
+  N = D2.length; STEP = 360 / N;
+  ring.innerHTML = D2.map((d, i) => `<li style="display:contents"><a class="gal-item" href="tumbler.html?d=${esc(d.id)}" data-i="${i}" aria-label="${esc(d.name)}"><img src="${esc(d.card)}" alt="${esc(d.name)} design" width="336" height="460" ${i < 4 || i >= N - 3 ? 'loading="eager"' : 'loading="lazy"'} decoding="async"></a></li>`).join("");
+  items = [...ring.querySelectorAll(".gal-item")];
+  }
+  build();
+  let rot = 0, target = 0, vel = 0, dragging = false, moved = 0, last = 0, raf = 0, auto = !matchMedia("(prefers-reduced-motion: reduce)").matches, visible = false, idle = 0;
+  function size() {
+    const W = gal.clientWidth < 560 ? Math.round(gal.clientWidth * .4) : Math.round(Math.min(176, Math.max(110, gal.clientWidth * .2))), H = Math.round(W * 1.37), R = Math.round((W / 2) / Math.tan(Math.PI / N) * 1.16);
+    gal.style.setProperty("--W", W + "px"); gal.style.setProperty("--H", H + "px"); gal._R = R; paint();
+  }
+  const norm = (a) => ((a % 360) + 540) % 360 - 180;
+  function paint() {
+    const R = gal._R || 600; let best = 0, bd = 999;
+    ring.style.transform = `translateZ(${-R}px) rotateY(${-rot}deg)`;
+    items.forEach((el, i) => {
+      el.style.transform = `rotateY(${i * STEP}deg) translateZ(${R}px)`;
+      const d = Math.abs(norm(i * STEP - rot)); if (d < bd) { bd = d; best = i; }
+      el.style.opacity = d > 78 ? 0 : String(Math.max(.25, 1 - d / 95));
+      el.style.pointerEvents = d > 78 ? "none" : "auto";
+    });
+    items.forEach((el, i) => el.classList.toggle("front", i === best));
+    if (paint.b !== best) { paint.b = best; nameEl.textContent = (D2[best] || {}).name || ""; }
+  }
+  function tick(t) {
+    raf = 0; const dt = Math.min(48, t - (last || t)); last = t;
+    if (!dragging) {
+      if (Math.abs(vel) > .004) { rot += vel * dt; vel *= Math.pow(.992, dt); target = Math.round(rot / STEP) * STEP; }
+      else if (auto && Date.now() - idle > 2500) { rot += .012 * dt; target = rot; }
+      else { rot += (target - rot) * Math.min(1, dt * .012); }
+    }
+    paint();
+    if (visible && (dragging || auto || Math.abs(target - rot) > .05 || Math.abs(vel) > .004)) raf = requestAnimationFrame(tick); else last = 0;
+  }
+  const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+  const stop = () => { auto = false; idle = Date.now(); };
+  const go = (n) => { stop(); target = (Math.round(target / STEP) + n) * STEP; vel = 0; kick(); };
+  new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) kick(); }).observe(gal);
+  new ResizeObserver(size).observe(gal);
+  let px = 0, pt = 0;
+  gal.addEventListener("pointerdown", (e) => { if (e.target.closest(".gal-nav")) return; stop(); dragging = true; moved = 0; vel = 0; px = e.clientX; pt = performance.now(); kick(); });
+  window.addEventListener("pointermove", (e) => {
+    if (!dragging) return; const now = performance.now(), dx = e.clientX - px, k = 150 / Math.max(260, gal.clientWidth * .5);   // finger distance -> degrees
+    rot -= dx * k; moved += Math.abs(dx); vel = Math.max(-.35, Math.min(.35, -dx * k / Math.max(8, now - pt))); px = e.clientX; pt = now; target = rot; kick();
+  });
+  const end = () => { if (!dragging) return; dragging = false; target = Math.round((rot + vel * 260) / STEP) * STEP; vel = 0; kick(); };
+  window.addEventListener("pointerup", end); window.addEventListener("pointercancel", end);
+  gal.addEventListener("click", (e) => {
+    const a = e.target.closest(".gal-item"); if (!a) return;
+    if (moved > 6) { e.preventDefault(); return; }                 // it was a drag, not a tap
+    if (!a.classList.contains("front")) { e.preventDefault(); stop(); const i = +a.dataset.i; let d = norm(i * STEP - rot); target = rot + d; kick(); }
+  });
+  document.getElementById("galPrev").onclick = () => go(-1); document.getElementById("galNext").onclick = () => go(1);
+  gal.addEventListener("keydown", (e) => { if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); } else if (e.key === "ArrowRight") { e.preventDefault(); go(1); } });
+  idle = Date.now(); size();
+  // designs from the database (admin → Tumbler designs)
+  fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/tumbler_designs?select=slug,name,card&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
+    .then((r) => (r.ok ? r.json() : null)).then((rows) => {
+      if (!rows || !rows.length) return;
+      D2 = rows.map((r) => ({ id: r.slug, name: r.name, card: r.card }));
+      try { localStorage.setItem("prajo:gallery", JSON.stringify(D2)); } catch { /* optional */ }
+      rot = target = 0; paint.b = -1; build(); size(); kick();
+      const c = document.getElementById("teaserCount"); if (c) c.textContent = D2.length;
+    }).catch(() => {});
+})();
 </script>
 </body>
 </html>

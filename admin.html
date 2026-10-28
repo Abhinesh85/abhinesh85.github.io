@@ -151,6 +151,30 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .signin { max-width: 400px; margin: 12vh auto 0; padding: 26px; border-radius: 24px; border: 1px solid var(--line); background: var(--navy); display: grid; gap: 14px; }
 .err { color: #ffb4a8; font-size: 14px; margin: 0; }
 .linkish { background: none; border: 0; color: var(--gold-2); font-weight: 700; font-size: 14px; cursor: pointer; justify-self: center; text-decoration: underline; padding: 6px; }
+/* tumbler designs + help */
+.td-how { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px 16px; background: rgba(217, 171, 79, .06); display: grid; gap: 8px; }
+.td-how ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14.5px; }
+.td-list { display: grid; gap: 8px; }
+.td-item { display: grid; grid-template-columns: 30px 56px 1fr auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); }
+.td-item.off { opacity: .55; }
+.td-item.busy { opacity: .6; }
+.td-item img { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; background: #1a2238; }
+.td-item input.nm { width: 100%; min-width: 0; min-height: 44px; border-radius: 10px; border: 1px solid var(--line-soft); background: var(--ink); color: var(--cream); padding: 0 10px; font: 600 15px var(--f-body); }
+.tdgrab { cursor: grab; text-align: center; color: var(--muted); font-size: 20px; user-select: none; touch-action: none; }
+.td-item .tg { position: relative; width: 52px; height: 30px; border-radius: 999px; border: 1px solid rgba(245, 236, 220, .25); background: #3a3f4d; cursor: pointer; padding: 0; }
+.td-item .tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #f5ecdc; transition: transform .18s; }
+.td-item .tg[aria-checked="true"] { background: #2f9e62; border-color: #2f9e62; }
+.td-item .tg[aria-checked="true"]::after { transform: translateX(22px); }
+.td-item .rm { min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid var(--line-soft); background: transparent; color: #ffb4a8; cursor: pointer; font-size: 18px; }
+.td-item .rm.arm { background: #5a1f1f; color: #fff; font-size: 13px; padding: 0 10px; }
+.help section { display: grid; gap: 10px; }
+.help h3 { font-size: 18px; color: var(--gold-2); }
+.help dl { margin: 0; display: grid; gap: 12px; }
+.help dt { font-weight: 800; }
+.help dd { margin: 2px 0 0; color: var(--muted); line-height: 1.55; }
+.help ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--muted); line-height: 1.55; }
+.help code { background: rgba(245, 236, 220, .08); padding: 1px 6px; border-radius: 6px; }
+@media (max-width: 520px) { .td-item { grid-template-columns: 26px 48px 1fr; } .td-item .tg, .td-item .rm { justify-self: end; } .td-item img { width: 48px; height: 48px; } }
 /* checkout settings */
 .co-list { display: grid; gap: 12px; }
 .co-row { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px; background: var(--panel); display: grid; gap: 12px; }
@@ -250,6 +274,8 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <div class="swrow" id="studioRow"><div class="swtxt"><b>🔤 Design studio on the store</b><small id="studioState">Checking…</small></div>
           <button type="button" class="tg" role="switch" aria-checked="false" id="studioToggle" aria-label="Design studio on the store"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
           <div class="swask" id="studioAsk" hidden><span id="studioAskT"></span><button type="button" class="btn gold" id="studioYes">Confirm</button><button type="button" class="btn line" id="studioNo">Cancel</button></div></div>
+        <button type="button" role="menuitem" id="tdBtn">🥤 Tumbler designs<small id="tdState">Artwork customers can try on a tumbler</small></button>
+        <button type="button" role="menuitem" id="helpBtn">📘 How to update your site<small>Plain-language steps, no coding</small></button>
         <button type="button" role="menuitem" id="dsBtn">🎨 Custom designs<small id="dsState">Designs customers sent from the Design studio</small></button>
         <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
         <button type="button" role="menuitem" id="pwBtn">Change password<small>For this admin page and the pricing app</small></button>
@@ -329,6 +355,51 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
   </div>
 </div>
 
+<div class="sheet" id="tdSheet" hidden role="dialog" aria-modal="true" aria-labelledby="tdTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="tdTitle">Tumbler designs</h2><button class="x" type="button" id="tdClose" aria-label="Close">×</button></div>
+    <div class="panel-body">
+      <div class="td-how"><b>How to add a design</b>
+        <ol><li>Tap <b>＋ Add designs</b> and choose your flat wrap artwork (the image you print on a tumbler). You can pick several at once.</li>
+        <li>Give each one a clear name. Customers see it in the gallery and on the tumbler page.</li>
+        <li>Drag the ⠿ handle to change the order. The first ones show first. Use the switch to hide a design without deleting it.</li></ol>
+        <p class="hint">Best artwork: a wide image (around 2000 × 1700 px), JPG or PNG. Transparent PNGs are placed on white. We resize everything automatically.</p></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="tdAdd">＋ Add designs</button><span class="hint" id="tdMsg" style="margin:0"></span></div>
+      <input type="file" id="tdFile" accept="image/*" multiple hidden>
+      <div id="tdList" class="td-list"><p class="hint">Loading…</p></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="helpSheet" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="helpTitle">How to update your site</h2><button class="x" type="button" id="helpClose" aria-label="Close">×</button></div>
+    <div class="panel-body help">
+      <section><h3>Everyday jobs (no coding)</h3>
+        <dl>
+          <dt>Add or change a product</dt><dd>On this page, tap <b>+ New listing</b> (or tap a product). Add photos, price, stock and description, then <b>Save</b>. It appears on the store straight away.</dd>
+          <dt>Add a design to the tumbler gallery</dt><dd><b>⚙ Settings → 🥤 Tumbler designs → ＋ Add designs.</b> Upload the flat artwork and name it. It shows up in the 3D gallery and the tumbler designer. Drag to reorder, switch off to hide.</dd>
+          <dt>Change words on the website</dt><dd><b>⚙ Settings → Site settings.</b> Headline, intro, banner, shipping and returns answers (FAQ), contact details and more.</dd>
+          <dt>Pause orders while you're away</dt><dd>Turn on <b>🌴 Vacation mode</b> in the Settings menu. Digital downloads stay available.</dd>
+          <dt>Shipping prices and local pickup</dt><dd><b>⚙ Settings → Checkout options.</b></dd>
+          <dt>See and answer customers</dt><dd>Open the <b>pricing app → Messages</b>. You also get a Telegram alert with a link.</dd>
+          <dt>Look at orders</dt><dd>Open the <b>pricing app → Orders</b>. Move each order along: New → In production → Ready → Shipped → Completed.</dd>
+        </dl></section>
+      <section><h3>Good to know</h3>
+        <ul>
+          <li>Changes you make here show on the live site within a minute. Refresh the store page to see them.</li>
+          <li>Pictures are resized for you, so don't worry about file size. JPG and PNG work best.</li>
+          <li>Sign-in uses your password plus the 6-digit code from your authenticator app (and your backup app). Keep both safe.</li>
+          <li>Hidden things are never deleted: switch a design or product off to hide it, and back on to bring it back.</li>
+        </ul></section>
+      <section><h3>Things that need a developer (or Claude)</h3>
+        <ul>
+          <li>Changing the page layout, adding new kinds of sections, or new features.</li>
+          <li>Swapping the base tumbler photo used in the designer (the file <code>tumbler-white.jpg</code>).</li>
+          <li>Updating the website files on GitHub.</li>
+        </ul><p class="hint">Everything else on this page you can do yourself.</p></section>
+    </div>
+  </div>
+</div>
 <div class="sheet" id="siteSheet" hidden role="dialog" aria-modal="true" aria-labelledby="siteTitle">
   <div class="panel">
     <div class="panel-head">
@@ -1040,6 +1111,7 @@ $("coList").addEventListener("change", (e) => {
 
 /* ---------- site settings: text and choices the store page reads at load (table site_settings) ---------- */
 // Empty fields use the store's built-in text (shown here as the gray placeholder). **word** makes a word bold.
+const DEFAULT_FAQ_TEXT = "How long does an order take?\nEvery piece is made to order. We'll message you if anything about your timeline changes. Need it by a date? Say so in the personalization box or message us before you order.\n\nHow much is shipping?\nShipping is by USPS to anywhere in the US and depends on what you order, shown in your cart before you pay. Made-to-order items totaling $75 or more ship free. Digital downloads never ship.\n\nCan I personalize my order?\nYes. Choose \"Add name\" or type your text in the personalization box on the product page. For logos, photos or a layout of your own, request a quote or message us.\n\nReturns & problems with my order\nWe want you to love your order, and we'll work with you to make it right. **Please message us before sending anything back** so we can understand what happened, find the best fix together and approve your return. If your order arrives damaged or isn't what you ordered, send us a photo within 14 days and we'll gladly replace it or refund you, and we'll cover the return shipping.Because each piece is personalized just for you, we can't accept returns for a change of mind. If we do approve a return for another reason, the return shipping is paid by the buyer. Digital downloads are final sale, but if a file won't open, we'll help you right away.\n\nCan I cancel my order?\nYes, message us as soon as you can. We can cancel for free until production starts, usually within 24 hours of ordering. After that the piece is already being made.\n\nHow do I care for my tumbler?\nHand wash for the longest-lasting print. UV prints and engraving won't peel or wash off with normal use, but avoid abrasive scrubbing and soaking for long periods.\n\nDo you offer bulk or business orders?\nYes: weddings, teams, schools, corporate gifts and memorials. Tap \"Request a quote\" above with your quantity and date and we'll reply within a day.\n\nWhere is my order?\nUse “Track my order” in the footer with your order number and the email you used at checkout.";
 const SITE_FIELDS = [
   { g: "Vacation mode", d: "Pause made-to-order items while you're away. Printables stay available.", f: [
     ["vacationOn", "Vacation mode is ON", "switch"],
@@ -1047,6 +1119,8 @@ const SITE_FIELDS = [
     ["vacationMsg", "Message (optional)", "area", "We're on a short break, back Nov 12. Made-to-order items are paused. Printables are still available instantly!"] ] },
   { g: "Design studio", d: "Lets customers design name tiles on the store. Also in the menu for a quick switch.", f: [
     ["studioOn", "Design studio is ON", "switch"] ] },
+  { g: "Shipping, returns & FAQ", d: "The questions and answers on your store. Edit, add or delete them here", f: [
+    ["faq", "Questions and answers", "faq"] ] },
   { g: "Shop display", d: "Order of products, New and low-stock badges, bundle discount", f: [
     ["productOrder", "Show products", "select", [["", "Newest first (recommended)"], ["custom", "My custom order (the drag order on this page)"]]],
     ["newDays", "Show the “New” badge for (days)", "number", "14"],
@@ -1113,6 +1187,7 @@ function renderSite() {
       if (type === "select") return `<label class="f"><span>${label}</span><select class="in" data-k="${k}">${ph.map(([v, l]) => `<option value="${v}"${(site[k] || "") === v ? " selected" : ""}>${l}</option>`).join("")}</select></label>`;
       if (type === "switch") return `<label class="ssw"><span class="switch"><input type="checkbox" data-k="${k}" ${site[k] ? "checked" : ""}></span>${label}</label>`;
       if (type === "colors") return `<div class="f"><span>${label}</span><div id="colList" style="display:grid;gap:8px">${colorRows(site.tumblerColors?.length ? site.tumblerColors : DEFAULT_COLORS)}</div></div>`;
+      if (type === "faq") return `<div class="f"><span>${label}</span><textarea class="in" data-k="faq" rows="16">${esc(site.faq || DEFAULT_FAQ_TEXT)}</textarea><p class="hint" style="margin:4px 0 0">One question per block, with a blank line between blocks. The <b>first line</b> is the question and the lines under it are the answer. Delete a block to remove that question. To go back to the standard answers, clear the box and save.</p></div>`;
       const v = esc(site[k] || ""), p = esc(ph || "");
       return `<label class="f"><span>${label}</span>${type === "area" || type === "lines" ? `<textarea class="in" data-k="${k}" placeholder="${p}" rows="${type === "lines" ? 5 : 3}">${v}</textarea>` : `<input class="in" data-k="${k}" type="${type === "number" ? "number" : type === "url" ? "url" : type === "email" ? "email" : type === "tel" ? "tel" : "text"}" value="${v}" placeholder="${p}">`}</label>`;
     }).join("")}</div></details>`).join("");
@@ -1126,6 +1201,7 @@ function readSite() {
     const v = el.type === "checkbox" ? el.checked : el.value.trim();
     if (v) out[el.dataset.k] = v;
   });
+  if (out.faq === DEFAULT_FAQ_TEXT) delete out.faq;
   const cols = readColors();
   const key = (l) => JSON.stringify(l.map((c) => [c.name, c.hex.toLowerCase()]));
   if (key(cols) !== key(DEFAULT_COLORS)) out.tumblerColors = cols;
@@ -1272,6 +1348,86 @@ $("pwForm").onsubmit = async (e) => {
 };
 
 boot();
+
+/* ---------- tumbler designs: add, name, reorder, hide, delete (table tumbler_designs, public bucket design-art) ---------- */
+let tdRows = [], tdSort = null;
+const tdSlug = (t) => (String(t).toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 28) || "design") + "-" + Math.random().toString(36).slice(2, 6);
+const tdTitle = (f) => f.name.replace(/\.[a-z0-9]+$/i, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim().replace(/\b\w/g, (c) => c.toUpperCase()).slice(0, 60) || "New design";
+const tdPath = (url) => { const m = /\/object\/public\/design-art\/(.+)$/.exec(url || ""); return m ? m[1] : null; };
+async function tdLoad() {
+  const { data, error } = await sb.from("tumbler_designs").select("*").order("sort");
+  if (error) { $("tdList").innerHTML = `<div class="empty"><b>Not set up yet</b><p class="hint">Run tumbler-designs-setup.sql once in Supabase (SQL Editor). (${esc(error.message)})</p></div>`; return; }
+  tdRows = data; tdRender();
+}
+function tdRender() {
+  $("tdList").innerHTML = tdRows.map((r) => `<div class="td-item${r.visible ? "" : " off"}" data-id="${r.id}">
+    <span class="tdgrab" aria-hidden="true" title="Drag to reorder">⠿</span><img src="${esc(r.thumb)}" alt="">
+    <input class="nm" value="${esc(r.name)}" maxlength="60" aria-label="Design name" data-nm>
+    <button class="tg" type="button" role="switch" aria-checked="${r.visible}" aria-label="Show this design" data-vis></button>
+    <button class="rm" type="button" aria-label="Delete this design" data-del>🗑</button></div>`).join("") || `<div class="empty"><b>No designs yet</b><p class="hint">Tap ＋ Add designs to upload your first one.</p></div>`;
+  if (tdSort) tdSort.destroy();
+  tdSort = Sortable.create($("tdList"), { handle: ".tdgrab", animation: 150, onEnd: tdSaveOrder });
+  $("tdState").textContent = `${tdRows.filter((r) => r.visible).length} showing on the store`;
+}
+async function tdSaveOrder() {
+  const ids = [...$("tdList").querySelectorAll(".td-item")].map((e) => e.dataset.id), by = new Map(tdRows.map((r) => [r.id, r]));
+  tdRows = ids.map((id) => by.get(id)).filter(Boolean);
+  const jobs = tdRows.map((r, i) => (r.sort === i * 10 ? null : sb.from("tumbler_designs").update({ sort: i * 10 }).eq("id", r.id).then(() => { r.sort = i * 10; })));
+  const res = await Promise.all(jobs.filter(Boolean).map((j) => j.catch(() => "x")));
+  toast(res.includes("x") ? "Couldn't save the order" : "Order saved");
+}
+async function tdOpen() { $("tdSheet").hidden = false; document.body.style.overflow = "hidden"; await tdLoad(); }
+$("tdBtn").onclick = tdOpen;
+$("tdClose").onclick = () => { $("tdSheet").hidden = true; document.body.style.overflow = ""; };
+$("tdList").addEventListener("change", async (e) => {
+  const row = e.target.closest(".td-item"); if (!row || !e.target.matches("[data-nm]")) return;
+  const r = tdRows.find((x) => x.id === row.dataset.id), name = e.target.value.trim().slice(0, 60);
+  if (!name) { e.target.value = r.name; return toast("A design needs a name"); }
+  const { error } = await sb.from("tumbler_designs").update({ name }).eq("id", r.id); if (error) return toast("Couldn't save: " + error.message); r.name = name; toast("Name saved");
+});
+$("tdList").addEventListener("click", async (e) => {
+  const row = e.target.closest(".td-item"); if (!row) return; const r = tdRows.find((x) => x.id === row.dataset.id);
+  if (e.target.matches("[data-vis]")) {
+    const visible = !r.visible, { error } = await sb.from("tumbler_designs").update({ visible }).eq("id", r.id);
+    if (error) return toast("Couldn't change it: " + error.message); r.visible = visible; tdRender(); toast(visible ? "Showing on the store" : "Hidden from the store");
+  }
+  if (e.target.matches("[data-del]")) {
+    if (e.target.dataset.armed !== "1") { e.target.dataset.armed = "1"; e.target.classList.add("arm"); e.target.textContent = "Tap again to delete"; setTimeout(() => { e.target.dataset.armed = ""; e.target.classList.remove("arm"); e.target.textContent = "🗑"; }, 3500); return; }
+    const { error } = await sb.from("tumbler_designs").delete().eq("id", r.id); if (error) return toast("Couldn't delete: " + error.message);
+    const paths = [r.art, r.card, r.thumb].map(tdPath).filter(Boolean); if (paths.length) await sb.storage.from("design-art").remove(paths).catch(() => {});
+    tdRows = tdRows.filter((x) => x.id !== r.id); tdRender(); toast("Deleted");
+  }
+});
+// picks the file, makes three sizes in the browser (full artwork, gallery card, small picker tile), uploads them and adds the row
+async function tdMake(file) {
+  const bmp = await createImageBitmap(file);
+  const draw = (w, h, cover) => { const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, w, h);
+    const sc = cover ? Math.max(w / bmp.width, h / bmp.height) : w / bmp.width, dw = bmp.width * sc, dh = bmp.height * sc; x.drawImage(bmp, (w - dw) / 2, (h - dh) / 2, dw, dh); return c; };
+  const blob = (c, q) => new Promise((ok) => c.toBlob(ok, "image/jpeg", q));
+  const aw = Math.min(1000, bmp.width), ah = Math.round(aw * bmp.height / bmp.width);
+  return { art: await blob(draw(aw, ah, false), .74), card: await blob(draw(336, 460, true), .74), thumb: await blob(draw(120, 120, true), .72) };
+}
+$("tdAdd").onclick = () => $("tdFile").click();
+$("tdFile").addEventListener("change", async () => {
+  const files = [...$("tdFile").files].filter((f) => f.type.startsWith("image/")); $("tdFile").value = ""; if (!files.length) return;
+  let ok = 0, n = 0;
+  for (const f of files) {
+    n++; $("tdMsg").textContent = `Adding ${n} of ${files.length}…`;
+    try {
+      const b = await tdMake(f), slug = tdSlug(f.name), up = async (suffix, blob) => {
+        const path = `${slug}/${suffix}.jpg`, { error } = await sb.storage.from("design-art").upload(path, blob, { contentType: "image/jpeg", upsert: false });
+        if (error) throw error; return sb.storage.from("design-art").getPublicUrl(path).data.publicUrl; };
+      const art = await up("art", b.art), card = await up("card", b.card), thumb = await up("thumb", b.thumb);
+      const sort = (tdRows.reduce((m, r) => Math.max(m, r.sort), 0)) + 10;
+      const { data, error } = await sb.from("tumbler_designs").insert({ slug, name: tdTitle(f), art, card, thumb, sort }).select().single();
+      if (error) throw error; tdRows.push(data); tdRender(); ok++;
+    } catch (err) { toast(/decode|bitmap|heic/i.test(String(err)) ? `“${f.name}” couldn't be read. Try a JPG or PNG.` : `“${f.name}” didn't upload: ` + (err.message || err)); }
+  }
+  $("tdMsg").textContent = ok ? `Added ${ok}. Tap a name to rename it.` : ""; if (ok) toast(`Added ${ok} design${ok > 1 ? "s" : ""}`);
+});
+/* ---------- help guide ---------- */
+$("helpBtn").onclick = () => { $("helpSheet").hidden = false; document.body.style.overflow = "hidden"; };
+$("helpClose").onclick = () => { $("helpSheet").hidden = true; document.body.style.overflow = ""; };
 </script>
 </body>
 </html>
