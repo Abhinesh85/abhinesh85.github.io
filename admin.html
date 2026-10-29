@@ -63,6 +63,14 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chips button { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-soft); background: none; color: var(--muted); font-weight: 700; font-size: 13.5px; cursor: pointer; }
 .chips button[aria-pressed="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+.bulkbar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; margin: 0 0 14px; border-radius: 14px; background: var(--panel-2, #16203a); border: 1px solid var(--gold, #d9ab4f); }
+.bulkbar[hidden] { display: none; }
+.bulkbar b { margin-right: auto; }
+.item.pick { cursor: pointer; }
+.item.pick .ph::before { content: ""; position: absolute; top: 10px; left: 10px; width: 24px; height: 24px; border-radius: 8px; border: 2px solid #fff; background: rgba(0,0,0,.45); z-index: 3; }
+.item.pick.sel .ph::before { background: var(--gold, #d9ab4f); border-color: var(--gold, #d9ab4f); content: "✓"; color: #1a1305; font-weight: 900; text-align: center; line-height: 20px; }
+.item.pick.sel { outline: 2px solid var(--gold, #d9ab4f); border-radius: 18px; }
+.item.pick .grab, .item.pick .switch { display: none; }
 .count { color: var(--muted); font-size: 13.5px; margin-left: auto; }
 
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; padding-bottom: 60px; }
@@ -146,6 +154,11 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .ds-actions .btn { min-height: 38px; padding: 0 14px; font-size: 13px; }
 .ds-actions select { max-width: 180px; min-height: 38px; }
 
+.toast .tundo { margin-left: 10px; border: 0; background: var(--ink); color: var(--cream); border-radius: 999px; padding: 4px 12px; font-weight: 800; cursor: pointer; }
+.qp { cursor: text; border-bottom: 1px dashed var(--gold-2); } .qp:hover { background: rgba(217,171,79,.15); border-radius: 6px; }
+.qpin { width: 84px; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--gold); background: var(--panel); color: inherit; font: inherit; font-weight: 800; }
+.step { display: inline-flex; align-items: center; gap: 6px; } .step button { width: 24px; height: 24px; border-radius: 8px; border: 1px solid var(--line-soft, rgba(255,255,255,.2)); background: transparent; color: inherit; font-weight: 900; cursor: pointer; line-height: 1; } .step button:hover { background: var(--gold); color: #1a1305; }
+.item { transition: transform .15s, box-shadow .15s; } .item:hover { transform: translateY(-2px); }
 .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; background: var(--cream); color: var(--ink); padding: 10px 18px; border-radius: 999px; font-weight: 800; font-size: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
 
 .signin { max-width: 400px; margin: 12vh auto 0; padding: 26px; border-radius: 24px; border: 1px solid var(--line); background: var(--navy); display: grid; gap: 14px; }
@@ -313,8 +326,14 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     <div class="tools">
       <input class="in" id="search" placeholder="Search listings" aria-label="Search listings" autocomplete="off">
       <div class="chips" id="cats" role="group" aria-label="Filter"></div>
+      <button class="btn" type="button" id="selBtn" aria-pressed="false">☑ Select several</button>
       <span class="count" id="count"></span>
     </div>
+    <div class="bulkbar" id="bulkBar" hidden><b id="bulkN">0 selected</b>
+      <button class="btn" type="button" id="bulkAll">Select all shown</button>
+      <button class="btn gold" type="button" id="bulkOn">Show on store</button>
+      <button class="btn" type="button" id="bulkOff">Hide from store</button>
+      <button class="btn" type="button" id="bulkDone">Done</button></div>
     <p class="hint" style="margin:-6px 0 14px">Drag <b>⠿</b> to change the order on the store. Tap a listing to edit it. Changes go live as soon as you save.</p>
     <div class="grid" id="grid"></div>
   </div>
@@ -508,7 +527,9 @@ const sb = window.supabase.createClient(CFG.url, CFG.key, { auth: { persistSessi
 sb.auth.onAuthStateChange((ev) => { if (ev === "PASSWORD_RECOVERY") try { sessionStorage.setItem("prajo:setpw", "1"); } catch {} });
 let rows = [], prices = {}, filter = "all", ed = null, sortable = null;
 let toastT;
-function toast(m) { const t = $("toast"); t.textContent = m; t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), 2400); }
+let undoFn = null;
+function toast(m, undo) { const t = $("toast"); undoFn = undo || null; t.innerHTML = esc(m) + (undo ? ` <button type="button" class="tundo">Undo</button>` : ""); t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), undo ? 7000 : 2400); }
+document.addEventListener("click", (e) => { if (e.target.closest(".tundo") && undoFn) { const f = undoFn; undoFn = null; $("toast").hidden = true; f(); } });
 const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "listing";
 
 /* ---------- two-step sign-in: a 6-digit code from an authenticator app (Supabase MFA, TOTP) ---------- */
@@ -649,9 +670,25 @@ const priceOf = (r) => r.price_source === "pricing" && prices[r.pricing_id] ? pr
 /* ---------- list ---------- */
 function stockTag(r) {
   const out = [];
-  if (!r.digital) out.push(r.stock <= 0 ? `<span class="stk out">● Sold out</span>` : r.stock <= 3 ? `<span class="stk low">● ${r.stock} left</span>` : `<span class="stk">${r.stock} in stock</span>`);
+  if (!r.digital) out.push(`<span class="step"><button type="button" data-stk="-1" aria-label="One less in stock">−</button>${r.stock <= 0 ? `<span class="stk out">● Sold out</span>` : r.stock <= 3 ? `<span class="stk low">● ${r.stock} left</span>` : `<span class="stk">${r.stock} in stock</span>`}<button type="button" data-stk="1" aria-label="One more in stock">+</button></span>`);
   if (r.created_at && Date.now() - Date.parse(r.created_at) < 14 * 86400000) out.push(`<span class="stk new">✦ New</span>`);
   return out.length ? `<div class="stks">${out.join("")}</div>` : "";
+}
+async function setField(r, patch, label) {
+  const prev = {}; Object.keys(patch).forEach((k) => (prev[k] = r[k]));
+  Object.assign(r, patch); render();
+  const { error } = await sb.from("listings").update({ ...patch, updated_at: new Date().toISOString() }).eq("id", r.id);
+  if (error) { Object.assign(r, prev); render(); return toast("Couldn't save. Try again."); }
+  toast(label, async () => { Object.assign(r, prev); render(); await sb.from("listings").update({ ...prev, updated_at: new Date().toISOString() }).eq("id", r.id); });
+}
+let selMode = false, picked = new Set(), shown = [];
+function setSel(on) { selMode = on; picked.clear(); $("selBtn").setAttribute("aria-pressed", on); $("bulkBar").hidden = !on; render(); }
+async function bulkVis(on) {
+  const ids = [...picked]; if (!ids.length) return toast("Tap the listings you want first.");
+  const { error } = await sb.from("listings").update({ visible: on, updated_at: new Date().toISOString() }).in("id", ids);
+  if (error) return toast("Couldn't update. Try again.");
+  rows.forEach((r) => { if (picked.has(r.id)) r.visible = on; });
+  toast(`${ids.length} listing${ids.length > 1 ? "s" : ""} ${on ? "now on the store" : "hidden from the store"}`, async () => { rows.forEach((r) => { if (ids.includes(r.id)) r.visible = !on; }); render(); await sb.from("listings").update({ visible: !on, updated_at: new Date().toISOString() }).in("id", ids); }); picked.clear(); render();
 }
 function render() {
   const q = $("search").value.trim().toLowerCase();
@@ -665,33 +702,40 @@ function render() {
   }
   const list = rows.filter((r) => (filter === "all" || (filter === "hidden" ? !r.visible : r.category === filter))
     && (!q || (r.name + " " + (r.title || "")).toLowerCase().includes(q)));
-  $("count").textContent = `${list.length} of ${rows.length}`;
+  $("count").textContent = `${list.length} of ${rows.length}`; shown = list.map((r) => r.id); $("bulkN").textContent = `${picked.size} selected`;
   $("grid").innerHTML = list.map((r) => `
-    <div class="item${r.visible ? "" : " off"}" data-id="${esc(r.id)}">
+    <div class="item${r.visible ? "" : " off"}${selMode ? " pick" : ""}${selMode && picked.has(r.id) ? " sel" : ""}" data-id="${esc(r.id)}">
       <div class="ph" data-edit>${r.images?.[0] ? `<img src="${esc(r.images[0].card)}" alt="" loading="lazy">` : `<span class="none">No photo yet</span>`}
         <span class="grab" title="Drag to reorder" aria-label="Drag to reorder">⠿</span>
         ${r.visible ? "" : `<span class="tag">Hidden</span>`}</div>
       <div class="meta">
         <span class="nm" data-edit>${esc(r.name)}</span>
-        <div class="pr"><b>${money(priceOf(r))}</b>${r.price_source === "pricing" ? `<small>⟲ from app</small>` : ""}</div>
+        <div class="pr">${r.price_source === "pricing" ? `<b>${money(priceOf(r))}</b>` : `<b class="qp" data-qp title="Tap to change the price">${money(priceOf(r))}</b>`}${r.price_source === "pricing" ? `<small>⟲ from app</small>` : ""}</div>
         ${stockTag(r)}
         <label class="switch"><input type="checkbox" data-vis ${r.visible ? "checked" : ""} aria-label="Show on store"> On store</label>
       </div>
     </div>`).join("");
   sortable?.destroy();
-  sortable = (filter === "all" && !q) ? Sortable.create($("grid"), { handle: ".grab", animation: 160, onEnd: saveOrder }) : null;
+  sortable = (filter === "all" && !q && !selMode) ? Sortable.create($("grid"), { handle: ".grab", animation: 160, onEnd: saveOrder }) : null;
 }
 $("search").addEventListener("input", render);
+$("selBtn").onclick = () => setSel(!selMode); $("bulkDone").onclick = () => setSel(false);
+$("bulkAll").onclick = () => { shown.forEach((id) => picked.add(id)); render(); };
+$("bulkOn").onclick = () => bulkVis(true); $("bulkOff").onclick = () => bulkVis(false);
 $("cats").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { filter = b.dataset.f; render(); } });
 $("grid").addEventListener("click", async (e) => {
   if (e.target.id === "importBtn") return importStore(e.target);
   const it = e.target.closest(".item"); if (!it) return;
+  const rr = rows.find((x) => x.id === it.dataset.id);
+  if (!selMode && e.target.closest("[data-stk]")) { const n = Math.max(0, (Number(rr.stock) || 0) + Number(e.target.closest("[data-stk]").dataset.stk)); setField(rr, { stock: n }, `Stock set to ${n}`); return; }
+  if (!selMode && e.target.matches("[data-qp]")) {
+    const b = e.target, inp = document.createElement("input"); inp.type = "number"; inp.step = "0.01"; inp.min = "0"; inp.className = "qpin"; inp.value = Number(rr.price).toFixed(2); b.replaceWith(inp); inp.focus(); inp.select();
+    let done = false; const fin = (ok) => { if (done) return; done = true; const v = Math.round(Number(inp.value) * 100) / 100; if (ok && v > 0 && v !== Number(rr.price)) setField(rr, { price: v }, `Price now ${money(v)}`); else render(); };
+    inp.onkeydown = (ev) => { if (ev.key === "Enter") fin(true); if (ev.key === "Escape") fin(false); }; inp.onblur = () => fin(true); return;
+  }
+  if (selMode) { const id = it.dataset.id; picked.has(id) ? picked.delete(id) : picked.add(id); render(); return; }
   if (e.target.matches("[data-vis]")) {
-    const r = rows.find((x) => x.id === it.dataset.id); r.visible = e.target.checked;
-    const { error } = await sb.from("listings").update({ visible: r.visible, updated_at: new Date().toISOString() }).eq("id", r.id);
-    if (error) { toast("Couldn't update. Try again."); r.visible = !r.visible; }
-    else toast(r.visible ? "Now on the store" : "Hidden from the store");
-    render(); return;
+    const r = rows.find((x) => x.id === it.dataset.id); setField(r, { visible: e.target.checked }, e.target.checked ? "Now on the store" : "Hidden from the store"); return;
   }
   if (e.target.closest("[data-edit]") && !e.target.closest(".grab")) openEditor(rows.find((x) => x.id === it.dataset.id));
 });
