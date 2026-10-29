@@ -1182,6 +1182,11 @@ function openProduct(id) {
   pQty = 1;
   if (window.__prefill && $("pPersonal") && !$("pPersonal").value) $("pPersonal").value = window.__prefill;
   if (!mountDesignPicker(p) && window.__prefill && $("pPersonal")) $("pPersonal").closest("label").insertAdjacentHTML("beforebegin", `<div class="yourdesign">${window.__preview ? `<img src="${esc(window.__preview)}" alt="Your design preview">` : ""}<div><b>Your design</b><small>${esc(window.__prefill)}</small></div></div>`);
+  { const q = new URLSearchParams(location.search), pdv = q.get("pd"), pov = q.get("po"), ptv = q.get("pt");   // a link from a message: reopen with the same choices
+    if (pdv && $("pDesign")) { $("pDesign").value = pdv; $("pDesign").dispatchEvent(new Event("change")); }
+    if (pov) pov.split("|").forEach((pair) => { const i = pair.indexOf(":"), k = pair.slice(0, i), v = pair.slice(i + 1), vi = p.variations.findIndex((x) => x.name === k);
+      if (vi >= 0) [...document.querySelectorAll("#info .chips button")].find((b) => +b.dataset.v === vi && b.dataset.val === v)?.click(); });
+    if (ptv && $("pPersonal") && !$("pPersonal").value.includes(ptv.slice(0, 20))) $("pPersonal").value = ptv + ($("pPersonal").value ? " · " + $("pPersonal").value : ""); }
   refreshPrice();
   $("sheet").hidden = false;
   document.body.style.overflow = "hidden";
@@ -1196,7 +1201,7 @@ function watchBuy(p) {
   if (buyIO) buyIO.disconnect();
   const add = $("addCart"), bar = $("sbar");
   if (!add) { bar.classList.remove("on"); document.body.classList.remove("has-sbar"); return; }
-  $("sbPrice").textContent = fmt(p.price); $("sbName").textContent = p.name;
+  $("sbPrice").textContent = fmt(unitOf(p, chosenOptions())); $("sbName").textContent = $("pTitle")?.textContent || p.name;
   $("sbGo").textContent = p.digital ? "Buy & download" : "Add to cart";
   buyIO = new IntersectionObserver(([en]) => { const show = !en.isIntersecting && !$("sheet").hidden; bar.classList.toggle("on", show); document.body.classList.toggle("has-sbar", show); }, { threshold: 0 });
   buyIO.observe(add);
@@ -1309,7 +1314,7 @@ function chatLink() { const c = chatStore.get(); return c ? `${location.origin}$
 // A product in a message travels as two plain lines at the top: "📦 Name" and its store link.
 // Telegram and the app show them as text and a tappable link; this page shows a small card.
 const productUrl = (id) => `${location.origin}${location.pathname}#p/${id}`;
-const withProduct = (text, a) => a ? `📦 ${a.name}\n${productUrl(a.id)}\n\n${text}` : text;
+const withProduct = (text, a) => a ? `📦 ${a.name}\n${a.url || productUrl(a.id)}\n\n${a.sel ? a.sel + "\n\n" : ""}${text}` : text;
 function bubbleHtml(body) {
   const m = String(body).match(/^📦 (.+)\n(https?:\/\/\S+#p\/([\w-]+))\s*\n?([\s\S]*)$/);
   if (!m) return esc(body);
@@ -1497,7 +1502,12 @@ document.addEventListener("click", (e) => {
   const ask = e.target.closest("[data-ask]");
   if (ask && cur) {
     const dz = $("pDesign") && $("pDesign").value ? designList().find((d) => d.id === $("pDesign").value) : null;   // a picked design travels with the question
-    openChat({ id: cur.id, name: dz ? `${cur.name.replace(/\s*\(your design\)\s*$/i, "")} · ${dz.name}` : cur.name, image: dz ? dz.card : cur.images[0]?.card, ...(dz ? { design: dz.id } : {}) });
+    // what they picked travels with the question: the link reopens the product with the same choices, and the lines say what they chose
+    const o = chosenOptions(), pers = ($("pPersonal")?.value || "").replace(/\s*·?\s*Design:[^·]*$/, "").trim(), qs = new URLSearchParams();
+    if (dz) qs.set("pd", dz.id); const po = Object.entries(o).map(([k, v]) => `${k}:${v}`).join("|"); if (po) qs.set("po", po); if (pers) qs.set("pt", pers.slice(0, 120));
+    const optTxt = Object.entries(o).map(([k, v]) => `${k}: ${/^\d+$/.test(v) ? v + "oz" : v}`).join(" · ");
+    const sel = [dz ? `🎨 Design: ${dz.name}` : "", optTxt ? `⚙️ ${optTxt}` : "", pers ? `✍️ Name/text: ${pers}` : "", `💲 ${fmt(unitOf(cur, o))}`, dz ? `🖼 On a tumbler: ${location.origin}${location.pathname.replace(/[^/]*$/, "")}tumbler.html?d=${encodeURIComponent(dz.id)}${pers ? `&name=${encodeURIComponent(pers.slice(0, 14))}` : ""}` : ""].filter(Boolean).join("\n");
+    openChat({ id: cur.id, name: dz ? `${cur.name.replace(/\s*\(your design\)\s*$/i, "")} · ${dz.name}` : cur.name, image: dz ? dz.card : cur.images[0]?.card, ...(dz ? { design: dz.id } : {}), url: `${location.origin}${location.pathname}${qs.toString() ? "?" + qs : ""}#p/${cur.id}`, sel });
   }
 });
 /* ---------- cart & checkout (Supabase Edge Function "checkout" → Stripe: cards, Apple Pay, Google Pay) ---------- */
