@@ -515,7 +515,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     <nav class="links" aria-label="Main">
       <a href="#shop">Shop</a>
       <a href="#how">How it's made</a>
-      <a href="tumbler.html">Design your tumbler</a>
+      <a href="tumbler.html">Design yours</a>
       <a href="#custom">Custom orders</a>
       <a href="#reviews">Reviews</a>
       <a href="#about">About</a>
@@ -532,7 +532,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
   <nav aria-label="Menu">
     <button class="nav-x" type="button" id="navX" aria-label="Close menu">×</button>
     <a href="#shop">Shop</a>
-    <a class="gold" href="tumbler.html">🥤 Design your tumbler</a>
+    <a class="gold" href="tumbler.html">🎨 Design yours</a>
     <a href="design.html" id="studioNav2" hidden>🔤 Name tiles</a>
     <a href="#custom">Custom &amp; bulk orders</a>
     <a href="#how">How it's made</a>
@@ -552,7 +552,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
         <p class="lede" data-s="heroIntro">Custom tumblers, mugs and keepsakes, UV printed in full color or laser engraved for life. Every piece is made by hand, one order at a time.</p>
         <div class="hero-cta">
           <a class="btn btn-gold" href="#shop">Shop the collection</a>
-          <a class="btn btn-line" href="tumbler.html">Design your tumbler</a>
+          <a class="btn btn-line" href="tumbler.html">Design yours</a>
         </div>
         <div class="proof">
           <span><span class="stars">★★★★★</span> <span data-s="proof1"><b>5.0</b> on Etsy</span></span>
@@ -567,8 +567,8 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
           <a class="tcard t-b" href="tumbler.html?d=roses&name=Isabella&f=script&i=gold"><img src="teaser/t2.jpg" width="480" height="1051" alt="Gothic roses tumbler personalized with the name Isabella"></a>
           <a class="tcard t-c" href="tumbler.html?d=eagle1776&name=Marcus&f=bebas&i=white"><img src="teaser/t3.jpg" width="480" height="1051" alt="Eagle tumbler personalized with the name Marcus"></a>
         </div>
-        <a class="btn btn-gold teaser-cta" href="tumbler.html">Design your tumbler <span aria-hidden="true">→</span></a>
-        <p class="teaser-sub">Try your name on <span id="teaserCount">29</span> designs, then spin it around.</p>
+        <a class="btn btn-gold teaser-cta" href="tumbler.html">Design yours <span aria-hidden="true">→</span></a>
+        <p class="teaser-sub">Try your name on <span id="teaserCount">29</span> designs, on tumblers and more.</p>
       </div>
     </div>
   </section>
@@ -920,7 +920,7 @@ $("colls").addEventListener("click", (e) => {
 /* ---------- shop grid ---------- */
 let filter = "all", P0 = P;
 const _qp = new URLSearchParams(location.search);   // arriving from tumbler.html with the design details
-if (_qp.get("prefill")) { window.__prefill = _qp.get("prefill").slice(0, 200); filter = "tumblers"; history.replaceState(null, "", location.pathname + "#shop"); }
+if (_qp.get("prefill")) { window.__prefill = _qp.get("prefill").slice(0, 200); const _c = _qp.get("cat"); filter = (typeof CATS !== "undefined" && CATS.some((c) => c.id === _c)) ? _c : "tumblers"; history.replaceState(null, "", location.pathname + "#shop"); }
 // Newest first by default; "My custom order" (Site settings) uses the drag order from the admin page.
 function applyOrder() {
   const custom = SITE.productOrder === "custom" || !P0.every((x) => x.created);   // custom = the order from the admin page (already sorted by the database)
@@ -961,7 +961,7 @@ setFilter(filter);
 shopReady = true;
 if (window.__prefill) {
   const note = document.createElement("p"); note.className = "pnote"; note.style.cssText = "margin:0 0 14px;padding:12px 16px;border-radius:14px;background:rgba(217,171,79,.12);border:1px solid var(--gold);color:var(--cream)";
-  note.innerHTML = `✨ Your design: <b>${esc(window.__prefill)}</b>. Pick a tumbler below and we'll add this to your order.`; $("grid").before(note);
+  note.innerHTML = `✨ Your design: <b>${esc(window.__prefill)}</b>. Pick one below and we'll add this to your order.`; $("grid").before(note);
   setTimeout(() => $("shop").scrollIntoView({ behavior: "smooth" }), 500);
 }
 

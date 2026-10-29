@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Design your tumbler · PrAjo Custom Studio</title>
+<title>Design yours · PrAjo Custom Studio</title>
 <meta name="description" content="Preview your name and artwork on a real tumbler. Spin it around, try colors, fonts and designs, then order it, made to order in Sacramento.">
 <meta name="theme-color" content="#0a1220">
 <meta property="og:title" content="Design your tumbler · PrAjo Custom Studio">
@@ -487,6 +487,9 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
 .tp .spinhint { bottom: 14px; }
 .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
 .tools .btn { min-height: 44px; padding: 0 8px; font-size: 13.5px; white-space: nowrap; }
+.prodbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 6px; }
+.prodbar button { min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line-soft); background: transparent; color: var(--cream); font: 700 15px var(--f-body); cursor: pointer; }
+.prodbar button[aria-pressed="true"] { border-color: var(--gold-2); background: rgba(217, 171, 79, .18); }
 .tp-note { max-width: 720px; margin: clamp(24px, 4vw, 40px) auto 0; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.6; }
 .tp-note a { color: var(--gold-2); }
 .toast2 { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px); opacity: 0; background: #0e1628; color: var(--cream); border: 1px solid var(--line); padding: 12px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; z-index: 200; transition: .25s; pointer-events: none; }
@@ -504,7 +507,7 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
     <nav class="links" aria-label="Main">
       <a href="./#shop">Shop</a>
       <a href="./#how">How it's made</a>
-      <a href="tumbler.html" aria-current="page">Design your tumbler</a>
+      <a href="tumbler.html" aria-current="page">Design yours</a>
       <a href="./#custom">Custom orders</a>
       <a href="./#reviews">Reviews</a>
       <a href="./#about">About</a>
@@ -521,7 +524,7 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
   <nav aria-label="Menu">
     <button class="nav-x" type="button" id="navX" aria-label="Close menu">×</button>
     <a href="./#shop">Shop</a>
-    <a class="gold" href="tumbler.html">🥤 Design your tumbler</a>
+    <a class="gold" href="tumbler.html">🎨 Design yours</a>
     <a href="design.html" id="studioNav2" hidden>🔤 Name tiles</a>
     <a href="./#custom">Custom &amp; bulk orders</a>
     <a href="./#how">How it's made</a>
@@ -536,9 +539,10 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
   <section class="tp">
     <div class="wrap">
       <div class="tp-head">
-        <div class="eyebrow">Design your tumbler</div>
-        <h1>See it before we make it</h1>
-        <p>Pick a color or an artwork, add a name, and spin it around. When it looks right, order it.</p>
+        <div class="eyebrow">Design yours</div>
+        <h1 id="tpTitle">See it before we make it</h1>
+        <p>Pick a color or an artwork, add a name, and try it out. When it looks right, order it.</p>
+        <div class="prodbar" id="prodBar" role="group" aria-label="What are you designing?" hidden></div>
       </div>
       <div class="studio" aria-label="Try your name on a tumbler">
         <div class="preview">
@@ -600,9 +604,9 @@ $("navSheet").addEventListener("click", (e) => { if (e.target.id === "navSheet" 
 document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("navSheet").hidden) setNav(false); });
 /* ---------- live preview: your real tumbler photo, recolored or wrapped with a design, spinnable ---------- */
 const nameIn = $("nameIn"), cv = $("tCanvas"), cx2 = cv.getContext("2d"), stage = $("stage");
-const PH = { W: 496, H: 1086, SY: 100, L: 112, R: 388, T: 194, B: 1036, CX: 250, RAD: 138, TY: 560 };   // geometry of the tumbler body inside tumbler-white.jpg
+let PH = { kind: "round", W: 496, H: 1086, SY: 100, L: 112, R: 388, T: 194, B: 1036, CX: 250, RAD: 138, TY: 560, radius: 0, shape: "rect" };   // geometry of the product inside its base photo (set by setTemplate)
 const K = 2, TAU = Math.PI * 2;
-const PV = { tint: null, font: "script", ink: "gold", design: null, showName: true, na: 0, ny: PH.TY, moveMode: false, rot: 0, vel: 0, auto: true, drag: false, ready: false };
+const PV = { tint: null, font: "script", ink: "gold", design: null, showName: true, na: 0, ny: PH.TY, nx: 250, shine: .5, template: null, moveMode: false, rot: 0, vel: 0, auto: true, drag: false, ready: false };
 const DESIGN_SEED = [
   { id: "grill", name: "King of the Grill" }, { id: "nurse", name: "Saving Lives" }, { id: "eagle", name: "Freedom Eagle" }, { id: "mexico", name: "Mexican Flag" },
   { id: "dreamcatcher", name: "Dream Catcher" }, { id: "boho", name: "Boho Dreamcatcher" }, { id: "bee", name: "Golden Bee" }, { id: "cards", name: "Cards Deck" },
@@ -617,9 +621,7 @@ const withPaths = (list) => list.map((d) => ({ id: d.id, name: d.name, art: d.ar
 let DESIGNS = withPaths(DESIGN_SEED);
 try { const c = JSON.parse(localStorage.getItem("prajo:designs") || "null"); if (Array.isArray(c) && c.length && c[0].art) DESIGNS = c; } catch { /* use the built-in list */ }
 const dImgs = {};
-const photo = new Image();
-photo.onload = () => { PV.ready = true; rebuildBase(); rebuildName(); requestDraw(); };
-photo.src = "tumbler-white.jpg";
+let photo = new Image();
 const FONTS = {
   script:   { label: "Script",    fam: '"Great Vibes", cursive',          wt: 400, size: 130, upper: false },
   pacifico: { label: "Casual",    fam: '"Pacifico", cursive',             wt: 400, size: 96,  upper: false },
@@ -638,6 +640,12 @@ const fontStr = (F, px) => `${F.style || "normal"} ${F.wt} ${px}px ${F.fam}`;
 function bodyPath(c) {
   const { L, R, T, B } = PH, r = 24; c.beginPath(); c.moveTo(L, T); c.lineTo(R, T); c.lineTo(R, B - r); c.quadraticCurveTo(R, B, R - r, B); c.lineTo(L + r, B); c.quadraticCurveTo(L, B, L, B - r); c.closePath();
 }
+function areaPath(c) {   // the printable area of a flat product: rectangle (optionally rounded) or ellipse
+  const { L, R, T, B, shape } = PH, w = R - L, h = B - T; c.beginPath();
+  if (shape === "ellipse") { c.ellipse(L + w / 2, T + h / 2, w / 2, h / 2, 0, 0, TAU); return; }
+  const r = Math.min(PH.radius || 0, w / 2, h / 2); c.moveTo(L + r, T); c.arcTo(R, T, R, B, r); c.arcTo(R, B, L, B, r); c.arcTo(L, B, L, T, r); c.arcTo(L, T, R, T, r); c.closePath();
+}
+const shapePath = (c) => (PH.kind === "flat" ? areaPath(c) : bodyPath(c));
 const gloss = (c, a1, a2) => {   // the bright vertical reflections of the glossy tumbler
   const { L, R, T, B } = PH, g = c.createLinearGradient(L, 0, R, 0);
   g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(.17, "rgba(255,255,255,0)"); g.addColorStop(.25, `rgba(255,255,255,${a1})`); g.addColorStop(.33, "rgba(255,255,255,0)");
@@ -651,7 +659,7 @@ function rebuildBase() {
   const c = base.getContext("2d"), { W, H, SY, L, R, T, B } = PH;
   c.setTransform(K, 0, 0, K, 0, 0); c.globalCompositeOperation = "source-over"; c.drawImage(photo, 0, SY, W, H, 0, 0, W, H);
   if (PV.tint && !PV.design) {
-    c.save(); bodyPath(c); c.clip(); c.globalCompositeOperation = "multiply"; c.fillStyle = PV.tint; c.fillRect(0, 0, W, H); gloss(c, .5, .34); c.restore();
+    c.save(); shapePath(c); c.clip(); c.globalCompositeOperation = "multiply"; c.fillStyle = PV.tint; c.fillRect(0, 0, W, H); if (PH.kind !== "flat") gloss(c, .5, .34); c.restore();
   }
 }
 // name sprite: the name drawn flat (cached: only rebuilt when the name, font or ink changes)
@@ -660,7 +668,7 @@ function rebuildName() {
   if (!PV.ready) return;
   const name = nameIn.value.trim() || "Name", F = FONTS[PV.font], text = F.upper ? name.toUpperCase() : name, { RAD } = PH;
   const m = document.createElement("canvas").getContext("2d"); m.font = fontStr(F, F.size); if ("letterSpacing" in m) m.letterSpacing = (F.ls || 0) + "px";
-  let tw = m.measureText(text).width; const fs = F.size * Math.min(1, (RAD * 2.0) / Math.max(tw, 1)); tw = tw * fs / F.size;
+  let tw = m.measureText(text).width; const maxW = PH.kind === "flat" ? (PH.R - PH.L) * .88 : RAD * 2.0; const fs = F.size * Math.min(1, maxW / Math.max(tw, 1)); tw = tw * fs / F.size;
   const pad = 24, oh = Math.ceil(fs * 1.7), o = document.createElement("canvas"); o.width = Math.ceil((tw + pad * 2) * K); o.height = oh * K;
   const oc = o.getContext("2d"); oc.scale(K, K); oc.font = fontStr(F, fs); if ("letterSpacing" in oc) oc.letterSpacing = (F.ls || 0) * fs / F.size + "px"; oc.textAlign = "center"; oc.textBaseline = "middle";
   const mid = oh / 2, x0 = (tw + pad * 2) / 2;
@@ -671,11 +679,26 @@ function rebuildName() {
   else oc.fillStyle = "#15171c";
   oc.fillText(text, x0, mid);
   nm = { o, tw, oh, x0, name };
-  cv.setAttribute("aria-label", `Tumbler preview with the name ${name}${PV.design ? " and the " + PV.design.name + " design" : ""}`);
+  cv.setAttribute("aria-label", `${PV.template ? PV.template.name : "Product"} preview with the name ${name}${PV.design ? " and the " + PV.design.name + " design" : ""}`);
 }
 const layer = document.createElement("canvas"); layer.width = PH.W * K; layer.height = PH.H * K;
+function drawFlat() {
+  const c = cx2, { L, R, T, B } = PH, aw = R - L, ah = B - T;
+  c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "source-over"; c.globalAlpha = 1; c.drawImage(base, 0, 0);
+  c.setTransform(K, 0, 0, K, 0, 0); c.save(); areaPath(c); c.clip();
+  const di = PV.design && dImgs[PV.design.id];
+  if (di && di.complete && di.naturalWidth) { const sc = Math.max(aw / di.naturalWidth, ah / di.naturalHeight), dw = di.naturalWidth * sc, dh = di.naturalHeight * sc; c.drawImage(di, L + aw / 2 - dw / 2, T + ah / 2 - dh / 2, dw, dh); }
+  if (PV.showName) { c.globalCompositeOperation = PV.ink === "black" && !di ? "multiply" : "source-over"; c.drawImage(nm.o, PV.nx - nm.o.width / K / 2, PV.ny - nm.oh / 2, nm.o.width / K, nm.oh); c.globalCompositeOperation = "source-over"; }
+  // a soft band of light slides across the glossy print as it is nudged or as the page idles
+  const s = PV.shine, g = c.createLinearGradient(L, T, R, B); const a = Math.max(0, s - .22), z = Math.min(1, s + .22);
+  g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(a, "rgba(255,255,255,0)"); g.addColorStop(s, "rgba(255,255,255,.30)"); g.addColorStop(z, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(255,255,255,0)");
+  c.globalCompositeOperation = "screen"; c.fillStyle = g; c.fillRect(L, T, aw, ah);
+  const e = c.createLinearGradient(0, T, 0, B); e.addColorStop(0, "rgba(255,255,255,0)"); e.addColorStop(1, "rgba(30,30,40,.10)"); c.globalCompositeOperation = "multiply"; c.fillStyle = e; c.fillRect(L, T, aw, ah);
+  c.restore();
+}
 function drawPreview() {
   if (!PV.ready || !nm) return;
+  if (PH.kind === "flat") return drawFlat();
   const c = cx2, { W, H, L, R, T, B, CX, RAD, TY } = PH, moving = PV.drag || Math.abs(PV.vel) > .0006 || PV.auto, step = moving ? 1 : .5;
   c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "source-over"; c.globalAlpha = 1; c.drawImage(base, 0, 0);
   c.setTransform(K, 0, 0, K, 0, 0);
@@ -712,6 +735,34 @@ function drawPreview() {
   c.fillStyle = e; c.fillRect(L, T, R - L, B - T);
   c.restore();
 }
+/* ---------- product templates: each product has a base photo, a shape (round or flat) and its printable area ---------- */
+const TPL_SEED = [{ slug: "tumbler", name: "Tumbler", kind: "round", photo: "tumbler-white.jpg", category: "tumblers", geom: { W: 496, H: 1086, SY: 100, L: 112, R: 388, T: 194, B: 1036, TY: 560 } }];
+let TEMPLATES = TPL_SEED;
+try { const c = JSON.parse(localStorage.getItem("prajo:templates") || "null"); if (Array.isArray(c) && c.length && c[0].geom) TEMPLATES = c; } catch { /* use the built-in tumbler */ }
+function setTemplate(t) {
+  const g = t.geom || {}, flat = t.kind === "flat";
+  PH = { kind: flat ? "flat" : "round", W: g.W, H: g.H, SY: g.SY || 0, L: g.L, R: g.R, T: g.T, B: g.B, CX: (g.L + g.R) / 2, RAD: (g.R - g.L) / 2, TY: g.TY || (g.T + g.B) / 2, radius: g.radius || 0, shape: g.shape || "rect" };
+  PV.template = t; PV.ready = false; PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; PV.rot = 0; PV.vel = 0; PV.shine = .5; PV.glowFor = null;
+  [base, layer].forEach((c) => { c.width = PH.W * K; c.height = PH.H * K; }); cv.width = PH.W * K; cv.height = PH.H * K;
+  stage.style.aspectRatio = `${PH.W} / ${PH.H}`; stage.style.width = PH.H / PH.W < .8 ? "min(460px, 88vw)" : PH.H / PH.W < 1.3 ? "min(400px, 88vw)" : "";
+  $("spinHint").textContent = flat ? "Drag to catch the light" : "Drag to spin"; $("spinHint").classList.remove("off");
+  $("tpTitle").textContent = `See your ${t.name.toLowerCase()} before we make it`;
+  $("prodBar").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.p === t.slug));
+  $("orderName").textContent = (PV.showName ? `Order a ${t.name.toLowerCase()} with this name` : `Order a ${t.name.toLowerCase()}`) + " →";
+  const img = new Image(); img.crossOrigin = "anonymous";
+  img.onload = () => {
+    photo = img;
+    try { const c = document.createElement("canvas"); c.width = c.height = 1; c.getContext("2d").drawImage(img, 2, 2, 1, 1, 0, 0, 1, 1); const d = c.getContext("2d").getImageData(0, 0, 1, 1).data; stage.style.background = `rgb(${d[0]},${d[1]},${d[2]})`; } catch { stage.style.background = ""; }
+    PV.ready = true; rebuildBase(); rebuildName(); requestDraw(); setGlow();
+  };
+  img.onerror = () => { toast2("That product's photo didn't load"); };
+  img.src = t.photo;
+}
+function buildProdBar() {
+  const bar = $("prodBar"); bar.hidden = TEMPLATES.length < 2;
+  bar.innerHTML = TEMPLATES.map((t) => `<button type="button" data-p="${esc(t.slug)}" aria-pressed="${PV.template && PV.template.slug === t.slug}">${esc(t.name)}</button>`).join("");
+}
+$("prodBar").addEventListener("click", (e) => { const b = e.target.closest("button[data-p]"); if (!b) return; const t = TEMPLATES.find((x) => x.slug === b.dataset.p); if (t && (!PV.template || PV.template.slug !== t.slug)) { setTemplate(t); } });
 // animation loop: runs only while it is moving and visible
 const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
 let raf = 0, last = 0, visible = true;
@@ -719,7 +770,7 @@ function requestDraw() { if (!raf) raf = requestAnimationFrame(tick); }
 function tick(t) {
   raf = 0; const dt = Math.min(48, t - (last || t)); last = t;
   if (!PV.drag) {
-    if (PV.auto && !reduceMotion) { PV.rot = Math.sin(t / 2100) * .32; }
+    if (PV.auto && !reduceMotion) { if (PH.kind === "flat") PV.shine = .5 + .5 * Math.sin(t / 1800); else PV.rot = Math.sin(t / 2100) * .32; }
     else if (Math.abs(PV.vel) > .0006) { PV.rot += PV.vel * dt; PV.vel *= Math.pow(.99, dt); }
   }
   drawPreview();
@@ -731,7 +782,9 @@ let px = 0, pt = 0;
 // Drag the tumbler to spin it. With "Move name" on (or by grabbing the name with a mouse) dragging moves the name instead: sideways around the tumbler, up and down along it.
 const stageXY = (e) => { const r = stage.getBoundingClientRect(); return [(e.clientX - r.left) / r.width * PH.W, (e.clientY - r.top) / r.height * PH.H]; };
 function nameHit(e) {
-  if (!PV.showName || !nm) return false; const [x, y] = stageXY(e), { CX, RAD } = PH, ph = PV.na - PV.rot;
+  if (!PV.showName || !nm) return false; const [x, y] = stageXY(e);
+  if (PH.kind === "flat") return Math.abs(x - PV.nx) <= nm.o.width / K / 2 + 8 && Math.abs(y - PV.ny) <= nm.oh / 2;
+  const { CX, RAD } = PH, ph = PV.na - PV.rot;
   if (Math.cos(ph) <= .1) return false; const cx = CX + RAD * Math.sin(ph), hw = nm.tw / 2 * Math.cos(ph) + 12;
   return Math.abs(x - cx) <= hw && Math.abs(y - PV.ny) <= nm.oh / 2;
 }
@@ -739,18 +792,21 @@ let mode = "spin", grab = null;
 stage.addEventListener("pointerdown", (e) => {
   stopAuto(); PV.vel = 0; px = e.clientX; pt = performance.now(); PV.drag = true; stage.setPointerCapture(e.pointerId);
   if (PV.showName && (PV.moveMode || (e.pointerType === "mouse" && nameHit(e)))) {
-    mode = "name"; const [x, y] = stageXY(e), th = Math.asin(Math.max(-1, Math.min(1, (x - PH.CX) / PH.RAD)));
-    grab = { da: PV.na - (th + PV.rot), dy: PV.ny - y };
+    mode = "name"; const [x, y] = stageXY(e);
+    if (PH.kind === "flat") grab = { dx: PV.nx - x, dy: PV.ny - y };
+    else { const th = Math.asin(Math.max(-1, Math.min(1, (x - PH.CX) / PH.RAD))); grab = { da: PV.na - (th + PV.rot), dy: PV.ny - y }; }
   } else mode = "spin";
   requestDraw();
 });
 stage.addEventListener("pointermove", (e) => {
   if (!PV.drag) { if (e.pointerType === "mouse") stage.style.cursor = nameHit(e) ? "move" : ""; return; }
   if (mode === "name") {
-    const [x, y] = stageXY(e), th = Math.asin(Math.max(-.97, Math.min(.97, (x - PH.CX) / PH.RAD)));
-    PV.na = th + PV.rot + grab.da; PV.ny = Math.max(PH.T + nm.oh / 2 - 20, Math.min(PH.B - nm.oh / 2 + 20, y + grab.dy));
+    const [x, y] = stageXY(e);
+    if (PH.kind === "flat") { PV.nx = Math.max(PH.L, Math.min(PH.R, x + grab.dx)); PV.ny = Math.max(PH.T + 6, Math.min(PH.B - 6, y + grab.dy)); }
+    else { const th = Math.asin(Math.max(-.97, Math.min(.97, (x - PH.CX) / PH.RAD))); PV.na = th + PV.rot + grab.da; PV.ny = Math.max(PH.T + nm.oh / 2 - 20, Math.min(PH.B - nm.oh / 2 + 20, y + grab.dy)); }
     $("nameReset").hidden = false; requestDraw(); return;
   }
+  if (PH.kind === "flat") { const [x] = stageXY(e); PV.shine = Math.max(0, Math.min(1, (x - PH.L) / (PH.R - PH.L))); requestDraw(); return; }
   const now = performance.now(), dxp = e.clientX - px, per = PH.W / stage.getBoundingClientRect().width;   // css px -> photo px
   const dr = dxp * per / PH.RAD; PV.rot += dr; PV.vel = Math.max(-.0035, Math.min(.0035, dr / Math.max(8, now - pt))); px = e.clientX; pt = now; requestDraw();
 });
@@ -758,11 +814,11 @@ const endDrag = () => { PV.drag = false; if (mode === "name") PV.vel = 0; reques
 stage.addEventListener("pointerup", endDrag); stage.addEventListener("pointercancel", endDrag);
 $("moveToggle").addEventListener("click", () => {
   PV.moveMode = !PV.moveMode; $("moveToggle").setAttribute("aria-checked", PV.moveMode); stage.style.touchAction = PV.moveMode ? "none" : "";
-  $("spinHint").textContent = PV.moveMode ? "Drag the name to place it" : "Drag to spin"; $("spinHint").classList.remove("off");
+  $("spinHint").textContent = PV.moveMode ? "Drag the name to place it" : (PH.kind === "flat" ? "Drag to catch the light" : "Drag to spin"); $("spinHint").classList.remove("off");
   if (PV.moveMode && !PV.showName) setName(true);
 });
-$("nameReset").addEventListener("click", () => { PV.na = 0; PV.ny = PH.TY; $("nameReset").hidden = true; requestDraw(); });
-stage.addEventListener("keydown", (e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stopAuto(); PV.rot += (e.key === "ArrowLeft" ? -1 : 1) * .35; requestDraw(); } });
+$("nameReset").addEventListener("click", () => { PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; $("nameReset").hidden = true; requestDraw(); });
+stage.addEventListener("keydown", (e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stopAuto(); if (PH.kind === "flat") PV.shine = Math.max(0, Math.min(1, PV.shine + (e.key === "ArrowLeft" ? -.15 : .15))); else PV.rot += (e.key === "ArrowLeft" ? -1 : 1) * .35; requestDraw(); } });
 
 function sizeName() { rebuildName(); requestDraw(); }
 nameIn.addEventListener("input", () => { nameIn.dataset.touched = "1"; if (!PV.showName) setName(true); else sizeName(); });
@@ -775,7 +831,7 @@ $("fontBox").insertAdjacentHTML("beforeend", Object.entries(FONTS).map(([id, F])
 $("fontBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-f]"); if (!b) return; PV.font = b.dataset.f; $("fontBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); setName(true); });
 function setName(on) {
   PV.showName = on; const t = $("nameToggle"); t.setAttribute("aria-checked", on); t.textContent = "Show name: " + (on ? "On" : "Off");
-  $("orderName").textContent = on ? "Order a tumbler with this name →" : "Order a tumbler →"; sizeName();
+  const pn = (PV.template ? PV.template.name : "tumbler").toLowerCase(); $("orderName").textContent = (on ? `Order a ${pn} with this name` : `Order a ${pn}`) + " →"; sizeName();
 }
 $("nameToggle").addEventListener("click", () => setName(!PV.showName));
 $("inkBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-i]"); if (!b) return; PV.ink = b.dataset.i; $("inkBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); sizeName(); });
@@ -824,7 +880,7 @@ $("surprise").addEventListener("click", () => {
 function stateParams() {
   const p = new URLSearchParams(); if (PV.showName && nameIn.value.trim()) p.set("name", nameIn.value.trim()); else p.set("nm", "0");
   if (PV.design) p.set("d", PV.design.id); else { const b = document.querySelector('.swatches [aria-pressed="true"]'); if (b) p.set("c", b.getAttribute("aria-label")); }
-  p.set("f", PV.font); p.set("i", PV.ink); return p;
+  p.set("f", PV.font); p.set("i", PV.ink); if (PV.template && TEMPLATES.length > 1) p.set("p", PV.template.slug); return p;
 }
 $("shareDesign").addEventListener("click", async () => {
   const url = `${location.origin}${location.pathname}?${stateParams()}`;
@@ -840,7 +896,8 @@ $("saveImg").addEventListener("click", () => {
 $("orderName").addEventListener("click", () => {
   const bits = []; if (PV.showName && nameIn.value.trim()) bits.push(`Name: ${nameIn.value.trim()} (${FONTS[PV.font].label}, ${PV.ink})`);
   if (PV.design) bits.push(`Design: ${PV.design.name}`); else bits.push(`Color: ${$("swName").textContent}`);
-  location.href = `./?prefill=${encodeURIComponent(bits.join(" · ").slice(0, 190))}#shop`;
+  const t = PV.template || TEMPLATES[0]; if (TEMPLATES.length > 1) bits.unshift(`Product: ${t.name}`);
+  location.href = `./?prefill=${encodeURIComponent(bits.join(" · ").slice(0, 190))}&cat=${encodeURIComponent(t.category || "tumblers")}#shop`;
 });
 function applyParams() {
   const p = new URLSearchParams(location.search); if (![...p.keys()].length) return;
@@ -874,7 +931,18 @@ fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/site_settings?id=eq.1&se
       $("swatchBox").querySelector("button").click();
     }
   }).catch(() => {});
-function init() { document.querySelector(".swatches button")?.click(); applyParams(); setGlow(); }
+function init() {
+  const want = new URLSearchParams(location.search).get("p"); setTemplate(TEMPLATES.find((t) => t.slug === want) || TEMPLATES[0]); buildProdBar();
+  document.querySelector(".swatches button")?.click(); applyParams(); setGlow();
+}
+// product templates from the database (admin → Products to design)
+fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/product_templates?select=slug,name,kind,photo,category,geom&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
+  .then((r) => (r.ok ? r.json() : null)).then((rows) => {
+    if (!rows || !rows.length) return;
+    TEMPLATES = rows; try { localStorage.setItem("prajo:templates", JSON.stringify(rows)); } catch { /* optional */ }
+    buildProdBar(); const want = new URLSearchParams(location.search).get("p"), t = TEMPLATES.find((x) => x.slug === want);
+    if (PV.template && !TEMPLATES.some((x) => x.slug === PV.template.slug)) setTemplate(TEMPLATES[0]); else if (t && PV.template && t.slug !== PV.template.slug) setTemplate(t);
+  }).catch(() => {});
 </script>
 </body>
 </html>

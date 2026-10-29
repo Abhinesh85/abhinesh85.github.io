@@ -151,6 +151,13 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .signin { max-width: 400px; margin: 12vh auto 0; padding: 26px; border-radius: 24px; border: 1px solid var(--line); background: var(--navy); display: grid; gap: 14px; }
 .err { color: #ffb4a8; font-size: 14px; margin: 0; }
 .linkish { background: none; border: 0; color: var(--gold-2); font-weight: 700; font-size: 14px; cursor: pointer; justify-self: center; text-decoration: underline; padding: 6px; }
+/* products to design */
+.pt-item { display: grid; grid-template-columns: 56px 1fr auto auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); }
+.pt-item.off { opacity: .55; }
+.pt-item img { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; background: #1a2238; }
+.pt-item b { display: block; font-size: 15.5px; } .pt-item small { color: var(--muted); }
+.pt-item .ed { min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--cream); cursor: pointer; font-weight: 700; }
+@media (max-width: 520px) { .pt-item { grid-template-columns: 48px 1fr auto; } .pt-item .tg { grid-column: 2; justify-self: start; } .pt-item img { width: 48px; height: 48px; } }
 /* tumbler designs + help */
 .td-how { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px 16px; background: rgba(217, 171, 79, .06); display: grid; gap: 8px; }
 .td-how ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14.5px; }
@@ -274,6 +281,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <div class="swrow" id="studioRow"><div class="swtxt"><b>🔤 Design studio on the store</b><small id="studioState">Checking…</small></div>
           <button type="button" class="tg" role="switch" aria-checked="false" id="studioToggle" aria-label="Design studio on the store"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
           <div class="swask" id="studioAsk" hidden><span id="studioAskT"></span><button type="button" class="btn gold" id="studioYes">Confirm</button><button type="button" class="btn line" id="studioNo">Cancel</button></div></div>
+        <button type="button" role="menuitem" id="ptBtn">🧩 Products to design<small id="ptState">Tumbler, mug, coaster, badge and more</small></button>
         <button type="button" role="menuitem" id="tdBtn">🥤 Tumbler designs<small id="tdState">Artwork customers can try on a tumbler</small></button>
         <button type="button" role="menuitem" id="helpBtn">📘 How to update your site<small>Plain-language steps, no coding</small></button>
         <button type="button" role="menuitem" id="dsBtn">🎨 Custom designs<small id="dsState">Designs customers sent from the Design studio</small></button>
@@ -355,6 +363,36 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
   </div>
 </div>
 
+<div class="sheet" id="ptSheet" hidden role="dialog" aria-modal="true" aria-labelledby="ptTitle">
+  <div class="panel">
+    <div class="panel-head"><button class="btn ghost" type="button" id="ptBack" hidden style="padding:8px 12px">‹ Back</button><h2 id="ptTitle">Products to design</h2><button class="x" type="button" id="ptClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="ptListView">
+      <div class="td-how"><b>What this is</b>
+        <p class="hint" style="margin:0">Each product here appears as a button on the “Design yours” page, so customers can try a design on a tumbler, mug, coaster, badge, keychain and more. For each one you upload a straight-on photo of the blank product and mark where the artwork prints.</p></div>
+      <div><button class="btn gold" type="button" id="ptAdd">＋ Add a product</button></div>
+      <div id="ptList" class="td-list"><p class="hint">Loading…</p></div>
+    </div>
+    <div class="panel-body" id="ptEditView" hidden>
+      <label class="f"><span>Product name</span><input class="in" id="ptName" maxlength="40" placeholder="e.g. Coaster, Mug, ID badge"></label>
+      <div class="f"><span>What shape is it?</span>
+        <div class="chips" role="group" aria-label="Shape" id="ptKind"><button type="button" data-k="flat" aria-pressed="true">Flat (coaster, badge, keychain, plaque)</button><button type="button" data-k="round" aria-pressed="false">Round (tumbler, mug, bottle)</button></div></div>
+      <label class="f"><span>Where do orders go in your shop?</span><select class="in" id="ptCat"><option value="tumblers">Tumblers</option><option value="mugs">Mugs</option><option value="tags">Badges & tags</option><option value="apparel">Apparel</option><option value="other">Everything else</option></select></label>
+      <div class="f"><span>Photo of the blank product</span>
+        <p class="hint" style="margin:0">Straight on, on a plain light background, evenly lit. For a mug, turn the handle to the side.</p>
+        <div><button class="btn line" type="button" id="ptPhotoBtn">Choose a photo</button> <span class="hint" id="ptPhotoName"></span></div>
+        <input type="file" id="ptPhotoIn" accept="image/*" hidden></div>
+      <div class="f" id="ptCalWrap" hidden><span>Mark where the artwork prints</span>
+        <p class="hint" style="margin:0" id="ptCalHint">Drag the gold dots so the box covers exactly the printable area.</p>
+        <canvas id="ptCal" style="width:100%;max-width:520px;border-radius:14px;border:1px solid var(--line);touch-action:none;background:#222"></canvas>
+        <div id="ptFlatOpts" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <div class="chips" role="group" aria-label="Print shape" id="ptShape"><button type="button" data-s="rect" aria-pressed="true">Square / rectangle</button><button type="button" data-s="ellipse" aria-pressed="false">Circle / oval</button></div>
+          <label class="f" style="min-width:200px"><span>Rounded corners</span><input type="range" id="ptRadius" min="0" max="120" value="0"></label></div>
+      </div>
+      <p class="hint bad" id="ptErr" hidden></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn gold" type="button" id="ptSave">Save product</button><span class="hint" id="ptMsg" style="margin:0"></span></div>
+    </div>
+  </div>
+</div>
 <div class="sheet" id="tdSheet" hidden role="dialog" aria-modal="true" aria-labelledby="tdTitle">
   <div class="panel">
     <div class="panel-head"><h2 id="tdTitle">Tumbler designs</h2><button class="x" type="button" id="tdClose" aria-label="Close">×</button></div>
@@ -377,7 +415,8 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       <section><h3>Everyday jobs (no coding)</h3>
         <dl>
           <dt>Add or change a product</dt><dd>On this page, tap <b>+ New listing</b> (or tap a product). Add photos, price, stock and description, then <b>Save</b>. It appears on the store straight away.</dd>
-          <dt>Add a design to the tumbler gallery</dt><dd><b>⚙ Settings → 🥤 Tumbler designs → ＋ Add designs.</b> Upload the flat artwork and name it. It shows up in the 3D gallery and the tumbler designer. Drag to reorder, switch off to hide.</dd>
+          <dt>Add a product people can design (mug, coaster, badge…)</dt><dd><b>⚙ Settings → 🧩 Products to design → ＋ Add a product.</b> Name it, choose Flat or Round, upload a straight-on photo of the blank product, then drag the gold dots to mark where the artwork prints. It becomes a button on the “Design yours” page.</dd>
+          <dt>Add a design to the gallery</dt><dd><b>⚙ Settings → 🥤 Tumbler designs → ＋ Add designs.</b> Upload the flat artwork and name it. It shows up in the 3D gallery and the tumbler designer. Drag to reorder, switch off to hide.</dd>
           <dt>Change words on the website</dt><dd><b>⚙ Settings → Site settings.</b> Headline, intro, banner, shipping and returns answers (FAQ), contact details and more.</dd>
           <dt>Pause orders while you're away</dt><dd>Turn on <b>🌴 Vacation mode</b> in the Settings menu. Digital downloads stay available.</dd>
           <dt>Shipping prices and local pickup</dt><dd><b>⚙ Settings → Checkout options.</b></dd>
@@ -1428,6 +1467,110 @@ $("tdFile").addEventListener("change", async () => {
 /* ---------- help guide ---------- */
 $("helpBtn").onclick = () => { $("helpSheet").hidden = false; document.body.style.overflow = "hidden"; };
 $("helpClose").onclick = () => { $("helpSheet").hidden = true; document.body.style.overflow = ""; };
+
+/* ---------- products to design: templates (round or flat) with a base photo and a marked printable area ---------- */
+let ptRows = [], ptCur = null, pc = null;   // pc = calibration state
+const ptSlug = (t) => (String(t).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 28) || "product") + "-" + Math.random().toString(36).slice(2, 5);
+async function ptLoad() {
+  const { data, error } = await sb.from("product_templates").select("*").order("sort");
+  if (error) { $("ptList").innerHTML = `<div class="empty"><b>Not set up yet</b><p class="hint">Run product-templates-setup.sql once in Supabase (SQL Editor). (${esc(error.message)})</p></div>`; return; }
+  ptRows = data; ptRender();
+}
+function ptRender() {
+  $("ptList").innerHTML = ptRows.map((r) => `<div class="pt-item${r.visible ? "" : " off"}" data-id="${r.id}"><img src="${esc(r.photo)}" alt="">
+    <div><b>${esc(r.name)}</b><small>${r.kind === "round" ? "Round" : "Flat"} · orders go to ${esc(({ tumblers: "Tumblers", mugs: "Mugs", tags: "Badges & tags", apparel: "Apparel", other: "Everything else" })[r.category] || r.category)}</small></div>
+    <button class="tg" type="button" role="switch" aria-checked="${r.visible}" aria-label="Show this product" data-vis style="position:relative;width:52px;height:30px;border-radius:999px;border:1px solid rgba(245,236,220,.25);background:${r.visible ? "#2f9e62" : "#3a3f4d"};cursor:pointer;padding:0"><i style="position:absolute;top:3px;left:${r.visible ? 25 : 3}px;width:22px;height:22px;border-radius:50%;background:#f5ecdc;transition:left .18s"></i></button>
+    <button class="ed" type="button" data-edit>Edit</button><button class="rm" type="button" aria-label="Delete this product" data-del style="min-width:44px;min-height:44px;border-radius:10px;border:1px solid var(--line-soft);background:transparent;color:#ffb4a8;cursor:pointer;font-size:18px">🗑</button></div>`).join("") || `<div class="empty"><b>No products yet</b><p class="hint">Tap ＋ Add a product to start.</p></div>`;
+  $("ptState").textContent = `${ptRows.filter((r) => r.visible).length} to choose from`;
+}
+function ptView(edit) { $("ptListView").hidden = edit; $("ptEditView").hidden = !edit; $("ptBack").hidden = !edit; $("ptTitle").textContent = edit ? (ptCur ? "Edit product" : "Add a product") : "Products to design"; }
+$("ptBtn").onclick = async () => { $("ptSheet").hidden = false; document.body.style.overflow = "hidden"; ptView(false); await ptLoad(); };
+$("ptClose").onclick = () => { $("ptSheet").hidden = true; document.body.style.overflow = ""; };
+$("ptBack").onclick = () => ptView(false);
+$("ptList").addEventListener("click", async (e) => {
+  const row = e.target.closest(".pt-item"); if (!row) return; const r = ptRows.find((x) => x.id === row.dataset.id);
+  if (e.target.closest("[data-vis]")) { const visible = !r.visible, { error } = await sb.from("product_templates").update({ visible }).eq("id", r.id); if (error) return toast("Couldn't change it: " + error.message); r.visible = visible; ptRender(); toast(visible ? "Showing on the store" : "Hidden from the store"); }
+  if (e.target.closest("[data-edit]")) ptEdit(r);
+  if (e.target.closest("[data-del]")) {
+    const b = e.target.closest("[data-del]"); if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Tap again to delete"; b.style.fontSize = "13px"; b.style.padding = "0 10px"; setTimeout(() => { b.dataset.armed = ""; b.textContent = "🗑"; b.style.fontSize = "18px"; b.style.padding = ""; }, 3500); return; }
+    if (r.slug === "tumbler" && ptRows.length === 1) return toast("Keep at least one product");
+    const { error } = await sb.from("product_templates").delete().eq("id", r.id); if (error) return toast("Couldn't delete: " + error.message);
+    const m = /\/object\/public\/design-art\/(.+)$/.exec(r.photo || ""); if (m) await sb.storage.from("design-art").remove([m[1]]).catch(() => {});
+    ptRows = ptRows.filter((x) => x.id !== r.id); ptRender(); toast("Deleted");
+  }
+});
+$("ptAdd").onclick = () => ptEdit(null);
+function ptEdit(r) {
+  ptCur = r; pc = null; $("ptErr").hidden = true; $("ptMsg").textContent = "";
+  $("ptName").value = r ? r.name : ""; setSeg("ptKind", "k", r ? r.kind : "flat"); $("ptCat").value = r ? r.category : "other"; $("ptPhotoName").textContent = r ? "Current photo kept. Choose a new one to replace it." : ""; $("ptCalWrap").hidden = true; ptView(true);
+  if (r) { const g = r.geom, img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => ptCalStart(img, { W: g.W, H: g.H, SY: g.SY || 0, L: g.L, R: g.R, T: g.T, B: g.B, TY: g.TY || (g.T + g.B) / 2, shape: g.shape || "rect", radius: g.radius || 0 }, r.kind); img.src = r.photo; }
+}
+function setSeg(id, key, val) { $(id).querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset[key] === val)); }
+$("ptKind").addEventListener("click", (e) => { const b = e.target.closest("button[data-k]"); if (!b) return; setSeg("ptKind", "k", b.dataset.k); if (pc) { pc.kind = b.dataset.k; ptCalUi(); ptCalDraw(); } });
+$("ptShape").addEventListener("click", (e) => { const b = e.target.closest("button[data-s]"); if (!b) return; setSeg("ptShape", "s", b.dataset.s); if (pc) { pc.g.shape = b.dataset.s; ptCalDraw(); } });
+$("ptRadius").addEventListener("input", () => { if (pc) { pc.g.radius = +$("ptRadius").value; ptCalDraw(); } });
+$("ptPhotoBtn").onclick = () => $("ptPhotoIn").click();
+$("ptPhotoIn").addEventListener("change", async () => {
+  const f = $("ptPhotoIn").files[0]; $("ptPhotoIn").value = ""; if (!f) return;
+  try {
+    const bmp = await createImageBitmap(f), sc = Math.min(1, 1100 / Math.max(bmp.width, bmp.height)), W = Math.round(bmp.width * sc), H = Math.round(bmp.height * sc);
+    const c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, W, H); x.drawImage(bmp, 0, 0, W, H);
+    const img = new Image(); img.onload = () => { $("ptPhotoName").textContent = f.name; pc && (pc.fresh = true); ptCalStart(img, null, $("ptKind").querySelector('[aria-pressed="true"]').dataset.k, true); }; img.src = c.toDataURL("image/jpeg", .85); ptPhotoImg = img;
+  } catch { toast("That photo couldn't be read. Try a JPG or PNG."); }
+});
+let ptPhotoImg = null;
+function ptCalStart(img, g, kind, fresh) {
+  const W = img.naturalWidth, H = (g && g.H) || img.naturalHeight;
+  pc = { img, kind, fresh: !!fresh, g: g || { W: img.naturalWidth, H: img.naturalHeight, SY: 0, L: Math.round(W * .2), R: Math.round(W * .8), T: Math.round(H * .2), B: Math.round(H * .8), TY: Math.round(H * .5), shape: "rect", radius: 0 } };
+  if (fresh && kind === "round") Object.assign(pc.g, { L: Math.round(W * .34), R: Math.round(W * .66), T: Math.round(H * .1), B: Math.round(H * .92), TY: Math.round(H * .5) });
+  if (fresh) { ptPhotoImg = img; }
+  $("ptCalWrap").hidden = false; setSeg("ptShape", "s", pc.g.shape || "rect"); $("ptRadius").value = pc.g.radius || 0; ptCalUi(); ptCalDraw();
+}
+function ptCalUi() { $("ptFlatOpts").hidden = pc.kind !== "flat"; $("ptCalHint").textContent = pc.kind === "round" ? "Drag the dots: left and right are the sides of the body, top and bottom are the printable part. The lower dot (gold line) is where the name sits." : "Drag the gold dots so the box covers exactly the printable area (the surface the artwork prints on)."; }
+const ptHandles = () => { const g = pc.g, mx = (g.L + g.R) / 2, my = (g.T + g.B) / 2; const h = [{ k: "L", x: g.L, y: my }, { k: "R", x: g.R, y: my }, { k: "T", x: mx, y: g.T }, { k: "B", x: mx, y: g.B }]; if (pc.kind === "round") h.push({ k: "TY", x: g.R, y: g.TY }); return h; };
+function ptCalDraw() {
+  const cvs = $("ptCal"), g = pc.g, W = g.W, H = g.H, wcss = cvs.clientWidth || 520, dpr = Math.min(2, devicePixelRatio || 1); cvs.width = Math.round(wcss * dpr); cvs.height = Math.round(wcss * dpr * H / W); cvs.style.height = (wcss * H / W) + "px";
+  const c = cvs.getContext("2d"), k = cvs.width / W; c.setTransform(k, 0, 0, k, 0, 0); c.drawImage(pc.img, 0, g.SY || 0, W, H, 0, 0, W, H);
+  c.fillStyle = "rgba(5,9,17,.55)"; c.beginPath(); c.rect(0, 0, W, H);
+  if (pc.kind === "flat" && g.shape === "ellipse") c.ellipse((g.L + g.R) / 2, (g.T + g.B) / 2, (g.R - g.L) / 2, (g.B - g.T) / 2, 0, 0, 7); else { const r = pc.kind === "flat" ? Math.min(g.radius || 0, (g.R - g.L) / 2, (g.B - g.T) / 2) : 0; c.roundRect(g.L, g.T, g.R - g.L, g.B - g.T, r); }
+  c.fill("evenodd"); c.strokeStyle = "#e8c872"; c.lineWidth = 3 / k * dpr; c.stroke();
+  if (pc.kind === "round") { c.setLineDash([10 / k * dpr, 8 / k * dpr]); c.beginPath(); c.moveTo(g.L, g.TY); c.lineTo(g.R, g.TY); c.stroke(); c.setLineDash([]); }
+  ptHandles().forEach((h) => { c.fillStyle = "#e8c872"; c.strokeStyle = "#1b1305"; c.lineWidth = 2 / k * dpr; c.beginPath(); c.arc(h.x, h.y, 13 / k * dpr, 0, 7); c.fill(); c.stroke(); });
+}
+let ptDrag = null;
+$("ptCal").addEventListener("pointerdown", (e) => {
+  if (!pc) return; const r = $("ptCal").getBoundingClientRect(), s = pc.g.W / r.width, x = (e.clientX - r.left) * s, y = (e.clientY - r.top) * s;
+  let best = null, bd = 1e9; ptHandles().forEach((h) => { const d = Math.hypot(h.x - x, h.y - y); if (d < bd) { bd = d; best = h; } });
+  if (best && bd < 40 * s) { ptDrag = best.k; $("ptCal").setPointerCapture(e.pointerId); e.preventDefault(); }
+});
+$("ptCal").addEventListener("pointermove", (e) => {
+  if (!ptDrag) return; const g = pc.g, r = $("ptCal").getBoundingClientRect(), s = g.W / r.width, x = Math.max(0, Math.min(g.W, (e.clientX - r.left) * s)), y = Math.max(0, Math.min(g.H, (e.clientY - r.top) * s));
+  if (ptDrag === "L") g.L = Math.min(x, g.R - 30); if (ptDrag === "R") g.R = Math.max(x, g.L + 30); if (ptDrag === "T") g.T = Math.min(y, g.B - 30); if (ptDrag === "B") g.B = Math.max(y, g.T + 30); if (ptDrag === "TY") g.TY = Math.max(g.T, Math.min(g.B, y));
+  if (pc.kind === "round") g.TY = Math.max(g.T, Math.min(g.B, g.TY)); ptCalDraw();
+});
+["pointerup", "pointercancel"].forEach((t) => $("ptCal").addEventListener(t, () => { ptDrag = null; }));
+window.addEventListener("resize", () => { if (pc && !$("ptEditView").hidden) ptCalDraw(); });
+$("ptSave").onclick = async () => {
+  const err = $("ptErr"); err.hidden = true; const name = $("ptName").value.trim(), kind = $("ptKind").querySelector('[aria-pressed="true"]').dataset.k, category = $("ptCat").value;
+  const fail = (m) => { err.textContent = m; err.hidden = false; };
+  if (!name) return fail("Give the product a name."); if (!pc) return fail("Choose a photo of the blank product first.");
+  $("ptSave").disabled = true; $("ptMsg").textContent = "Saving…";
+  try {
+    const g = pc.g, slug = ptCur ? ptCur.slug : ptSlug(name); let photo = ptCur ? ptCur.photo : "";
+    if (pc.fresh || !ptCur) {
+      const c = document.createElement("canvas"); c.width = g.W; c.height = g.H; c.getContext("2d").drawImage(pc.img, 0, 0, g.W, g.H);
+      const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", .85)), path = `products/${slug}/photo-${Date.now()}.jpg`;
+      const { error } = await sb.storage.from("design-art").upload(path, blob, { contentType: "image/jpeg", upsert: false }); if (error) throw error;
+      photo = sb.storage.from("design-art").getPublicUrl(path).data.publicUrl; g.SY = 0;
+      if (ptCur) { const m = /\/object\/public\/design-art\/(.+)$/.exec(ptCur.photo || ""); if (m) sb.storage.from("design-art").remove([m[1]]).catch(() => {}); }
+    }
+    const geom = { W: g.W, H: g.H, SY: g.SY || 0, L: Math.round(g.L), R: Math.round(g.R), T: Math.round(g.T), B: Math.round(g.B), TY: Math.round(g.TY), shape: kind === "flat" ? (g.shape || "rect") : "rect", radius: kind === "flat" ? Math.round(g.radius || 0) : 0 };
+    const row = { name, kind, category, photo, geom };
+    const res = ptCur ? await sb.from("product_templates").update(row).eq("id", ptCur.id) : await sb.from("product_templates").insert({ ...row, slug, sort: (ptRows.reduce((m, r) => Math.max(m, r.sort), 0)) + 10 });
+    if (res.error) throw res.error; toast("Saved"); ptCur = null; pc = null; await ptLoad(); ptView(false);
+  } catch (x) { fail("Couldn't save: " + (x.message || x)); }
+  $("ptSave").disabled = false; $("ptMsg").textContent = "";
+};
 </script>
 </body>
 </html>
