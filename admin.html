@@ -1596,8 +1596,9 @@ async function scImage(v, n) {   // draws one showcase tumbler and stores it as 
   const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", .8)), path = `showcase/s${n}-${Date.now()}.jpg`;
   const { error } = await sb.storage.from("design-art").upload(path, blob, { contentType: "image/jpeg", upsert: false }); if (error) throw error;
   // a permanent copy at a fixed address: the home page asks for it straight away, before it has read any settings
-  const fixed = `showcase/slot-${n}.jpg`; await sb.storage.from("design-art").remove([fixed]).catch(() => {});
-  const f = await sb.storage.from("design-art").upload(fixed, blob, { contentType: "image/jpeg", cacheControl: "60", upsert: false });
+  const fixed = `showcase/slot-${n}.jpg`;
+  const f = await sb.storage.from("design-art").upload(fixed, blob, { contentType: "image/jpeg", cacheControl: "60", upsert: true });
+  if (f.error) console.warn("showcase fixed picture:", f.error.message);
   return { img: sb.storage.from("design-art").getPublicUrl(path).data.publicUrl, fixed: !f.error };
 }
 $("scSave").onclick = async () => {
@@ -1610,6 +1611,7 @@ $("scSave").onclick = async () => {
   const ok = await scWrite(list); $("scSave").disabled = false;
   if (ok) {
     $("scMsg").textContent = "Saved. Live on the home page now."; toast("Showcase saved");
+    if (list.some((x) => !x.fixed)) toast("Saved, but the fast-loading copy couldn't be stored. The home page still works.");
     const gone = old.map((u) => (String(u).match(SC_BUCKET_RE) || [])[1]).filter(Boolean); if (gone.length) sb.storage.from("design-art").remove(gone).catch(() => {});
   } else $("scMsg").textContent = "";
 };
