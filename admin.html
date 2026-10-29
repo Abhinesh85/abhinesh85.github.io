@@ -1587,11 +1587,28 @@ async function scWrite(list) {
   const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
   if (error) { toast("Couldn't save: " + error.message); return false; } site = next; return true;
 }
+const SC_BUCKET_RE = /\/design-art\/(showcase\/[^?#]+)$/;
+async function scImage(v, n) {   // draws one showcase tumbler and stores it as a small picture, so the home page only has to load it
+  const d = (window.__scDesigns || []).find((x) => x.slug === v.d); if (!d) throw new Error("design missing");
+  const F = SC_FONTS[v.f] || SC_FONTS.script; try { await document.fonts.load(scFont(F, F.size), v.name || "Aa"); } catch { /* fine */ }
+  const src = await loadImg(await tumblerPreview({ id: d.slug, name: d.name, art: d.art, card: d.card }, { name: v.name, f: v.f, i: v.i, y: v.y, a: v.a }));
+  const c = document.createElement("canvas"); c.width = 560; c.height = Math.round(560 * src.height / src.width); c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
+  const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", .86)), path = `showcase/s${n}-${Date.now()}.jpg`;
+  const { error } = await sb.storage.from("design-art").upload(path, blob, { contentType: "image/jpeg", upsert: false }); if (error) throw error;
+  return sb.storage.from("design-art").getPublicUrl(path).data.publicUrl;
+}
 $("scSave").onclick = async () => {
   const list = [...document.querySelectorAll("#scSlots .sc-slot")].map(scVals);
   if (list.some((x) => !x.d)) return toast("Choose a design for each tumbler");
-  $("scSave").disabled = true; const ok = await scWrite(list); $("scSave").disabled = false;
-  if (ok) { $("scMsg").textContent = "Saved. Live on the home page now."; toast("Showcase saved"); }
+  $("scSave").disabled = true; $("scMsg").textContent = "Preparing the pictures…";
+  const old = ((await readSiteRow()).showcase || []).map((x) => x.img).filter(Boolean);
+  try { for (let n = 0; n < list.length; n++) list[n].img = await scImage(list[n], n); }
+  catch (e) { $("scSave").disabled = false; $("scMsg").textContent = ""; return toast("Couldn't prepare the pictures: " + (e.message || e)); }
+  const ok = await scWrite(list); $("scSave").disabled = false;
+  if (ok) {
+    $("scMsg").textContent = "Saved. Live on the home page now."; toast("Showcase saved");
+    const gone = old.map((u) => (String(u).match(SC_BUCKET_RE) || [])[1]).filter(Boolean); if (gone.length) sb.storage.from("design-art").remove(gone).catch(() => {});
+  } else $("scMsg").textContent = "";
 };
 $("scReset").onclick = async () => { if (await scWrite(null)) { $("scMsg").textContent = "Back to the original pictures."; toast("Original pictures restored"); scOpen(); } };
 /* ---------- help guide ---------- */

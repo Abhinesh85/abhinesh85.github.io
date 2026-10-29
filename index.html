@@ -899,7 +899,11 @@ setTimeout(scShow, 4500);   // the built-in pictures are hidden at first so they
 async function applyShowcase() {
   const sc = SITE.showcase; if (!Array.isArray(sc) || !sc.length) { if (siteFresh) scShow(); return; }
   const cards = document.querySelectorAll(".teaser .tcard"), sig = JSON.stringify(sc); if (!cards.length || sig === scSig) return; scSig = sig;
-  const done = scShow;
+  const done = scShow, link = (v, d) => `tumbler.html?d=${encodeURIComponent(d)}${v.name ? `&name=${encodeURIComponent(String(v.name).slice(0, 20))}` : "&nm=0"}&f=${encodeURIComponent(v.f)}&i=${encodeURIComponent(v.i)}${v.y != null && v.y !== "" ? `&y=${Number(v.y)}` : ""}${v.a ? `&a=${Number(v.a)}` : ""}`;
+  if (sc.length >= cards.length && sc.slice(0, cards.length).every((v) => /^https:\/\/mrnnrmyvjkyjcjnfomna\.supabase\.co\/storage\//.test(v.img || ""))) {   // pictures drawn in admin: just show them
+    const imgs = [...cards].map((a, n) => { const v = sc[n], im = a.querySelector("img"); im.src = v.img; im.alt = `${v.name ? v.name + ": " : ""}tumbler design`; a.href = link(v, String(v.d).replace(/[^\w-]/g, "")); return im.decode ? im.decode().catch(() => {}) : Promise.resolve(); });
+    await Promise.all(imgs); done(); return;
+  }
   try {
     const slugs = [...new Set(sc.map((x) => String(x.d).replace(/[^\w-]/g, "")))];
     const rows = await fetch(`https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/tumbler_designs?select=slug,name,art,card&slug=in.(${slugs.join(",")})`, { headers: { apikey: SITE_KEY, Authorization: `Bearer ${SITE_KEY}` } }).then((r) => (r.ok ? r.json() : []));
