@@ -948,7 +948,9 @@ fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/product_templates?select
     if (!rows || !rows.length) return;
     TEMPLATES = rows; try { localStorage.setItem("prajo:templates", JSON.stringify(rows)); } catch { /* optional */ }
     buildProdBar(); const want = new URLSearchParams(location.search).get("p"), t = TEMPLATES.find((x) => x.slug === want);
-    if (PV.template && !TEMPLATES.some((x) => x.slug === PV.template.slug)) setTemplate(TEMPLATES[0]); else if (t && PV.template && t.slug !== PV.template.slug) setTemplate(t);
+    const cur = PV.template && TEMPLATES.find((x) => x.slug === PV.template.slug);
+    if (PV.template && !cur) setTemplate(TEMPLATES[0]); else if (t && PV.template && t.slug !== PV.template.slug) setTemplate(t);
+    else if (cur && (cur.photo !== PV.template.photo || JSON.stringify(cur.geom) !== JSON.stringify(PV.template.geom))) setTemplate(cur);   // photo or printable area edited in admin
   }).catch(() => {});
 
 /* floating mini preview (phones) */

@@ -404,6 +404,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 .ci .right { display: grid; justify-items: end; align-content: space-between; gap: 6px; }
 .ci .lp { font-family: var(--f-display); color: var(--gold-2); }
 .ci .qty { height: 36px; } .ci .qty button { width: 32px; height: 34px; font-size: 17px; }
+@media (max-width: 700px) { .ci .qty { height: 42px; } .ci .qty button { width: 42px; height: 40px; font-size: 19px; } .ci .rm { padding: 10px 6px; font-size: 13.5px; } }
 .ci .rm { background: none; border: 0; color: var(--muted); font-size: 12.5px; text-decoration: underline; cursor: pointer; padding: 2px; }
 .cart-foot { border-top: 1px solid var(--line-soft); padding: 14px 16px calc(14px + env(safe-area-inset-bottom, 0px)); display: grid; gap: 10px; }
 .cart-foot .tot { display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; }
@@ -1076,6 +1077,12 @@ function showSlide(i, scroll = true) {
 const TP = { W: 496, H: 1086, SY: 100, L: 112, R: 388, T: 194, B: 1036, CX: 250, RAD: 138, K: 2 }, tpCache = {};
 const loadImg = (src) => new Promise((ok, no) => { const i = new Image(); i.crossOrigin = "anonymous"; i.onload = () => ok(i); i.onerror = no; i.src = src; });
 const artOf = (d) => d.art || (d.card || "").replace(/\/c-([^/]+)$/, "/$1");
+let blankTp = "";
+async function blankTumbler() {
+  if (blankTp) return blankTp;
+  const photo = await loadImg("tumbler-white.jpg"), { W, H, SY } = TP, K = 2, cv = document.createElement("canvas"); cv.width = W * K; cv.height = H * K;
+  const c = cv.getContext("2d"); c.setTransform(K, 0, 0, K, 0, 0); c.drawImage(photo, 0, SY, W, H, 0, 0, W, H); return (blankTp = cv.toDataURL("image/jpeg", .9));
+}
 async function tumblerPreview(d) {
   const key = d.id; if (tpCache[key]) return tpCache[key];
   const [photo, art] = await Promise.all([loadImg("tumbler-white.jpg"), loadImg(artOf(d))]);
@@ -1109,6 +1116,7 @@ function mountDesignPicker(p) {
     const d = list.find((x) => x.id === sel.value);
     const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img");
     if (s0) { s0.src = d ? d.card : p.images[0].large; s0.style.objectFit = d ? "contain" : ""; } if (t0) t0.src = d ? d.card : p.images[0].card;
+    if (!d) blankTumbler().then((u) => { if (!sel.value) { if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
     if (d) tumblerPreview(d).then((u) => { if (sel.value === d.id) { if (s0) s0.src = u; if (t0) t0.src = u; } }).catch(() => { /* keep the flat artwork */ });
     const eb = document.querySelector("#info .eyebrow"); if (eb && eb.dataset.o === undefined) eb.dataset.o = eb.textContent;
     if (eb) eb.textContent = d ? p.name.replace(/\s*\(your design\)\s*$/i, "") : eb.dataset.o;
@@ -1123,6 +1131,7 @@ function mountDesignPicker(p) {
     inp.value = (base ? base + " · " : "") + "Design: " + d.name;
   };
   sel.onchange = apply; apply();
+  if (!sel.value) blankTumbler().then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
   return true;
 }
 document.addEventListener("designs-ready", () => { if (cur && !$("sheet").hidden && !$("pDesign")) mountDesignPicker(cur); });
@@ -1197,7 +1206,7 @@ function closeProduct(fromHash) {
   $("sheet").hidden = true;
   document.body.style.overflow = "";
   document.title = "PrAjo Custom Studio · Custom engraved & UV printed gifts · Sacramento";
-  if (!fromHash && location.hash.startsWith("#p/")) history.back();
+  if (!fromHash && location.hash.startsWith("#p/")) { if (inApp) history.back(); else history.replaceState(null, "", location.pathname + location.search); }   // a shared or designer link has no earlier page of ours to go back to
   if (lastFocus) { lastFocus.focus({ preventScroll: true }); lastFocus = null; }
 }
 function route() {
@@ -1207,7 +1216,8 @@ function route() {
   const o = location.hash.match(/^#order\/(cs_[\w]+)$/);
   if (o) showThanks(o[1]);
 }
-window.addEventListener("hashchange", route);
+let inApp = false;
+window.addEventListener("hashchange", () => { inApp = true; route(); });
 $("closeBtn").onclick = () => closeProduct(false);
 /* mobile menu */
 const setNav = (on) => { $("navSheet").hidden = !on; $("navBtn").setAttribute("aria-expanded", on); document.body.style.overflow = on ? "hidden" : ""; if (on) $("navX").focus(); else $("navBtn").focus({ preventScroll: true }); };
@@ -1549,7 +1559,8 @@ $("info").addEventListener("click", (e) => {
     const items = cart.get();
     const same = items.find((i) => i.id === cur.id && JSON.stringify(i.options) === JSON.stringify(options) && i.personalization === personalization);
     if (same) same.qty = cur.digital ? 1 : Math.min(50, same.qty + pQty);
-    else items.push({ id: cur.id, qty: cur.digital ? 1 : pQty, options, personalization, ...(cur.digital ? { digital: true } : {}) });
+    else { const dz = $("pDesign") && $("pDesign").value ? designList().find((d) => d.id === $("pDesign").value) : null;   // a picked design: show its picture in the cart
+      items.push({ id: cur.id, qty: cur.digital ? 1 : pQty, options, personalization, ...(dz ? { thumb: dz.card } : {}), ...(cur.digital ? { digital: true } : {}) }); }
     cart.set(items);
     pQty = 1;
     closeProduct(false);
@@ -1573,7 +1584,7 @@ function renderCart() {
   $("cartList").innerHTML = known.map((i, idx) => {
     const line = unitOf(i.p, i.options) * i.qty; sub += line;
     const opts = Object.entries(i.options || {}).map(([k, v]) => `${k}: ${/^\d+$/.test(v) ? v + "oz" : v}`).join(" · ");
-    return `<div class="ci" data-idx="${idx}"><img src="${esc(i.p.images[0]?.card || "")}" alt="">
+    return `<div class="ci" data-idx="${idx}"><img src="${esc(i.thumb || i.p.images[0]?.card || "")}" alt="">
       <div><b>${esc(i.p.name)}</b>${opts ? `<small>${esc(opts)}</small>` : ""}${i.personalization ? `<small>✍️ ${esc(i.personalization)}</small>` : ""}</div>
       <div class="right"><span class="lp">${fmt(line)}</span>
         ${i.p.digital ? `<small>💾 Download</small>` : `<div class="qty"><button type="button" data-cq="-1" aria-label="One less">−</button><span>${i.qty}</span><button type="button" data-cq="1" aria-label="One more">+</button></div>`}

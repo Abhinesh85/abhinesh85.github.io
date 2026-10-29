@@ -228,6 +228,19 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .menu .swask span { flex: 1 1 100%; }
 .menu .swask .btn { min-height: 38px; padding: 6px 16px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(245, 236, 220, .3); border-radius: 999px; font-weight: 800; }
 .menu .swask .btn.gold { background: linear-gradient(180deg, #f1d98f, #d9b45c); color: #1a1405; border-color: transparent; }
+/* phones: Settings opens as a big bottom sheet instead of a small dropdown */
+@media (max-width: 700px) {
+  header.top { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(10, 18, 32, .97); }   /* a blur here would trap the fixed sheet inside the header */
+  .menu { position: fixed; left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch; border-radius: 24px 24px 0 0; padding: 22px 14px calc(22px + env(safe-area-inset-bottom, 0px)); gap: 4px; box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .6); overscroll-behavior: contain; }
+  .menu::before { content: ""; justify-self: center; width: 44px; height: 5px; border-radius: 999px; background: rgba(245, 236, 220, .3); margin: -10px 0 8px; }
+  .menu button, .menu a { padding: 16px 14px; font-size: 18px; border-radius: 14px; min-height: 60px; }
+  .menu small { font-size: 15px; }
+  .menu .swrow { padding: 14px; }
+  .menu .swtxt { font-size: 18px; }
+  .menu .swtxt small { font-size: 15px; }
+  .menu button.tg { width: 88px; height: 44px; } .menu button.tg i { width: 36px; height: 36px; } .menu button.tg[aria-checked="true"] i { transform: translateX(44px); } .menu button.tg span { font-size: 13px; }
+  .menu .swask { font-size: 16px; padding: 12px; } .menu .swask .btn { min-height: 48px; padding: 8px 22px; font-size: 16px; }
+}
 .menu button:hover, .menu a:hover, .menu button:focus-visible, .menu a:focus-visible { background: rgba(245, 236, 220, .06); outline: none; }
 .stks { display: flex; gap: 8px; flex-wrap: wrap; font-size: 11.5px; font-weight: 800; }
 .stk { color: var(--muted); }
