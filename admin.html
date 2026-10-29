@@ -1595,14 +1595,17 @@ async function scImage(v, n) {   // draws one showcase tumbler and stores it as 
   const c = document.createElement("canvas"); c.width = 560; c.height = Math.round(560 * src.height / src.width); c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
   const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", .86)), path = `showcase/s${n}-${Date.now()}.jpg`;
   const { error } = await sb.storage.from("design-art").upload(path, blob, { contentType: "image/jpeg", upsert: false }); if (error) throw error;
-  return sb.storage.from("design-art").getPublicUrl(path).data.publicUrl;
+  // a permanent copy at a fixed address: the home page asks for it straight away, before it has read any settings
+  const fixed = `showcase/slot-${n}.jpg`; await sb.storage.from("design-art").remove([fixed]).catch(() => {});
+  const f = await sb.storage.from("design-art").upload(fixed, blob, { contentType: "image/jpeg", cacheControl: "60", upsert: false });
+  return { img: sb.storage.from("design-art").getPublicUrl(path).data.publicUrl, fixed: !f.error };
 }
 $("scSave").onclick = async () => {
   const list = [...document.querySelectorAll("#scSlots .sc-slot")].map(scVals);
   if (list.some((x) => !x.d)) return toast("Choose a design for each tumbler");
   $("scSave").disabled = true; $("scMsg").textContent = "Preparing the pictures…";
   const old = ((await readSiteRow()).showcase || []).map((x) => x.img).filter(Boolean);
-  try { for (let n = 0; n < list.length; n++) list[n].img = await scImage(list[n], n); }
+  try { for (let n = 0; n < list.length; n++) Object.assign(list[n], await scImage(list[n], n)); }
   catch (e) { $("scSave").disabled = false; $("scMsg").textContent = ""; return toast("Couldn't prepare the pictures: " + (e.message || e)); }
   const ok = await scWrite(list); $("scSave").disabled = false;
   if (ok) {

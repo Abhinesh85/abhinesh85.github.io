@@ -20,6 +20,10 @@
 <link rel="canonical" href="https://prajocustomstudio.com/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"PrAjo Custom Studio","url":"https://prajocustomstudio.com/","logo":"https://prajocustomstudio.com/logo.png","image":"https://prajocustomstudio.com/share-card.jpg","description":"Custom engraved and UV printed tumblers, mugs and keepsakes, made by hand in Sacramento, CA.","address":{"@type":"PostalAddress","addressLocality":"Sacramento","addressRegion":"CA","addressCountry":"US"},"sameAs":["https://www.etsy.com/shop/PrAjoCustomStudio"]}</script>
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://mrnnrmyvjkyjcjnfomna.supabase.co" crossorigin>
+<link rel="preload" as="image" href="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-0.jpg" fetchpriority="high">
+<link rel="preload" as="image" href="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-1.jpg" fetchpriority="high">
+<link rel="preload" as="image" href="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-2.jpg" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,500;1,9..144,700&family=Great+Vibes&family=Manrope:wght@400;500;600;700;800&family=Pacifico&family=Dancing+Script:wght@700&family=Caveat:wght@700&family=Playfair+Display:ital,wght@1,700&family=Bebas+Neue&family=Permanent+Marker&family=Lobster&family=Satisfy&display=swap">
@@ -121,7 +125,7 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .t-c { right: 1%; width: 35%; rotate: 5deg; translate: 0 12px; animation-delay: -4s; }
 @keyframes bob { 50% { transform: translateY(-9px); } }
 .tcard:hover, .tcard:focus-visible { transform: translateY(-14px) scale(1.03); z-index: 3; box-shadow: 0 44px 70px -22px rgba(0, 0, 0, .85), 0 0 0 2px var(--gold-2); animation-play-state: paused; outline: none; }
-.teaser .tcard img { transition: opacity .35s; } .teaser.sc-wait .tcard img { opacity: 0; }   /* while the saved showcase is being drawn, don't flash the old pictures */
+.teaser .tcard img { transition: opacity .35s; } .teaser.sc-wait .tcard img:not(.ok) { opacity: 0; }   /* while the saved showcase is being drawn, don't flash the old pictures */
 .teaser-cta { min-height: 54px; padding: 0 30px; font-size: 16px; }
 .teaser-sub { margin: 0; color: var(--muted); font-size: 14px; position: relative; }
 @media (prefers-reduced-motion: reduce) { .tcard { animation: none; } }
@@ -587,9 +591,9 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 
       <div class="teaser sc-wait" aria-label="Designs you can try on a tumbler">
         <div class="tcards">
-          <a class="tcard t-a" href="tumbler.html?d=sunflowers&name=Grace&f=dancing&i=black"><img src="teaser/t1.jpg" width="480" height="1051" alt="Sunflower tumbler personalized with the name Grace"></a>
-          <a class="tcard t-b" href="tumbler.html?d=roses&name=Isabella&f=script&i=gold"><img src="teaser/t2.jpg" width="480" height="1051" alt="Gothic roses tumbler personalized with the name Isabella"></a>
-          <a class="tcard t-c" href="tumbler.html?d=eagle1776&name=Marcus&f=bebas&i=white"><img src="teaser/t3.jpg" width="480" height="1051" alt="Eagle tumbler personalized with the name Marcus"></a>
+          <a class="tcard t-a" href="tumbler.html?d=sunflowers&name=Grace&f=dancing&i=black"><img src="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-0.jpg" data-fb="teaser/t1.jpg" width="480" height="1051" alt="Sunflower tumbler personalized with the name Grace" fetchpriority="high" onload="this.classList.add('ok')" onerror="this.dataset.err=1"></a>
+          <a class="tcard t-b" href="tumbler.html?d=roses&name=Isabella&f=script&i=gold"><img src="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-1.jpg" data-fb="teaser/t2.jpg" width="480" height="1051" alt="Gothic roses tumbler personalized with the name Isabella" fetchpriority="high" onload="this.classList.add('ok')" onerror="this.dataset.err=1"></a>
+          <a class="tcard t-c" href="tumbler.html?d=eagle1776&name=Marcus&f=bebas&i=white"><img src="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-2.jpg" data-fb="teaser/t3.jpg" width="480" height="1051" alt="Eagle tumbler personalized with the name Marcus" fetchpriority="high" onload="this.classList.add('ok')" onerror="this.dataset.err=1"></a>
         </div>
         <a class="btn btn-gold teaser-cta" href="tumbler.html">Design yours <span aria-hidden="true">→</span></a>
         <p class="teaser-sub">Try your name on <span id="teaserCount">29</span> designs, on tumblers and more.</p>
@@ -894,14 +898,17 @@ function applySite() {
 }
 /* home page showcase: the three tumblers at the top are drawn from the choices saved in admin → Home page showcase */
 let scSig = "", siteFresh = false;
-const scShow = () => document.querySelector(".teaser")?.classList.remove("sc-wait");
+const scShow = () => {
+  document.querySelectorAll(".teaser .tcard img[data-err]").forEach((im) => { im.src = im.dataset.fb; delete im.dataset.err; });   // permanent picture not there yet: use the built-in one
+  document.querySelector(".teaser")?.classList.remove("sc-wait");
+};
 setTimeout(scShow, 4500);   // the built-in pictures are hidden at first so they don't flash; never leave the spot empty if something is slow
 async function applyShowcase() {
   const sc = SITE.showcase; if (!Array.isArray(sc) || !sc.length) { if (siteFresh) scShow(); return; }
   const cards = document.querySelectorAll(".teaser .tcard"), sig = JSON.stringify(sc); if (!cards.length || sig === scSig) return; scSig = sig;
   const done = scShow, link = (v, d) => `tumbler.html?d=${encodeURIComponent(d)}${v.name ? `&name=${encodeURIComponent(String(v.name).slice(0, 20))}` : "&nm=0"}&f=${encodeURIComponent(v.f)}&i=${encodeURIComponent(v.i)}${v.y != null && v.y !== "" ? `&y=${Number(v.y)}` : ""}${v.a ? `&a=${Number(v.a)}` : ""}`;
   if (sc.length >= cards.length && sc.slice(0, cards.length).every((v) => /^https:\/\/mrnnrmyvjkyjcjnfomna\.supabase\.co\/storage\//.test(v.img || ""))) {   // pictures drawn in admin: just show them
-    const imgs = [...cards].map((a, n) => { const v = sc[n], im = a.querySelector("img"); im.src = v.img; im.alt = `${v.name ? v.name + ": " : ""}tumbler design`; a.href = link(v, String(v.d).replace(/[^\w-]/g, "")); return im.decode ? im.decode().catch(() => {}) : Promise.resolve(); });
+    const imgs = [...cards].map((a, n) => { const v = sc[n], im = a.querySelector("img"); if (!(v.fixed && im.classList.contains("ok"))) { delete im.dataset.err; im.classList.remove("ok"); im.src = v.img; im.onload = () => im.classList.add("ok"); } im.alt = `${v.name ? v.name + ": " : ""}tumbler design`; a.href = link(v, String(v.d).replace(/[^\w-]/g, "")); return im.decode ? im.decode().catch(() => {}) : Promise.resolve(); });   // (a failed decode just falls through)
     await Promise.all(imgs); done(); return;
   }
   try {
