@@ -1731,8 +1731,9 @@ route();
   let N, STEP, items = [];
   function build() {
   N = D2.length; STEP = 360 / N;
-  ring.innerHTML = D2.map((d, i) => `<li style="display:contents"><a class="gal-item" href="tumbler.html?d=${esc(d.id)}" data-i="${i}" aria-label="${esc(d.name)}"><img src="${esc(d.card)}" alt="${esc(d.name)} design" width="336" height="460" ${i < 4 || i >= N - 3 ? 'loading="eager"' : 'loading="lazy"'} decoding="async"></a></li>`).join("");
+  ring.innerHTML = D2.map((d, i) => `<li style="display:contents"><a class="gal-item" href="tumbler.html?d=${esc(d.id)}" data-i="${i}" aria-label="${esc(d.name)}"><img src="${esc(d.card)}" alt="${esc(d.name)} design" width="336" height="460" ${i < 9 || i >= N - 8 ? 'loading="eager"' : 'loading="lazy"'} decoding="async"></a></li>`).join("");
   items = [...ring.querySelectorAll(".gal-item")];
+  setTimeout(() => ring.querySelectorAll('img[loading="lazy"]').forEach((im) => { im.loading = "eager"; }), 800);   // the ring is 3D, so the browser's "near the screen" test comes too late
   }
   build();
   let rot = 0, target = 0, vel = 0, dragging = false, moved = 0, last = 0, raf = 0, auto = !matchMedia("(prefers-reduced-motion: reduce)").matches, visible = false, idle = 0;
@@ -1791,8 +1792,11 @@ route();
       D2 = rows.map((r) => ({ id: r.slug, name: r.name, card: r.card, art: r.art }));
       try { localStorage.setItem("prajo:gallery", JSON.stringify(D2)); } catch { /* optional */ }
       window.__designs = D2; document.dispatchEvent(new Event("designs-ready"));
-      rot = target = 0; paint.b = -1; build(); size(); kick();
       const c = document.getElementById("teaserCount"); if (c) c.textContent = D2.length;
+      const same = items.length === D2.length && items.every((el, i) => (el.querySelector("img")?.getAttribute("src") || "") === D2[i].card);
+      if (same) return;   // nothing new: leave the ring exactly as it is
+      const warm = (u) => new Promise((ok) => { const im = new Image(); im.onload = im.onerror = ok; im.src = u; });
+      return Promise.race([Promise.all(D2.map((d) => warm(d.card))), new Promise((ok) => setTimeout(ok, 4000))]).then(() => { rot = target = 0; paint.b = -1; build(); size(); kick(); });
     }).catch(() => {});
 })();
 </script>
