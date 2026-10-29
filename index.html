@@ -1444,7 +1444,7 @@ $("chatBody").addEventListener("submit", async (e) => {
   go.disabled = true; go.textContent = chatPhotos.length ? "Sending photos…" : "Sending…";
   try {
     const a = chatState.about;
-    const d = await chatCall({ action: "start", name, email, message: message ? withProduct(message, a) : "", photos: chatPhotos.map((p) => p.b64), website: $("cSite").value, productId: a?.id, productName: a?.name });
+    const d = await chatCall({ action: "start", name, email, message: message ? withProduct(message, a) : "", photos: chatPhotos.map((p) => p.b64), website: $("cSite").value, productId: a?.id, productName: a?.name, design: a?.design });
     chatStore.set({ token: d.token, name });
     chatState.about = null; clearPhotos();
     chatState.messages = d.messages;
@@ -1487,7 +1487,10 @@ chatState.timer = setInterval(() => !chatState.open && document.visibilityState 
 document.addEventListener("click", (e) => {
   if (e.target.closest("[data-chat]")) openChat(null);
   const ask = e.target.closest("[data-ask]");
-  if (ask && cur) openChat({ id: cur.id, name: cur.name, image: cur.images[0]?.card });
+  if (ask && cur) {
+    const dz = $("pDesign") && $("pDesign").value ? designList().find((d) => d.id === $("pDesign").value) : null;   // a picked design travels with the question
+    openChat({ id: cur.id, name: dz ? `${cur.name.replace(/\s*\(your design\)\s*$/i, "")} · ${dz.name}` : cur.name, image: dz ? dz.card : cur.images[0]?.card, ...(dz ? { design: dz.id } : {}) });
+  }
 });
 /* ---------- cart & checkout (Supabase Edge Function "checkout" → Stripe: cards, Apple Pay, Google Pay) ---------- */
 const CHECKOUT_URL = "https://mrnnrmyvjkyjcjnfomna.supabase.co/functions/v1/checkout";
@@ -1557,10 +1560,10 @@ $("info").addEventListener("click", (e) => {
   if (e.target.closest("#addCart") && cur) {
     const options = chosenOptions(), personalization = ($("pPersonal")?.value || "").trim();
     const items = cart.get();
-    const same = items.find((i) => i.id === cur.id && JSON.stringify(i.options) === JSON.stringify(options) && i.personalization === personalization);
+    const same = items.find((i) => i.id === cur.id && JSON.stringify(i.options) === JSON.stringify(options) && i.personalization === personalization && (i.design || "") === (($("pDesign") && $("pDesign").value) || ""));
     if (same) same.qty = cur.digital ? 1 : Math.min(50, same.qty + pQty);
     else { const dz = $("pDesign") && $("pDesign").value ? designList().find((d) => d.id === $("pDesign").value) : null;   // a picked design: show its picture in the cart
-      items.push({ id: cur.id, qty: cur.digital ? 1 : pQty, options, personalization, ...(dz ? { thumb: dz.card } : {}), ...(cur.digital ? { digital: true } : {}) }); }
+      items.push({ id: cur.id, qty: cur.digital ? 1 : pQty, options, personalization, ...(dz ? { thumb: dz.card, design: dz.id } : {}), ...(cur.digital ? { digital: true } : {}) }); }
     cart.set(items);
     pQty = 1;
     closeProduct(false);
