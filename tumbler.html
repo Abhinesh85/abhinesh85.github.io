@@ -914,7 +914,14 @@ function applyParams() {
   const ink = p.get("i"); if (["gold", "black", "white"].includes(ink)) document.querySelector(`#inkBox [data-i="${ink}"]`).click();
   const c = p.get("c"); if (c) [...document.querySelectorAll(".swatches button")].find((b) => b.getAttribute("aria-label") === c)?.click();
   const d = p.get("d"); if (d && DESIGNS.some((x) => x.id === d)) document.querySelector(`#designBox [data-d="${d}"]`)?.click();
+  applyPos();
   sizeName();
+}
+function applyPos() {   // name position from the home page showcase: height (% of the printable area) and turn (degrees)
+  const p = new URLSearchParams(location.search), py = p.get("y"), pa = p.get("a");
+  if ((py == null && pa == null) || PH.kind === "flat") return;
+  if (py != null) PV.ny = PH.T + (PH.B - PH.T) * Math.max(0, Math.min(100, Number(py) || 0)) / 100; if (pa != null) PV.na = (Number(pa) || 0) * Math.PI / 180;
+  $("nameReset").hidden = false; requestDraw();
 }
 // designs from the database: refresh the picker; a shared link to a brand-new design still works once they arrive
 fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/tumbler_designs?select=slug,name,art,thumb&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
@@ -950,7 +957,7 @@ fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/product_templates?select
     buildProdBar(); const want = new URLSearchParams(location.search).get("p"), t = TEMPLATES.find((x) => x.slug === want);
     const cur = PV.template && TEMPLATES.find((x) => x.slug === PV.template.slug);
     if (PV.template && !cur) setTemplate(TEMPLATES[0]); else if (t && PV.template && t.slug !== PV.template.slug) setTemplate(t);
-    else if (cur && (cur.photo !== PV.template.photo || JSON.stringify(cur.geom) !== JSON.stringify(PV.template.geom))) setTemplate(cur);   // photo or printable area edited in admin
+    else if (cur && (cur.photo !== PV.template.photo || JSON.stringify(cur.geom) !== JSON.stringify(PV.template.geom))) { setTemplate(cur); applyPos(); }   // photo or printable area edited in admin
   }).catch(() => {});
 
 /* floating mini preview (phones) */

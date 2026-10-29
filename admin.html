@@ -10,8 +10,9 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Fraunces:opsz,wght@9..144,700&family=Manrope:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,500;1,9..144,700&family=Great+Vibes&family=Manrope:wght@400;500;600;700;800&family=Pacifico&family=Dancing+Script:wght@700&family=Caveat:wght@700&family=Playfair+Display:ital,wght@1,700&family=Bebas+Neue&family=Permanent+Marker&family=Lobster&family=Satisfy&display=swap">
 <style id="antiFrame">html{display:none!important}</style>
+<script src="showcase.js"></script>
 <script>/* refuse to be shown inside another website (clickjacking) */ if (self === top) document.getElementById("antiFrame").remove(); else top.location = self.location;</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js" integrity="sha384-BWcjm9OdFth9TbhCxZPdm+gAOUMAzQy9nmTs12ioXdCcbVnJaPMn+fMUoQCLt60R" crossorigin="anonymous"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js" integrity="sha384-BSxuMLxX+FCbTdYec3TbXlnMGEEM2QXTFdtDaveen71o+jswm2J36+xFqp8k4VHM" crossorigin="anonymous"></script>
@@ -216,6 +217,10 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .sc-slot select, .sc-slot input { width: 100%; min-height: 46px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: inherit; font: inherit; font-size: 16px; }
 .sc-slot .sc-thumb { width: 64px; height: 56px; border-radius: 10px; object-fit: cover; background: #222; }
 @media (max-width: 520px) { .sc-row { grid-template-columns: 1fr; } }
+.sc-body { display: grid; grid-template-columns: 92px 1fr; gap: 14px; align-items: start; } .sc-form { display: grid; gap: 10px; min-width: 0; }
+.sc-pv img { width: 92px; height: auto; border-radius: 12px; background: #ededed; display: block; }
+.sc-slot input[type=range] { min-height: 32px; padding: 0; accent-color: #d9ab4f; }
+@media (max-width: 520px) { .sc-body { grid-template-columns: 72px 1fr; gap: 10px; } .sc-pv img { width: 72px; } }
 .menu-wrap { position: relative; }
 .menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 260px; background: var(--navy); border: 1px solid var(--line); border-radius: 16px; padding: 6px; display: grid; gap: 2px; box-shadow: 0 18px 40px rgba(0, 0, 0, .45); }
 .menu button, .menu a { display: grid; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer; text-decoration: none; }
@@ -1550,20 +1555,31 @@ $("tdFile").addEventListener("change", async () => {
   $("tdMsg").textContent = ok ? `Added ${ok}. Tap a name to rename it.` : ""; if (ok) toast(`Added ${ok} design${ok > 1 ? "s" : ""}`);
 });
 /* ---------- home page showcase: the three tumblers at the top of the home page (saved in site_settings.showcase) ---------- */
-const SC_FONTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"]];
-const SC_DEFAULT = [{ d: "sunflowers", name: "Grace", f: "dancing", i: "black" }, { d: "roses", name: "Isabella", f: "script", i: "gold" }, { d: "eagle1776", name: "Marcus", f: "bebas", i: "white" }];
+const SC_FONT_OPTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"]];
+const SC_DEFAULT = [{ d: "sunflowers", name: "Grace", f: "dancing", i: "black", y: 43, a: 0 }, { d: "roses", name: "Isabella", f: "script", i: "gold", y: 43, a: 0 }, { d: "eagle1776", name: "Marcus", f: "bebas", i: "white", y: 43, a: 0 }];
 const SC_POS = ["Left", "Middle (front)", "Right"];
 async function scOpen() {
   $("scSheet").hidden = false; document.body.style.overflow = "hidden"; $("scMsg").textContent = "";
-  const [{ data: ds }, cur] = await Promise.all([sb.from("tumbler_designs").select("slug,name,thumb").eq("visible", true).order("sort"), readSiteRow()]);
-  const list = ds || [], sc = Array.isArray(cur.showcase) && cur.showcase.length ? cur.showcase : SC_DEFAULT;
+  const [{ data: ds }, cur] = await Promise.all([sb.from("tumbler_designs").select("slug,name,thumb,art,card").eq("visible", true).order("sort"), readSiteRow()]);
+  const list = ds || [], sc = Array.isArray(cur.showcase) && cur.showcase.length ? cur.showcase : SC_DEFAULT; window.__scDesigns = list;
   $("scSlots").innerHTML = [0, 1, 2].map((n) => { const v = sc[n] || SC_DEFAULT[n];
-    return `<div class="sc-slot" data-n="${n}"><h3>${SC_POS[n]}</h3>
+    return `<div class="sc-slot" data-n="${n}"><h3>${SC_POS[n]}</h3><div class="sc-body"><div class="sc-pv"><img alt="Preview" width="92" height="201"></div><div class="sc-form">
       <div class="sc-row"><label>Design<select data-sc="d">${list.map((d) => `<option value="${esc(d.slug)}"${d.slug === v.d ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select></label>
       <label>Name on the tumbler<input data-sc="name" maxlength="20" value="${esc(v.name || "")}" placeholder="e.g. Grace" autocomplete="off"></label></div>
-      <div class="sc-row"><label>Lettering<select data-sc="f">${SC_FONTS.map(([k, l]) => `<option value="${k}"${k === v.f ? " selected" : ""}>${l}</option>`).join("")}</select></label>
-      <label>Ink<select data-sc="i">${[["gold", "Gold"], ["black", "Black"], ["white", "White"]].map(([k, l]) => `<option value="${k}"${k === v.i ? " selected" : ""}>${l}</option>`).join("")}</select></label></div></div>`; }).join("");
+      <div class="sc-row"><label>Lettering<select data-sc="f">${SC_FONT_OPTS.map(([k, l]) => `<option value="${k}"${k === v.f ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label>Ink<select data-sc="i">${[["gold", "Gold"], ["black", "Black"], ["white", "White"]].map(([k, l]) => `<option value="${k}"${k === v.i ? " selected" : ""}>${l}</option>`).join("")}</select></label></div>
+      <div class="sc-row"><label>Name height<input type="range" data-sc="y" min="10" max="90" value="${v.y ?? 43}"></label>
+      <label>Name left / right<input type="range" data-sc="a" min="-70" max="70" value="${v.a ?? 0}"></label></div></div></div></div>`; }).join("");
+  document.querySelectorAll("#scSlots .sc-slot").forEach(scPaint);
 }
+const scTimers = {};
+function scVals(el) { const g = (k) => el.querySelector(`[data-sc="${k}"]`).value.trim(); return { d: g("d"), name: g("name").slice(0, 20), f: g("f"), i: g("i"), y: Number(g("y")), a: Number(g("a")) }; }
+async function scPaint(el) {   // small live preview, drawn the same way as the home page
+  const v = scVals(el), d = (window.__scDesigns || []).find((x) => x.slug === v.d), img = el.querySelector(".sc-pv img"); if (!d) return;
+  const F = SC_FONTS[v.f] || SC_FONTS.script; try { await document.fonts.load(scFont(F, F.size), v.name || "Aa"); } catch { /* fine */ }
+  try { img.src = await tumblerPreview({ id: d.slug, name: d.name, art: d.art, card: d.card }, { name: v.name, f: v.f, i: v.i, y: v.y, a: v.a }); } catch { /* keep the last picture */ }
+}
+$("scSlots").addEventListener("input", (e) => { const el = e.target.closest(".sc-slot"); if (!el) return; clearTimeout(scTimers[el.dataset.n]); scTimers[el.dataset.n] = setTimeout(() => scPaint(el), 150); });
 $("scBtn").onclick = scOpen;
 $("scClose").onclick = () => { $("scSheet").hidden = true; document.body.style.overflow = ""; };
 async function scWrite(list) {
@@ -1572,7 +1588,7 @@ async function scWrite(list) {
   if (error) { toast("Couldn't save: " + error.message); return false; } site = next; return true;
 }
 $("scSave").onclick = async () => {
-  const list = [...document.querySelectorAll("#scSlots .sc-slot")].map((el) => { const g = (k) => el.querySelector(`[data-sc="${k}"]`).value.trim(); return { d: g("d"), name: g("name").slice(0, 20), f: g("f"), i: g("i") }; });
+  const list = [...document.querySelectorAll("#scSlots .sc-slot")].map(scVals);
   if (list.some((x) => !x.d)) return toast("Choose a design for each tumbler");
   $("scSave").disabled = true; const ok = await scWrite(list); $("scSave").disabled = false;
   if (ok) { $("scMsg").textContent = "Saved. Live on the home page now."; toast("Showcase saved"); }
