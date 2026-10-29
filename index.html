@@ -585,7 +585,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
         </div>
       </div>
 
-      <div class="teaser" aria-label="Designs you can try on a tumbler">
+      <div class="teaser sc-wait" aria-label="Designs you can try on a tumbler">
         <div class="tcards">
           <a class="tcard t-a" href="tumbler.html?d=sunflowers&name=Grace&f=dancing&i=black"><img src="teaser/t1.jpg" width="480" height="1051" alt="Sunflower tumbler personalized with the name Grace"></a>
           <a class="tcard t-b" href="tumbler.html?d=roses&name=Isabella&f=script&i=gold"><img src="teaser/t2.jpg" width="480" height="1051" alt="Gothic roses tumbler personalized with the name Isabella"></a>
@@ -893,11 +893,13 @@ function applySite() {
   if (S.occasions) $("track").innerHTML = [...Array(2)].flatMap(() => S.occasions.split("\n").map((x) => x.trim()).filter(Boolean)).map((o) => `<span>${esc(o)}</span>`).join("");
 }
 /* home page showcase: the three tumblers at the top are drawn from the choices saved in admin → Home page showcase */
-let scSig = "";
+let scSig = "", siteFresh = false;
+const scShow = () => document.querySelector(".teaser")?.classList.remove("sc-wait");
+setTimeout(scShow, 4500);   // the built-in pictures are hidden at first so they don't flash; never leave the spot empty if something is slow
 async function applyShowcase() {
-  const sc = SITE.showcase; if (!Array.isArray(sc) || !sc.length) return;
+  const sc = SITE.showcase; if (!Array.isArray(sc) || !sc.length) { if (siteFresh) scShow(); return; }
   const cards = document.querySelectorAll(".teaser .tcard"), sig = JSON.stringify(sc); if (!cards.length || sig === scSig) return; scSig = sig;
-  const box = document.querySelector(".teaser"), done = () => box.classList.remove("sc-wait"); box.classList.add("sc-wait"); setTimeout(done, 4000);   // never leave it blank
+  const done = scShow;
   try {
     const slugs = [...new Set(sc.map((x) => String(x.d).replace(/[^\w-]/g, "")))];
     const rows = await fetch(`https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/tumbler_designs?select=slug,name,art,card&slug=in.(${slugs.join(",")})`, { headers: { apikey: SITE_KEY, Authorization: `Bearer ${SITE_KEY}` } }).then((r) => (r.ok ? r.json() : []));
@@ -915,11 +917,11 @@ async function applyShowcase() {
 const SITE_KEY = "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b";
 fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/site_settings?id=eq.1&select=data", { headers: { apikey: SITE_KEY, Authorization: `Bearer ${SITE_KEY}` } })
   .then((r) => (r.ok ? r.json() : null)).then((rows) => {
-    if (!rows) return;
-    SITE = rows[0]?.data || {};
+    if (!rows) { scShow(); return; }
+    SITE = rows[0]?.data || {}; siteFresh = true;
     try { localStorage.setItem("prajo:site", JSON.stringify(SITE)); } catch {}
     applySite();
-  }).catch(() => {});
+  }).catch(() => { scShow(); });
 const CATS = [
   { id: "tumblers", label: "Tumblers", blurb: "Insulated, full-wrap & engraved" },
   { id: "mugs", label: "Mugs", blurb: "Morning coffee, made personal" },
