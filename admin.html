@@ -211,6 +211,11 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .co-fees { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
 .co-list[data-paused] .co-row:not(.master) { opacity: .45; }
 /* settings menu */
+.sc-slot { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px; margin: 12px 0; display: grid; gap: 10px; background: rgba(255,255,255,.03); }
+.sc-slot h3 { margin: 0; font-size: 15px; } .sc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .sc-slot label { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.sc-slot select, .sc-slot input { width: 100%; min-height: 46px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: inherit; font: inherit; font-size: 16px; }
+.sc-slot .sc-thumb { width: 64px; height: 56px; border-radius: 10px; object-fit: cover; background: #222; }
+@media (max-width: 520px) { .sc-row { grid-template-columns: 1fr; } }
 .menu-wrap { position: relative; }
 .menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 260px; background: var(--navy); border: 1px solid var(--line); border-radius: 16px; padding: 6px; display: grid; gap: 2px; box-shadow: 0 18px 40px rgba(0, 0, 0, .45); }
 .menu button, .menu a { display: grid; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer; text-decoration: none; }
@@ -309,6 +314,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
           <button type="button" class="tg" role="switch" aria-checked="false" id="studioToggle" aria-label="Design studio on the store"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
           <div class="swask" id="studioAsk" hidden><span id="studioAskT"></span><button type="button" class="btn gold" id="studioYes">Confirm</button><button type="button" class="btn line" id="studioNo">Cancel</button></div></div>
         <button type="button" role="menuitem" id="ptBtn">🧩 Products to design<small id="ptState">Tumbler, mug, coaster, badge and more</small></button>
+        <button type="button" role="menuitem" id="scBtn">🏠 Home page showcase<small id="scState">The three tumblers at the top of your home page</small></button>
         <button type="button" role="menuitem" id="tdBtn">🥤 Tumbler designs<small id="tdState">Artwork customers can try on a tumbler</small></button>
         <button type="button" role="menuitem" id="helpBtn">📘 How to update your site<small>Plain-language steps, no coding</small></button>
         <button type="button" role="menuitem" id="dsBtn">🎨 Custom designs<small id="dsState">Designs customers sent from the Design studio</small></button>
@@ -428,6 +434,17 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       </div>
       <p class="hint bad" id="ptErr" hidden></p>
       <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn gold" type="button" id="ptSave">Save product</button><span class="hint" id="ptMsg" style="margin:0"></span></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="scSheet" hidden role="dialog" aria-modal="true" aria-labelledby="scTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="scTitle">Home page showcase</h2><button class="x" type="button" id="scClose" aria-label="Close">×</button></div>
+    <div class="panel-body">
+      <div class="td-how"><b>The three tumblers customers see first</b>
+        <p class="hint" style="margin:6px 0 0">For each one, choose a design, type a name and pick the lettering. The home page draws them for you. Tapping one opens the designer with the same choices.</p></div>
+      <div id="scSlots"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px"><button class="btn gold" type="button" id="scSave">Save showcase</button><button class="btn" type="button" id="scReset">Use the original pictures</button><span class="hint" id="scMsg" style="margin:0"></span></div>
     </div>
   </div>
 </div>
@@ -1308,6 +1325,7 @@ function readSite() {
     if (v) out[el.dataset.k] = v;
   });
   if (out.faq === DEFAULT_FAQ_TEXT) delete out.faq;
+  if (site && site.showcase) out.showcase = site.showcase;   // edited in its own panel, so keep it when these settings are saved
   const cols = readColors();
   const key = (l) => JSON.stringify(l.map((c) => [c.name, c.hex.toLowerCase()]));
   if (key(cols) !== key(DEFAULT_COLORS)) out.tumblerColors = cols;
@@ -1531,6 +1549,35 @@ $("tdFile").addEventListener("change", async () => {
   }
   $("tdMsg").textContent = ok ? `Added ${ok}. Tap a name to rename it.` : ""; if (ok) toast(`Added ${ok} design${ok > 1 ? "s" : ""}`);
 });
+/* ---------- home page showcase: the three tumblers at the top of the home page (saved in site_settings.showcase) ---------- */
+const SC_FONTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"]];
+const SC_DEFAULT = [{ d: "sunflowers", name: "Grace", f: "dancing", i: "black" }, { d: "roses", name: "Isabella", f: "script", i: "gold" }, { d: "eagle1776", name: "Marcus", f: "bebas", i: "white" }];
+const SC_POS = ["Left", "Middle (front)", "Right"];
+async function scOpen() {
+  $("scSheet").hidden = false; document.body.style.overflow = "hidden"; $("scMsg").textContent = "";
+  const [{ data: ds }, cur] = await Promise.all([sb.from("tumbler_designs").select("slug,name,thumb").eq("visible", true).order("sort"), readSiteRow()]);
+  const list = ds || [], sc = Array.isArray(cur.showcase) && cur.showcase.length ? cur.showcase : SC_DEFAULT;
+  $("scSlots").innerHTML = [0, 1, 2].map((n) => { const v = sc[n] || SC_DEFAULT[n];
+    return `<div class="sc-slot" data-n="${n}"><h3>${SC_POS[n]}</h3>
+      <div class="sc-row"><label>Design<select data-sc="d">${list.map((d) => `<option value="${esc(d.slug)}"${d.slug === v.d ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select></label>
+      <label>Name on the tumbler<input data-sc="name" maxlength="20" value="${esc(v.name || "")}" placeholder="e.g. Grace" autocomplete="off"></label></div>
+      <div class="sc-row"><label>Lettering<select data-sc="f">${SC_FONTS.map(([k, l]) => `<option value="${k}"${k === v.f ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label>Ink<select data-sc="i">${[["gold", "Gold"], ["black", "Black"], ["white", "White"]].map(([k, l]) => `<option value="${k}"${k === v.i ? " selected" : ""}>${l}</option>`).join("")}</select></label></div></div>`; }).join("");
+}
+$("scBtn").onclick = scOpen;
+$("scClose").onclick = () => { $("scSheet").hidden = true; document.body.style.overflow = ""; };
+async function scWrite(list) {
+  const cur = await readSiteRow(), next = { ...cur }; if (list) next.showcase = list; else delete next.showcase;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+  if (error) { toast("Couldn't save: " + error.message); return false; } site = next; return true;
+}
+$("scSave").onclick = async () => {
+  const list = [...document.querySelectorAll("#scSlots .sc-slot")].map((el) => { const g = (k) => el.querySelector(`[data-sc="${k}"]`).value.trim(); return { d: g("d"), name: g("name").slice(0, 20), f: g("f"), i: g("i") }; });
+  if (list.some((x) => !x.d)) return toast("Choose a design for each tumbler");
+  $("scSave").disabled = true; const ok = await scWrite(list); $("scSave").disabled = false;
+  if (ok) { $("scMsg").textContent = "Saved. Live on the home page now."; toast("Showcase saved"); }
+};
+$("scReset").onclick = async () => { if (await scWrite(null)) { $("scMsg").textContent = "Back to the original pictures."; toast("Original pictures restored"); scOpen(); } };
 /* ---------- help guide ---------- */
 $("helpBtn").onclick = () => { $("helpSheet").hidden = false; document.body.style.overflow = "hidden"; };
 $("helpClose").onclick = () => { $("helpSheet").hidden = true; document.body.style.overflow = ""; };
