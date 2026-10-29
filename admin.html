@@ -1592,8 +1592,8 @@ async function scImage(v, n) {   // draws one showcase tumbler and stores it as 
   const d = (window.__scDesigns || []).find((x) => x.slug === v.d); if (!d) throw new Error("design missing");
   const F = SC_FONTS[v.f] || SC_FONTS.script; try { await document.fonts.load(scFont(F, F.size), v.name || "Aa"); } catch { /* fine */ }
   const src = await loadImg(await tumblerPreview({ id: d.slug, name: d.name, art: d.art, card: d.card }, { name: v.name, f: v.f, i: v.i, y: v.y, a: v.a }));
-  const c = document.createElement("canvas"); c.width = 560; c.height = Math.round(560 * src.height / src.width); c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
-  const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", .86)), path = `showcase/s${n}-${Date.now()}.jpg`;
+  const c = document.createElement("canvas"); c.width = 440; c.height = Math.round(440 * src.height / src.width); c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
+  const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", .8)), path = `showcase/s${n}-${Date.now()}.jpg`;
   const { error } = await sb.storage.from("design-art").upload(path, blob, { contentType: "image/jpeg", upsert: false }); if (error) throw error;
   // a permanent copy at a fixed address: the home page asks for it straight away, before it has read any settings
   const fixed = `showcase/slot-${n}.jpg`; await sb.storage.from("design-art").remove([fixed]).catch(() => {});
