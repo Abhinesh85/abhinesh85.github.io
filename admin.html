@@ -158,6 +158,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .pt-item b { display: block; font-size: 15.5px; } .pt-item small { color: var(--muted); }
 .pt-item .ed { min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--cream); cursor: pointer; font-weight: 700; }
 @media (max-width: 520px) { .pt-item { grid-template-columns: 48px 1fr auto; } .pt-item .tg { grid-column: 2; justify-self: start; } .pt-item img { width: 48px; height: 48px; } }
+.val input.add { width: 92px; min-height: 30px; margin: 0 6px; padding: 0 8px; border-radius: 8px; border: 1px solid var(--line-soft); background: var(--ink); color: var(--cream); font: 600 13px var(--f-body); }
 /* tumbler designs + help */
 .td-how { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px 16px; background: rgba(217, 171, 79, .06); display: grid; gap: 8px; }
 .td-how ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14.5px; }
@@ -377,6 +378,11 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       <div class="f"><span>What shape is it?</span>
         <div class="chips" role="group" aria-label="Shape" id="ptKind"><button type="button" data-k="flat" aria-pressed="true">Flat (coaster, badge, keychain, plaque)</button><button type="button" data-k="round" aria-pressed="false">Round (tumbler, mug, bottle)</button></div></div>
       <label class="f"><span>Where do orders go in your shop?</span><select class="in" id="ptCat"><option value="tumblers">Tumblers</option><option value="mugs">Mugs</option><option value="tags">Badges & tags</option><option value="apparel">Apparel</option><option value="other">Everything else</option></select></label>
+      <div class="f"><span>The shop item customers order after designing</span>
+        <select class="in" id="ptListing"><option value="">None (send them to the shop category)</option></select>
+        <p class="hint" style="margin:0">Pick a listing such as “Custom Tumbler (your design)”. Its options and prices (for example 20oz and 30oz) are used, and the customer's design details are filled in for you.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn line" type="button" id="ptMakeItem">＋ Create this shop item for me</button><label class="f" style="min-width:150px"><span>Starting price ($)</span><input class="in" id="ptPrice" type="number" inputmode="decimal" min="0" step="0.5" value="25"></label></div>
+        <p class="hint" style="margin:0" id="ptMakeMsg"></p></div>
       <div class="f"><span>Photo of the blank product</span>
         <p class="hint" style="margin:0">Straight on, on a plain light background, evenly lit. For a mug, turn the handle to the side.</p>
         <div><button class="btn line" type="button" id="ptPhotoBtn">Choose a photo</button> <span class="hint" id="ptPhotoName"></span></div>
@@ -798,11 +804,11 @@ function renderEditor() {
 
     <section class="sec">
       <div class="lbl">Options</div>
-      <p class="hint">Sizes, colors, designs: anything the customer chooses. Type a choice and press Enter to add it.</p>
+      <p class="hint">Sizes, colors, designs: anything the customer chooses. Type a choice and press Enter to add it. To charge more for a choice (for example 30oz), type the <b>extra amount in dollars</b> in its box, like <b>5</b> for +$5.</p>
       <div id="opts" style="display:grid;gap:10px">${ed.variations.map((v, gi) => `
         <div class="opt-group" data-g="${gi}">
           <div class="opt-head"><input class="in" data-gname="${gi}" value="${esc(v.name)}" placeholder="Option name, e.g. Size" maxlength="40"><button class="btn danger" type="button" data-gdel="${gi}">Remove</button></div>
-          <div class="vals">${v.values.map((val, vi) => `<span class="val">${esc(val)}<button type="button" data-vdel="${gi}:${vi}" aria-label="Remove ${esc(val)}">×</button></span>`).join("")}
+          <div class="vals">${v.values.map((val, vi) => `<span class="val">${esc(val)}<input class="add" type="number" inputmode="decimal" min="0" step="0.5" data-vamt="${gi}:${vi}" value="${(v.adds && v.adds[val]) || ""}" placeholder="+$ extra" aria-label="Extra price for ${esc(val)}" title="Extra price for ${esc(val)} (optional)"><button type="button" data-vdel="${gi}:${vi}" aria-label="Remove ${esc(val)}">×</button></span>`).join("")}
             <input class="in" data-vadd="${gi}" placeholder="Add a choice…" maxlength="40"></div>
         </div>`).join("")}</div>
       <button class="btn line" type="button" id="addGroup">+ Add an option</button>
@@ -832,6 +838,10 @@ function readForm() {
   if ($("ePid")) ed.pricing_id = $("ePid").value || null;
   ed.description = $("eDesc").value;
   document.querySelectorAll("[data-gname]").forEach((el) => { ed.variations[+el.dataset.gname].name = el.value.trim(); });
+  document.querySelectorAll("[data-vamt]").forEach((el) => {
+    const [gi, vi] = el.dataset.vamt.split(":").map(Number), g = ed.variations[gi], val = g && g.values[vi]; if (val == null) return;
+    const n = Math.max(0, Math.round((parseFloat(el.value) || 0) * 100) / 100); g.adds = g.adds || {}; if (n > 0) g.adds[val] = n; else delete g.adds[val];
+  });
 }
 
 const fmtSize = (b) => !b ? "" : b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.ceil(b / 1024) + " KB";
@@ -968,7 +978,7 @@ $("edSave").onclick = async () => {
     id: ed.id, name: ed.name, title: ed.title || ed.name, category: ed.category,
     price: ed.price_source === "pricing" ? prices[ed.pricing_id].sell : ed.price, currency: ed.currency || "USD",
     stock: ed.stock, digital: ed.digital, personalizable: ed.personalizable, visible: ed.visible, sort: ed.sort,
-    variations: ed.variations.map((v) => ({ name: v.name, values: v.values })),
+    variations: ed.variations.map((v) => { const adds = Object.fromEntries(Object.entries(v.adds || {}).filter(([k, n]) => v.values.includes(k) && n > 0)); return Object.keys(adds).length ? { name: v.name, values: v.values, adds } : { name: v.name, values: v.values }; }),
     images: ed.images.map(({ card, large, shows }) => (shows ? { card, large, shows } : { card, large })),
     tags: ed.tags || [], description: ed.description, bundle_ids: ed.bundle_ids || [], files: (ed.files || []).map(({ path, name, size }) => ({ path, name, size })),
     pricing_id: ed.price_source === "pricing" ? ed.pricing_id : null, price_source: ed.price_source,
@@ -1470,6 +1480,19 @@ $("helpClose").onclick = () => { $("helpSheet").hidden = true; document.body.sty
 
 /* ---------- products to design: templates (round or flat) with a base photo and a marked printable area ---------- */
 let ptRows = [], ptCur = null, pc = null;   // pc = calibration state
+function ptFillListings(sel) {
+  $("ptListing").innerHTML = `<option value="">None (send them to the shop category)</option>` + (typeof rows !== "undefined" ? rows : []).filter((r) => !r.digital).map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join("");
+  $("ptListing").value = sel || ""; $("ptMakeMsg").textContent = "";
+}
+$("ptMakeItem").onclick = async () => {
+  const msg = $("ptMakeMsg"), name = $("ptName").value.trim(); if (!name) { msg.textContent = "Type the product name first."; return; }
+  if (!ptCur) { msg.textContent = "Save the product first, then come back and tap this."; return; }
+  const price = Math.max(0, parseFloat($("ptPrice").value) || 0); if (!price) { msg.textContent = "Enter a starting price."; return; }
+  const id = `custom-${ptCur.slug}`, img = ptCur.photo.startsWith("http") ? ptCur.photo : location.origin + "/" + ptCur.photo.replace(/^\//, "");
+  const { error } = await sb.from("listings").upsert({ id, name: `Custom ${name} (your design)`, title: `Custom ${name} (your design)`, category: $("ptCat").value, price, currency: "USD", stock: 999, digital: false, personalizable: true, visible: true, sort: 9980, variations: [], images: [{ card: img, large: img }], tags: ["custom"], description: "Designed by you in our studio designer, made to order. We confirm the details with you before printing." });
+  if (error) { msg.textContent = "Couldn't create it: " + error.message; return; }
+  if (typeof loadRows === "function") await loadRows(); ptFillListings(id); $("ptListing").value = id; msg.textContent = "Created. Save the product to link it, then add sizes and prices in the listing (open “Custom " + name + "”).";
+};
 const ptSlug = (t) => (String(t).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 28) || "product") + "-" + Math.random().toString(36).slice(2, 5);
 async function ptLoad() {
   const { data, error } = await sb.from("product_templates").select("*").order("sort");
@@ -1502,7 +1525,7 @@ $("ptList").addEventListener("click", async (e) => {
 $("ptAdd").onclick = () => ptEdit(null);
 function ptEdit(r) {
   ptCur = r; pc = null; $("ptErr").hidden = true; $("ptMsg").textContent = "";
-  $("ptName").value = r ? r.name : ""; setSeg("ptKind", "k", r ? r.kind : "flat"); $("ptCat").value = r ? r.category : "other"; $("ptPhotoName").textContent = r ? "Current photo kept. Choose a new one to replace it." : ""; $("ptCalWrap").hidden = true; ptView(true);
+  ptFillListings(r && r.listing_id); $("ptName").value = r ? r.name : ""; setSeg("ptKind", "k", r ? r.kind : "flat"); $("ptCat").value = r ? r.category : "other"; $("ptPhotoName").textContent = r ? "Current photo kept. Choose a new one to replace it." : ""; $("ptCalWrap").hidden = true; ptView(true);
   if (r) { const g = r.geom, img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => ptCalStart(img, { W: g.W, H: g.H, SY: g.SY || 0, L: g.L, R: g.R, T: g.T, B: g.B, TY: g.TY || (g.T + g.B) / 2, shape: g.shape || "rect", radius: g.radius || 0 }, r.kind); img.src = r.photo; }
 }
 function setSeg(id, key, val) { $(id).querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset[key] === val)); }
@@ -1565,7 +1588,7 @@ $("ptSave").onclick = async () => {
       if (ptCur) { const m = /\/object\/public\/design-art\/(.+)$/.exec(ptCur.photo || ""); if (m) sb.storage.from("design-art").remove([m[1]]).catch(() => {}); }
     }
     const geom = { W: g.W, H: g.H, SY: g.SY || 0, L: Math.round(g.L), R: Math.round(g.R), T: Math.round(g.T), B: Math.round(g.B), TY: Math.round(g.TY), shape: kind === "flat" ? (g.shape || "rect") : "rect", radius: kind === "flat" ? Math.round(g.radius || 0) : 0 };
-    const row = { name, kind, category, photo, geom };
+    const row = { name, kind, category, photo, geom, listing_id: $("ptListing").value || null };
     const res = ptCur ? await sb.from("product_templates").update(row).eq("id", ptCur.id) : await sb.from("product_templates").insert({ ...row, slug, sort: (ptRows.reduce((m, r) => Math.max(m, r.sort), 0)) + 10 });
     if (res.error) throw res.error; toast("Saved"); ptCur = null; pc = null; await ptLoad(); ptView(false);
   } catch (x) { fail("Couldn't save: " + (x.message || x)); }

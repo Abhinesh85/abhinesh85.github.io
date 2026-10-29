@@ -897,7 +897,8 @@ $("orderName").addEventListener("click", () => {
   const bits = []; if (PV.showName && nameIn.value.trim()) bits.push(`Name: ${nameIn.value.trim()} (${FONTS[PV.font].label}, ${PV.ink})`);
   if (PV.design) bits.push(`Design: ${PV.design.name}`); else bits.push(`Color: ${$("swName").textContent}`);
   const t = PV.template || TEMPLATES[0]; if (TEMPLATES.length > 1) bits.unshift(`Product: ${t.name}`);
-  location.href = `./?prefill=${encodeURIComponent(bits.join(" · ").slice(0, 190))}&cat=${encodeURIComponent(t.category || "tumblers")}#shop`;
+  try { const o = document.createElement("canvas"); o.width = 360; o.height = Math.round(cv.height * 360 / cv.width); o.getContext("2d").drawImage(cv, 0, 0, o.width, o.height); sessionStorage.setItem("prajo:preview", o.toDataURL("image/jpeg", .8)); } catch { /* the preview picture is optional */ }
+  location.href = `./?prefill=${encodeURIComponent(bits.join(" · ").slice(0, 190))}&cat=${encodeURIComponent(t.category || "tumblers")}${t.listing_id ? "&listing=" + encodeURIComponent(t.listing_id) : ""}${t.listing_id ? "" : "#shop"}`;
 });
 function applyParams() {
   const p = new URLSearchParams(location.search); if (![...p.keys()].length) return;
@@ -936,7 +937,7 @@ function init() {
   document.querySelector(".swatches button")?.click(); applyParams(); setGlow();
 }
 // product templates from the database (admin → Products to design)
-fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/product_templates?select=slug,name,kind,photo,category,geom&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
+fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/product_templates?select=*&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
   .then((r) => (r.ok ? r.json() : null)).then((rows) => {
     if (!rows || !rows.length) return;
     TEMPLATES = rows; try { localStorage.setItem("prajo:templates", JSON.stringify(rows)); } catch { /* optional */ }

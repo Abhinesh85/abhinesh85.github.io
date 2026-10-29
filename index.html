@@ -223,6 +223,17 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 .bundle .bgo .btn { flex: 1; min-height: 42px; }
 .cart-foot .disc { display: flex; justify-content: space-between; color: #7fd99a; font-weight: 700; font-size: 14.5px; }
 .cart-foot .suggest { border: 1px dashed var(--gold); border-radius: 14px; padding: 10px 12px; font-size: 13.5px; display: grid; gap: 8px; }
+/* polish: tilt + gold spotlight on shop cards, shimmer on hero italic (fine pointers only, off for reduced motion) */
+.hero h1 em { background: linear-gradient(100deg, var(--gold) 0%, var(--gold-2) 35%, #fff4d2 50%, var(--gold-2) 65%, var(--gold) 100%); background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; animation: shine 6s ease-in-out infinite; }
+@keyframes shine { 0%, 100% { background-position: 100% 0; } 50% { background-position: 0 0; } }
+.card .ph::after { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity .3s; background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 224, 150, .28), transparent 55%); }
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  #grid { perspective: 900px; }
+  .card .ph { transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); will-change: transform; }
+  .card:hover .ph { transform: translateY(-4px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)); }
+  .card:hover .ph::after { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) { .hero h1 em { animation: none; } }
 .card .nm { font-weight: 700; font-size: 15px; line-height: 1.3; }
 .card .pr { font-family: var(--f-display); font-size: 18px; color: var(--gold-2); }
 .card .pr small { font-family: var(--f-body); font-size: 12.5px; color: var(--muted); font-weight: 600; }
@@ -455,6 +466,11 @@ nav.links a { padding: 12px 4px; }
 body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px)); }
 
 /* ---- upgrade: FAQ, quote and track dialogs ---- */
+.yourdesign { display: flex; gap: 14px; align-items: center; padding: 12px; border-radius: 16px; border: 1px solid var(--gold); background: rgba(217, 171, 79, .10); }
+.yourdesign img { width: 72px; height: auto; max-height: 120px; object-fit: contain; border-radius: 10px; background: #ededed; flex: none; }
+.designpick select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line, rgba(255,255,255,.18)); background: rgba(255,255,255,.06); color: inherit; font: inherit; margin-bottom: 10px; }
+.designpick select option { color: #111; }
+.yourdesign small { display: block; color: var(--muted); margin-top: 4px; overflow-wrap: anywhere; }
 .faq { display: grid; gap: 10px; max-width: 820px; }
 .faq details { border: 1px solid rgba(245, 236, 220, .14); border-radius: 14px; background: rgba(245, 236, 220, .03); }
 .faq summary { cursor: pointer; list-style: none; padding: 16px 18px; min-height: 52px; font-weight: 700; display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -881,6 +897,10 @@ const CATS = [
   { id: "printables", label: "Printables", blurb: "Instant-download learning fun" },
 ];
 const fmt = (n) => "$" + (Math.round(n * 100) % 100 ? n.toFixed(2) : String(Math.round(n)));
+// Some options cost extra (set per option in admin). The price shown and charged is the base price plus the extras for the choices made.
+const optAdd = (p, opts) => (p.variations || []).reduce((t, v) => t + Number((v.adds || {})[(opts || {})[v.name] ?? v.values[0]] || 0), 0);
+const unitOf = (p, opts) => p.price + optAdd(p, opts);
+const hasAdds = (p) => (p.variations || []).some((v) => Object.values(v.adds || {}).some((n) => n > 0));
 const priceHtml = (p) => `${p.variations.length ? "<small>from </small>" : ""}${fmt(p.price)}`;
 
 /* ---------- reviews (from Etsy) ---------- */
@@ -920,7 +940,11 @@ $("colls").addEventListener("click", (e) => {
 /* ---------- shop grid ---------- */
 let filter = "all", P0 = P;
 const _qp = new URLSearchParams(location.search);   // arriving from tumbler.html with the design details
-if (_qp.get("prefill")) { window.__prefill = _qp.get("prefill").slice(0, 200); const _c = _qp.get("cat"); filter = (typeof CATS !== "undefined" && CATS.some((c) => c.id === _c)) ? _c : "tumblers"; history.replaceState(null, "", location.pathname + "#shop"); }
+if (_qp.get("prefill")) {
+  window.__prefill = _qp.get("prefill").slice(0, 200); const _c = _qp.get("cat"), _l = (_qp.get("listing") || "").replace(/[^\w-]/g, ""); window.__listing = _l;
+  try { window.__preview = sessionStorage.getItem("prajo:preview") || ""; } catch { window.__preview = ""; }
+  filter = (typeof CATS !== "undefined" && CATS.some((c) => c.id === _c)) ? _c : "tumblers"; history.replaceState(null, "", location.pathname + (_l ? "#p/" + _l : "#shop"));
+}
 // Newest first by default; "My custom order" (Site settings) uses the drag order from the admin page.
 function applyOrder() {
   const custom = SITE.productOrder === "custom" || !P0.every((x) => x.created);   // custom = the order from the admin page (already sorted by the database)
@@ -962,8 +986,21 @@ shopReady = true;
 if (window.__prefill) {
   const note = document.createElement("p"); note.className = "pnote"; note.style.cssText = "margin:0 0 14px;padding:12px 16px;border-radius:14px;background:rgba(217,171,79,.12);border:1px solid var(--gold);color:var(--cream)";
   note.innerHTML = `✨ Your design: <b>${esc(window.__prefill)}</b>. Pick one below and we'll add this to your order.`; $("grid").before(note);
-  setTimeout(() => $("shop").scrollIntoView({ behavior: "smooth" }), 500);
+  if (!window.__listing) setTimeout(() => $("shop").scrollIntoView({ behavior: "smooth" }), 500);
 }
+
+/* card tilt + spotlight */
+(() => {
+  if (!matchMedia("(hover: hover) and (pointer: fine)").matches || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const g = document.getElementById("grid"); if (!g) return;
+  g.addEventListener("pointermove", (e) => {
+    const ph = e.target.closest(".card .ph"); if (!ph) return;
+    const r = ph.getBoundingClientRect(), x = (e.clientX - r.left) / r.width, y = (e.clientY - r.top) / r.height;
+    ph.style.setProperty("--ry", ((x - .5) * 10).toFixed(2) + "deg"); ph.style.setProperty("--rx", ((.5 - y) * 10).toFixed(2) + "deg");
+    ph.style.setProperty("--mx", (x * 100).toFixed(1) + "%"); ph.style.setProperty("--my", (y * 100).toFixed(1) + "%");
+  });
+  g.addEventListener("pointerout", (e) => { const ph = e.target.closest(".card .ph"); if (ph && !ph.contains(e.relatedTarget)) { ph.style.removeProperty("--rx"); ph.style.removeProperty("--ry"); } });
+})();
 
 /* ---------- live listings (edited in admin.html, stored in Supabase) ---------- */
 const DB = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" };
@@ -1028,6 +1065,37 @@ function showSlide(i, scroll = true) {
     document.querySelectorAll(`#info .chips button[data-v="${vi}"]`).forEach((b) => b.setAttribute("aria-pressed", b.dataset.val === val));
   });
 }
+/* One "custom" listing + a Design dropdown: picking a design swaps the preview and writes "Design: X" into the personalization text */
+function designList() { if (window.__designs && window.__designs.length) return window.__designs; try { const c = JSON.parse(localStorage.getItem("prajo:gallery") || "null"); if (Array.isArray(c) && c.length) return c; } catch { /* none cached */ } return []; }
+function mountDesignPicker(p) {
+  const inp = $("pPersonal"), list = designList();
+  if (!inp || !(p.tags || []).includes("custom") || !list.length) return false;
+  document.querySelector("#info .designpick")?.remove();
+  const m = (inp.value || "").match(/Design:\s*([^·]+?)\s*$/), pre = m && list.find((d) => d.name.toLowerCase() === m[1].toLowerCase());
+  const lab = inp.closest("label");
+  lab.insertAdjacentHTML("beforebegin", `<div class="designpick opt"><span>Design</span><select id="pDesign"><option value="">Choose a design…</option>${list.map((d) => `<option value="${esc(d.id)}"${pre && pre.id === d.id ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select>
+    <div class="yourdesign" id="pDesignCard" hidden><img alt="Design preview"><div><b></b><small></small><a class="etsy-link" id="pDesignLink" href="#">See it with your name in the designer</a></div></div></div>`);
+  const sel = $("pDesign"), card = $("pDesignCard");
+  const apply = () => {
+    const d = list.find((x) => x.id === sel.value);
+    const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img");
+    if (s0) { s0.src = d ? d.card : p.images[0].large; s0.style.objectFit = d ? "contain" : ""; } if (t0) t0.src = d ? d.card : p.images[0].card;
+    const eb = document.querySelector("#info .eyebrow"); if (eb && eb.dataset.o === undefined) eb.dataset.o = eb.textContent;
+    if (eb) eb.textContent = d ? p.name.replace(/\s*\(your design\)\s*$/i, "") : eb.dataset.o;
+    $("pTitle").textContent = d ? d.name : p.name;
+    document.title = `${$("pTitle").textContent} · PrAjo Custom Studio`; $("sbName").textContent = $("pTitle").textContent;
+    if (d) $("slides").scrollLeft = 0;
+    card.hidden = !d; if (!d) return;
+    card.querySelector("img").src = (window.__preview && pre && pre.id === d.id) ? window.__preview : d.card;
+    card.querySelector("b").textContent = d.name; card.querySelector("small").textContent = "Printed edge to edge on your tumbler";
+    $("pDesignLink").href = "tumbler.html?d=" + encodeURIComponent(d.id);
+    const base = (inp.value || "").replace(/\s*·?\s*Design:[^·]*$/, "").trim();
+    inp.value = (base ? base + " · " : "") + "Design: " + d.name;
+  };
+  sel.onchange = apply; apply();
+  return true;
+}
+document.addEventListener("designs-ready", () => { if (cur && !$("sheet").hidden && !$("pDesign")) mountDesignPicker(cur); });
 function openProduct(id) {
   const p = P.find((x) => x.id === id);
   cur = p || null;
@@ -1043,7 +1111,7 @@ function openProduct(id) {
     <div class="eyebrow">${esc(cat ? cat.label : "")}</div>
     <h2 id="pTitle">${esc(p.name)}</h2>
     <div class="pr">${priceHtml(p)}${p.stock > 0 && p.stock <= 3 && !p.digital ? ` <small>· only ${p.stock} left</small>` : ""}</div>
-    ${p.variations.map((v, vi) => `<div class="opt"><span>${esc(v.name)}</span><div class="chips">${v.values.map((x, i) => `<button type="button" data-v="${vi}" data-val="${esc(x)}" aria-pressed="${i === 0}">${esc(/^\d+$/.test(x) ? x + "oz" : x)}</button>`).join("")}</div></div>`).join("")}
+    ${p.variations.map((v, vi) => `<div class="opt"><span>${esc(v.name)}</span><div class="chips">${v.values.map((x, i) => `<button type="button" data-v="${vi}" data-val="${esc(x)}" aria-pressed="${i === 0}">${esc(/^\d+$/.test(x) ? x + "oz" : x)}${(v.adds || {})[x] > 0 ? ` <small>+${fmt(v.adds[x])}</small>` : ""}</button>`).join("")}</div></div>`).join("")}
     <div class="perks">${perks.map((x) => `<span>${esc(x)}</span>`).join("")}</div>
     ${!buyable(p) ? `${whyNot(p) ? `<div class="pnote ${whyNot(p).cls}">${esc(whyNot(p).t)}</div>` : ""}<div class="actions">
       ${whyNot(p) ? "" : `<a class="btn btn-gold" href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">${p.digital ? "Get it on Etsy" : "Order on Etsy"}</a>`}
@@ -1066,6 +1134,8 @@ function openProduct(id) {
     <div class="desc">${descHtml(p.description)}</div>`;
   pQty = 1;
   if (window.__prefill && $("pPersonal") && !$("pPersonal").value) $("pPersonal").value = window.__prefill;
+  if (!mountDesignPicker(p) && window.__prefill && $("pPersonal")) $("pPersonal").closest("label").insertAdjacentHTML("beforebegin", `<div class="yourdesign">${window.__preview ? `<img src="${esc(window.__preview)}" alt="Your design preview">` : ""}<div><b>Your design</b><small>${esc(window.__prefill)}</small></div></div>`);
+  refreshPrice();
   $("sheet").hidden = false;
   document.body.style.overflow = "hidden";
   $("slides").scrollLeft = 0;
@@ -1164,7 +1234,14 @@ $("info").addEventListener("click", (e) => {
   b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
   const idx = cur?.variations[+b.dataset.v]?.photos?.[b.dataset.val];
   if (idx != null) showSlide(idx);
+  refreshPrice();
 });
+function refreshPrice() {
+  if (!cur || !hasAdds(cur)) return; const u = unitOf(cur, chosenOptions());
+  const pr = document.querySelector("#info .pr"); if (pr) pr.innerHTML = `${fmt(u)}${cur.stock > 0 && cur.stock <= 3 && !cur.digital ? ` <small>· only ${cur.stock} left</small>` : ""}`;
+  const a = $("addCart"); if (a) a.textContent = `${cur.digital ? "Buy & download" : "Add to cart"} · ${fmt(u)}`;
+  if ($("sbPrice")) $("sbPrice").textContent = fmt(u);
+}
 /* ---------- messaging (Supabase Edge Function "chat") ---------- */
 const CHAT = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co/functions/v1/chat", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" };
 const chatStore = {
@@ -1380,7 +1457,7 @@ let CO = { enabled: true, shipping: true, shipFee: 8, freeOver: 75, delivery: tr
 // Same math as the checkout function: the priciest item pays its first-item rate, every other item adds its extra rate.
 function shipEstimate(items) {
   const phys = items.filter((i) => !i.p.digital); if (!phys.length) return 0;
-  if (CO.freeOver > 0 && phys.reduce((t, i) => t + i.p.price * i.qty, 0) >= CO.freeOver) return 0;
+  if (CO.freeOver > 0 && phys.reduce((t, i) => t + unitOf(i.p, i.options) * i.qty, 0) >= CO.freeOver) return 0;
   const rs = []; phys.forEach((i) => { const r = CO.rates?.[i.p.category] || CO.rates?.other || { first: CO.shipFee, extra: 0 }; for (let k = 0; k < i.qty; k++) rs.push(r); });
   rs.sort((a, b) => b.first - a.first);
   return Math.round((rs[0].first + rs.slice(1).reduce((t, r) => t + r.extra, 0)) * 100) / 100;
@@ -1464,7 +1541,7 @@ function renderCart() {
   $("cartFoot").hidden = false;
   let sub = 0;
   $("cartList").innerHTML = known.map((i, idx) => {
-    const line = i.p.price * i.qty; sub += line;
+    const line = unitOf(i.p, i.options) * i.qty; sub += line;
     const opts = Object.entries(i.options || {}).map(([k, v]) => `${k}: ${/^\d+$/.test(v) ? v + "oz" : v}`).join(" · ");
     return `<div class="ci" data-idx="${idx}"><img src="${esc(i.p.images[0]?.card || "")}" alt="">
       <div><b>${esc(i.p.name)}</b>${opts ? `<small>${esc(opts)}</small>` : ""}${i.personalization ? `<small>✍️ ${esc(i.personalization)}</small>` : ""}</div>
@@ -1597,6 +1674,7 @@ route();
     ["gothic", "Gothic Roses"], ["flames", "Flaming Cards"], ["mexico", "Mexican Flag"], ["cards", "Cards Deck"], ["blossom", "Cherry Blossom Moon"]];
   let D2 = D.map(([id, nm]) => ({ id, name: nm, card: `designs/c-${id}.jpg` }));
   try { const c = JSON.parse(localStorage.getItem("prajo:gallery") || "null"); if (Array.isArray(c) && c.length) D2 = c; } catch { /* use the built-in list */ }
+  window.__designs = D2; document.dispatchEvent(new Event("designs-ready"));
   const gal = document.getElementById("gal"), ring = document.getElementById("galRing"), nameEl = document.getElementById("galName");
   let N, STEP, items = [];
   function build() {
@@ -1660,6 +1738,7 @@ route();
       if (!rows || !rows.length) return;
       D2 = rows.map((r) => ({ id: r.slug, name: r.name, card: r.card }));
       try { localStorage.setItem("prajo:gallery", JSON.stringify(D2)); } catch { /* optional */ }
+      window.__designs = D2; document.dispatchEvent(new Event("designs-ready"));
       rot = target = 0; paint.b = -1; build(); size(); kick();
       const c = document.getElementById("teaserCount"); if (c) c.textContent = D2.length;
     }).catch(() => {});
