@@ -124,6 +124,11 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .styles .ink { width: 40px; padding: 0; position: relative; }
 .styles .ink i { position: absolute; inset: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .3); }
 .try .btn { width: 100%; min-height: 50px; font-size: 15px; padding: 0 12px; white-space: nowrap; }
+/* phones: when the big preview scrolls away, a small live copy floats in the corner so changes stay visible */
+.mini { position: fixed; right: 10px; top: 80px; width: 56px; z-index: 40; border-radius: 12px; overflow: hidden; background: #ededed; box-shadow: 0 10px 30px rgba(0,0,0,.55), 0 0 0 1.5px var(--gold); opacity: 0; pointer-events: none; transform: translateY(-8px) scale(.92); transition: opacity .25s, transform .25s; cursor: pointer; }
+.mini.on { opacity: 1; pointer-events: auto; transform: none; }
+.mini canvas { display: block; width: 100%; height: auto; }
+@media (min-width: 901px) { .mini { display: none; } }
 .stage { cursor: grab; touch-action: pan-y; position: relative; }
 .stage:active { cursor: grabbing; }
 .stage:focus-visible { outline: 3px solid var(--gold-2); outline-offset: 3px; }
@@ -588,6 +593,7 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
     <span>© 2026 PrAjo Custom Studio</span>
   </div>
 </footer>
+<button type="button" class="mini" id="mini" aria-label="Back to the big preview"><canvas id="miniCv" width="132" height="289"></canvas></button>
 <div class="toast2" id="toast2" role="status" aria-live="polite"></div>
 <script>
 const $ = (id) => document.getElementById(id);
@@ -944,6 +950,17 @@ fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/product_templates?select
     buildProdBar(); const want = new URLSearchParams(location.search).get("p"), t = TEMPLATES.find((x) => x.slug === want);
     if (PV.template && !TEMPLATES.some((x) => x.slug === PV.template.slug)) setTemplate(TEMPLATES[0]); else if (t && PV.template && t.slug !== PV.template.slug) setTemplate(t);
   }).catch(() => {});
+
+/* floating mini preview (phones) */
+(() => {
+  const mini = $("mini"), mc = $("miniCv").getContext("2d"); let vis = true, timer = 0;
+  const paint = () => { try { mc.drawImage(cv, 0, 0, mc.canvas.width, mc.canvas.height); } catch { /* not ready */ } };
+  new IntersectionObserver(([en]) => {
+    vis = en.isIntersecting; mini.classList.toggle("on", !vis);
+    clearInterval(timer); if (!vis) { paint(); timer = setInterval(paint, 120); }
+  }, { threshold: 0.15 }).observe($("stage"));
+  mini.onclick = () => $("stage").scrollIntoView({ behavior: "smooth", block: "center" });
+})();
 </script>
 </body>
 </html>

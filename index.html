@@ -234,6 +234,12 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
   .card:hover .ph::after { opacity: 1; }
 }
 @media (prefers-reduced-motion: reduce) { .hero h1 em { animation: none; } }
+/* phones: 16px fields (iOS zooms in on anything smaller), bigger tap targets, readable badges */
+@media (max-width: 700px) {
+  select, input, textarea, #sortSel, #occSel { font-size: 16px !important; }
+  footer a, .foot a { display: inline-block; padding: 11px 4px; }
+  .badge { font-size: 11.5px; }
+}
 .card .nm { font-weight: 700; font-size: 15px; line-height: 1.3; }
 .card .pr { font-family: var(--f-display); font-size: 18px; color: var(--gold-2); }
 .card .pr small { font-family: var(--f-body); font-size: 12.5px; color: var(--muted); font-weight: 600; }
@@ -1095,7 +1101,7 @@ function mountDesignPicker(p) {
   if (!inp || !(p.tags || []).includes("custom") || !list.length) return false;
   document.querySelector("#info .designpick")?.remove();
   const m = (inp.value || "").match(/Design:\s*([^·]+?)\s*$/), pre = m && list.find((d) => d.name.toLowerCase() === m[1].toLowerCase());
-  const lab = inp.closest("label");
+  const lab = document.querySelector("#info .opt") || inp.closest("label");
   lab.insertAdjacentHTML("beforebegin", `<div class="designpick opt"><span>Design</span><select id="pDesign"><option value="">Choose a design…</option>${list.map((d) => `<option value="${esc(d.id)}"${pre && pre.id === d.id ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select>
     <div class="yourdesign" id="pDesignCard" hidden><img alt="Design preview"><div><b></b><small></small><a class="etsy-link" id="pDesignLink" href="#">See it with your name in the designer</a></div></div></div>`);
   const sel = $("pDesign"), card = $("pDesignCard");
