@@ -1110,6 +1110,14 @@ function showSlide(i, scroll = true) {
   });
 }
 /* One "custom" listing + a Design dropdown: picking a design swaps the preview and writes "Design: X" into the personalization text */
+/* product templates (luggage tag...): a "custom" listing linked to one previews designs on that product instead of the tumbler */
+window.__tpls = []; try { const c = JSON.parse(localStorage.getItem("prajo:templates") || "null"); if (Array.isArray(c)) window.__tpls = c; } catch { /* none cached */ }
+window.__tplReady = new Promise((ok) => {
+  const t = setTimeout(ok, 2500);
+  fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/product_templates?select=*&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
+    .then((r) => (r.ok ? r.json() : null)).then((rows) => { if (Array.isArray(rows)) { window.__tpls = rows; try { localStorage.setItem("prajo:templates", JSON.stringify(rows)); } catch { /* optional */ } } }).catch(() => {}).finally(() => { clearTimeout(t); ok(); });
+});
+const tplFor = (p) => (window.__tpls || []).find((t) => p && t.listing_id === p.id && t.kind === "flat") || null;
 function designList() { if (window.__designs && window.__designs.length) return window.__designs; try { const c = JSON.parse(localStorage.getItem("prajo:gallery") || "null"); if (Array.isArray(c) && c.length) return c; } catch { /* none cached */ } return []; }
 function mountDesignPicker(p) {
   const inp = $("pPersonal"), list = designList();
@@ -1124,8 +1132,9 @@ function mountDesignPicker(p) {
     const d = list.find((x) => x.id === sel.value);
     const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img");
     if (s0) { s0.src = d ? d.card : p.images[0].large; s0.style.objectFit = d ? "contain" : ""; } if (t0) t0.src = d ? d.card : p.images[0].card;
-    if (!d) blankTumbler().then((u) => { if (!sel.value) { if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
-    if (d) tumblerPreview(d).then((u) => { if (sel.value === d.id) { if (s0) s0.src = u; if (t0) t0.src = u; } }).catch(() => { /* keep the flat artwork */ });
+    window.__tplReady.then(() => { const tpl = tplFor(p);
+      if (!d) blankTumbler(tpl).then((u) => { if (!sel.value) { if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
+      if (d) tumblerPreview(d, undefined, tpl).then((u) => { if (sel.value === d.id) { if (s0) s0.src = u; if (t0) t0.src = u; } }).catch(() => { /* keep the flat artwork */ }); });
     const eb = document.querySelector("#info .eyebrow"); if (eb && eb.dataset.o === undefined) eb.dataset.o = eb.textContent;
     if (eb) eb.textContent = d ? p.name.replace(/\s*\(your design\)\s*$/i, "") : eb.dataset.o;
     $("pTitle").textContent = d ? d.name : p.name;
@@ -1139,7 +1148,7 @@ function mountDesignPicker(p) {
     inp.value = (base ? base + " · " : "") + "Design: " + d.name;
   };
   sel.onchange = apply; apply();
-  if (!sel.value) blankTumbler().then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
+  if (!sel.value) window.__tplReady.then(() => blankTumbler(tplFor(p))).then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
   return true;
 }
 document.addEventListener("designs-ready", () => { if (cur && !$("sheet").hidden && !$("pDesign")) mountDesignPicker(cur); });
@@ -1506,7 +1515,7 @@ document.addEventListener("click", (e) => {
     const o = chosenOptions(), pers = ($("pPersonal")?.value || "").replace(/\s*·?\s*Design:[^·]*$/, "").trim(), qs = new URLSearchParams();
     if (dz) qs.set("pd", dz.id); const po = Object.entries(o).map(([k, v]) => `${k}:${v}`).join("|"); if (po) qs.set("po", po); if (pers) qs.set("pt", pers.slice(0, 120));
     const optTxt = Object.entries(o).map(([k, v]) => `${k}: ${/^\d+$/.test(v) ? v + "oz" : v}`).join(" · ");
-    const sel = [dz ? `🎨 Design: ${dz.name}` : "", optTxt ? `⚙️ ${optTxt}` : "", pers ? `✍️ Name/text: ${pers}` : "", `💲 ${fmt(unitOf(cur, o))}`, dz ? `🖼 On a tumbler: ${location.origin}${location.pathname.replace(/[^/]*$/, "")}tumbler.html?d=${encodeURIComponent(dz.id)}${pers ? `&name=${encodeURIComponent(pers.slice(0, 14))}` : ""}` : ""].filter(Boolean).join("\n");
+    const sel = [dz ? `🎨 Design: ${dz.name}` : "", optTxt ? `⚙️ ${optTxt}` : "", pers ? `✍️ Name/text: ${pers}` : "", `💲 ${fmt(unitOf(cur, o))}`, dz ? `🖼 On a ${tplFor(cur) ? tplFor(cur).name.toLowerCase() : "tumbler"}: ${location.origin}${location.pathname.replace(/[^/]*$/, "")}tumbler.html?${tplFor(cur) ? `p=${encodeURIComponent(tplFor(cur).slug)}&` : ""}d=${encodeURIComponent(dz.id)}${pers ? `&name=${encodeURIComponent(pers.slice(0, 14))}` : ""}` : ""].filter(Boolean).join("\n");
     openChat({ id: cur.id, name: dz ? `${cur.name.replace(/\s*\(your design\)\s*$/i, "")} · ${dz.name}` : cur.name, image: dz ? dz.card : cur.images[0]?.card, ...(dz ? { design: dz.id } : {}), url: `${location.origin}${location.pathname}${qs.toString() ? "?" + qs : ""}#p/${cur.id}`, sel });
   }
 });

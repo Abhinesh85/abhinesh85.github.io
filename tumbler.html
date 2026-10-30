@@ -695,6 +695,7 @@ function drawFlat() {
   const di = PV.design && dImgs[PV.design.id];
   if (di && di.complete && di.naturalWidth) { const sc = Math.max(aw / di.naturalWidth, ah / di.naturalHeight), dw = di.naturalWidth * sc, dh = di.naturalHeight * sc; c.drawImage(di, L + aw / 2 - dw / 2, T + ah / 2 - dh / 2, dw, dh); }
   if (PV.showName) { c.globalCompositeOperation = PV.ink === "black" && !di ? "multiply" : "source-over"; c.drawImage(nm.o, PV.nx - nm.o.width / K / 2, PV.ny - nm.oh / 2, nm.o.width / K, nm.oh); c.globalCompositeOperation = "source-over"; }
+  if (PH.overlay) { c.globalCompositeOperation = "multiply"; c.drawImage(base, 0, 0, PH.W, PH.H); c.globalCompositeOperation = "source-over"; }   // the product's own strap, slot and stitching sit on top of the print
   // a soft band of light slides across the glossy print as it is nudged or as the page idles
   const s = PV.shine, g = c.createLinearGradient(L, T, R, B); const a = Math.max(0, s - .22), z = Math.min(1, s + .22);
   g.addColorStop(0, "rgba(255,255,255,0)"); g.addColorStop(a, "rgba(255,255,255,0)"); g.addColorStop(s, "rgba(255,255,255,.30)"); g.addColorStop(z, "rgba(255,255,255,0)"); g.addColorStop(1, "rgba(255,255,255,0)");
@@ -747,7 +748,7 @@ let TEMPLATES = TPL_SEED;
 try { const c = JSON.parse(localStorage.getItem("prajo:templates") || "null"); if (Array.isArray(c) && c.length && c[0].geom) TEMPLATES = c; } catch { /* use the built-in tumbler */ }
 function setTemplate(t) {
   const g = t.geom || {}, flat = t.kind === "flat";
-  PH = { kind: flat ? "flat" : "round", W: g.W, H: g.H, SY: g.SY || 0, L: g.L, R: g.R, T: g.T, B: g.B, CX: (g.L + g.R) / 2, RAD: (g.R - g.L) / 2, TY: g.TY || (g.T + g.B) / 2, radius: g.radius || 0, shape: g.shape || "rect" };
+  PH = { kind: flat ? "flat" : "round", W: g.W, H: g.H, SY: g.SY || 0, L: g.L, R: g.R, T: g.T, B: g.B, CX: (g.L + g.R) / 2, RAD: (g.R - g.L) / 2, TY: g.TY || (g.T + g.B) / 2, radius: g.radius || 0, shape: g.shape || "rect", overlay: !!g.overlay };
   PV.template = t; PV.ready = false; PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; PV.rot = 0; PV.vel = 0; PV.shine = .5; PV.glowFor = null;
   [base, layer].forEach((c) => { c.width = PH.W * K; c.height = PH.H * K; }); cv.width = PH.W * K; cv.height = PH.H * K;
   stage.style.aspectRatio = `${PH.W} / ${PH.H}`; stage.style.width = PH.H / PH.W < .8 ? "min(460px, 88vw)" : PH.H / PH.W < 1.3 ? "min(400px, 88vw)" : "";

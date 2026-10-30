@@ -10,10 +10,10 @@ const SC_FONTS = {
   classic: { fam: '"Cinzel", Georgia, serif', wt: 700, size: 84, upper: true, ls: 3 }, block: { fam: '"Manrope", sans-serif', wt: 800, size: 84, upper: true },
   bebas: { fam: '"Bebas Neue", Impact, sans-serif', wt: 400, size: 120, upper: true, ls: 2 }, marker: { fam: '"Permanent Marker", cursive', wt: 400, size: 84 } };
 const scFont = (F, px) => `${F.style || "normal"} ${F.wt} ${px}px ${F.fam}`;
-function nameSprite(name, fk, ink) {   // the name drawn flat, same look as the designer
+function nameSprite(name, fk, ink, maxW) {   // the name drawn flat, same look as the designer
   const F = SC_FONTS[fk] || SC_FONTS.script, K = 2, text = F.upper ? name.toUpperCase() : name, RAD = TP.RAD;
   const m = document.createElement("canvas").getContext("2d"); m.font = scFont(F, F.size); if ("letterSpacing" in m) m.letterSpacing = (F.ls || 0) + "px";
-  let tw = m.measureText(text).width; const fs = F.size * Math.min(1, RAD * 2 / Math.max(tw, 1)); tw = tw * fs / F.size;
+  let tw = m.measureText(text).width; const fs = F.size * Math.min(1, (maxW || RAD * 2) / Math.max(tw, 1)); tw = tw * fs / F.size;
   const pad = 24, oh = Math.ceil(fs * 1.7), o = document.createElement("canvas"); o.width = Math.ceil((tw + pad * 2) * K); o.height = oh * K;
   const oc = o.getContext("2d"); oc.scale(K, K); oc.font = scFont(F, fs); if ("letterSpacing" in oc) oc.letterSpacing = (F.ls || 0) * fs / F.size + "px"; oc.textAlign = "center"; oc.textBaseline = "middle";
   const mid = oh / 2, x0 = (tw + pad * 2) / 2;
@@ -22,12 +22,25 @@ function nameSprite(name, fk, ink) {   // the name drawn flat, same look as the 
   oc.fillText(text, x0, mid); return { o, tw, oh, x0 };
 }
 let blankTp = "";
-async function blankTumbler() {
+async function blankTumbler(tpl) {
+  if (tpl && tpl.kind === "flat") return tpl.photo;   // a flat product (luggage tag...): its own blank photo
   if (blankTp) return blankTp;
   const photo = await loadImg("tumbler-white.jpg"), { W, H, SY } = TP, K = 2, cv = document.createElement("canvas"); cv.width = W * K; cv.height = H * K;
   const c = cv.getContext("2d"); c.setTransform(K, 0, 0, K, 0, 0); c.drawImage(photo, 0, SY, W, H, 0, 0, W, H); return (blankTp = cv.toDataURL("image/jpeg", .9));
 }
-async function tumblerPreview(d, opt) {   // opt = { name, f, i } also prints a name on it
+const flatCache = {};
+async function flatPreview(d, tpl, opt) {   // a design printed on a flat product (luggage tag...): cover-fit into its printable area; its strap, slot and stitching stay on top
+  const key = `f|${tpl.slug}|${d.id}|${opt && opt.name ? `${opt.name}|${opt.f}|${opt.i}|${opt.y ?? ""}` : ""}`; if (flatCache[key]) return flatCache[key];
+  const [photo, art] = await Promise.all([loadImg(tpl.photo), loadImg(artOf(d))]), g = tpl.geom, { W, H } = g, L = g.L, R = g.R, T = g.T, B = g.B, aw = R - L, ah = B - T;
+  const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const c = cv.getContext("2d"); c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H);
+  c.save(); const r = Math.min(g.radius || 0, aw / 2, ah / 2); c.beginPath(); c.moveTo(L + r, T); c.arcTo(R, T, R, B, r); c.arcTo(R, B, L, B, r); c.arcTo(L, B, L, T, r); c.arcTo(L, T, R, T, r); c.closePath(); c.clip();
+  const sc = Math.max(aw / art.naturalWidth, ah / art.naturalHeight), dw = art.naturalWidth * sc, dh = art.naturalHeight * sc; c.drawImage(art, L + aw / 2 - dw / 2, T + ah / 2 - dh / 2, dw, dh);
+  if (opt && opt.name) { const nm = nameSprite(opt.name, opt.f, opt.i, aw * .88), ny = opt.y == null || opt.y === "" ? (g.TY || (T + B) / 2) : T + ah * Math.max(0, Math.min(100, Number(opt.y))) / 100; c.drawImage(nm.o, (L + R) / 2 - nm.o.width / 4, ny - nm.oh / 2, nm.o.width / 2, nm.oh); }
+  if (g.overlay) { c.globalCompositeOperation = "multiply"; c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H); c.globalCompositeOperation = "source-over"; }
+  c.restore(); return (flatCache[key] = cv.toDataURL("image/jpeg", .9));
+}
+async function tumblerPreview(d, opt, tpl) {   // opt = { name, f, i } also prints a name on it
+  if (tpl && tpl.kind === "flat") return flatPreview(d, tpl, opt);
   const key = d.id + (opt && opt.name ? `|${opt.name}|${opt.f}|${opt.i}|${opt.y ?? ""}|${opt.a ?? ""}` : ""); if (tpCache[key]) return tpCache[key];
   const [photo, art] = await Promise.all([loadImg("tumbler-white.jpg"), loadImg(artOf(d))]);
   const { W, H, SY, L, R, T, B, CX, RAD, K } = TP, TAU = Math.PI * 2, cv = document.createElement("canvas"); cv.width = W * K; cv.height = H * K;
