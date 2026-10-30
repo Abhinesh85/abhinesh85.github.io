@@ -624,8 +624,14 @@ const DESIGN_SEED = [
 ];
 // Designs come from the database (managed in admin → Tumbler designs). This built-in list is the fallback, and the last good copy is cached.
 const withPaths = (list) => list.map((d) => ({ id: d.id, name: d.name, art: d.art || `designs/${d.id}.jpg`, thumb: d.thumb || `designs/th-${d.id}.jpg` }));
-let DESIGNS = withPaths(DESIGN_SEED);
-try { const c = JSON.parse(localStorage.getItem("prajo:designs") || "null"); if (Array.isArray(c) && c.length && c[0].art) DESIGNS = c; } catch { /* use the built-in list */ }
+let DESIGNS_ALL = withPaths(DESIGN_SEED);   // every design; DESIGNS is the part that belongs to the product being shown
+try { const c = JSON.parse(localStorage.getItem("prajo:designs") || "null"); if (Array.isArray(c) && c.length && c[0].art) DESIGNS_ALL = c; } catch { /* use the built-in list */ }
+let DESIGNS = DESIGNS_ALL;
+function applyDesignFilter() {
+  const slug = PV.template ? PV.template.slug : "tumbler"; DESIGNS = DESIGNS_ALL.filter((d) => (d.product || "tumbler") === slug);
+  if (PV.design && !DESIGNS.some((d) => d.id === PV.design.id)) { PV.design = null; $("dsName").textContent = "None"; }
+  buildPicker();
+}
 const dImgs = {};
 let photo = new Image();
 const FONTS = {
@@ -749,7 +755,7 @@ try { const c = JSON.parse(localStorage.getItem("prajo:templates") || "null"); i
 function setTemplate(t) {
   const g = t.geom || {}, flat = t.kind === "flat";
   PH = { kind: flat ? "flat" : "round", W: g.W, H: g.H, SY: g.SY || 0, L: g.L, R: g.R, T: g.T, B: g.B, CX: (g.L + g.R) / 2, RAD: (g.R - g.L) / 2, TY: g.TY || (g.T + g.B) / 2, radius: g.radius || 0, shape: g.shape || "rect", overlay: !!g.overlay };
-  PV.template = t; PV.ready = false; PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; PV.rot = 0; PV.vel = 0; PV.shine = .5; PV.glowFor = null;
+  PV.template = t; applyDesignFilter(); PV.ready = false; PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; PV.rot = 0; PV.vel = 0; PV.shine = .5; PV.glowFor = null;
   [base, layer].forEach((c) => { c.width = PH.W * K; c.height = PH.H * K; }); cv.width = PH.W * K; cv.height = PH.H * K;
   stage.style.aspectRatio = `${PH.W} / ${PH.H}`; stage.style.width = PH.H / PH.W < .8 ? "min(460px, 88vw)" : PH.H / PH.W < 1.3 ? "min(400px, 88vw)" : "";
   $("spinHint").textContent = flat ? "Drag to catch the light" : "Drag to spin"; $("spinHint").classList.remove("off");
@@ -925,13 +931,12 @@ function applyPos() {   // name position from the home page showcase: height (% 
   $("nameReset").hidden = false; requestDraw();
 }
 // designs from the database: refresh the picker; a shared link to a brand-new design still works once they arrive
-fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/tumbler_designs?select=slug,name,art,thumb&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
+fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/tumbler_designs?select=slug,name,art,thumb,product&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
   .then((r) => (r.ok ? r.json() : null)).then((rows) => {
     if (!rows || !rows.length) return;
-    DESIGNS = rows.map((r) => ({ id: r.slug, name: r.name, art: r.art, thumb: r.thumb }));
-    try { localStorage.setItem("prajo:designs", JSON.stringify(DESIGNS)); } catch { /* optional */ }
-    if (PV.design && !DESIGNS.some((d) => d.id === PV.design.id)) { PV.design = null; $("dsName").textContent = "None"; rebuildBase(); requestDraw(); }
-    buildPicker();
+    DESIGNS_ALL = rows.map((r) => ({ id: r.slug, name: r.name, art: r.art, thumb: r.thumb, product: r.product || "tumbler" }));
+    try { localStorage.setItem("prajo:designs", JSON.stringify(DESIGNS_ALL)); } catch { /* optional */ }
+    const had = PV.design; applyDesignFilter(); if (had && !PV.design) { rebuildBase(); requestDraw(); }
     const d = new URLSearchParams(location.search).get("d"); if (d && !PV.design && DESIGNS.some((x) => x.id === d)) document.querySelector(`#designBox [data-d="${d}"]`)?.click();
   }).catch(() => {});
 // site settings: default name, colors, name-tile link

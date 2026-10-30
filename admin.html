@@ -221,6 +221,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .sc-pv img { width: 92px; height: auto; border-radius: 12px; background: #ededed; display: block; }
 .sc-slot input[type=range] { min-height: 32px; padding: 0; accent-color: #d9ab4f; }
 @media (max-width: 520px) { .sc-body { grid-template-columns: 72px 1fr; gap: 10px; } .sc-pv img { width: 72px; } }
+.td-prod { display: flex; gap: 10px; align-items: center; font-weight: 800; margin: 4px 0 6px; } .td-prod select { flex: 1; min-height: 46px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: inherit; font: inherit; font-size: 16px; }
 .menu-wrap { position: relative; }
 .menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 260px; background: var(--navy); border: 1px solid var(--line); border-radius: 16px; padding: 6px; display: grid; gap: 2px; box-shadow: 0 18px 40px rgba(0, 0, 0, .45); }
 .menu button, .menu a { display: grid; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer; text-decoration: none; }
@@ -462,6 +463,8 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <li>Give each one a clear name. Customers see it in the gallery and on the tumbler page.</li>
         <li>Drag the ⠿ handle to change the order. The first ones show first. Use the switch to hide a design without deleting it.</li></ol>
         <p class="hint">Best artwork: a wide image (around 2000 × 1700 px), JPG or PNG. Transparent PNGs are placed on white. We resize everything automatically.</p></div>
+      <label class="td-prod">Designs for <select id="tdProd" aria-label="Which product these designs are for"></select></label>
+      <p class="hint" style="margin:0 0 10px">Each product has its own designs. Pick the product first, then add or sort its designs.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="tdAdd">＋ Add designs</button><span class="hint" id="tdMsg" style="margin:0"></span></div>
       <input type="file" id="tdFile" accept="image/*" multiple hidden>
       <div id="tdList" class="td-list"><p class="hint">Loading…</p></div>
@@ -1483,25 +1486,31 @@ let tdRows = [], tdSort = null;
 const tdSlug = (t) => (String(t).toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 28) || "design") + "-" + Math.random().toString(36).slice(2, 6);
 const tdTitle = (f) => f.name.replace(/\.[a-z0-9]+$/i, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim().replace(/\b\w/g, (c) => c.toUpperCase()).slice(0, 60) || "New design";
 const tdPath = (url) => { const m = /\/object\/public\/design-art\/(.+)$/.exec(url || ""); return m ? m[1] : null; };
+let tdProd = "tumbler";
+const tdMine = () => tdRows.filter((r) => (r.product || "tumbler") === tdProd);
 async function tdLoad() {
+  const { data: pts } = await sb.from("product_templates").select("slug,name").order("sort");
+  const opts = (pts && pts.length ? pts : [{ slug: "tumbler", name: "Tumbler" }]);
+  $("tdProd").innerHTML = opts.map((p) => `<option value="${esc(p.slug)}"${p.slug === tdProd ? " selected" : ""}>${esc(p.name)}</option>`).join("");
   const { data, error } = await sb.from("tumbler_designs").select("*").order("sort");
   if (error) { $("tdList").innerHTML = `<div class="empty"><b>Not set up yet</b><p class="hint">Run tumbler-designs-setup.sql once in Supabase (SQL Editor). (${esc(error.message)})</p></div>`; return; }
   tdRows = data; tdRender();
 }
+$("tdProd").onchange = () => { tdProd = $("tdProd").value; tdRender(); };
 function tdRender() {
-  $("tdList").innerHTML = tdRows.map((r) => `<div class="td-item${r.visible ? "" : " off"}" data-id="${r.id}">
+  $("tdList").innerHTML = tdMine().map((r) => `<div class="td-item${r.visible ? "" : " off"}" data-id="${r.id}">
     <span class="tdgrab" aria-hidden="true" title="Drag to reorder">⠿</span><img src="${esc(r.thumb)}" alt="">
     <input class="nm" value="${esc(r.name)}" maxlength="60" aria-label="Design name" data-nm>
     <button class="tg" type="button" role="switch" aria-checked="${r.visible}" aria-label="Show this design" data-vis></button>
     <button class="rm" type="button" aria-label="Delete this design" data-del>🗑</button></div>`).join("") || `<div class="empty"><b>No designs yet</b><p class="hint">Tap ＋ Add designs to upload your first one.</p></div>`;
   if (tdSort) tdSort.destroy();
   tdSort = Sortable.create($("tdList"), { handle: ".tdgrab", animation: 150, onEnd: tdSaveOrder });
-  $("tdState").textContent = `${tdRows.filter((r) => r.visible).length} showing on the store`;
+  $("tdState").textContent = `${tdRows.filter((r) => r.visible && (r.product || "tumbler") === "tumbler").length} tumbler designs showing`;
 }
 async function tdSaveOrder() {
   const ids = [...$("tdList").querySelectorAll(".td-item")].map((e) => e.dataset.id), by = new Map(tdRows.map((r) => [r.id, r]));
-  tdRows = ids.map((id) => by.get(id)).filter(Boolean);
-  const jobs = tdRows.map((r, i) => (r.sort === i * 10 ? null : sb.from("tumbler_designs").update({ sort: i * 10 }).eq("id", r.id).then(() => { r.sort = i * 10; })));
+  const mine = ids.map((id) => by.get(id)).filter(Boolean); tdRows = [...tdRows.filter((r) => !mine.includes(r)), ...mine];   // only this product's designs are re-ordered
+  const jobs = mine.map((r, i) => (r.sort === i * 10 ? null : sb.from("tumbler_designs").update({ sort: i * 10 }).eq("id", r.id).then(() => { r.sort = i * 10; })));
   const res = await Promise.all(jobs.filter(Boolean).map((j) => j.catch(() => "x")));
   toast(res.includes("x") ? "Couldn't save the order" : "Order saved");
 }
@@ -1547,8 +1556,8 @@ $("tdFile").addEventListener("change", async () => {
         const path = `${slug}/${suffix}.jpg`, { error } = await sb.storage.from("design-art").upload(path, blob, { contentType: "image/jpeg", upsert: false });
         if (error) throw error; return sb.storage.from("design-art").getPublicUrl(path).data.publicUrl; };
       const art = await up("art", b.art), card = await up("card", b.card), thumb = await up("thumb", b.thumb);
-      const sort = (tdRows.reduce((m, r) => Math.max(m, r.sort), 0)) + 10;
-      const { data, error } = await sb.from("tumbler_designs").insert({ slug, name: tdTitle(f), art, card, thumb, sort }).select().single();
+      const sort = (tdMine().reduce((m, r) => Math.max(m, r.sort), 0)) + 10;
+      const { data, error } = await sb.from("tumbler_designs").insert({ slug, name: tdTitle(f), art, card, thumb, sort, product: tdProd }).select().single();
       if (error) throw error; tdRows.push(data); tdRender(); ok++;
     } catch (err) { toast(/decode|bitmap|heic/i.test(String(err)) ? `“${f.name}” couldn't be read. Try a JPG or PNG.` : `“${f.name}” didn't upload: ` + (err.message || err)); }
   }

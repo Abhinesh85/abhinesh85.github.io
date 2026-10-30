@@ -1115,17 +1115,25 @@ window.__tpls = []; try { const c = JSON.parse(localStorage.getItem("prajo:templ
 window.__tplReady = new Promise((ok) => {
   const t = setTimeout(ok, 2500);
   fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/product_templates?select=*&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
-    .then((r) => (r.ok ? r.json() : null)).then((rows) => { if (Array.isArray(rows)) { window.__tpls = rows; try { localStorage.setItem("prajo:templates", JSON.stringify(rows)); } catch { /* optional */ } } }).catch(() => {}).finally(() => { clearTimeout(t); ok(); });
+    .then((r) => (r.ok ? r.json() : null)).then((rows) => { if (Array.isArray(rows)) { window.__tpls = rows; try { localStorage.setItem("prajo:templates", JSON.stringify(rows)); } catch { /* optional */ } } }).catch(() => {}).finally(() => { clearTimeout(t); ok(); document.dispatchEvent(new Event("designs-ready")); });
 });
 const tplFor = (p) => (window.__tpls || []).find((t) => p && t.listing_id === p.id && t.kind === "flat") || null;
-function designList() { if (window.__designs && window.__designs.length) return window.__designs; try { const c = JSON.parse(localStorage.getItem("prajo:gallery") || "null"); if (Array.isArray(c) && c.length) return c; } catch { /* none cached */ } return []; }
+function designList(slug) {   // each product has its own designs (admin → Tumbler designs → "Designs for")
+  slug = slug || "tumbler"; let all = window.__allDesigns;
+  if (!all) { try { const c = JSON.parse(localStorage.getItem("prajo:alldesigns") || "null"); if (Array.isArray(c)) all = c; } catch { /* none cached */ } }
+  if (all && all.length) return all.filter((d) => (d.product || "tumbler") === slug);
+  if (slug !== "tumbler") return [];
+  if (window.__designs && window.__designs.length) return window.__designs;
+  try { const c = JSON.parse(localStorage.getItem("prajo:gallery") || "null"); if (Array.isArray(c) && c.length) return c; } catch { /* none cached */ } return [];
+}
+const prodSlug = (p) => (tplFor(p) ? tplFor(p).slug : "tumbler");
 function mountDesignPicker(p) {
-  const inp = $("pPersonal"), list = designList();
+  const inp = $("pPersonal"), list = designList(prodSlug(p));
   if (!inp || !(p.tags || []).includes("custom") || !list.length) return false;
   document.querySelector("#info .designpick")?.remove();
   const m = (inp.value || "").match(/Design:\s*([^·]+?)\s*$/), pre = m && list.find((d) => d.name.toLowerCase() === m[1].toLowerCase());
   const lab = document.querySelector("#info .opt") || inp.closest("label");
-  lab.insertAdjacentHTML("beforebegin", `<div class="designpick opt"><span>Design</span><select id="pDesign"><option value="">Choose a design…</option>${list.map((d) => `<option value="${esc(d.id)}"${pre && pre.id === d.id ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select>
+  lab.insertAdjacentHTML("beforebegin", `<div class="designpick opt"><span>Design</span><select id="pDesign" data-prod="${esc(prodSlug(p))}"><option value="">Choose a design…</option>${list.map((d) => `<option value="${esc(d.id)}"${pre && pre.id === d.id ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select>
     <div class="yourdesign" id="pDesignCard" hidden><img alt="Design preview"><div><b></b><small></small><a class="etsy-link" id="pDesignLink" href="#">See it with your name in the designer</a></div></div></div>`);
   const sel = $("pDesign"), card = $("pDesignCard");
   const apply = () => {
@@ -1151,7 +1159,7 @@ function mountDesignPicker(p) {
   if (!sel.value) window.__tplReady.then(() => blankTumbler(tplFor(p))).then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
   return true;
 }
-document.addEventListener("designs-ready", () => { if (cur && !$("sheet").hidden && !$("pDesign")) mountDesignPicker(cur); });
+document.addEventListener("designs-ready", () => { if (!cur || $("sheet").hidden) return; const sel = $("pDesign"); if (!sel || sel.dataset.prod !== prodSlug(cur)) { const keep = sel ? sel.value : ""; mountDesignPicker(cur); if (keep && $("pDesign") && [...$("pDesign").options].some((o) => o.value === keep)) { $("pDesign").value = keep; $("pDesign").dispatchEvent(new Event("change")); } } });
 function openProduct(id) {
   const p = P.find((x) => x.id === id);
   cur = p || null;
@@ -1805,10 +1813,12 @@ route();
   gal.addEventListener("keydown", (e) => { if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); } else if (e.key === "ArrowRight") { e.preventDefault(); go(1); } });
   idle = Date.now(); size();
   // designs from the database (admin → Tumbler designs)
-  fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/tumbler_designs?select=slug,name,card,art&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
+  fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/tumbler_designs?select=slug,name,card,art,product&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
     .then((r) => (r.ok ? r.json() : null)).then((rows) => {
       if (!rows || !rows.length) return;
-      D2 = rows.map((r) => ({ id: r.slug, name: r.name, card: r.card, art: r.art }));
+      const everyone = rows.map((r) => ({ id: r.slug, name: r.name, card: r.card, art: r.art, product: r.product || "tumbler" })); window.__allDesigns = everyone;
+      try { localStorage.setItem("prajo:alldesigns", JSON.stringify(everyone)); } catch { /* optional */ }
+      D2 = everyone.filter((d) => d.product === "tumbler");   // the home page gallery shows tumbler designs
       try { localStorage.setItem("prajo:gallery", JSON.stringify(D2)); } catch { /* optional */ }
       window.__designs = D2; document.dispatchEvent(new Event("designs-ready"));
       const c = document.getElementById("teaserCount"); if (c) c.textContent = D2.length;
