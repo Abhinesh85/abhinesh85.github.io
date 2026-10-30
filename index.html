@@ -1134,26 +1134,31 @@ function mountDesignPicker(p) {
   const m = (inp.value || "").match(/Design:\s*([^·]+?)\s*$/), pre = m && list.find((d) => d.name.toLowerCase() === m[1].toLowerCase());
   const lab = document.querySelector("#info .opt") || inp.closest("label");
   lab.insertAdjacentHTML("beforebegin", `<div class="designpick opt"><span>Design</span><select id="pDesign" data-prod="${esc(prodSlug(p))}"><option value="">Choose a design…</option>${list.map((d) => `<option value="${esc(d.id)}"${pre && pre.id === d.id ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select>
+    <div id="pRotRow" style="display:none;gap:10px;align-items:center;margin:0 0 10px;flex-wrap:wrap"><button type="button" class="btn btn-line" id="pRot">↻ Turn 90°</button>
+      <label style="display:flex;align-items:center;gap:8px;flex:1 1 200px;font-weight:700">Angle <input type="range" id="pRotRange" min="-180" max="180" step="1" value="0" style="flex:1;accent-color:#d9ab4f"><output id="pRotOut" style="min-width:46px">0°</output></label></div>
     <div class="yourdesign" id="pDesignCard" hidden><img alt="Design preview"><div><b></b><small></small><a class="etsy-link" id="pDesignLink" href="#">See it with your name in the designer</a></div></div></div>`);
-  const sel = $("pDesign"), card = $("pDesignCard");
+  const sel = $("pDesign"), card = $("pDesignCard"), rotRow = $("pRotRow"); let rot = Number(new URLSearchParams(location.search).get("pr")) || 0, rotT = 0; window.__rot = rot;
+  const normA = (a) => ((Math.round(a) + 180) % 360 + 360) % 360 - 180, paintRot = () => { $("pRotRange").value = rot; $("pRotOut").textContent = rot + "°"; };
+  paintRot(); $("pRot").onclick = () => { rot = normA(rot + 90); window.__rot = rot; paintRot(); apply(); };
+  $("pRotRange").oninput = () => { rot = Number($("pRotRange").value) || 0; window.__rot = rot; $("pRotOut").textContent = rot + "°"; clearTimeout(rotT); rotT = setTimeout(apply, 70); };
   const apply = () => {
     const d = list.find((x) => x.id === sel.value);
     const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img");
     if (s0) { s0.src = d ? d.card : p.images[0].large; s0.style.objectFit = d ? "contain" : ""; } if (t0) t0.src = d ? d.card : p.images[0].card;
     window.__tplReady.then(() => { const tpl = tplFor(p);
       if (!d) blankTumbler(tpl).then((u) => { if (!sel.value) { if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
-      if (d) tumblerPreview(d, undefined, tpl).then((u) => { if (sel.value === d.id) { if (s0) s0.src = u; if (t0) t0.src = u; } }).catch(() => { /* keep the flat artwork */ }); });
+      if (d) tumblerPreview(d, tpl ? { rot: window.__rot || 0 } : undefined, tpl).then((u) => { if (sel.value === d.id) { if (s0) s0.src = u; if (t0) t0.src = u; } }).catch(() => { /* keep the flat artwork */ }); });
     const eb = document.querySelector("#info .eyebrow"); if (eb && eb.dataset.o === undefined) eb.dataset.o = eb.textContent;
     if (eb) eb.textContent = d ? p.name.replace(/\s*\(your design\)\s*$/i, "") : eb.dataset.o;
     $("pTitle").textContent = d ? d.name : p.name;
     document.title = `${$("pTitle").textContent} · PrAjo Custom Studio`; $("sbName").textContent = $("pTitle").textContent;
     if (d) $("slides").scrollLeft = 0;
-    card.hidden = !d; if (!d) return;
+    card.hidden = !d; rotRow.style.display = d && tplFor(p) ? "flex" : "none"; if (!d) return;
     card.querySelector("img").src = (window.__preview && pre && pre.id === d.id) ? window.__preview : d.card;
     card.querySelector("b").textContent = d.name; { const tp = tplFor(p); card.querySelector("small").textContent = `Printed on your ${tp ? tp.name.toLowerCase() : "tumbler"}`; }
     $("pDesignLink").href = `tumbler.html?${tplFor(p) ? "p=" + encodeURIComponent(tplFor(p).slug) + "&" : ""}d=${encodeURIComponent(d.id)}`;
     const base = (inp.value || "").replace(/\s*·?\s*Design:[^·]*$/, "").trim();
-    inp.value = (base ? base + " · " : "") + "Design: " + d.name;
+    inp.value = (base ? base + " · " : "") + "Design: " + d.name + (rot && tplFor(p) ? ` (rotated ${rot}°)` : "");
   };
   sel.onchange = apply; apply();
   if (!sel.value) window.__tplReady.then(() => blankTumbler(tplFor(p))).then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
@@ -1518,12 +1523,12 @@ document.addEventListener("click", (e) => {
   if (e.target.closest("[data-chat]")) openChat(null);
   const ask = e.target.closest("[data-ask]");
   if (ask && cur) {
-    const dz = $("pDesign") && $("pDesign").value ? designList().find((d) => d.id === $("pDesign").value) : null;   // a picked design travels with the question
+    const dz = $("pDesign") && $("pDesign").value ? designList(prodSlug(cur)).find((d) => d.id === $("pDesign").value) : null;   // a picked design travels with the question
     // what they picked travels with the question: the link reopens the product with the same choices, and the lines say what they chose
     const o = chosenOptions(), pers = ($("pPersonal")?.value || "").replace(/\s*·?\s*Design:[^·]*$/, "").trim(), qs = new URLSearchParams();
-    if (dz) qs.set("pd", dz.id); const po = Object.entries(o).map(([k, v]) => `${k}:${v}`).join("|"); if (po) qs.set("po", po); if (pers) qs.set("pt", pers.slice(0, 120));
+    if (dz) qs.set("pd", dz.id); if (dz && window.__rot) qs.set("pr", String(window.__rot)); const po = Object.entries(o).map(([k, v]) => `${k}:${v}`).join("|"); if (po) qs.set("po", po); if (pers) qs.set("pt", pers.slice(0, 120));
     const optTxt = Object.entries(o).map(([k, v]) => `${k}: ${/^\d+$/.test(v) ? v + "oz" : v}`).join(" · ");
-    const sel = [dz ? `🎨 Design: ${dz.name}` : "", optTxt ? `⚙️ ${optTxt}` : "", pers ? `✍️ Name/text: ${pers}` : "", `💲 ${fmt(unitOf(cur, o))}`, dz ? `🖼 On a ${tplFor(cur) ? tplFor(cur).name.toLowerCase() : "tumbler"}: ${location.origin}${location.pathname.replace(/[^/]*$/, "")}tumbler.html?${tplFor(cur) ? `p=${encodeURIComponent(tplFor(cur).slug)}&` : ""}d=${encodeURIComponent(dz.id)}${pers ? `&name=${encodeURIComponent(pers.slice(0, 14))}` : ""}` : ""].filter(Boolean).join("\n");
+    const sel = [dz ? `🎨 Design: ${dz.name}${window.__rot && tplFor(cur) ? ` (rotated ${window.__rot}°)` : ""}` : "", optTxt ? `⚙️ ${optTxt}` : "", pers ? `✍️ Name/text: ${pers}` : "", `💲 ${fmt(unitOf(cur, o))}`, dz ? `🖼 On a ${tplFor(cur) ? tplFor(cur).name.toLowerCase() : "tumbler"}: ${location.origin}${location.pathname.replace(/[^/]*$/, "")}tumbler.html?${tplFor(cur) ? `p=${encodeURIComponent(tplFor(cur).slug)}&` : ""}d=${encodeURIComponent(dz.id)}${pers ? `&name=${encodeURIComponent(pers.slice(0, 14))}` : ""}${window.__rot && tplFor(cur) ? `&r=${window.__rot}` : ""}` : ""].filter(Boolean).join("\n");
     openChat({ id: cur.id, name: dz ? `${cur.name.replace(/\s*\(your design\)\s*$/i, "")} · ${dz.name}` : cur.name, image: dz ? dz.card : cur.images[0]?.card, ...(dz ? { design: dz.id } : {}), url: `${location.origin}${location.pathname}${qs.toString() ? "?" + qs : ""}#p/${cur.id}`, sel });
   }
 });
@@ -1597,7 +1602,7 @@ $("info").addEventListener("click", (e) => {
     const items = cart.get();
     const same = items.find((i) => i.id === cur.id && JSON.stringify(i.options) === JSON.stringify(options) && i.personalization === personalization && (i.design || "") === (($("pDesign") && $("pDesign").value) || ""));
     if (same) same.qty = cur.digital ? 1 : Math.min(50, same.qty + pQty);
-    else { const dz = $("pDesign") && $("pDesign").value ? designList().find((d) => d.id === $("pDesign").value) : null;   // a picked design: show its picture in the cart
+    else { const dz = $("pDesign") && $("pDesign").value ? designList(prodSlug(cur)).find((d) => d.id === $("pDesign").value) : null;   // a picked design: show its picture in the cart
       items.push({ id: cur.id, qty: cur.digital ? 1 : pQty, options, personalization, ...(dz ? { thumb: dz.card, design: dz.id } : {}), ...(cur.digital ? { digital: true } : {}) }); }
     cart.set(items);
     pQty = 1;
