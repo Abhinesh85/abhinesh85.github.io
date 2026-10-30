@@ -176,6 +176,8 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 /* tumbler designs + help */
 .td-how { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px 16px; background: rgba(217, 171, 79, .06); display: grid; gap: 8px; }
 .td-how ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14.5px; }
+.td-list.placing .td-item.sel { opacity: .35; outline: 2px dashed var(--gold, #d9ab4f); }
+.td-list.placing .td-item:not(.sel):hover { outline: 2px solid #5ad08a; }
 .td-list.picking { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
 .td-list.picking .td-item { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 8px; cursor: pointer; position: relative; }
 .td-list.picking .td-item img { width: 100%; height: 84px; }
@@ -476,7 +478,8 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="tdAdd">＋ Add designs</button><button class="btn" type="button" id="tdSelBtn" aria-pressed="false">☑ Select several</button><button class="btn" type="button" id="tdAZ">Sort A–Z</button><span class="hint" id="tdMsg" style="margin:0"></span></div>
       <input class="in" id="tdSearch" placeholder="Search designs" aria-label="Search designs" autocomplete="off" style="margin:10px 0 0;width:100%">
       <div class="bulkbar" id="tdBulk" hidden><b id="tdBulkN">0 selected</b>
-        <button class="btn" type="button" id="tdAll">Select all shown</button><button class="btn gold" type="button" id="tdTop">⬆ Move to top</button><button class="btn" type="button" id="tdBottom">⬇ Move to bottom</button>
+        <button class="btn" type="button" id="tdAll">Select all shown</button><button class="btn gold" type="button" id="tdMoveTo">📍 Move to…</button><button class="btn" type="button" id="tdTop">⬆ Top</button><button class="btn" type="button" id="tdBottom">⬇ Bottom</button>
+        <div id="tdPlace" hidden style="flex:1 1 100%;display:none;gap:8px;align-items:center;flex-wrap:wrap"><b style="margin-right:auto" id="tdPlaceTxt"></b><button class="btn gold" type="button" id="tdBefore" aria-pressed="true">Before it</button><button class="btn" type="button" id="tdAfter" aria-pressed="false">After it</button><button class="btn" type="button" id="tdPlaceX">Cancel</button></div>
         <button class="btn" type="button" id="tdShow">Show</button><button class="btn" type="button" id="tdHide">Hide</button><button class="btn" type="button" id="tdDelSel" style="color:#ffb4a8">Delete</button><button class="btn" type="button" id="tdDone">Done</button></div>
       <input type="file" id="tdFile" accept="image/*" multiple hidden>
       <div id="tdList" class="td-list"><p class="hint">Loading…</p></div>
@@ -1509,10 +1512,10 @@ async function tdLoad() {
   tdRows = data; tdRender();
 }
 $("tdProd").onchange = () => { tdProd = $("tdProd").value; tdPicked.clear(); tdRender(); };
-let tdSelMode = false, tdPicked = new Set(), tdShown = [];
+let tdSelMode = false, tdPicked = new Set(), tdShown = [], tdPlacing = false, tdAfter = false;
 const tdFiltered = () => { const q = $("tdSearch").value.trim().toLowerCase(); return tdMine().filter((r) => !q || r.name.toLowerCase().includes(q)); };
 function tdRender() {
-  tdShown = tdFiltered(); $("tdList").classList.toggle("picking", tdSelMode); $("tdBulkN").textContent = `${tdPicked.size} selected`;
+  tdShown = tdFiltered(); $("tdList").classList.toggle("picking", tdSelMode); $("tdList").classList.toggle("placing", tdPlacing); $("tdBulkN").textContent = `${tdPicked.size} selected`;
   $("tdList").innerHTML = tdShown.map((r) => `<div class="td-item${r.visible ? "" : " off"}${tdSelMode && tdPicked.has(r.id) ? " sel" : ""}" data-id="${r.id}">
     <span class="tdgrab" aria-hidden="true" title="Drag to reorder">⠿</span><img src="${esc(r.thumb)}" alt="">
     <input class="nm" value="${esc(r.name)}" maxlength="60" aria-label="Design name" data-nm>
@@ -1529,7 +1532,11 @@ async function tdApplyOrder(list, label) {   // list = this product's designs in
   if (!ok) return toast("Couldn't save the order");
   toast(label, async () => { const by = new Map(tdRows.map((r) => [r.id, r])); const back = prev.map((id) => by.get(id)).filter(Boolean); tdRows = [...tdRows.filter((r) => !back.includes(r)), ...back]; tdRender(); await save(prev); });
 }
-function tdSetSel(on) { tdSelMode = on; tdPicked.clear(); $("tdSelBtn").setAttribute("aria-pressed", on); $("tdBulk").hidden = !on; tdRender(); }
+function tdPlaceUi() { const on = tdPlacing; $("tdPlace").style.display = on ? "flex" : "none"; $("tdPlaceTxt").textContent = `Tap the design to put your ${tdPicked.size} selected ${tdAfter ? "after" : "before"}`; $("tdBefore").className = "btn" + (tdAfter ? "" : " gold"); $("tdAfter").className = "btn" + (tdAfter ? " gold" : ""); $("tdBefore").setAttribute("aria-pressed", !tdAfter); $("tdAfter").setAttribute("aria-pressed", tdAfter); }
+$("tdMoveTo").onclick = () => { if (!tdPicked.size) return toast("Tap the designs you want to move first."); tdPlacing = true; tdPlaceUi(); tdRender(); };
+$("tdBefore").onclick = () => { tdAfter = false; tdPlaceUi(); }; $("tdAfter").onclick = () => { tdAfter = true; tdPlaceUi(); };
+$("tdPlaceX").onclick = () => { tdPlacing = false; tdPlaceUi(); tdRender(); };
+function tdSetSel(on) { tdPlacing = false; tdPlaceUi(); tdSelMode = on; tdPicked.clear(); $("tdSelBtn").setAttribute("aria-pressed", on); $("tdBulk").hidden = !on; tdRender(); }
 const tdPickedRows = () => tdMine().filter((r) => tdPicked.has(r.id));
 $("tdSelBtn").onclick = () => tdSetSel(!tdSelMode); $("tdDone").onclick = () => tdSetSel(false);
 $("tdSearch").addEventListener("input", tdRender);
@@ -1564,6 +1571,11 @@ $("tdList").addEventListener("change", async (e) => {
 });
 $("tdList").addEventListener("click", async (e) => {
   const row = e.target.closest(".td-item"); if (!row) return; const r = tdRows.find((x) => x.id === row.dataset.id);
+  if (tdSelMode && tdPlacing) {   // choosing where the selected designs go
+    if (tdPicked.has(r.id)) return toast("Tap a design that isn't selected.");
+    const p = tdPickedRows(), rest = tdMine().filter((x) => !tdPicked.has(x.id)), at = rest.indexOf(r) + (tdAfter ? 1 : 0);
+    const n = p.length, name = r.name; tdPicked.clear(); tdPlacing = false; tdPlaceUi(); tdApplyOrder([...rest.slice(0, at), ...p, ...rest.slice(at)], `${n} moved ${tdAfter ? "after" : "before"} ${name}`); return;
+  }
   if (tdSelMode) { tdPicked.has(r.id) ? tdPicked.delete(r.id) : tdPicked.add(r.id); tdRender(); return; }
   if (e.target.matches("[data-vis]")) {
     const visible = !r.visible, { error } = await sb.from("tumbler_designs").update({ visible }).eq("id", r.id);
