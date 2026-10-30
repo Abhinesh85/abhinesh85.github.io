@@ -129,6 +129,7 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .mini.on { opacity: 1; pointer-events: auto; transform: none; }
 .mini canvas { display: block; width: 100%; height: auto; }
 @media (min-width: 901px) { .mini { display: none; } }
+.adjd { display: flex; align-items: center; gap: 8px; font-weight: 700; } .adjd span { min-width: 92px; } .adjd input { flex: 1; accent-color: #d9ab4f; } .adjd output { min-width: 48px; text-align: right; }
 .stage { cursor: grab; touch-action: pan-y; position: relative; }
 .stage:active { cursor: grabbing; }
 .stage:focus-visible { outline: 3px solid var(--gold-2); outline-offset: 3px; }
@@ -576,7 +577,7 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
                 <button type="button" class="ink" data-i="black" aria-pressed="false" aria-label="Black"><i style="background:#15171c"></i></button>
                 <button type="button" class="ink" data-i="white" aria-pressed="false" aria-label="White"><i style="background:#fff"></i></button></div></div>
             <button class="btn btn-gold" type="button" id="orderName">Order a tumbler with this name →</button>
-            <div class="tools"><button class="btn btn-line" type="button" id="rotDesign" hidden>↻ Rotate design</button><label id="rotWrap" style="display:none;align-items:center;gap:8px;font-weight:700;flex:1 1 220px">Angle <input type="range" id="rotRange" min="-180" max="180" step="1" value="0" style="flex:1;accent-color:#d9ab4f"><output id="rotOut" style="min-width:48px">0°</output></label><button class="btn btn-line" type="button" id="surprise">🎲 Surprise me</button><button class="btn btn-line" type="button" id="shareDesign">🔗 Share</button><button class="btn btn-line" type="button" id="saveImg">⬇ Save image</button></div>
+            <div class="tools"><button class="btn btn-line" type="button" id="rotDesign" hidden>↻ Rotate design</button><div id="rotWrap" style="display:none;flex:1 1 100%;gap:6px;flex-direction:column"><label class="adjd"><span>Angle</span><input type="range" id="rotRange" min="-180" max="180" step="1" value="0"><output id="rotRangeOut">0°</output></label><label class="adjd"><span>Size</span><input type="range" id="szRange" min="30" max="200" step="1" value="100"><output id="szRangeOut">100%</output></label><label class="adjd"><span>Left / right</span><input type="range" id="xRange" min="-50" max="50" step="1" value="0"><output id="xRangeOut">0%</output></label><label class="adjd"><span>Up / down</span><input type="range" id="yRange" min="-50" max="50" step="1" value="0"><output id="yRangeOut">0%</output></label><button class="btn btn-line" type="button" id="adjReset" style="align-self:flex-start">Reset position</button></div><button class="btn btn-line" type="button" id="surprise">🎲 Surprise me</button><button class="btn btn-line" type="button" id="shareDesign">🔗 Share</button><button class="btn btn-line" type="button" id="saveImg">⬇ Save image</button></div>
             
           </div>
         </div>
@@ -612,7 +613,7 @@ document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("navS
 const nameIn = $("nameIn"), cv = $("tCanvas"), cx2 = cv.getContext("2d"), stage = $("stage");
 let PH = { kind: "round", W: 496, H: 1086, SY: 100, L: 112, R: 388, T: 194, B: 1036, CX: 250, RAD: 138, TY: 560, radius: 0, shape: "rect" };   // geometry of the product inside its base photo (set by setTemplate)
 const K = 2, TAU = Math.PI * 2;
-const PV = { drot: 0, tint: null, font: "script", ink: "gold", design: null, showName: true, na: 0, ny: PH.TY, nx: 250, shine: .5, template: null, moveMode: false, rot: 0, vel: 0, auto: true, drag: false, ready: false };
+const PV = { drot: 0, dsz: 100, dx: 0, dy: 0, tint: null, font: "script", ink: "gold", design: null, showName: true, na: 0, ny: PH.TY, nx: 250, shine: .5, template: null, moveMode: false, rot: 0, vel: 0, auto: true, drag: false, ready: false };
 const DESIGN_SEED = [
   { id: "grill", name: "King of the Grill" }, { id: "nurse", name: "Saving Lives" }, { id: "eagle", name: "Freedom Eagle" }, { id: "mexico", name: "Mexican Flag" },
   { id: "dreamcatcher", name: "Dream Catcher" }, { id: "boho", name: "Boho Dreamcatcher" }, { id: "bee", name: "Golden Bee" }, { id: "cards", name: "Cards Deck" },
@@ -708,7 +709,7 @@ function drawFlat() {
   c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "source-over"; c.globalAlpha = 1; c.drawImage(base, 0, 0);
   c.setTransform(K, 0, 0, K, 0, 0); c.save(); areaPath(c); c.clip();
   const di = PV.design && dImgs[PV.design.id];
-  if (di && di.complete && di.naturalWidth) { const rot = PV.drot || 0, th = rot * Math.PI / 180, cs = Math.abs(Math.cos(th)), sn = Math.abs(Math.sin(th)), iw0 = di.naturalWidth, ih0 = di.naturalHeight, sc = artBoxed(di) ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), dw = iw0 * sc, dh = ih0 * sc; c.save(); c.translate(L + aw / 2, T + ah / 2); c.rotate(th); c.drawImage(di, -dw / 2, -dh / 2, dw, dh); c.restore(); }
+  if (di && di.complete && di.naturalWidth) { const rot = PV.drot || 0, th = rot * Math.PI / 180, cs = Math.abs(Math.cos(th)), sn = Math.abs(Math.sin(th)), iw0 = di.naturalWidth, ih0 = di.naturalHeight, sc = artBoxed(di) ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), dw = iw0 * sc * ((PV.dsz || 100) / 100), dh = ih0 * sc * ((PV.dsz || 100) / 100); c.save(); c.translate(L + aw / 2 + ((PV.dx || 0) / 100) * aw, T + ah / 2 + ((PV.dy || 0) / 100) * ah); c.rotate(th); c.drawImage(di, -dw / 2, -dh / 2, dw, dh); c.restore(); }
   if (PV.showName) { c.globalCompositeOperation = PV.ink === "black" && !di ? "multiply" : "source-over"; c.drawImage(nm.o, PV.nx - nm.o.width / K / 2, PV.ny - nm.oh / 2, nm.o.width / K, nm.oh); c.globalCompositeOperation = "source-over"; }
   if (PH.overlay) { c.globalCompositeOperation = "multiply"; c.drawImage(base, 0, 0, PH.W, PH.H); c.globalCompositeOperation = "source-over"; }   // the product's own strap, slot and stitching sit on top of the print
   // a soft band of light slides across the glossy print as it is nudged or as the page idles
@@ -764,7 +765,7 @@ try { const c = JSON.parse(localStorage.getItem("prajo:templates") || "null"); i
 function setTemplate(t) {
   const g = t.geom || {}, flat = t.kind === "flat";
   PH = { kind: flat ? "flat" : "round", W: g.W, H: g.H, SY: g.SY || 0, L: g.L, R: g.R, T: g.T, B: g.B, CX: (g.L + g.R) / 2, RAD: (g.R - g.L) / 2, TY: g.TY || (g.T + g.B) / 2, radius: g.radius || 0, shape: g.shape || "rect", overlay: !!g.overlay };
-  PV.template = t; applyDesignFilter(); PV.ready = false; PV.drot = 0; $("rotDesign").hidden = t.kind !== "flat"; $("rotWrap").style.display = t.kind === "flat" ? "flex" : "none"; setRotUi(); PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; PV.rot = 0; PV.vel = 0; PV.shine = .5; PV.glowFor = null;
+  PV.template = t; applyDesignFilter(); PV.ready = false; PV.drot = 0; PV.dsz = 100; PV.dx = 0; PV.dy = 0; $("rotDesign").hidden = t.kind !== "flat"; $("rotWrap").style.display = t.kind === "flat" ? "flex" : "none"; setRotUi(); PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; PV.rot = 0; PV.vel = 0; PV.shine = .5; PV.glowFor = null;
   [base, layer].forEach((c) => { c.width = PH.W * K; c.height = PH.H * K; }); cv.width = PH.W * K; cv.height = PH.H * K;
   stage.style.aspectRatio = `${PH.W} / ${PH.H}`; stage.style.width = PH.H / PH.W < .8 ? "min(460px, 88vw)" : PH.H / PH.W < 1.3 ? "min(400px, 88vw)" : "";
   $("spinHint").textContent = flat ? "Drag to catch the light" : "Drag to spin"; $("spinHint").classList.remove("off");
@@ -916,12 +917,14 @@ $("saveImg").addEventListener("click", () => {
   o.toBlob((b) => { const a = document.createElement("a"); a.href = URL.createObjectURL(b); a.download = "my-prajo-tumbler.png"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); toast2("Saved to your device"); }, "image/png");
 });
 const normA = (a) => ((Math.round(a) + 180) % 360 + 360) % 360 - 180;
-function setRotUi() { const r = PV.drot || 0; $("rotRange").value = r; $("rotOut").textContent = r + "°"; $("rotDesign").textContent = "↻ Turn 90°"; }
+function setRotUi() { const v = [["rotRange", PV.drot || 0, "°"], ["szRange", PV.dsz || 100, "%"], ["xRange", PV.dx || 0, "%"], ["yRange", PV.dy || 0, "%"]]; v.forEach(([id, val, u]) => { $(id).value = val; $(id + "Out").textContent = val + u; }); $("rotDesign").textContent = "↻ Turn 90°"; }
 $("rotDesign").addEventListener("click", () => { PV.drot = normA((PV.drot || 0) + 90); setRotUi(); requestDraw(); });
-$("rotRange").addEventListener("input", () => { PV.drot = Number($("rotRange").value) || 0; $("rotOut").textContent = PV.drot + "°"; requestDraw(); });
+[["rotRange", "drot"], ["szRange", "dsz"], ["xRange", "dx"], ["yRange", "dy"]].forEach(([id, k]) => $(id).addEventListener("input", () => { PV[k] = Number($(id).value) || (k === "dsz" ? 100 : 0); setRotUi(); requestDraw(); }));
+$("adjReset").addEventListener("click", () => { PV.drot = 0; PV.dsz = 100; PV.dx = 0; PV.dy = 0; setRotUi(); requestDraw(); });
+const adjNoteD = () => { const b = []; if (PV.drot) b.push(`rotated ${PV.drot}°`); if ((PV.dsz || 100) !== 100) b.push(`size ${PV.dsz}%`); if (PV.dx || PV.dy) b.push(`moved ${PV.dx ? `${PV.dx > 0 ? "right" : "left"} ${Math.abs(PV.dx)}%` : ""}${PV.dx && PV.dy ? ", " : ""}${PV.dy ? `${PV.dy > 0 ? "down" : "up"} ${Math.abs(PV.dy)}%` : ""}`); return b.length ? ` (${b.join(", ")})` : ""; };
 $("orderName").addEventListener("click", () => {
   const bits = []; if (PV.showName && nameIn.value.trim()) bits.push(`Name: ${nameIn.value.trim()} (${FONTS[PV.font].label}, ${PV.ink})`);
-  if (PV.design) bits.push(`Design: ${PV.design.name}${PV.drot ? ` (rotated ${PV.drot}°)` : ""}`); else bits.push(`Color: ${$("swName").textContent}`);
+  if (PV.design) bits.push(`Design: ${PV.design.name}${adjNoteD()}`); else bits.push(`Color: ${$("swName").textContent}`);
   const t = PV.template || TEMPLATES[0]; if (TEMPLATES.length > 1) bits.unshift(`Product: ${t.name}`);
   try { const o = document.createElement("canvas"); o.width = 360; o.height = Math.round(cv.height * 360 / cv.width); o.getContext("2d").drawImage(cv, 0, 0, o.width, o.height); sessionStorage.setItem("prajo:preview", o.toDataURL("image/jpeg", .8)); } catch { /* the preview picture is optional */ }
   location.href = `./?prefill=${encodeURIComponent(bits.join(" · ").slice(0, 190))}&cat=${encodeURIComponent(t.category || "tumblers")}${t.listing_id ? "&listing=" + encodeURIComponent(t.listing_id) : ""}${t.listing_id ? "" : "#shop"}`;
@@ -935,7 +938,7 @@ function applyParams() {
   const c = p.get("c"); if (c) [...document.querySelectorAll(".swatches button")].find((b) => b.getAttribute("aria-label") === c)?.click();
   const d = p.get("d"); if (d && DESIGNS.some((x) => x.id === d)) document.querySelector(`#designBox [data-d="${d}"]`)?.click();
   applyPos();
-  const rr = Number(p.get("r")); if (rr && Math.abs(rr) <= 360 && PH.kind === "flat") { PV.drot = normA(rr); setRotUi(); requestDraw(); }
+  if (PH.kind === "flat") { const rr = Number(p.get("r")), sz = Number(p.get("sz")), ox = Number(p.get("ox")), oy = Number(p.get("oy")); if (rr || sz || ox || oy) { if (rr && Math.abs(rr) <= 360) PV.drot = normA(rr); if (sz >= 30 && sz <= 200) PV.dsz = sz; if (Math.abs(ox) <= 50) PV.dx = ox || 0; if (Math.abs(oy) <= 50) PV.dy = oy || 0; setRotUi(); requestDraw(); } }
   sizeName();
 }
 function applyPos() {   // name position from the home page showcase: height (% of the printable area) and turn (degrees)

@@ -39,13 +39,13 @@ function artBoxed(im) {   // art on a white or transparent square (round, arched
 }
 const flatCache = {};
 async function flatPreview(d, tpl, opt) {   // a design printed on a flat product (luggage tag...): cover-fit into its printable area; its strap, slot and stitching stay on top
-  const key = `f3|${tpl.slug}|${d.id}|${(opt && opt.rot) || 0}|${opt && opt.name ? `${opt.name}|${opt.f}|${opt.i}|${opt.y ?? ""}` : ""}`; if (flatCache[key]) return flatCache[key];
+  const key = `f4|${tpl.slug}|${d.id}|${(opt && opt.rot) || 0}|${(opt && opt.s) || 100}|${(opt && opt.x) || 0}|${(opt && opt.y) || 0}|${opt && opt.name ? `${opt.name}|${opt.f}|${opt.i}|${opt.y ?? ""}` : ""}`; if (flatCache[key]) return flatCache[key];
   const [photo, art] = await Promise.all([loadImg(tpl.photo), loadImg(artOf(d))]), g = tpl.geom, { W, H } = g, L = g.L, R = g.R, T = g.T, B = g.B, aw = R - L, ah = B - T;
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const c = cv.getContext("2d"); c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H);
   c.save(); const r = Math.min(g.radius || 0, aw / 2, ah / 2); c.beginPath(); c.moveTo(L + r, T); c.arcTo(R, T, R, B, r); c.arcTo(R, B, L, B, r); c.arcTo(L, B, L, T, r); c.arcTo(L, T, R, T, r); c.closePath(); c.clip();
   const rot = (opt && Number(opt.rot)) || 0, th = rot * Math.PI / 180, cs = Math.abs(Math.cos(th)), sn = Math.abs(Math.sin(th)), iw0 = art.naturalWidth, ih0 = art.naturalHeight;
-  const boxed = artBoxed(art), sc = boxed ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), dw = iw0 * sc, dh = ih0 * sc;
-  c.save(); c.translate(L + aw / 2, T + ah / 2); c.rotate(th); c.drawImage(art, -dw / 2, -dh / 2, dw, dh); c.restore();
+  const boxed = artBoxed(art), sc = boxed ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), dw = iw0 * sc * (((opt && Number(opt.s)) || 100) / 100), dh = ih0 * sc * (((opt && Number(opt.s)) || 100) / 100);
+  c.save(); c.translate(L + aw / 2 + (((opt && Number(opt.x)) || 0) / 100) * aw, T + ah / 2 + (((opt && Number(opt.y)) || 0) / 100) * ah); c.rotate(th); c.drawImage(art, -dw / 2, -dh / 2, dw, dh); c.restore();
   if (opt && opt.name) { const nm = nameSprite(opt.name, opt.f, opt.i, aw * .88), ny = opt.y == null || opt.y === "" ? (g.TY || (T + B) / 2) : T + ah * Math.max(0, Math.min(100, Number(opt.y))) / 100; c.drawImage(nm.o, (L + R) / 2 - nm.o.width / 4, ny - nm.oh / 2, nm.o.width / 2, nm.oh); }
   if (g.overlay) { c.globalCompositeOperation = "multiply"; c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H); c.globalCompositeOperation = "source-over"; }
   c.restore(); return (flatCache[key] = cv.toDataURL("image/jpeg", .9));
