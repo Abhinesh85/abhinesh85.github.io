@@ -1146,6 +1146,7 @@ function mountDesignPicker(p) {
   paintAdj(); $("pRot").onclick = () => { adj.rot = normA(adj.rot + 90); window.__rot = adj.rot; paintAdj(); apply(); };
   $("pAdjReset").onclick = () => { adj.rot = 0; adj.s = 100; adj.x = 0; adj.y = 0; window.__rot = 0; paintAdj(); apply(); };
   ids.forEach(([id, k, u]) => { $(id).oninput = () => { adj[k] = Number($(id).value) || (k === "s" ? 100 : 0); window.__rot = adj.rot; $(id + "Out").textContent = adj[k] + u; clearTimeout(rotT); rotT = setTimeout(apply, 70); }; });
+  inp.closest("label").insertAdjacentHTML("afterend", `<p class="hint" id="pDesignNote" style="margin:6px 2px 0;font-size:13px;opacity:.8"></p>`); const note = $("pDesignNote"); window.__designNote = "";
   const apply = () => {
     const d = list.find((x) => x.id === sel.value);
     const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img");
@@ -1158,12 +1159,12 @@ function mountDesignPicker(p) {
     $("pTitle").textContent = d ? d.name : p.name;
     document.title = `${$("pTitle").textContent} · PrAjo Custom Studio`; $("sbName").textContent = $("pTitle").textContent;
     if (d) $("slides").scrollLeft = 0;
-    card.hidden = !d; rotRow.style.display = d && tplFor(p) ? "flex" : "none"; if (!d) return;
+    card.hidden = !d; rotRow.style.display = d && tplFor(p) ? "flex" : "none"; if (!d) { window.__designNote = ""; note.textContent = ""; return; }
     card.querySelector("img").src = (window.__preview && pre && pre.id === d.id) ? window.__preview : d.card;
     card.querySelector("b").textContent = d.name; { const tp = tplFor(p); card.querySelector("small").textContent = `Printed on your ${tp ? tp.name.toLowerCase() : "tumbler"}`; }
     $("pDesignLink").href = `tumbler.html?${tplFor(p) ? "p=" + encodeURIComponent(tplFor(p).slug) + "&" : ""}d=${encodeURIComponent(d.id)}`;
-    const base = (inp.value || "").replace(/\s*·?\s*Design:[^·]*$/, "").trim();
-    inp.value = (base ? base + " · " : "") + "Design: " + d.name + (tplFor(p) ? adjNote(adj) : "");
+    window.__designNote = `Design: ${d.name}${tplFor(p) ? adjNote(adj) : ""}`;   // goes into the order automatically; the box stays free for the customer's own name
+    note.textContent = `Added to your order: ${window.__designNote}`;
   };
   sel.onchange = apply; apply();
   if (!sel.value) window.__tplReady.then(() => blankTumbler(tplFor(p))).then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
@@ -1191,7 +1192,7 @@ function openProduct(id) {
       ${whyNot(p) ? "" : `<a class="btn btn-gold" href="${SHOP}?search_query=${encodeURIComponent(p.name)}" target="_blank" rel="noopener">${p.digital ? "Get it on Etsy" : "Order on Etsy"}</a>`}
       <div class="ask-row"><button class="btn btn-line" type="button" data-ask>Ask about this item</button><button class="btn btn-line" type="button" data-share aria-label="Share this product">${SHARE_ICON} Share</button></div>
     </div>` : `
-    ${p.personalizable && !p.digital ? `<label class="personal opt"><span>Personalization</span><input id="pPersonal" maxlength="200" placeholder="Name or text to print (leave empty if none)" autocomplete="off"></label>` : ""}
+    ${p.personalizable && !p.digital ? `<label class="personal opt"><span>${p.variations.some((v) => /^personali[sz]ation$/i.test(v.name)) ? "Your name or text" : "Personalization"}</span><input id="pPersonal" maxlength="120" placeholder="Name or text to print (leave empty if none)" autocomplete="off"></label>` : ""}
     <div class="actions">
       ${p.digital ? `<button class="btn btn-gold" type="button" id="addCart">Buy & download · ${fmt(p.price)}</button>
       <p class="etsy-link" style="margin-top:-2px">💾 Instant download right after you pay. Nothing is shipped.</p>` : `<div class="buy-row">
@@ -1309,6 +1310,12 @@ $("slides").addEventListener("scroll", () => {
   clearTimeout(s._t);
   s._t = setTimeout(() => showSlide(Math.round(s.scrollLeft / Math.max(1, s.clientWidth)), false), 80);
 }, { passive: true });
+$("info").addEventListener("input", (e) => {   // typing a name switches the "Add name" option on (and clearing it switches it off), so the price follows
+  if (e.target.id !== "pPersonal" || !cur) return;
+  const vi = (cur.variations || []).findIndex((v) => /^personali[sz]ation$/i.test(v.name)); if (vi < 0) return;
+  const v = cur.variations[vi], want = e.target.value.trim() ? (v.values.find((x) => /add|yes/i.test(x) && !/^no/i.test(x)) || v.values[1]) : v.values[0];
+  const btn = [...document.querySelectorAll(`#info .chips button[data-v="${vi}"]`)].find((b) => b.dataset.val === want); if (btn && btn.getAttribute("aria-pressed") !== "true") btn.click();
+});
 $("info").addEventListener("click", (e) => {
   const b = e.target.closest(".opt .chips button"); if (!b) return;
   b.parentElement.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b));
@@ -1603,7 +1610,7 @@ $("info").addEventListener("click", (e) => {
     return;
   }
   if (e.target.closest("#addCart") && cur) {
-    const options = chosenOptions(), personalization = ($("pPersonal")?.value || "").trim();
+    const options = chosenOptions(), typed = ($("pPersonal")?.value || "").trim(), personalization = [typed, /Design:/i.test(typed) ? "" : (window.__designNote || "")].filter(Boolean).join(" · ").slice(0, 200);
     const items = cart.get();
     const same = items.find((i) => i.id === cur.id && JSON.stringify(i.options) === JSON.stringify(options) && i.personalization === personalization && (i.design || "") === (($("pDesign") && $("pDesign").value) || ""));
     if (same) same.qty = cur.digital ? 1 : Math.min(50, same.qty + pQty);
