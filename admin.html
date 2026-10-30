@@ -176,6 +176,14 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 /* tumbler designs + help */
 .td-how { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px 16px; background: rgba(217, 171, 79, .06); display: grid; gap: 8px; }
 .td-how ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14.5px; }
+.td-list.picking { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+.td-list.picking .td-item { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 8px; cursor: pointer; position: relative; }
+.td-list.picking .td-item img { width: 100%; height: 84px; }
+.td-list.picking .td-item .tdgrab, .td-list.picking .td-item .tg, .td-list.picking .td-item .rm { display: none; }
+.td-list.picking .td-item input.nm { pointer-events: none; min-height: 34px; font-size: 12.5px; text-align: center; padding: 0 4px; }
+.td-list.picking .td-item::before { content: ""; position: absolute; top: 12px; left: 12px; width: 22px; height: 22px; border-radius: 7px; border: 2px solid #fff; background: rgba(0,0,0,.45); z-index: 2; }
+.td-list.picking .td-item.sel { outline: 2px solid var(--gold, #d9ab4f); } .td-list.picking .td-item.sel::before { content: "✓"; background: var(--gold, #d9ab4f); border-color: var(--gold, #d9ab4f); color: #1a1305; font-weight: 900; text-align: center; line-height: 18px; }
+#tdBulk { position: sticky; top: 0; z-index: 5; margin: 10px 0; }
 .td-list { display: grid; gap: 8px; }
 .td-item { display: grid; grid-template-columns: 30px 56px 1fr auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); }
 .td-item.off { opacity: .55; }
@@ -465,7 +473,11 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <p class="hint">Best artwork: a wide image (around 2000 × 1700 px), JPG or PNG. Transparent PNGs are placed on white. We resize everything automatically.</p></div>
       <label class="td-prod">Designs for <select id="tdProd" aria-label="Which product these designs are for"></select></label>
       <p class="hint" style="margin:0 0 10px">Each product has its own designs. Pick the product first, then add or sort its designs.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="tdAdd">＋ Add designs</button><span class="hint" id="tdMsg" style="margin:0"></span></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="tdAdd">＋ Add designs</button><button class="btn" type="button" id="tdSelBtn" aria-pressed="false">☑ Select several</button><button class="btn" type="button" id="tdAZ">Sort A–Z</button><span class="hint" id="tdMsg" style="margin:0"></span></div>
+      <input class="in" id="tdSearch" placeholder="Search designs" aria-label="Search designs" autocomplete="off" style="margin:10px 0 0;width:100%">
+      <div class="bulkbar" id="tdBulk" hidden><b id="tdBulkN">0 selected</b>
+        <button class="btn" type="button" id="tdAll">Select all shown</button><button class="btn gold" type="button" id="tdTop">⬆ Move to top</button><button class="btn" type="button" id="tdBottom">⬇ Move to bottom</button>
+        <button class="btn" type="button" id="tdShow">Show</button><button class="btn" type="button" id="tdHide">Hide</button><button class="btn" type="button" id="tdDelSel" style="color:#ffb4a8">Delete</button><button class="btn" type="button" id="tdDone">Done</button></div>
       <input type="file" id="tdFile" accept="image/*" multiple hidden>
       <div id="tdList" class="td-list"><p class="hint">Loading…</p></div>
     </div>
@@ -1496,17 +1508,44 @@ async function tdLoad() {
   if (error) { $("tdList").innerHTML = `<div class="empty"><b>Not set up yet</b><p class="hint">Run tumbler-designs-setup.sql once in Supabase (SQL Editor). (${esc(error.message)})</p></div>`; return; }
   tdRows = data; tdRender();
 }
-$("tdProd").onchange = () => { tdProd = $("tdProd").value; tdRender(); };
+$("tdProd").onchange = () => { tdProd = $("tdProd").value; tdPicked.clear(); tdRender(); };
+let tdSelMode = false, tdPicked = new Set(), tdShown = [];
+const tdFiltered = () => { const q = $("tdSearch").value.trim().toLowerCase(); return tdMine().filter((r) => !q || r.name.toLowerCase().includes(q)); };
 function tdRender() {
-  $("tdList").innerHTML = tdMine().map((r) => `<div class="td-item${r.visible ? "" : " off"}" data-id="${r.id}">
+  tdShown = tdFiltered(); $("tdList").classList.toggle("picking", tdSelMode); $("tdBulkN").textContent = `${tdPicked.size} selected`;
+  $("tdList").innerHTML = tdShown.map((r) => `<div class="td-item${r.visible ? "" : " off"}${tdSelMode && tdPicked.has(r.id) ? " sel" : ""}" data-id="${r.id}">
     <span class="tdgrab" aria-hidden="true" title="Drag to reorder">⠿</span><img src="${esc(r.thumb)}" alt="">
     <input class="nm" value="${esc(r.name)}" maxlength="60" aria-label="Design name" data-nm>
     <button class="tg" type="button" role="switch" aria-checked="${r.visible}" aria-label="Show this design" data-vis></button>
     <button class="rm" type="button" aria-label="Delete this design" data-del>🗑</button></div>`).join("") || `<div class="empty"><b>No designs yet</b><p class="hint">Tap ＋ Add designs to upload your first one.</p></div>`;
   if (tdSort) tdSort.destroy();
-  tdSort = Sortable.create($("tdList"), { handle: ".tdgrab", animation: 150, onEnd: tdSaveOrder });
+  tdSort = (tdSelMode || $("tdSearch").value.trim()) ? null : Sortable.create($("tdList"), { handle: ".tdgrab", animation: 150, onEnd: tdSaveOrder });
   $("tdState").textContent = `${tdRows.filter((r) => r.visible && (r.product || "tumbler") === "tumbler").length} tumbler designs showing`;
 }
+async function tdApplyOrder(list, label) {   // list = this product's designs in the new order
+  const prev = tdMine().map((r) => r.id); tdRows = [...tdRows.filter((r) => !list.includes(r)), ...list];
+  const save = async (arr) => { const by = new Map(tdRows.map((r) => [r.id, r])); const res = await Promise.all(arr.map((id, i) => { const r = by.get(id); if (!r || r.sort === i * 10) return null; r.sort = i * 10; return sb.from("tumbler_designs").update({ sort: i * 10 }).eq("id", id); }).filter(Boolean)); return !res.some((x) => x && x.error); };
+  tdRender(); const ok = await save(list.map((r) => r.id));
+  if (!ok) return toast("Couldn't save the order");
+  toast(label, async () => { const by = new Map(tdRows.map((r) => [r.id, r])); const back = prev.map((id) => by.get(id)).filter(Boolean); tdRows = [...tdRows.filter((r) => !back.includes(r)), ...back]; tdRender(); await save(prev); });
+}
+function tdSetSel(on) { tdSelMode = on; tdPicked.clear(); $("tdSelBtn").setAttribute("aria-pressed", on); $("tdBulk").hidden = !on; tdRender(); }
+const tdPickedRows = () => tdMine().filter((r) => tdPicked.has(r.id));
+$("tdSelBtn").onclick = () => tdSetSel(!tdSelMode); $("tdDone").onclick = () => tdSetSel(false);
+$("tdSearch").addEventListener("input", tdRender);
+$("tdAll").onclick = () => { tdShown.forEach((r) => tdPicked.add(r.id)); tdRender(); };
+$("tdTop").onclick = () => { const p = tdPickedRows(); if (!p.length) return toast("Tap the designs you want to move first."); const rest = tdMine().filter((r) => !tdPicked.has(r.id)); tdPicked.clear(); tdApplyOrder([...p, ...rest], `${p.length} moved to the top`); };
+$("tdBottom").onclick = () => { const p = tdPickedRows(); if (!p.length) return toast("Tap the designs you want to move first."); const rest = tdMine().filter((r) => !tdPicked.has(r.id)); tdPicked.clear(); tdApplyOrder([...rest, ...p], `${p.length} moved to the bottom`); };
+$("tdAZ").onclick = () => { if (!confirm("Sort all " + tdMine().length + " designs A to Z? You can undo it right after.")) return; tdApplyOrder([...tdMine()].sort((x, y) => x.name.localeCompare(y.name, undefined, { sensitivity: "base" })), "Sorted A to Z"); };
+async function tdBulkVis(on) { const p = tdPickedRows(); if (!p.length) return toast("Tap the designs first."); const ids = p.map((r) => r.id), { error } = await sb.from("tumbler_designs").update({ visible: on }).in("id", ids); if (error) return toast("Couldn't update: " + error.message); p.forEach((r) => (r.visible = on)); tdRender(); toast(`${ids.length} design${ids.length > 1 ? "s" : ""} ${on ? "now showing" : "hidden"}`, async () => { p.forEach((r) => (r.visible = !on)); tdRender(); await sb.from("tumbler_designs").update({ visible: !on }).in("id", ids); }); }
+$("tdShow").onclick = () => tdBulkVis(true); $("tdHide").onclick = () => tdBulkVis(false);
+$("tdDelSel").onclick = async () => {
+  const p = tdPickedRows(); if (!p.length) return toast("Tap the designs first.");
+  if (!confirm(`Delete ${p.length} design${p.length > 1 ? "s" : ""} permanently? This can't be undone.`)) return;
+  const ids = p.map((r) => r.id), { error } = await sb.from("tumbler_designs").delete().in("id", ids); if (error) return toast("Couldn't delete: " + error.message);
+  const paths = p.flatMap((r) => [r.art, r.card, r.thumb]).map(tdPath).filter(Boolean); if (paths.length) await sb.storage.from("design-art").remove(paths).catch(() => {});
+  tdRows = tdRows.filter((r) => !ids.includes(r.id)); tdPicked.clear(); tdRender(); toast(`Deleted ${ids.length}`);
+};
 async function tdSaveOrder() {
   const ids = [...$("tdList").querySelectorAll(".td-item")].map((e) => e.dataset.id), by = new Map(tdRows.map((r) => [r.id, r]));
   const mine = ids.map((id) => by.get(id)).filter(Boolean); tdRows = [...tdRows.filter((r) => !mine.includes(r)), ...mine];   // only this product's designs are re-ordered
@@ -1525,6 +1564,7 @@ $("tdList").addEventListener("change", async (e) => {
 });
 $("tdList").addEventListener("click", async (e) => {
   const row = e.target.closest(".td-item"); if (!row) return; const r = tdRows.find((x) => x.id === row.dataset.id);
+  if (tdSelMode) { tdPicked.has(r.id) ? tdPicked.delete(r.id) : tdPicked.add(r.id); tdRender(); return; }
   if (e.target.matches("[data-vis]")) {
     const visible = !r.visible, { error } = await sb.from("tumbler_designs").update({ visible }).eq("id", r.id);
     if (error) return toast("Couldn't change it: " + error.message); r.visible = visible; tdRender(); toast(visible ? "Showing on the store" : "Hidden from the store");
