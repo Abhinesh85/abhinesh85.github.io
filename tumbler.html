@@ -694,12 +694,21 @@ function rebuildName() {
   cv.setAttribute("aria-label", `${PV.template ? PV.template.name : "Product"} preview with the name ${name}${PV.design ? " and the " + PV.design.name + " design" : ""}`);
 }
 const layer = document.createElement("canvas"); layer.width = PH.W * K; layer.height = PH.H * K;
+function artBoxed(im) {   // art on a white or transparent square (round, arched or cut-out shapes): fit the whole thing instead of cropping it
+  if (im.__boxed !== undefined) return im.__boxed;
+  try {
+    const c = document.createElement("canvas"), n = 12; c.width = c.height = n; const x = c.getContext("2d", { willReadFrequently: true }), w = im.naturalWidth, h = im.naturalHeight, k = Math.max(4, Math.round(Math.min(w, h) * .02));
+    const spots = [[0, 0], [w - k, 0], [0, h - k], [w - k, h - k]]; let light = 0;
+    for (const [sx, sy] of spots) { x.clearRect(0, 0, n, n); x.drawImage(im, sx, sy, k, k, 0, 0, n, n); const d = x.getImageData(0, 0, n, n).data; let a = 0, l = 0; for (let i = 0; i < d.length; i += 4) { a += d[i + 3]; l += (d[i] + d[i + 1] + d[i + 2]) / 3; } const px = d.length / 4; if (a / px < 40 || l / px > 238) light++; }
+    return (im.__boxed = light >= 3);
+  } catch { return (im.__boxed = false); }
+}
 function drawFlat() {
   const c = cx2, { L, R, T, B } = PH, aw = R - L, ah = B - T;
   c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "source-over"; c.globalAlpha = 1; c.drawImage(base, 0, 0);
   c.setTransform(K, 0, 0, K, 0, 0); c.save(); areaPath(c); c.clip();
   const di = PV.design && dImgs[PV.design.id];
-  if (di && di.complete && di.naturalWidth) { const sc = Math.max(aw / di.naturalWidth, ah / di.naturalHeight), dw = di.naturalWidth * sc, dh = di.naturalHeight * sc; c.drawImage(di, L + aw / 2 - dw / 2, T + ah / 2 - dh / 2, dw, dh); }
+  if (di && di.complete && di.naturalWidth) { const sc = artBoxed(di) ? Math.min(aw / di.naturalWidth, ah / di.naturalHeight) * .97 : Math.max(aw / di.naturalWidth, ah / di.naturalHeight), dw = di.naturalWidth * sc, dh = di.naturalHeight * sc; c.drawImage(di, L + aw / 2 - dw / 2, T + ah / 2 - dh / 2, dw, dh); }
   if (PV.showName) { c.globalCompositeOperation = PV.ink === "black" && !di ? "multiply" : "source-over"; c.drawImage(nm.o, PV.nx - nm.o.width / K / 2, PV.ny - nm.oh / 2, nm.o.width / K, nm.oh); c.globalCompositeOperation = "source-over"; }
   if (PH.overlay) { c.globalCompositeOperation = "multiply"; c.drawImage(base, 0, 0, PH.W, PH.H); c.globalCompositeOperation = "source-over"; }   // the product's own strap, slot and stitching sit on top of the print
   // a soft band of light slides across the glossy print as it is nudged or as the page idles

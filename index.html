@@ -1150,8 +1150,8 @@ function mountDesignPicker(p) {
     if (d) $("slides").scrollLeft = 0;
     card.hidden = !d; if (!d) return;
     card.querySelector("img").src = (window.__preview && pre && pre.id === d.id) ? window.__preview : d.card;
-    card.querySelector("b").textContent = d.name; card.querySelector("small").textContent = "Printed edge to edge on your tumbler";
-    $("pDesignLink").href = "tumbler.html?d=" + encodeURIComponent(d.id);
+    card.querySelector("b").textContent = d.name; { const tp = tplFor(p); card.querySelector("small").textContent = `Printed on your ${tp ? tp.name.toLowerCase() : "tumbler"}`; }
+    $("pDesignLink").href = `tumbler.html?${tplFor(p) ? "p=" + encodeURIComponent(tplFor(p).slug) + "&" : ""}d=${encodeURIComponent(d.id)}`;
     const base = (inp.value || "").replace(/\s*·?\s*Design:[^·]*$/, "").trim();
     inp.value = (base ? base + " · " : "") + "Design: " + d.name;
   };
