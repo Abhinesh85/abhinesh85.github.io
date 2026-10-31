@@ -210,9 +210,14 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 .card .ph { position: relative; aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; background: var(--panel); border: 1px solid var(--line-soft); transition: border-color .3s, box-shadow .3s, transform .3s; }
 .card .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .5s, transform .8s cubic-bezier(.2, .7, .2, 1); }
 .card .ph img + img { opacity: 0; }
+.card.dig .ph { background: #fff; } .card.dig .ph img { object-fit: contain; }
+.card.seeall .ph { display: grid; place-content: center; gap: 8px; padding: 18px; text-align: center; background: var(--panel-2, #13213a); border-style: dashed; }
+.card.seeall b { font-family: var(--f-display); font-size: 22px; color: var(--gold-2); } .card.seeall small { font-size: 14px; color: var(--muted); }
+
 .card .ph img.cs { z-index: 1; opacity: 0; object-fit: contain; background: #efefef; transition: opacity .8s; }
 .card .ph img.cs.on { opacity: 1; }
 .card .clab { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: grid; gap: 2px; padding: 26px 12px 10px; background: linear-gradient(transparent, rgba(8, 12, 22, .82)); color: #fff; pointer-events: none; }
+.card .clab:empty { display: none; }
 .card .clab b { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-2); }
 .card .clab small { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity .4s; }
 @media (hover: hover) {
@@ -1030,24 +1035,24 @@ function setFilter(f) {
   if (sortBy === "lo") list = [...list].sort((a, b) => a.price - b.price);
   else if (sortBy === "hi") list = [...list].sort((a, b) => b.price - a.price);
   else if (sortBy === "new") list = [...list].sort((a, b) => (b.created || 0) - (a.created || 0));
-  $("shopCount").textContent = list.length === total ? `${total} ${total === 1 ? "design" : "designs"}` : `Showing ${list.length} of ${total}`;
+  let more = 0;   // the "All" view leads with the made-to-order pieces; the digital printables sit behind one tile at the end
+  if (filter === "all" && !occ && !sortBy) { const pr = list.filter((p) => p.category === "printables"); if (pr.length > 4) { more = pr.length; const keep = new Set(pr.slice(0, 4)); list = list.filter((p) => p.category !== "printables" || keep.has(p)); } }
+  $("shopCount").textContent = list.length === total || more ? `${total} ${total === 1 ? "design" : "designs"}` : `Showing ${list.length} of ${total}`;
   if (!list.length) { $("grid").innerHTML = `<div class="empty-shop"><b>Nothing matches that yet.</b><br>Try another occasion, or ask us for a custom piece.<br><button class="btn btn-line" type="button" id="clearOcc">Show everything</button></div>`; return; }
   $("grid").innerHTML = list.map((p) => {
     const badge = soldOut(p) ? `<span class="badge out">Sold out</span>`
-      : p.digital ? `<span class="badge">Instant download</span>`
-      : p.stock > 0 && p.stock <= lowAt() ? `<span class="badge low">Only ${p.stock} left</span>`
-      : p.personalizable ? `<span class="badge">Personalizable</span>` : "";
-    return `<a class="card${soldOut(p) ? " soldout" : ""}" href="#p/${esc(p.id)}">
+      : p.stock > 0 && p.stock <= lowAt() && !p.digital ? `<span class="badge low">Only ${p.stock} left</span>` : "";
+    return `<a class="card${soldOut(p) ? " soldout" : ""}${p.digital ? " dig" : ""}" href="#p/${esc(p.id)}">
       <span class="ph">${badge}${isNew(p) && !soldOut(p) ? `<span class="badge new">New</span>` : ""}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy">${p.images[1] ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
       <span class="nm">${esc(p.name)}</span>
       <span class="pr">${priceHtml(p)}</span></a>`;
-  }).join("");
+  }).join("") + (more ? `<button class="card seeall" type="button" data-f="printables"><span class="ph"><b>See all ${more} printables</b><small>Workbooks &amp; coloring books, instant download →</small></span></button>` : "");
   if (window.__cardShows) window.__cardShows();
 }
 $("filters").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setFilter(b.dataset.f); });
 $("sortSel").onchange = () => { sortBy = $("sortSel").value; setFilter(filter); };
 $("occSel").onchange = () => { occ = $("occSel").value; setFilter(filter); };
-$("grid").addEventListener("click", (e) => { if (e.target.id === "clearOcc") { occ = sortBy = ""; $("occSel").value = $("sortSel").value = ""; setFilter(filter); } });
+$("grid").addEventListener("click", (e) => { const sa = e.target.closest(".seeall"); if (sa) { setFilter(sa.dataset.f); $("shop").scrollIntoView({ behavior: "smooth" }); return; } if (e.target.id === "clearOcc") { occ = sortBy = ""; $("occSel").value = $("sortSel").value = ""; setFilter(filter); } });
 setFilter(filter);
 shopReady = true;
 if (window.__prefill) {
