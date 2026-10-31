@@ -169,6 +169,11 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 
 
 /* marquee */
+.ownbox { display: grid; grid-template-columns: auto 1fr auto; gap: 18px 22px; align-items: center; padding: 22px 26px; border-radius: 22px; border: 1px solid var(--gold); background: linear-gradient(120deg, rgba(217, 171, 79, .14), rgba(242, 138, 36, .06)); }
+.ownico { font-size: 40px; line-height: 1; }
+.ownbox h2 { font-size: clamp(20px, 2.6vw, 28px); margin: 0 0 6px; }
+.ownbox p { margin: 0; color: var(--muted); max-width: 62ch; }
+@media (max-width: 720px) { .ownbox { grid-template-columns: 1fr; text-align: left; padding: 20px; } .ownico { font-size: 32px; } .ownbox .btn { justify-self: start; } }
 .marquee { border-block: 1px solid var(--line); background: linear-gradient(90deg, rgba(217, 171, 79, .08), rgba(242, 138, 36, .08)); overflow: hidden; }
 .marquee .track { display: flex; width: max-content; padding: 16px 0; animation: slide 38s linear infinite; font-family: var(--f-label); font-size: 14px; letter-spacing: .24em; text-transform: uppercase; color: var(--gold-2); white-space: nowrap; }
 /* spacing lives inside each item (not flex gap) so the two copies are exactly half the track: seamless loop */
@@ -608,6 +613,17 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
   </section>
 
   <div class="marquee" aria-hidden="true"><div class="track" id="track"></div></div>
+
+  <section class="band ownpic" id="ownpic" aria-labelledby="ownTitle" style="padding-block:34px 10px">
+    <div class="wrap">
+      <div class="ownbox">
+        <div class="ownico" aria-hidden="true">📷</div>
+        <div class="owntxt"><h2 id="ownTitle">Have your own picture? We can print it.</h2>
+          <p>Send us a photo, a drawing, a logo or your own artwork and we'll put it on a tumbler, luggage tag, mug and more. A pet, a family photo, a team crest, a child's drawing. Just message us the picture and we'll sort out the rest.</p></div>
+        <button class="btn btn-gold" type="button" data-chat>Send us your picture</button>
+      </div>
+    </div>
+  </section>
 
   <section class="band" id="gallery" aria-labelledby="galTitle">
     <div class="wrap">
@@ -1170,6 +1186,7 @@ function mountDesignPicker(p) {
   lab.insertAdjacentHTML("beforebegin", `<div class="designpick opt"><span>Design</span><select id="pDesign" data-prod="${esc(prodSlug(p))}"><option value="">Choose a design…</option>${list.map((d) => `<option value="${esc(d.id)}"${pre && pre.id === d.id ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select>
     <div id="pRotRow" style="display:none;gap:8px 14px;margin:0 0 10px;flex-wrap:wrap;align-items:center"><button type="button" class="btn btn-line" id="pRot">↻ Turn 90°</button><button type="button" class="btn btn-line" id="pAdjReset">Reset</button>
       <label class="adj"><span>Angle</span><input type="range" id="pRotRange" min="-180" max="180" step="1" value="0"><output id="pRotRangeOut">0°</output></label><label class="adj"><span>Size</span><input type="range" id="pSzRange" min="30" max="200" step="1" value="100"><output id="pSzRangeOut">100%</output></label><label class="adj"><span>Left / right</span><input type="range" id="pXRange" min="-50" max="50" step="1" value="0"><output id="pXRangeOut">0%</output></label><label class="adj"><span>Up / down</span><input type="range" id="pYRange" min="-50" max="50" step="1" value="0"><output id="pYRangeOut">0%</output></label></div>
+    <p class="hint" style="margin:2px 2px 10px;font-size:13px;opacity:.85">📷 Want your own picture instead? <button type="button" data-chat style="background:none;border:0;padding:0;color:var(--gold-2);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer">Send it to us</button> and we'll print it.</p>
     <div class="yourdesign" id="pDesignCard" hidden><img alt="Design preview"><div><b></b><small></small><a class="etsy-link" id="pDesignLink" href="#">See it with your name in the designer</a></div></div></div>`);
   const sel = $("pDesign"), card = $("pDesignCard"), rotRow = $("pRotRow"), qp = new URLSearchParams(location.search); let rotT = 0;
   const adj = { rot: Number(qp.get("pr")) || 0, s: Number(qp.get("ps")) || 100, x: Number(qp.get("px")) || 0, y: Number(qp.get("py")) || 0 }; window.__adj = adj; window.__rot = adj.rot;
