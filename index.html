@@ -210,6 +210,8 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 .card .ph { position: relative; aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; background: var(--panel); border: 1px solid var(--line-soft); transition: border-color .3s, box-shadow .3s, transform .3s; }
 .card .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .5s, transform .8s cubic-bezier(.2, .7, .2, 1); }
 .card .ph img + img { opacity: 0; }
+.card .ph.wide::before { content: ""; position: absolute; inset: 0; background: var(--bg) center / cover; filter: blur(22px) brightness(.72); transform: scale(1.25); }
+.card .ph.wide img:not(.cs) { object-fit: contain; }
 .card.dig .ph { background: #fff; } .card.dig .ph img { object-fit: contain; }
 .card.seeall .ph { display: grid; place-content: center; gap: 8px; padding: 18px; text-align: center; background: var(--panel-2, #13213a); border-style: dashed; }
 .card.seeall b { font-family: var(--f-display); font-size: 22px; color: var(--gold-2); } .card.seeall small { font-size: 14px; color: var(--muted); }
@@ -1043,7 +1045,7 @@ function setFilter(f) {
     const badge = soldOut(p) ? `<span class="badge out">Sold out</span>`
       : p.stock > 0 && p.stock <= lowAt() && !p.digital ? `<span class="badge low">Only ${p.stock} left</span>` : "";
     return `<a class="card${soldOut(p) ? " soldout" : ""}${p.digital ? " dig" : ""}" href="#p/${esc(p.id)}">
-      <span class="ph">${badge}${isNew(p) && !soldOut(p) ? `<span class="badge new">New</span>` : ""}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy">${p.images[1] ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
+      <span class="ph">${badge}${isNew(p) && !soldOut(p) ? `<span class="badge new">New</span>` : ""}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy" onload="window.__cardFit&&__cardFit(this)">${p.images[1] ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
       <span class="nm">${esc(p.name)}</span>
       <span class="pr">${priceHtml(p)}</span></a>`;
   }).join("") + (more ? `<button class="card seeall" type="button" data-f="printables"><span class="ph"><b>See all ${more} printables</b><small>Workbooks &amp; coloring books, instant download →</small></span></button>` : "");
@@ -1155,6 +1157,8 @@ function designList(slug) {   // each product has its own designs (admin → Tum
   try { const c = JSON.parse(localStorage.getItem("prajo:gallery") || "null"); if (Array.isArray(c) && c.length) return c; } catch { /* none cached */ } return [];
 }
 const prodSlug = (p) => (tplFor(p) ? tplFor(p).slug : "tumbler");
+/* wide photos (Etsy shots are often landscape) show whole on a soft blur of themselves instead of being cropped to a sliver */
+window.__cardFit = (im) => { const ph = im.closest(".ph"); if (!ph || ph.dataset.fit || !im.naturalHeight) return; ph.dataset.fit = "1"; if (im.naturalWidth / im.naturalHeight > 1.2 && !ph.closest(".dig")) { ph.classList.add("wide"); ph.style.setProperty("--bg", `url("${im.currentSrc || im.src}")`); } };
 /* shop cards of "custom" listings (tumbler, luggage tag...) flip through the first designs of their list by themselves, so people see they can pick */
 let csTimer = 0;
 window.__cardShows = function () {
