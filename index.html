@@ -205,6 +205,11 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 .card .ph { position: relative; aspect-ratio: 4 / 5; border-radius: 18px; overflow: hidden; background: var(--panel); border: 1px solid var(--line-soft); transition: border-color .3s, box-shadow .3s, transform .3s; }
 .card .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: opacity .5s, transform .8s cubic-bezier(.2, .7, .2, 1); }
 .card .ph img + img { opacity: 0; }
+.card .ph img.cs { z-index: 1; opacity: 0; object-fit: contain; background: #efefef; transition: opacity .8s; }
+.card .ph img.cs.on { opacity: 1; }
+.card .clab { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: grid; gap: 2px; padding: 26px 12px 10px; background: linear-gradient(transparent, rgba(8, 12, 22, .82)); color: #fff; pointer-events: none; }
+.card .clab b { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-2); }
+.card .clab small { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity .4s; }
 @media (hover: hover) {
   .card:hover .ph { border-color: var(--gold); box-shadow: 0 18px 50px rgba(0, 0, 0, .45), 0 0 0 1px var(--gold), 0 0 40px rgba(217, 171, 79, .18); transform: translateY(-4px); }
   .card:hover .ph img:first-child { transform: scale(1.04); }
@@ -1021,6 +1026,7 @@ function setFilter(f) {
       <span class="nm">${esc(p.name)}</span>
       <span class="pr">${priceHtml(p)}</span></a>`;
   }).join("");
+  if (window.__cardShows) window.__cardShows();
 }
 $("filters").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setFilter(b.dataset.f); });
 $("sortSel").onchange = () => { sortBy = $("sortSel").value; setFilter(filter); };
@@ -1128,6 +1134,32 @@ function designList(slug) {   // each product has its own designs (admin → Tum
   try { const c = JSON.parse(localStorage.getItem("prajo:gallery") || "null"); if (Array.isArray(c) && c.length) return c; } catch { /* none cached */ } return [];
 }
 const prodSlug = (p) => (tplFor(p) ? tplFor(p).slug : "tumbler");
+/* shop cards of "custom" listings (tumbler, luggage tag...) flip through the first designs of their list by themselves, so people see they can pick */
+let csTimer = 0;
+window.__cardShows = function () {
+  clearInterval(csTimer);
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches || typeof P === "undefined") return;
+  const shows = [];
+  document.querySelectorAll("#grid .card").forEach((a) => {
+    const id = decodeURIComponent((a.getAttribute("href") || "").replace(/^#p\//, "")), p = P.find((x) => x.id === id), ph = a.querySelector(".ph");
+    if (!p || !ph || !(p.tags || []).includes("custom") || soldOut(p)) return;
+    const imgs = [0, 1].map(() => { const i = document.createElement("img"); i.alt = ""; i.className = "cs"; ph.appendChild(i); return i; }), lab = document.createElement("span"); lab.className = "clab"; ph.appendChild(lab);
+    shows.push({ p, ph, imgs, lab, i: -1, front: 1, busy: false, n: 0 });
+  });
+  if (!shows.length) return;
+  const step = (sh) => {
+    if (sh.busy) return; const r = sh.ph.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight || document.hidden) return;
+    const list = designList(prodSlug(sh.p)); if (!list.length) return; sh.n = list.length; sh.busy = true;
+    const k = (sh.i + 1) % Math.min(list.length, 10), d = list[k], back = sh.imgs[1 - sh.front];
+    window.__tplReady.then(() => tumblerPreview(d, undefined, tplFor(sh.p))).then((u) => new Promise((ok) => { back.onload = ok; back.onerror = ok; back.src = u; })).then(() => {
+      back.classList.add("on"); sh.imgs[sh.front].classList.remove("on"); sh.front = 1 - sh.front; sh.i = k;
+      sh.lab.innerHTML = `<b>Pick your design · ${sh.n}</b><small>${esc(d.name)}</small>`;
+    }).catch(() => {}).finally(() => { sh.busy = false; });
+  };
+  shows.forEach((sh, j) => setTimeout(() => step(sh), 300 + j * 500));
+  csTimer = setInterval(() => shows.forEach(step), 2800);
+};
+document.addEventListener("designs-ready", () => window.__cardShows && window.__cardShows());
 const adjNote = (a) => { const b = []; if (a.rot) b.push(`rotated ${a.rot}°`); if (a.s !== 100) b.push(`size ${a.s}%`); if (a.x || a.y) b.push(`moved ${a.x ? `${a.x > 0 ? "right" : "left"} ${Math.abs(a.x)}%` : ""}${a.x && a.y ? ", " : ""}${a.y ? `${a.y > 0 ? "down" : "up"} ${Math.abs(a.y)}%` : ""}`); return b.length ? ` (${b.join(", ")})` : ""; };
 function mountDesignPicker(p) {
   const inp = $("pPersonal"), list = designList(prodSlug(p));
