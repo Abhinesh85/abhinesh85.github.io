@@ -64,6 +64,17 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chips button { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-soft); background: none; color: var(--muted); font-weight: 700; font-size: 13.5px; cursor: pointer; }
 .chips button[aria-pressed="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+.dp-tabs { display: flex; gap: 8px; margin: 0 0 12px; }
+.dp-grp { border: 1px solid var(--line, #3a3a3a); border-radius: 14px; padding: 10px; margin: 12px 0; }
+.dp-grp > h4 { margin: 0 0 8px; font-size: 13px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.dp-tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: rgba(217,171,79,.18); color: var(--gold, #d9ab4f); }
+.dp-row { display: flex; gap: 10px; align-items: center; padding: 6px; border-radius: 10px; cursor: pointer; }
+.dp-row.sel { background: rgba(255,120,100,.12); outline: 1px solid rgba(255,120,100,.5); }
+.dp-row img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; background: #fff; flex: none; }
+.dp-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dp-row small { display: block; opacity: .65; }
+.dp-row input[type=checkbox] { width: 22px; height: 22px; flex: none; }
+.dp-keep { font-size: 12px; padding: 4px 10px; }
 .bulkbar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; margin: 0 0 14px; border-radius: 14px; background: var(--panel-2, #16203a); border: 1px solid var(--gold, #d9ab4f); }
 .bulkbar[hidden] { display: none; }
 .bulkbar b { margin-right: auto; }
@@ -332,6 +343,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <button type="button" role="menuitem" id="ptBtn">🧩 Products to design<small id="ptState">Tumbler, mug, coaster, badge and more</small></button>
         <button type="button" role="menuitem" id="scBtn">🏠 Home page showcase<small id="scState">The three tumblers at the top of your home page</small></button>
         <button type="button" role="menuitem" id="tdBtn">🥤 Tumbler designs<small id="tdState">Artwork customers can try on a tumbler</small></button>
+        <button type="button" role="menuitem" id="dpBtn">🔍 Find duplicates<small>Spot repeated designs and listings, then clear them out</small></button>
         <button type="button" role="menuitem" id="helpBtn">📘 How to update your site<small>Plain-language steps, no coding</small></button>
         <button type="button" role="menuitem" id="dsBtn">🎨 Custom designs<small id="dsState">Designs customers sent from the Design studio</small></button>
         <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
@@ -483,6 +495,21 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <button class="btn" type="button" id="tdShow">Show</button><button class="btn" type="button" id="tdHide">Hide</button><button class="btn" type="button" id="tdDelSel" style="color:#ffb4a8">Delete</button><button class="btn" type="button" id="tdDone">Done</button></div>
       <input type="file" id="tdFile" accept="image/*" multiple hidden>
       <div id="tdList" class="td-list"><p class="hint">Loading…</p></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="dpSheet" hidden role="dialog" aria-modal="true" aria-labelledby="dpTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="dpTitle">Find duplicates</h2><button class="x" type="button" id="dpClose" aria-label="Close">×</button></div>
+    <div class="panel-body">
+      <div class="dp-tabs"><button class="btn gold" type="button" id="dpTabD" aria-pressed="true">🥤 Designs</button><button class="btn" type="button" id="dpTabL" aria-pressed="false">🛍 Listings</button></div>
+      <label class="td-prod" id="dpProdWrap">Designs for <select id="dpProd" aria-label="Which product's designs to check"></select></label>
+      <p class="hint" id="dpHow" style="margin:0 0 10px"></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="dpScan">🔍 Scan now</button><span class="hint" id="dpMsg" style="margin:0"></span></div>
+      <div class="bulkbar" id="dpBulk" hidden><b id="dpN">0 selected</b>
+        <button class="btn" type="button" id="dpAllX">Select all extras</button><button class="btn" type="button" id="dpNone">Clear</button>
+        <button class="btn" type="button" id="dpHide">Hide</button><button class="btn" type="button" id="dpDel" style="color:#ffb4a8">Delete</button></div>
+      <div id="dpList"></div>
     </div>
   </div>
 </div>
@@ -1560,6 +1587,92 @@ async function tdSaveOrder() {
   const res = await Promise.all(jobs.filter(Boolean).map((j) => j.catch(() => "x")));
   toast(res.includes("x") ? "Couldn't save the order" : "Order saved");
 }
+
+/* ---------- find duplicates: designs by picture, listings by name or main photo ---------- */
+let dpTab = "designs", dpGroups = [], dpPick = new Set(), dpItems = new Map(), dpBusy = false;
+const dpNorm = (s) => String(s || "").toLowerCase().replace(/\(.*?\)/g, " ").replace(/\b(copy|duplicate)\b/g, " ").replace(/[^a-z0-9]+/g, "");
+async function dpHash(url) {   // 256-bit gradient fingerprint + 4x4 colour grid of a picture
+  const res = await fetch(url, { cache: "force-cache" }); if (!res.ok) throw new Error("load");
+  const bmp = await createImageBitmap(await res.blob());
+  const grab = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d", { willReadFrequently: true }); x.imageSmoothingQuality = "high"; x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); x.drawImage(bmp, 0, 0, w, h); return x.getImageData(0, 0, w, h).data; };
+  const d = grab(17, 16), g = []; for (let i = 0; i < 272; i++) g.push(d[i * 4] * .3 + d[i * 4 + 1] * .59 + d[i * 4 + 2] * .11);
+  const bits = new Uint8Array(256); let k = 0; for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) bits[k++] = g[y * 17 + x] > g[y * 17 + x + 1] ? 1 : 0;
+  const c4 = grab(4, 4), col = []; for (let i = 0; i < 16; i++) col.push(c4[i * 4], c4[i * 4 + 1], c4[i * 4 + 2]);
+  bmp.close && bmp.close(); return { bits, col };
+}
+function dpDist(a, b) { let h = 0; for (let i = 0; i < 256; i++) if (a.bits[i] !== b.bits[i]) h++; let c = 0; for (let i = 0; i < 48; i++) c += Math.abs(a.col[i] - b.col[i]); return { h, c: c / 48 }; }
+function dpItemsFor() {
+  if (dpTab === "designs") { const pr = $("dpProd").value || "tumbler"; return tdRows.filter((r) => (r.product || "tumbler") === pr).map((r) => ({ id: r.id, name: r.name, img: r.thumb, off: !r.visible, row: r })); }
+  return rows.filter((r) => r.id !== "custom-design").map((r) => ({ id: r.id, name: r.title || r.name, key: r.name, img: r.images?.[0]?.card || "", off: !r.visible, row: r }));
+}
+async function dpScanRun() {
+  if (dpBusy) return; dpBusy = true; $("dpScan").disabled = true; $("dpList").innerHTML = ""; $("dpBulk").hidden = true; dpPick.clear();
+  const items = dpItemsFor(); dpItems = new Map(items.map((i) => [i.id, i]));
+  let done = 0; const hs = new Map();
+  for (let i = 0; i < items.length; i += 8) {
+    await Promise.all(items.slice(i, i + 8).map(async (it) => { if (it.img) { try { hs.set(it.id, await dpHash(it.img)); } catch (_) {} } done++; $("dpMsg").textContent = `Looking at ${done} of ${items.length}…`; }));
+  }
+  const par = items.map((_, i) => i), find = (i) => (par[i] === i ? i : (par[i] = find(par[i]))), rank = new Map();   // rank: 3 same picture, 2 same name, 1 looks similar
+  const link = (i, j, r) => { const a = find(i), b = find(j); if (a !== b) { par[a] = b; rank.set(b, Math.max(rank.get(a) || 0, rank.get(b) || 0, r)); } else rank.set(a, Math.max(rank.get(a) || 0, r)); };
+  const nk = items.map((it) => dpNorm(it.key || it.name));
+  for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+    let r = 0; const a = hs.get(items[i].id), b = hs.get(items[j].id);
+    if (a && b) { const { h, c } = dpDist(a, b); if (h <= 10 && c < 14) r = 3; else if (h <= 28 && c < 32) r = 1; }
+    if (nk[i] && nk[i] === nk[j]) r = Math.max(r, 2);
+    if (r) link(i, j, r);
+  }
+  const by = new Map(); items.forEach((it, i) => { const k = find(i); (by.get(k) || by.set(k, []).get(k)).push(it); });
+  dpGroups = [...by.entries()].filter(([, v]) => v.length > 1).map(([k, v]) => ({ rank: rank.get(k) || 1, items: v.sort((x, y) => (x.off - y.off)) }));   // showing ones first = the one to keep
+  dpGroups.sort((x, y) => y.rank - x.rank);
+  dpGroups.forEach((g) => { if (g.rank > 1) g.items.slice(1).forEach((it) => dpPick.add(it.id)); });
+  dpBusy = false; $("dpScan").disabled = false; $("dpScan").textContent = "🔍 Scan again";
+  $("dpMsg").textContent = dpGroups.length ? `${dpGroups.length} group${dpGroups.length > 1 ? "s" : ""} found` : `Checked ${items.length}. No duplicates found 🎉`;
+  dpRender();
+}
+function dpRender() {
+  const tag = { 3: "Same picture", 2: "Same name", 1: "Looks similar" };
+  $("dpBulk").hidden = !dpGroups.length; $("dpN").textContent = `${dpPick.size} selected`;
+  $("dpList").innerHTML = dpGroups.map((g, gi) => `<div class="dp-grp"><h4><span class="dp-tag">${tag[g.rank]}</span>${g.items.length} copies${g.rank === 1 ? " · check these by eye, nothing is pre-selected" : " · extras are pre-selected"}</h4>${g.items.map((it) => `<div class="dp-row${dpPick.has(it.id) ? " sel" : ""}" data-id="${esc(it.id)}"><input type="checkbox" ${dpPick.has(it.id) ? "checked" : ""} aria-label="Select ${esc(it.name)}"><img src="${esc(it.img)}" alt="" loading="lazy"><span class="nm">${esc(it.name)}<small>${it.off ? "Hidden from store" : "Showing"}${dpPick.has(it.id) ? "" : " · keeping"}</small></span><button class="btn dp-keep" type="button" data-keep="${gi}">Keep this</button></div>`).join("")}</div>`).join("");
+}
+$("dpList").addEventListener("click", (e) => {
+  const row = e.target.closest(".dp-row"); if (!row) return; const id = row.dataset.id;
+  if (e.target.matches("[data-keep]")) { const g = dpGroups[+e.target.dataset.keep]; g.items.forEach((it) => (it.id === id ? dpPick.delete(it.id) : dpPick.add(it.id))); dpRender(); return; }
+  dpPick.has(id) ? dpPick.delete(id) : dpPick.add(id); dpRender();
+});
+$("dpAllX").onclick = () => { dpPick.clear(); dpGroups.forEach((g) => g.items.slice(1).forEach((it) => dpPick.add(it.id))); dpRender(); };
+$("dpNone").onclick = () => { dpPick.clear(); dpRender(); };
+function dpDrop(ids) { dpGroups.forEach((g) => (g.items = g.items.filter((it) => !ids.includes(it.id)))); dpGroups = dpGroups.filter((g) => g.items.length > 1); ids.forEach((i) => dpPick.delete(i)); dpRender(); $("dpMsg").textContent = dpGroups.length ? `${dpGroups.length} group${dpGroups.length > 1 ? "s" : ""} left` : "All clear 🎉"; }
+const dpPickedIds = () => [...dpPick].filter((id) => dpItems.has(id));
+$("dpHide").onclick = async () => {
+  const ids = dpPickedIds(); if (!ids.length) return toast("Tick the copies first.");
+  const tbl = dpTab === "designs" ? "tumbler_designs" : "listings", stamp = dpTab === "designs" ? {} : { updated_at: new Date().toISOString() };
+  const { error } = await sb.from(tbl).update({ visible: false, ...stamp }).in("id", ids); if (error) return toast("Couldn't hide: " + error.message);
+  const src = dpTab === "designs" ? tdRows : rows; src.forEach((r) => { if (ids.includes(r.id)) r.visible = false; }); ids.forEach((i) => { const it = dpItems.get(i); if (it) it.off = true; }); dpRender(); if (dpTab === "listings") render();
+  toast(`${ids.length} hidden from the store`, async () => { src.forEach((r) => { if (ids.includes(r.id)) r.visible = true; }); ids.forEach((i) => { const it = dpItems.get(i); if (it) it.off = false; }); dpRender(); await sb.from(tbl).update({ visible: true, ...stamp }).in("id", ids); });
+};
+$("dpDel").onclick = async () => {
+  const ids = dpPickedIds(); if (!ids.length) return toast("Tick the copies first.");
+  if (!confirm(`Delete ${ids.length} ${dpTab === "designs" ? "design" : "listing"}${ids.length > 1 ? "s" : ""} permanently? This can't be undone. The ones you didn't tick stay.`)) return;
+  if (dpTab === "designs") {
+    const gone = tdRows.filter((r) => ids.includes(r.id)), { error } = await sb.from("tumbler_designs").delete().in("id", ids); if (error) return toast("Couldn't delete: " + error.message);
+    tdRows = tdRows.filter((r) => !ids.includes(r.id));
+    const keepP = new Set(tdRows.flatMap((r) => [r.art, r.card, r.thumb]).map(tdPath).filter(Boolean)), paths = gone.flatMap((r) => [r.art, r.card, r.thumb]).map(tdPath).filter((p) => p && !keepP.has(p));
+    if (paths.length) await sb.storage.from("design-art").remove(paths).catch(() => {});
+  } else {
+    const { error } = await sb.from("listings").delete().in("id", ids); if (error) return toast("Couldn't delete: " + error.message);
+    rows = rows.filter((r) => !ids.includes(r.id)); render();
+  }
+  toast(`Deleted ${ids.length}`); dpDrop(ids);
+};
+function dpTabSet(t) {
+  dpTab = t; dpGroups = []; dpPick.clear(); $("dpList").innerHTML = ""; $("dpBulk").hidden = true; $("dpMsg").textContent = ""; $("dpScan").textContent = "🔍 Scan now";
+  $("dpTabD").className = "btn" + (t === "designs" ? " gold" : ""); $("dpTabL").className = "btn" + (t === "listings" ? " gold" : ""); $("dpProdWrap").style.display = t === "designs" ? "" : "none";
+  $("dpHow").textContent = t === "designs" ? "Compares the pictures themselves, so a re-saved or resized copy is caught even with a different name." : "Finds listings with the same name, or whose first photo looks the same.";
+}
+$("dpTabD").onclick = () => dpTabSet("designs"); $("dpTabL").onclick = () => dpTabSet("listings"); $("dpScan").onclick = dpScanRun;
+$("dpBtn").onclick = async () => { $("dpSheet").hidden = false; document.body.style.overflow = "hidden"; dpTabSet("designs"); await tdLoad(); $("dpProd").innerHTML = $("tdProd").innerHTML; $("dpProd").value = tdProd; };
+$("dpProd").onchange = () => { dpGroups = []; dpPick.clear(); $("dpList").innerHTML = ""; $("dpBulk").hidden = true; $("dpMsg").textContent = ""; };
+$("dpClose").onclick = () => { $("dpSheet").hidden = true; document.body.style.overflow = ""; };
 async function tdOpen() { $("tdSheet").hidden = false; document.body.style.overflow = "hidden"; await tdLoad(); }
 $("tdBtn").onclick = tdOpen;
 $("tdClose").onclick = () => { $("tdSheet").hidden = true; document.body.style.overflow = ""; };
