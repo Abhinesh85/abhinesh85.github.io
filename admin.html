@@ -274,6 +274,16 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
   .menu button.tg { width: 88px; height: 44px; } .menu button.tg i { width: 36px; height: 36px; } .menu button.tg[aria-checked="true"] i { transform: translateX(44px); } .menu button.tg span { font-size: 13px; }
   .menu .swask { font-size: 16px; padding: 12px; } .menu .swask .btn { min-height: 48px; padding: 8px 22px; font-size: 16px; }
 }
+/* tablets and desktops: a roomy panel that fits the screen and scrolls, instead of a narrow strip */
+@media (min-width: 701px) {
+  header.top { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(10, 18, 32, .97); }   /* a blur on the header would trap the fixed panel inside it */
+  .menu { position: fixed; right: 16px; top: 76px; width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 96px); overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px; gap: 4px; border-radius: 20px; }
+  .menu button, .menu a { padding: 14px 16px; font-size: 16.5px; border-radius: 12px; min-height: 58px; }
+  .menu small { font-size: 14px; }
+  .menu .swrow { padding: 12px 16px; } .menu .swtxt { font-size: 16.5px; } .menu .swtxt small { font-size: 14px; }
+  .menu button.tg { width: 82px; height: 40px; } .menu button.tg i { width: 32px; height: 32px; } .menu button.tg[aria-checked="true"] i { transform: translateX(42px); }
+}
+@media (min-width: 1000px) { .menu { width: min(860px, calc(100vw - 48px)); grid-template-columns: 1fr 1fr; } .menu .swrow { grid-column: auto; } }
 .menu button:hover, .menu a:hover, .menu button:focus-visible, .menu a:focus-visible { background: rgba(245, 236, 220, .06); outline: none; }
 .stks { display: flex; gap: 8px; flex-wrap: wrap; font-size: 11.5px; font-weight: 800; }
 .stk { color: var(--muted); }
