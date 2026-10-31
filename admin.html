@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,500;1,9..144,700&family=Great+Vibes&family=Manrope:wght@400;500;600;700;800&family=Pacifico&family=Dancing+Script:wght@700&family=Caveat:wght@700&family=Playfair+Display:ital,wght@1,700&family=Bebas+Neue&family=Permanent+Marker&family=Lobster&family=Satisfy&display=swap">
 <style id="antiFrame">html{display:none!important}</style>
+<script src="season.js" data-run="off"></script>
 <script src="showcase.js"></script>
 <script>/* refuse to be shown inside another website (clickjacking) */ if (self === top) document.getElementById("antiFrame").remove(); else top.location = self.location;</script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js" integrity="sha384-BWcjm9OdFth9TbhCxZPdm+gAOUMAzQy9nmTs12ioXdCcbVnJaPMn+fMUoQCLt60R" crossorigin="anonymous"></script>
@@ -342,6 +343,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
           <div class="swask" id="studioAsk" hidden><span id="studioAskT"></span><button type="button" class="btn gold" id="studioYes">Confirm</button><button type="button" class="btn line" id="studioNo">Cancel</button></div></div>
         <button type="button" role="menuitem" id="ptBtn">🧩 Products to design<small id="ptState">Tumbler, mug, coaster, badge and more</small></button>
         <button type="button" role="menuitem" id="scBtn">🏠 Home page showcase<small id="scState">The three tumblers at the top of your home page</small></button>
+        <button type="button" role="menuitem" id="snBtn">🎄 Seasonal effects<small id="snState">Falling snow, hearts, ghosts and more on holidays</small></button>
         <button type="button" role="menuitem" id="tdBtn">🥤 Tumbler designs<small id="tdState">Artwork customers can try on a tumbler</small></button>
         <button type="button" role="menuitem" id="dpBtn">🔍 Find duplicates<small>Spot repeated designs and listings, then clear them out</small></button>
         <button type="button" role="menuitem" id="helpBtn">📘 How to update your site<small>Plain-language steps, no coding</small></button>
@@ -510,6 +512,17 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <button class="btn" type="button" id="dpAllX">Select all extras</button><button class="btn" type="button" id="dpNone">Clear</button>
         <button class="btn" type="button" id="dpHide">Hide</button><button class="btn" type="button" id="dpDel" style="color:#ffb4a8">Delete</button></div>
       <div id="dpList"></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="snSheet" hidden role="dialog" aria-modal="true" aria-labelledby="snTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="snTitle">Seasonal effects</h2><button class="x" type="button" id="snClose" aria-label="Close">×</button></div>
+    <div class="panel-body">
+      <p class="hint" style="margin:0 0 12px">Falling decorations appear on your store around each holiday: Santa hats, snow and a decorated tree at Christmas, floating ghosts at Halloween, hearts for Valentine's Day, and more for the major US and Canadian holidays. Leave it on Automatic and it follows the calendar.</p>
+      <label class="td-prod">Show <select id="snSel" aria-label="Which seasonal effect to show"></select></label>
+      <p class="hint" id="snNow" style="margin:0 0 12px"></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="snSave">Save</button><a class="btn" id="snPrev" href="./" target="_blank" rel="noopener">Preview on the store ↗</a><span class="hint" id="snMsg" style="margin:0"></span></div>
     </div>
   </div>
 </div>
@@ -1673,6 +1686,24 @@ $("dpTabD").onclick = () => dpTabSet("designs"); $("dpTabL").onclick = () => dpT
 $("dpBtn").onclick = async () => { $("dpSheet").hidden = false; document.body.style.overflow = "hidden"; dpTabSet("designs"); await tdLoad(); $("dpProd").innerHTML = $("tdProd").innerHTML; $("dpProd").value = tdProd; };
 $("dpProd").onchange = () => { dpGroups = []; dpPick.clear(); $("dpList").innerHTML = ""; $("dpBulk").hidden = true; $("dpMsg").textContent = ""; };
 $("dpClose").onclick = () => { $("dpSheet").hidden = true; document.body.style.overflow = ""; };
+
+/* ---------- seasonal effects: auto by calendar, or force one, or off (site_settings.data.season) ---------- */
+const snLabel = (id) => (window.PRAJO_SEASONS || []).find((x) => x.id === id)?.label || "";
+function snPrev() { const v = $("snSel").value, id = v === "off" ? "off" : v === "auto" ? (window.prajoSeasonNow() || "christmas") : v; $("snPrev").href = `./?season=${encodeURIComponent(id)}`; }
+async function snOpen() {
+  $("snSheet").hidden = false; document.body.style.overflow = "hidden"; $("snMsg").textContent = "";
+  const cur = (await readSiteRow()).season || "auto", now = window.prajoSeasonNow();
+  $("snSel").innerHTML = `<option value="auto">Automatic (follows the calendar)</option><option value="off">Off</option>` + (window.PRAJO_SEASONS || []).map((x) => `<option value="${esc(x.id)}">${esc(x.label)}</option>`).join("");
+  $("snSel").value = cur; $("snNow").textContent = now ? `Right now Automatic shows: ${snLabel(now)}.` : "Right now Automatic shows nothing, because no holiday is close."; snPrev();
+}
+$("snSel").onchange = snPrev; $("snBtn").onclick = snOpen;
+$("snClose").onclick = () => { $("snSheet").hidden = true; document.body.style.overflow = ""; };
+$("snSave").onclick = async () => {
+  const v = $("snSel").value, cur = await readSiteRow(), next = { ...cur }; if (v === "auto") delete next.season; else next.season = v;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+  if (error) return toast("Couldn't save: " + error.message); toast(v === "auto" ? "Automatic: follows the calendar" : v === "off" ? "Seasonal effects are off" : `Showing ${snLabel(v)} on the store`);
+  site = next; $("snMsg").textContent = "Saved. It shows on the store right away.";
+};
 async function tdOpen() { $("tdSheet").hidden = false; document.body.style.overflow = "hidden"; await tdLoad(); }
 $("tdBtn").onclick = tdOpen;
 $("tdClose").onclick = () => { $("tdSheet").hidden = true; document.body.style.overflow = ""; };

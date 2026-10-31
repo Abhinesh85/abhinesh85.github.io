@@ -873,6 +873,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 </div>
 
 <script src="showcase.js"></script>
+<script src="season.js" defer></script>
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
@@ -962,6 +963,7 @@ fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/site_settings?id=eq.1&se
     SITE = rows[0]?.data || {}; siteFresh = true;
     try { localStorage.setItem("prajo:site", JSON.stringify(SITE)); } catch {}
     applySite();
+    if (window.__season) window.__season(SITE.season);
   }).catch(() => { scShow(); });
 const CATS = [
   { id: "tumblers", label: "Tumblers", blurb: "Insulated, full-wrap & engraved" },
