@@ -492,6 +492,7 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
 @media (min-width: 901px) { .tp .preview { grid-template-columns: auto minmax(330px, 1fr); gap: 56px; align-items: center; } .tp .preview { align-items: start; } .tp .stage { width: 296px; top: 96px; } }
 .tp .spinhint { bottom: 14px; }
 .tools { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.tools > .btn { align-self: center; }   /* the two side buttons stay button-sized when the middle column holds the stacked sliders */
 .tools .btn { min-height: 44px; padding: 0 8px; font-size: 13.5px; white-space: nowrap; }
 .prodbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 6px; }
 .prodbar button { min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--line-soft); background: transparent; color: var(--cream); font: 700 15px var(--f-body); cursor: pointer; }
