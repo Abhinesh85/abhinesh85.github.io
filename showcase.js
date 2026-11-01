@@ -48,6 +48,7 @@ async function flatPreview(d, tpl, opt) {   // a design printed on a flat produc
   c.save(); c.translate(L + aw / 2 + (((opt && Number(opt.x)) || 0) / 100) * aw, T + ah / 2 + (((opt && Number(opt.y)) || 0) / 100) * ah); c.rotate(th); c.drawImage(art, -dw / 2, -dh / 2, dw, dh); c.restore();
   if (opt && opt.name) { const nm = nameSprite(opt.name, opt.f, opt.i, aw * .88), ny = opt.y == null || opt.y === "" ? (g.TY || (T + B) / 2) : T + ah * Math.max(0, Math.min(100, Number(opt.y))) / 100; c.drawImage(nm.o, (L + R) / 2 - nm.o.width / 4, ny - nm.oh / 2, nm.o.width / 2, nm.oh); }
   if (g.overlay) { c.globalCompositeOperation = "multiply"; c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H); c.globalCompositeOperation = "source-over"; }
+  if (g.hole) { const h = g.hole; c.save(); c.beginPath(); c.roundRect(h.x, h.y, h.w, h.h, h.r); c.clip(); c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H); c.restore(); }   // a punched slot stays open: the art does not print over it
   c.restore(); return (flatCache[key] = cv.toDataURL("image/jpeg", .9));
 }
 async function tumblerPreview(d, opt, tpl) {   // opt = { name, f, i } also prints a name on it

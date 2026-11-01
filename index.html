@@ -502,6 +502,9 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 .yourdesign img { width: 72px; height: auto; max-height: 120px; object-fit: contain; border-radius: 10px; background: #ededed; flex: none; }
 .designpick select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line, rgba(255,255,255,.18)); background: rgba(255,255,255,.06); color: inherit; font: inherit; margin-bottom: 10px; }
 .designpick select option { color: #111; }
+.designpick input[type=search], .backpick input[type=search] { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line, rgba(255,255,255,.18)); background: rgba(255,255,255,.06); color: inherit; font: inherit; margin-bottom: 8px; }
+.backpick select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line, rgba(255,255,255,.18)); background: rgba(255,255,255,.06); color: inherit; font: inherit; margin-bottom: 10px; }
+.backpick select option { color: #111; }
 .yourdesign small { display: block; color: var(--muted); margin-top: 4px; overflow-wrap: anywhere; }
 .faq { display: grid; gap: 10px; max-width: 820px; }
 .faq details { border: 1px solid rgba(245, 236, 220, .14); border-radius: 14px; background: rgba(245, 236, 220, .03); }
@@ -1191,6 +1194,17 @@ window.__cardShows = function () {
 };
 document.addEventListener("designs-ready", () => window.__cardShows && window.__cardShows());
 const adjNote = (a) => { const b = []; if (a.rot) b.push(`rotated ${a.rot}°`); if (a.s !== 100) b.push(`size ${a.s}%`); if (a.x || a.y) b.push(`moved ${a.x ? `${a.x > 0 ? "right" : "left"} ${Math.abs(a.x)}%` : ""}${a.x && a.y ? ", " : ""}${a.y ? `${a.y > 0 ? "down" : "up"} ${Math.abs(a.y)}%` : ""}`); return b.length ? ` (${b.join(", ")})` : ""; };
+// A long design list gets a search box above it that narrows the dropdown as you type (the chosen design always stays in it).
+function designFilter(sel, list, ph) {
+  if (!sel || list.length < 30) return;
+  const inp = document.createElement("input"); inp.type = "search"; inp.placeholder = "Search " + list.length + " designs…"; inp.setAttribute("aria-label", "Search designs"); inp.style.marginBottom = "8px";
+  sel.parentNode.insertBefore(inp, sel);
+  inp.oninput = () => {
+    const q = inp.value.trim().toLowerCase(), keep = sel.value, hit = list.filter((d) => !q || d.name.toLowerCase().includes(q)), kd = keep && !hit.some((d) => d.id === keep) ? list.find((d) => d.id === keep) : null;
+    sel.innerHTML = `<option value="">${q ? hit.length + " match" + (hit.length === 1 ? "" : "es") : esc(ph)}</option>` + (kd ? `<option value="${esc(kd.id)}">${esc(kd.name)}</option>` : "") + hit.map((d) => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join("");
+    sel.value = keep;
+  };
+}
 function mountDesignPicker(p) {
   const inp = $("pPersonal"), list = designList(prodSlug(p));
   if (!inp || !(p.tags || []).includes("custom") || !list.length) return false;
@@ -1202,6 +1216,7 @@ function mountDesignPicker(p) {
       <label class="adj"><span>Angle</span><input type="range" id="pRotRange" min="-180" max="180" step="1" value="0"><output id="pRotRangeOut">0°</output></label><label class="adj"><span>Size</span><input type="range" id="pSzRange" min="30" max="200" step="1" value="100"><output id="pSzRangeOut">100%</output></label><label class="adj"><span>Left / right</span><input type="range" id="pXRange" min="-50" max="50" step="1" value="0"><output id="pXRangeOut">0%</output></label><label class="adj"><span>Up / down</span><input type="range" id="pYRange" min="-50" max="50" step="1" value="0"><output id="pYRangeOut">0%</output></label></div>
     <p class="hint" style="margin:2px 2px 10px;font-size:13px;opacity:.85">📷 Want your own picture instead? <button type="button" data-chat style="background:none;border:0;padding:0;color:var(--gold-2);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer">Send it to us</button> and we'll print it.</p>
     <div class="yourdesign" id="pDesignCard" hidden><img alt="Design preview"><div><b></b><small></small><a class="etsy-link" id="pDesignLink" href="#">See it with your name in the designer</a></div></div></div>`);
+  designFilter($("pDesign"), list, "Choose a design…");
   const sel = $("pDesign"), card = $("pDesignCard"), rotRow = $("pRotRow"), qp = new URLSearchParams(location.search); let rotT = 0;
   const adj = { rot: Number(qp.get("pr")) || 0, s: Number(qp.get("ps")) || 100, x: Number(qp.get("px")) || 0, y: Number(qp.get("py")) || 0 }; window.__adj = adj; window.__rot = adj.rot;
   const normA = (a) => ((Math.round(a) + 180) % 360 + 360) % 360 - 180, ids = [["pRotRange", "rot", "°"], ["pSzRange", "s", "%"], ["pXRange", "x", "%"], ["pYRange", "y", "%"]];
@@ -1243,6 +1258,7 @@ function mountBackPicker(p) {
     <p class="hint" style="margin:6px 2px 10px;font-size:13px;opacity:.85">📷 ${list.length ? "Or send" : "Send"} us the picture or text for the back: <button type="button" data-chat style="background:none;border:0;padding:0;color:var(--gold-2);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer">Send it to us</button>. Mention “back” so we print it on the right side.</p></div>`);
   const wrap = document.querySelector("#info .backpick"), sel = $("pDesignBack");
   const sync = () => { const on = Object.values(chosenOptions()).some((v) => /both sides/i.test(v)); wrap.style.display = on ? "" : "none"; const d = on && sel ? list.find((x) => x.id === sel.value) : null; window.__backNote = d ? `Back: ${d.name}` : ""; };
+  designFilter(sel, list, "Choose a design for the back…");
   window.__backSync = sync; if (sel) sel.onchange = sync; sync();
 }
 $("info").addEventListener("click", (e) => { if (e.target.closest(".chips button")) setTimeout(() => window.__backSync && window.__backSync(), 0); });
