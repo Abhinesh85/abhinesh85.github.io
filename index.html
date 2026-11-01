@@ -1246,7 +1246,7 @@ function mountBackPicker(p) {
   window.__backSync = sync; if (sel) sel.onchange = sync; sync();
 }
 $("info").addEventListener("click", (e) => { if (e.target.closest(".chips button")) setTimeout(() => window.__backSync && window.__backSync(), 0); });
-document.addEventListener("designs-ready", () => { if (!cur || $("sheet").hidden) return; const sel = $("pDesign"); if (!sel || sel.dataset.prod !== prodSlug(cur)) { const keep = sel ? sel.value : ""; mountDesignPicker(cur); if (keep && $("pDesign") && [...$("pDesign").options].some((o) => o.value === keep)) { $("pDesign").value = keep; $("pDesign").dispatchEvent(new Event("change")); } } });
+document.addEventListener("designs-ready", () => { if (!cur || $("sheet").hidden) return; const sel = $("pDesign"); if (!sel || sel.dataset.prod !== prodSlug(cur)) { const keep = sel ? sel.value : ""; mountDesignPicker(cur); mountBackPicker(cur); if (keep && $("pDesign") && [...$("pDesign").options].some((o) => o.value === keep)) { $("pDesign").value = keep; $("pDesign").dispatchEvent(new Event("change")); } } });
 function openProduct(id) {
   const p = P.find((x) => x.id === id);
   cur = p || null;
