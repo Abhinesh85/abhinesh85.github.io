@@ -10,14 +10,16 @@ const SC_FONTS = {
   classic: { fam: '"Cinzel", Georgia, serif', wt: 700, size: 84, upper: true, ls: 3 }, block: { fam: '"Manrope", sans-serif', wt: 800, size: 84, upper: true },
   bebas: { fam: '"Bebas Neue", Impact, sans-serif', wt: 400, size: 120, upper: true, ls: 2 }, marker: { fam: '"Permanent Marker", cursive', wt: 400, size: 84 } };
 const scFont = (F, px) => `${F.style || "normal"} ${F.wt} ${px}px ${F.fam}`;
-function nameSprite(name, fk, ink, maxW) {   // the name drawn flat, same look as the designer
+function nameSprite(name, fk, ink, maxW, mul) {   // the name drawn flat, same look as the designer
   const F = SC_FONTS[fk] || SC_FONTS.script, K = 2, text = F.upper ? name.toUpperCase() : name, RAD = TP.RAD;
   const m = document.createElement("canvas").getContext("2d"); m.font = scFont(F, F.size); if ("letterSpacing" in m) m.letterSpacing = (F.ls || 0) + "px";
-  let tw = m.measureText(text).width; const fs = F.size * Math.min(1, (maxW || RAD * 2) / Math.max(tw, 1)); tw = tw * fs / F.size;
+  let tw = m.measureText(text).width; const mm = Math.max(.3, Math.min(2, mul || 1)), fs = F.size * Math.min(mm, (maxW || RAD * 2) / Math.max(tw, 1)); tw = tw * fs / F.size;
   const pad = 24, oh = Math.ceil(fs * 1.7), o = document.createElement("canvas"); o.width = Math.ceil((tw + pad * 2) * K); o.height = oh * K;
   const oc = o.getContext("2d"); oc.scale(K, K); oc.font = scFont(F, fs); if ("letterSpacing" in oc) oc.letterSpacing = (F.ls || 0) * fs / F.size + "px"; oc.textAlign = "center"; oc.textBaseline = "middle";
   const mid = oh / 2, x0 = (tw + pad * 2) / 2;
   if (ink === "gold") { const g = oc.createLinearGradient(0, mid - fs * .5, 0, mid + fs * .5); g.addColorStop(0, "#fff3cf"); g.addColorStop(.45, "#e9c46a"); g.addColorStop(1, "#a97a22"); oc.shadowColor = "rgba(60,35,5,.6)"; oc.shadowBlur = 2; oc.shadowOffsetY = 1.4; oc.fillStyle = g; }
+  else if (ink === "silver" || ink === "rosegold") { const c3 = ink === "silver" ? ["#ffffff", "#c9ced6", "#7f8896"] : ["#ffe3dc", "#e8a598", "#b76e62"], g = oc.createLinearGradient(0, mid - fs * .5, 0, mid + fs * .5); g.addColorStop(0, c3[0]); g.addColorStop(.45, c3[1]); g.addColorStop(1, c3[2]); oc.shadowColor = "rgba(0,0,0,.4)"; oc.shadowBlur = 2; oc.shadowOffsetY = 1.2; oc.fillStyle = g; }
+  else if (/^#[0-9a-f]{6}$/i.test(ink || "")) { oc.shadowColor = "rgba(0,0,0,.35)"; oc.shadowBlur = 2.5; oc.shadowOffsetY = 1; oc.fillStyle = ink; }
   else if (ink === "white") { oc.shadowColor = "rgba(0,0,0,.45)"; oc.shadowBlur = 3; oc.shadowOffsetY = 1; oc.fillStyle = "#ffffff"; } else oc.fillStyle = "#15171c";
   oc.fillText(text, x0, mid); return { o, tw, oh, x0 };
 }
@@ -39,21 +41,21 @@ function artBoxed(im) {   // art on a white or transparent square (round, arched
 }
 const flatCache = {};
 async function flatPreview(d, tpl, opt) {   // a design printed on a flat product (luggage tag...): cover-fit into its printable area; its strap, slot and stitching stay on top
-  const key = `f4|${tpl.slug}|${d.id}|${(opt && opt.rot) || 0}|${(opt && opt.s) || 100}|${(opt && opt.x) || 0}|${(opt && opt.y) || 0}|${opt && opt.name ? `${opt.name}|${opt.f}|${opt.i}|${"ny" in opt ? "n" + (opt.ny ?? "") : opt.y ?? ""}` : ""}`; if (flatCache[key]) return flatCache[key];
+  const key = `f4|${tpl.slug}|${d.id}|${(opt && opt.rot) || 0}|${(opt && opt.s) || 100}|${(opt && opt.x) || 0}|${(opt && opt.y) || 0}|${opt && opt.name ? `${opt.name}|${opt.f}|${opt.i}|${"ny" in opt ? "n" + (opt.ny ?? "") : opt.y ?? ""}|${opt.ns || ""}|${opt.na || ""}|${opt.nx || ""}` : ""}`; if (flatCache[key]) return flatCache[key];
   const [photo, art] = await Promise.all([loadImg(tpl.photo), loadImg(artOf(d))]), g = tpl.geom, { W, H } = g, L = g.L, R = g.R, T = g.T, B = g.B, aw = R - L, ah = B - T;
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const c = cv.getContext("2d"); c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H);
   c.save(); const r = Math.min(g.radius || 0, aw / 2, ah / 2); c.beginPath(); c.moveTo(L + r, T); c.arcTo(R, T, R, B, r); c.arcTo(R, B, L, B, r); c.arcTo(L, B, L, T, r); c.arcTo(L, T, R, T, r); c.closePath(); c.clip();
   const rot = (opt && Number(opt.rot)) || 0, th = rot * Math.PI / 180, cs = Math.abs(Math.cos(th)), sn = Math.abs(Math.sin(th)), iw0 = art.naturalWidth, ih0 = art.naturalHeight;
   const boxed = artBoxed(art), sc = boxed ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), dw = iw0 * sc * (((opt && Number(opt.s)) || 100) / 100), dh = ih0 * sc * (((opt && Number(opt.s)) || 100) / 100);
   c.save(); c.translate(L + aw / 2 + (((opt && Number(opt.x)) || 0) / 100) * aw, T + ah / 2 + (((opt && Number(opt.y)) || 0) / 100) * ah); c.rotate(th); c.drawImage(art, -dw / 2, -dh / 2, dw, dh); c.restore();
-  if (opt && opt.name) { const nm = nameSprite(opt.name, opt.f, opt.i, aw * .88), yy = "ny" in opt ? opt.ny : opt.y, ny = yy == null || yy === "" ? (g.TY || (T + B) / 2) : T + ah * Math.max(0, Math.min(100, Number(yy))) / 100; c.drawImage(nm.o, (L + R) / 2 - nm.o.width / 4, ny - nm.oh / 2, nm.o.width / 2, nm.oh); }
+  if (opt && opt.name) { const nm = nameSprite(opt.name, opt.f, opt.i, aw * .88), yy = "ny" in opt ? opt.ny : opt.y, ny = yy == null || yy === "" ? (g.TY || (T + B) / 2) : T + ah * Math.max(0, Math.min(100, Number(yy))) / 100; const sc = Math.max(.3, Math.min(2, (Number(opt.ns) || 100) / 100)), cx = (L + R) / 2 + (Number(opt.nx) || 0) / 100 * aw, th = (Number(opt.na) || 0) * Math.PI / 180; c.save(); c.translate(cx, ny); c.rotate(th); c.scale(sc, sc); c.drawImage(nm.o, -nm.o.width / 4, -nm.oh / 2, nm.o.width / 2, nm.oh); c.restore(); }
   if (g.overlay) { c.globalCompositeOperation = "multiply"; c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H); c.globalCompositeOperation = "source-over"; }
   if (g.hole) { const h = g.hole; c.save(); c.beginPath(); c.roundRect(h.x, h.y, h.w, h.h, h.r); c.clip(); c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H); c.restore(); }   // a punched slot stays open: the art does not print over it
   c.restore(); return (flatCache[key] = cv.toDataURL("image/jpeg", .9));
 }
 async function tumblerPreview(d, opt, tpl) {   // opt = { name, f, i } also prints a name on it
   if (tpl && tpl.kind === "flat") return flatPreview(d, tpl, opt);
-  const key = d.id + (opt && opt.name ? `|${opt.name}|${opt.f}|${opt.i}|${opt.y ?? ""}|${opt.a ?? ""}` : ""); if (tpCache[key]) return tpCache[key];
+  const key = d.id + (opt && opt.name ? `|${opt.name}|${opt.f}|${opt.i}|${opt.y ?? ""}|${opt.a ?? ""}|${opt.ns || ""}` : ""); if (tpCache[key]) return tpCache[key];
   const [photo, art] = await Promise.all([loadImg("tumbler-white.jpg"), loadImg(artOf(d))]);
   const { W, H, SY, L, R, T, B, CX, RAD, K } = TP, TAU = Math.PI * 2, cv = document.createElement("canvas"); cv.width = W * K; cv.height = H * K;
   const c = cv.getContext("2d"); c.setTransform(K, 0, 0, K, 0, 0); c.drawImage(photo, 0, SY, W, H, 0, 0, W, H);
@@ -66,7 +68,7 @@ async function tumblerPreview(d, opt, tpl) {   // opt = { name, f, i } also prin
   c.save(); c.beginPath(); c.moveTo(L, T); c.lineTo(R, T); c.lineTo(R, B - 24); c.quadraticCurveTo(R, B, R - 24, B); c.lineTo(L + 24, B); c.quadraticCurveTo(L, B, L, B - 24); c.closePath(); c.clip();
   c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "multiply"; c.drawImage(lay, 0, 0); c.setTransform(K, 0, 0, K, 0, 0);
   if (opt && opt.name) {   // the name, bent around the tumbler like the designer does
-    const nm = nameSprite(opt.name, opt.f, opt.i), ny = opt.y == null || opt.y === "" ? 560 : T + (B - T) * Math.max(0, Math.min(100, Number(opt.y))) / 100, na = (Number(opt.a) || 0) * Math.PI / 180, y = ny - nm.oh / 2, nl = document.createElement("canvas"); nl.width = W * K; nl.height = H * K; const nc = nl.getContext("2d"); nc.setTransform(K, 0, 0, K, 0, 0);
+    const nm = nameSprite(opt.name, opt.f, opt.i, undefined, (Number(opt.ns) || 100) / 100), ny = opt.y == null || opt.y === "" ? 560 : T + (B - T) * Math.max(0, Math.min(100, Number(opt.y))) / 100, na = (Number(opt.a) || 0) * Math.PI / 180, y = ny - nm.oh / 2, nl = document.createElement("canvas"); nl.width = W * K; nl.height = H * K; const nc = nl.getContext("2d"); nc.setTransform(K, 0, 0, K, 0, 0);
     for (let dx = -half; dx < half; dx += .5) { const th = Math.asin(dx / RAD), u = RAD * (th - na); if (Math.abs(u) > nm.tw / 2 + 6) continue; const sx = (nm.x0 + u) * K, sw = (.5 / Math.cos(th)) * K; if (sx < 0 || sx + sw > nm.o.width) continue; nc.drawImage(nm.o, sx, 0, sw, nm.o.height, CX + dx, y, .75, nm.oh); }
     c.setTransform(1, 0, 0, 1, 0, 0); c.globalCompositeOperation = "source-over"; c.drawImage(nl, 0, 0); c.setTransform(K, 0, 0, K, 0, 0);
   }
