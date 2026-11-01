@@ -1556,12 +1556,22 @@ const tdMine = () => tdRows.filter((r) => (r.product || "tumbler") === tdProd);
 async function tdLoad() {
   const { data: pts } = await sb.from("product_templates").select("slug,name").order("sort");
   const opts = (pts && pts.length ? pts : [{ slug: "tumbler", name: "Tumbler" }]);
-  $("tdProd").innerHTML = opts.map((p) => `<option value="${esc(p.slug)}"${p.slug === tdProd ? " selected" : ""}>${esc(p.name)}</option>`).join("");
+  $("tdProd").innerHTML = opts.map((p) => `<option value="${esc(p.slug)}"${p.slug === tdProd ? " selected" : ""}>${esc(p.name)}</option>`).join("") + `<option value="__new">＋ New product folder…</option>`;
   const { data, error } = await sb.from("tumbler_designs").select("*").order("sort");
   if (error) { $("tdList").innerHTML = `<div class="empty"><b>Not set up yet</b><p class="hint">Run tumbler-designs-setup.sql once in Supabase (SQL Editor). (${esc(error.message)})</p></div>`; return; }
   tdRows = data; tdRender();
 }
-$("tdProd").onchange = () => { tdProd = $("tdProd").value; tdPicked.clear(); tdRender(); };
+$("tdProd").onchange = async () => {
+  if ($("tdProd").value === "__new") {
+    const name = (prompt("Name for the new product folder (for example: PVC ID card)") || "").trim().slice(0, 40);
+    if (!name) { $("tdProd").value = tdProd; return; }
+    const slug = ptSlug(name), { data: last } = await sb.from("product_templates").select("sort").order("sort", { ascending: false }).limit(1);
+    const { error } = await sb.from("product_templates").insert({ slug, name, kind: "flat", category: "tags", photo: "", geom: { W: 1000, H: 1000, SY: 0, L: 100, R: 900, T: 100, B: 900, TY: 100, shape: "rect", radius: 0 }, visible: false, sort: ((last && last[0] && last[0].sort) || 0) + 10 });
+    if (error) { toast("Couldn't create the folder: " + error.message); $("tdProd").value = tdProd; return; }
+    tdProd = slug; toast(`Folder “${name}” created. Add designs to it now. It stays off the Design yours page until you add a blank photo in Products to design.`); await tdLoad(); return;
+  }
+  tdProd = $("tdProd").value; tdPicked.clear(); tdRender();
+};
 let tdSelMode = false, tdPicked = new Set(), tdShown = [], tdPlacing = false, tdAfter = false;
 const tdFiltered = () => { const q = $("tdSearch").value.trim().toLowerCase(); return tdMine().filter((r) => !q || r.name.toLowerCase().includes(q)); };
 function tdRender() {
@@ -1693,7 +1703,7 @@ function dpTabSet(t) {
   $("dpHow").textContent = t === "designs" ? "Compares the pictures themselves, so a re-saved or resized copy is caught even with a different name." : "Finds listings with the same name, or whose first photo looks the same.";
 }
 $("dpTabD").onclick = () => dpTabSet("designs"); $("dpTabL").onclick = () => dpTabSet("listings"); $("dpScan").onclick = dpScanRun;
-$("dpBtn").onclick = async () => { $("dpSheet").hidden = false; document.body.style.overflow = "hidden"; dpTabSet("designs"); await tdLoad(); $("dpProd").innerHTML = $("tdProd").innerHTML; $("dpProd").value = tdProd; };
+$("dpBtn").onclick = async () => { $("dpSheet").hidden = false; document.body.style.overflow = "hidden"; dpTabSet("designs"); await tdLoad(); $("dpProd").innerHTML = $("tdProd").innerHTML.replace(/<option value="__new">[^<]*<\/option>/, ""); $("dpProd").value = tdProd; };
 $("dpProd").onchange = () => { dpGroups = []; dpPick.clear(); $("dpList").innerHTML = ""; $("dpBulk").hidden = true; $("dpMsg").textContent = ""; };
 $("dpClose").onclick = () => { $("dpSheet").hidden = true; document.body.style.overflow = ""; };
 
