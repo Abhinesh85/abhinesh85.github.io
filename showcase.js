@@ -8,7 +8,9 @@ const SC_FONTS = {
   satisfy: { fam: '"Satisfy", cursive', wt: 400, size: 112 }, lobster: { fam: '"Lobster", cursive', wt: 400, size: 100 }, caveat: { fam: '"Caveat", cursive', wt: 700, size: 120 },
   serif: { fam: '"Fraunces", Georgia, serif', wt: 700, size: 96 }, playfair: { fam: '"Playfair Display", Georgia, serif', wt: 700, size: 96, style: "italic" },
   classic: { fam: '"Cinzel", Georgia, serif', wt: 700, size: 84, upper: true, ls: 3 }, block: { fam: '"Manrope", sans-serif', wt: 800, size: 84, upper: true },
-  bebas: { fam: '"Bebas Neue", Impact, sans-serif', wt: 400, size: 120, upper: true, ls: 2 }, marker: { fam: '"Permanent Marker", cursive', wt: 400, size: 84 } };
+  bebas: { fam: '"Bebas Neue", Impact, sans-serif', wt: 400, size: 120, upper: true, ls: 2 }, marker: { fam: '"Permanent Marker", cursive', wt: 400, size: 84 },
+  royal: { fam: '"PrAjo Royal", Georgia, serif', wt: 900, size: 80, upper: true, ls: 2 }, sketch: { fam: '"PrAjo Sketch", cursive', wt: 700, size: 130, upper: true }, notebook: { fam: '"PrAjo Notebook", cursive', wt: 400, size: 100 },
+  heavy: { fam: '"PrAjo Heavy", sans-serif', wt: 900, size: 84 }, sport: { fam: '"PrAjo Sport", sans-serif', wt: 900, size: 80, upper: true, style: "italic" }, modern: { fam: '"PrAjo Modern", sans-serif', wt: 700, size: 90 }, plain: { fam: '"PrAjo Plain", sans-serif', wt: 400, size: 90 } };
 const scFont = (F, px) => `${F.style || "normal"} ${F.wt} ${px}px ${F.fam}`;
 function nameSprite(name, fk, ink, maxW, mul) {   // the name drawn flat, same look as the designer
   const F = SC_FONTS[fk] || SC_FONTS.script, K = 2, text = F.upper ? name.toUpperCase() : name, RAD = TP.RAD;

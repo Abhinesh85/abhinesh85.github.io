@@ -22,6 +22,7 @@
 <link rel="apple-touch-icon" href="icon-180.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,500;1,9..144,700&family=Great+Vibes&family=Manrope:wght@400;500;600;700;800&family=Pacifico&family=Dancing+Script:wght@700&family=Caveat:wght@700&family=Playfair+Display:ital,wght@1,700&family=Bebas+Neue&family=Permanent+Marker&family=Lobster&family=Satisfy&display=swap">
 <link rel="preconnect" href="https://i.etsystatic.com">
 <script src="products.js?v=d6fe29f995"></script>
@@ -121,7 +122,8 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .scrollrow { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
 .scrollrow > * { flex: none; }
 .styles button[role="switch"][aria-checked="true"] { border-color: var(--gold-2); background: rgba(217, 171, 79, .16); }
-.styles .ink { width: 40px; padding: 0; position: relative; }
+.styles .ink { width: 40px; padding: 0; position: relative; } .styles { flex-wrap: wrap; }
+.styles label.cust { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed rgba(255,255,255,.4); display: grid; place-items: center; cursor: pointer; font-size: 17px; position: relative; overflow: hidden; } .styles label.cust input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 .styles .ink i { position: absolute; inset: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .3); }
 .try .btn { width: 100%; min-height: 50px; font-size: 15px; padding: 0 12px; white-space: nowrap; }
 /* phones: when the big preview scrolls away, a small live copy floats in the corner so changes stay visible */
@@ -573,10 +575,11 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
             <div class="ctl"><div class="ctl-h">Font</div>
               <div class="styles scrollrow" role="group" aria-label="Lettering style" id="fontBox"></div></div>
             <div class="ctl"><div class="ctl-h">Ink</div>
-              <div class="styles" role="group" aria-label="Lettering color" id="inkBox">
-                <button type="button" class="ink" data-i="gold" aria-pressed="true" aria-label="Gold"><i style="background:linear-gradient(135deg,#fff3cf,#d9a441 55%,#b8862c)"></i></button>
-                <button type="button" class="ink" data-i="black" aria-pressed="false" aria-label="Black"><i style="background:#15171c"></i></button>
-                <button type="button" class="ink" data-i="white" aria-pressed="false" aria-label="White"><i style="background:#fff"></i></button></div></div>
+              <div class="styles" role="group" aria-label="Lettering color" id="inkBox"></div></div>
+            <div class="ctl"><div class="ctl-h">Name size and angle</div>
+              <label class="adjd"><span>Size</span><input type="range" id="nszRange" min="40" max="160" step="1" value="100"><output id="nszOut">100%</output></label>
+              <label class="adjd" id="ntWrap"><span>Tilt</span><input type="range" id="ntRange" min="-90" max="90" step="1" value="0"><output id="ntOut">0°</output></label>
+              <label class="adjd" id="naWrap" style="display:none"><span>Turn around</span><input type="range" id="naRange" min="-60" max="60" step="1" value="0"><output id="naOut">0°</output></label></div>
             <button class="btn btn-gold" type="button" id="orderName">Order a tumbler with this name →</button>
             <div class="tools"><button class="btn btn-line" type="button" id="rotDesign" hidden>↻ Rotate design</button><div id="rotWrap" style="display:none;flex:1 1 100%;gap:6px;flex-direction:column"><label class="adjd"><span>Angle</span><input type="range" id="rotRange" min="-180" max="180" step="1" value="0"><output id="rotRangeOut">0°</output></label><label class="adjd"><span>Size</span><input type="range" id="szRange" min="30" max="200" step="1" value="100"><output id="szRangeOut">100%</output></label><label class="adjd"><span>Left / right</span><input type="range" id="xRange" min="-50" max="50" step="1" value="0"><output id="xRangeOut">0%</output></label><label class="adjd"><span>Up / down</span><input type="range" id="yRange" min="-50" max="50" step="1" value="0"><output id="yRangeOut">0%</output></label><button class="btn btn-line" type="button" id="adjReset" style="align-self:flex-start">Reset position</button></div><button class="btn btn-line" type="button" id="surprise">🎲 Surprise me</button><button class="btn btn-line" type="button" id="shareDesign">🔗 Share</button><button class="btn btn-line" type="button" id="saveImg">⬇ Save image</button></div>
             
@@ -651,6 +654,13 @@ const FONTS = {
   block:    { label: "Block",     fam: '"Manrope", sans-serif',           wt: 800, size: 84,  upper: true },
   bebas:    { label: "Tall",      fam: '"Bebas Neue", Impact, sans-serif', wt: 400, size: 120, upper: true, ls: 2 },
   marker:   { label: "Marker",    fam: '"Permanent Marker", cursive',     wt: 400, size: 84,  upper: false },
+  royal:    { label: "Royal",     fam: '"PrAjo Royal", Georgia, serif',   wt: 900, size: 80,  upper: true, ls: 2 },
+  sketch:   { label: "Sketch",    fam: '"PrAjo Sketch", cursive',         wt: 700, size: 130, upper: true },
+  notebook: { label: "Notebook",  fam: '"PrAjo Notebook", cursive',       wt: 400, size: 100, upper: false },
+  heavy:    { label: "Heavy",     fam: '"PrAjo Heavy", sans-serif',       wt: 900, size: 84,  upper: false },
+  sport:    { label: "Sport",     fam: '"PrAjo Sport", sans-serif',       wt: 900, size: 80,  upper: true, style: "italic" },
+  modern:   { label: "Modern",    fam: '"PrAjo Modern", sans-serif',      wt: 700, size: 90,  upper: false },
+  plain:    { label: "Plain",     fam: '"PrAjo Plain", sans-serif',       wt: 400, size: 90,  upper: false },
 };
 const fontStr = (F, px) => `${F.style || "normal"} ${F.wt} ${px}px ${F.fam}`;
 function bodyPath(c) {
@@ -684,14 +694,18 @@ function rebuildName() {
   if (!PV.ready) return;
   const name = nameIn.value.trim() || "Name", F = FONTS[PV.font], text = F.upper ? name.toUpperCase() : name, { RAD } = PH;
   const m = document.createElement("canvas").getContext("2d"); m.font = fontStr(F, F.size); if ("letterSpacing" in m) m.letterSpacing = (F.ls || 0) + "px";
-  let tw = m.measureText(text).width; const maxW = PH.kind === "flat" ? (PH.R - PH.L) * .88 : RAD * 2.0; const fs = F.size * Math.min(1, maxW / Math.max(tw, 1)); tw = tw * fs / F.size;
+  let tw = m.measureText(text).width; const maxW = PH.kind === "flat" ? (PH.R - PH.L) * .88 : RAD * 2.0; const fs = F.size * Math.min(Math.max(.3, Math.min(2, (PV.nsz || 100) / 100)), maxW / Math.max(tw, 1)); tw = tw * fs / F.size;
   const pad = 24, oh = Math.ceil(fs * 1.7), o = document.createElement("canvas"); o.width = Math.ceil((tw + pad * 2) * K); o.height = oh * K;
   const oc = o.getContext("2d"); oc.scale(K, K); oc.font = fontStr(F, fs); if ("letterSpacing" in oc) oc.letterSpacing = (F.ls || 0) * fs / F.size + "px"; oc.textAlign = "center"; oc.textBaseline = "middle";
   const mid = oh / 2, x0 = (tw + pad * 2) / 2;
   if (PV.ink === "gold") {
     const g = oc.createLinearGradient(0, mid - fs * .5, 0, mid + fs * .5); g.addColorStop(0, "#fff3cf"); g.addColorStop(.45, "#e9c46a"); g.addColorStop(1, "#a97a22");
     oc.shadowColor = "rgba(60,35,5,.6)"; oc.shadowBlur = 2; oc.shadowOffsetY = 1.4; oc.fillStyle = g;
-  } else if (PV.ink === "white") { oc.shadowColor = "rgba(0,0,0,.45)"; oc.shadowBlur = 3; oc.shadowOffsetY = 1; oc.fillStyle = "#ffffff"; }
+  } else if (PV.ink === "silver" || PV.ink === "rosegold") {
+    const c3 = PV.ink === "silver" ? ["#ffffff", "#c9ced6", "#7f8896"] : ["#ffe3dc", "#e8a598", "#b76e62"], g = oc.createLinearGradient(0, mid - fs * .5, 0, mid + fs * .5); g.addColorStop(0, c3[0]); g.addColorStop(.45, c3[1]); g.addColorStop(1, c3[2]);
+    oc.shadowColor = "rgba(0,0,0,.4)"; oc.shadowBlur = 2; oc.shadowOffsetY = 1.2; oc.fillStyle = g;
+  } else if (/^#[0-9a-f]{6}$/i.test(PV.ink)) { oc.shadowColor = "rgba(0,0,0,.35)"; oc.shadowBlur = 2.5; oc.shadowOffsetY = 1; oc.fillStyle = PV.ink; }
+  else if (PV.ink === "white") { oc.shadowColor = "rgba(0,0,0,.45)"; oc.shadowBlur = 3; oc.shadowOffsetY = 1; oc.fillStyle = "#ffffff"; }
   else oc.fillStyle = "#15171c";
   oc.fillText(text, x0, mid);
   nm = { o, tw, oh, x0, name };
@@ -713,7 +727,7 @@ function drawFlat() {
   c.setTransform(K, 0, 0, K, 0, 0); c.save(); areaPath(c); c.clip();
   const di = PV.design && dImgs[PV.design.id];
   if (di && di.complete && di.naturalWidth) { const rot = PV.drot || 0, th = rot * Math.PI / 180, cs = Math.abs(Math.cos(th)), sn = Math.abs(Math.sin(th)), iw0 = di.naturalWidth, ih0 = di.naturalHeight, sc = artBoxed(di) ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), dw = iw0 * sc * ((PV.dsz || 100) / 100), dh = ih0 * sc * ((PV.dsz || 100) / 100); c.save(); c.translate(L + aw / 2 + ((PV.dx || 0) / 100) * aw, T + ah / 2 + ((PV.dy || 0) / 100) * ah); c.rotate(th); c.drawImage(di, -dw / 2, -dh / 2, dw, dh); c.restore(); }
-  if (PV.showName) { c.globalCompositeOperation = PV.ink === "black" && !di ? "multiply" : "source-over"; c.drawImage(nm.o, PV.nx - nm.o.width / K / 2, PV.ny - nm.oh / 2, nm.o.width / K, nm.oh); c.globalCompositeOperation = "source-over"; }
+  if (PV.showName) { c.globalCompositeOperation = PV.ink === "black" && !di ? "multiply" : "source-over"; c.save(); c.translate(PV.nx, PV.ny); c.rotate((PV.nrot || 0) * Math.PI / 180); c.drawImage(nm.o, -nm.o.width / K / 2, -nm.oh / 2, nm.o.width / K, nm.oh); c.restore(); c.globalCompositeOperation = "source-over"; }
   if (PH.overlay) { c.globalCompositeOperation = "multiply"; c.drawImage(base, 0, 0, PH.W, PH.H); c.globalCompositeOperation = "source-over"; }   // the product's own strap, slot and stitching sit on top of the print
   if (PH.hole) { const h = PH.hole; c.save(); c.beginPath(); c.roundRect(h.x, h.y, h.w, h.h, h.r); c.clip(); c.drawImage(photo, 0, PH.SY, PH.W, PH.H, 0, 0, PH.W, PH.H); c.restore(); }   // a punched slot stays open (the plain photo, not the color tint)
   // a soft band of light slides across the glossy print as it is nudged or as the page idles
@@ -769,7 +783,7 @@ try { const c = JSON.parse(localStorage.getItem("prajo:templates") || "null"); i
 function setTemplate(t) {
   const g = t.geom || {}, flat = t.kind === "flat";
   PH = { kind: flat ? "flat" : "round", W: g.W, H: g.H, SY: g.SY || 0, L: g.L, R: g.R, T: g.T, B: g.B, CX: (g.L + g.R) / 2, RAD: (g.R - g.L) / 2, TY: g.TY || (g.T + g.B) / 2, radius: g.radius || 0, shape: g.shape || "rect", overlay: !!g.overlay, hole: g.hole || null };
-  PV.template = t; applyDesignFilter(); PV.ready = false; PV.drot = 0; PV.dsz = 100; PV.dx = 0; PV.dy = 0; $("rotDesign").hidden = t.kind !== "flat"; $("rotWrap").style.display = t.kind === "flat" ? "flex" : "none"; setRotUi(); PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; PV.rot = 0; PV.vel = 0; PV.shine = .5; PV.glowFor = null;
+  PV.template = t; applyDesignFilter(); PV.ready = false; PV.drot = 0; PV.dsz = 100; PV.dx = 0; PV.dy = 0; $("rotDesign").hidden = t.kind !== "flat"; $("rotWrap").style.display = t.kind === "flat" ? "flex" : "none"; setRotUi(); PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; PV.nsz = 100; PV.nrot = 0; if (typeof syncNameFx === "function") syncNameFx(); PV.rot = 0; PV.vel = 0; PV.shine = .5; PV.glowFor = null;
   [base, layer].forEach((c) => { c.width = PH.W * K; c.height = PH.H * K; }); cv.width = PH.W * K; cv.height = PH.H * K;
   stage.style.aspectRatio = `${PH.W} / ${PH.H}`; stage.style.width = PH.H / PH.W < .8 ? "min(460px, 88vw)" : PH.H / PH.W < 1.3 ? "min(400px, 88vw)" : "";
   $("spinHint").textContent = flat ? "Drag to catch the light" : "Drag to spin"; $("spinHint").classList.remove("off");
@@ -844,7 +858,7 @@ $("moveToggle").addEventListener("click", () => {
   $("spinHint").textContent = PV.moveMode ? "Drag the name to place it" : (PH.kind === "flat" ? "Drag to catch the light" : "Drag to spin"); $("spinHint").classList.remove("off");
   if (PV.moveMode && !PV.showName) setName(true);
 });
-$("nameReset").addEventListener("click", () => { PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; $("nameReset").hidden = true; requestDraw(); });
+$("nameReset").addEventListener("click", () => { PV.na = 0; PV.nx = PH.CX; PV.ny = PH.TY; PV.nsz = 100; PV.nrot = 0; syncNameFx(); $("nameReset").hidden = true; sizeName(); });
 stage.addEventListener("keydown", (e) => { if (e.key === "ArrowLeft" || e.key === "ArrowRight") { e.preventDefault(); stopAuto(); if (PH.kind === "flat") PV.shine = Math.max(0, Math.min(1, PV.shine + (e.key === "ArrowLeft" ? -.15 : .15))); else PV.rot += (e.key === "ArrowLeft" ? -1 : 1) * .35; requestDraw(); } });
 
 function sizeName() { rebuildName(); requestDraw(); }
@@ -861,7 +875,17 @@ function setName(on) {
   const pn = lcName(PV.template ? PV.template.name : "tumbler"); $("orderName").textContent = (on ? `Order a ${pn} with this name` : `Order a ${pn}`) + " →"; sizeName();
 }
 $("nameToggle").addEventListener("click", () => setName(!PV.showName));
-$("inkBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-i]"); if (!b) return; PV.ink = b.dataset.i; $("inkBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); sizeName(); });
+const INKS = [["gold", "Gold", "linear-gradient(135deg,#fff3cf,#d9a441 55%,#b8862c)"], ["black", "Black", "#15171c"], ["white", "White", "#fff"], ["silver", "Silver", "linear-gradient(135deg,#fff,#c9ced6,#7f8896)"], ["rosegold", "Rose gold", "linear-gradient(135deg,#ffe3dc,#e8a598,#b76e62)"], ["#d62839", "Red", "#d62839"], ["#ff5fa2", "Pink", "#ff5fa2"], ["#ff8a00", "Orange", "#ff8a00"], ["#f5c400", "Yellow", "#f5c400"], ["#1fa34a", "Green", "#1fa34a"], ["#14b8a6", "Teal", "#14b8a6"], ["#2563eb", "Blue", "#2563eb"], ["#1e2a5a", "Navy", "#1e2a5a"], ["#7c3aed", "Purple", "#7c3aed"]];
+const inkLabel = (v) => (INKS.find((x) => x[0] === v) || [0, "custom " + v])[1].toLowerCase();
+$("inkBox").innerHTML = INKS.map(([v, l, bg]) => `<button type="button" class="ink" data-i="${v}" aria-pressed="${v === PV.ink}" aria-label="${l}" title="${l}"><i style="background:${bg}"></i></button>`).join("") + `<label class="cust" title="Pick any color" aria-label="Pick any color">🎨<input type="color" id="inkCustom" value="#e11d48"></label>`;
+function setInk(v) { PV.ink = v; $("inkBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x.dataset.i === v)); sizeName(); }
+$("inkBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-i]"); if (b) setInk(b.dataset.i); });
+$("inkCustom").addEventListener("input", () => setInk($("inkCustom").value));
+// name size, tilt (flat products) and turn-around (round ones)
+function syncNameFx() { $("nszRange").value = PV.nsz || 100; $("nszOut").textContent = (PV.nsz || 100) + "%"; $("ntRange").value = PV.nrot || 0; $("ntOut").textContent = (PV.nrot || 0) + "°"; const d = Math.round((PV.na || 0) * 180 / Math.PI); $("naRange").value = Math.max(-60, Math.min(60, d)); $("naOut").textContent = d + "°"; const flat = PH.kind === "flat"; $("ntWrap").style.display = flat ? "flex" : "none"; $("naWrap").style.display = flat ? "none" : "flex"; }
+$("nszRange").addEventListener("input", () => { PV.nsz = Number($("nszRange").value) || 100; $("nszOut").textContent = PV.nsz + "%"; $("nameReset").hidden = false; sizeName(); });
+$("ntRange").addEventListener("input", () => { PV.nrot = Number($("ntRange").value) || 0; $("ntOut").textContent = PV.nrot + "°"; $("nameReset").hidden = false; requestDraw(); });
+$("naRange").addEventListener("input", () => { PV.na = (Number($("naRange").value) || 0) * Math.PI / 180; $("naOut").textContent = $("naRange").value + "°"; $("nameReset").hidden = false; requestDraw(); });
 function setDesignUi() { $("designBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", (x.dataset.d || "") === (PV.design ? PV.design.id : ""))); }
 function buildPicker() {
   $("designBox").querySelectorAll("button[data-d]:not(.none)").forEach((b) => b.remove());
@@ -907,7 +931,7 @@ $("surprise").addEventListener("click", () => {
 function stateParams() {
   const p = new URLSearchParams(); if (PV.showName && nameIn.value.trim()) p.set("name", nameIn.value.trim()); else p.set("nm", "0");
   if (PV.design) p.set("d", PV.design.id); else { const b = document.querySelector('.swatches [aria-pressed="true"]'); if (b) p.set("c", b.getAttribute("aria-label")); }
-  p.set("f", PV.font); p.set("i", PV.ink); if (PV.template && TEMPLATES.length > 1) p.set("p", PV.template.slug); return p;
+  p.set("f", PV.font); p.set("i", PV.ink); if ((PV.nsz || 100) !== 100) p.set("ns", PV.nsz); if (PV.nrot) p.set("nt", PV.nrot); if (PV.template && TEMPLATES.length > 1) p.set("p", PV.template.slug); return p;
 }
 $("shareDesign").addEventListener("click", async () => {
   const url = `${location.origin}${location.pathname}?${stateParams()}`;
@@ -927,7 +951,7 @@ $("rotDesign").addEventListener("click", () => { PV.drot = normA((PV.drot || 0) 
 $("adjReset").addEventListener("click", () => { PV.drot = 0; PV.dsz = 100; PV.dx = 0; PV.dy = 0; setRotUi(); requestDraw(); });
 const adjNoteD = () => { const b = []; if (PV.drot) b.push(`rotated ${PV.drot}°`); if ((PV.dsz || 100) !== 100) b.push(`size ${PV.dsz}%`); if (PV.dx || PV.dy) b.push(`moved ${PV.dx ? `${PV.dx > 0 ? "right" : "left"} ${Math.abs(PV.dx)}%` : ""}${PV.dx && PV.dy ? ", " : ""}${PV.dy ? `${PV.dy > 0 ? "down" : "up"} ${Math.abs(PV.dy)}%` : ""}`); return b.length ? ` (${b.join(", ")})` : ""; };
 $("orderName").addEventListener("click", () => {
-  const bits = []; if (PV.showName && nameIn.value.trim()) bits.push(`Name: ${nameIn.value.trim()} (${FONTS[PV.font].label}, ${PV.ink})`);
+  const bits = []; if (PV.showName && nameIn.value.trim()) bits.push(`Name: ${nameIn.value.trim()} (${FONTS[PV.font].label}, ${inkLabel(PV.ink)}${(PV.nsz || 100) !== 100 ? `, size ${PV.nsz}%` : ""}${PV.nrot ? `, tilt ${PV.nrot}°` : ""})`);
   if (PV.design) bits.push(`Design: ${PV.design.name}${adjNoteD()}`); else bits.push(`Color: ${$("swName").textContent}`);
   const t = PV.template || TEMPLATES[0]; if (TEMPLATES.length > 1) bits.unshift(`Product: ${t.name}`);
   try { const o = document.createElement("canvas"); o.width = 360; o.height = Math.round(cv.height * 360 / cv.width); o.getContext("2d").drawImage(cv, 0, 0, o.width, o.height); sessionStorage.setItem("prajo:preview", o.toDataURL("image/jpeg", .8)); } catch { /* the preview picture is optional */ }
@@ -938,7 +962,8 @@ function applyParams() {
   if (p.get("name")) { nameIn.value = p.get("name").slice(0, 14); nameIn.dataset.touched = "1"; }
   if (p.get("nm") === "0") setName(false);
   const f = p.get("f"); if (f && FONTS[f]) document.querySelector(`#fontBox [data-f="${f}"]`).click();
-  const ink = p.get("i"); if (["gold", "black", "white"].includes(ink)) document.querySelector(`#inkBox [data-i="${ink}"]`).click();
+  const ink = p.get("i"); if (ink && (INKS.some((x) => x[0] === ink) || /^#[0-9a-f]{6}$/i.test(ink))) { if (INKS.some((x) => x[0] === ink)) document.querySelector(`#inkBox [data-i="${ink}"]`).click(); else { $("inkCustom").value = ink; setInk(ink); } }
+  const pns = Number(p.get("ns")), pnt = Number(p.get("nt")); if (pns >= 40 && pns <= 160) PV.nsz = pns; if (Math.abs(pnt) <= 90 && pnt) PV.nrot = pnt; syncNameFx();
   const c = p.get("c"); if (c) [...document.querySelectorAll(".swatches button")].find((b) => b.getAttribute("aria-label") === c)?.click();
   const d = p.get("d"); if (d && DESIGNS.some((x) => x.id === d)) document.querySelector(`#designBox [data-d="${d}"]`)?.click();
   applyPos();

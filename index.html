@@ -26,6 +26,7 @@
 <link rel="preload" as="image" href="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-2.jpg" fetchpriority="high">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="fonts/fonts.css">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,500;1,9..144,700&family=Great+Vibes&family=Manrope:wght@400;500;600;700;800&family=Pacifico&family=Dancing+Script:wght@700&family=Caveat:wght@700&family=Playfair+Display:ital,wght@1,700&family=Bebas+Neue&family=Permanent+Marker&family=Lobster&family=Satisfy&display=swap">
 <link rel="preconnect" href="https://i.etsystatic.com">
 <script src="products.js?v=d6fe29f995"></script>
@@ -1335,7 +1336,7 @@ function mountDesignPicker(p) {
   ids.forEach(([id, k, u]) => { $(id).oninput = () => { adj[k] = Number($(id).value) || (k === "s" ? 100 : 0); window.__rot = adj.rot; $(id + "Out").textContent = adj[k] + u; clearTimeout(rotT); rotT = setTimeout(apply, 70); }; });
   inp.closest("label").insertAdjacentHTML("afterend", `<p class="hint" id="pDesignNote" style="margin:6px 2px 0;font-size:13px;opacity:.8"></p>`); const note = $("pDesignNote"); window.__designNote = ""; note.after($("pNameFx"));   // the name style controls sit right under the name box
   // name style (font, color, height): the same look as the designer, shown on the design as the customer types
-  const NAME_FONTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"]];
+  const NAME_FONTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"], ["royal", "Royal"], ["sketch", "Sketch"], ["notebook", "Notebook"], ["heavy", "Heavy"], ["sport", "Sport"], ["modern", "Modern"], ["plain", "Plain"]];
   const fx = window.__nameFx = { f: "script", i: "gold", ny: null, ns: 100, na: 0, nx: 0 }, nameVal = () => ($("pPersonal")?.value || "").trim().slice(0, 30);
   // before anyone types, the preview shows the sample name "Aleesa" (like the designer); it is never added to the order
   window.__noNameClick = false; const noNameChosen = () => window.__noNameClick === true, pvName = () => nameVal() || (noNameChosen() ? "" : "Aleesa");
@@ -1375,7 +1376,7 @@ function mountDesignPicker(p) {
     card.hidden = !d; $("pNameFx").hidden = !d; $("pFxHint").hidden = !!nameVal(); rotRow.style.display = d && tplFor(p) ? "flex" : "none"; if (!d) { window.__designNote = ""; note.textContent = ""; return; }
     card.querySelector("img").src = (window.__preview && pre && pre.id === d.id) ? window.__preview : d.card;
     card.querySelector("b").textContent = d.name; { const tp = tplFor(p); card.querySelector("small").textContent = `Printed on your ${tp ? tp.name.toLowerCase() : "tumbler"}`; }
-    $("pDesignLink").href = `tumbler.html?${tplFor(p) ? "p=" + encodeURIComponent(tplFor(p).slug) + "&" : ""}d=${encodeURIComponent(d.id)}${nameVal() ? `&name=${encodeURIComponent(nameVal().slice(0, 14))}&f=${fx.f}${["gold", "white", "black"].includes(fx.i) ? `&i=${fx.i}` : ""}` : ""}`;
+    $("pDesignLink").href = `tumbler.html?${tplFor(p) ? "p=" + encodeURIComponent(tplFor(p).slug) + "&" : ""}d=${encodeURIComponent(d.id)}${nameVal() ? `&name=${encodeURIComponent(nameVal().slice(0, 14))}&f=${fx.f}&i=${encodeURIComponent(fx.i)}${fx.ns !== 100 ? `&ns=${fx.ns}` : ""}${fx.na && tplFor(p) && tplFor(p).kind === "flat" ? `&nt=${fx.na}` : ""}` : ""}`;
     const fl = (NAME_FONTS.find((x) => x[0] === fx.f) || [0, fx.f])[1];
     window.__designNote = `Design: ${d.name}${tplFor(p) ? adjNote(adj) : ""}${nameVal() ? ` · Name style: ${fl} font, ${inkName(fx.i)} ink${fx.ns !== 100 ? `, size ${fx.ns}%` : ""}${fx.na ? `, tilt ${fx.na}°` : ""}${fx.nx ? `, ${fx.nx > 0 ? "right" : "left"} ${Math.abs(fx.nx)}%` : ""}${fx.ny == null ? "" : `, name height ${fx.ny}%`}` : ""}`;   // goes into the order automatically; the box stays free for the customer's own name
     note.textContent = `Added to your order: ${window.__designNote}`;

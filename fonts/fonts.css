@@ -1,0 +1,8 @@
+/* Name fonts hosted on this site. All are open-licensed; see LICENSES.txt in this folder. */
+@font-face { font-family: "PrAjo Royal"; src: url("prajo-royal.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+@font-face { font-family: "PrAjo Sketch"; src: url("prajo-sketch.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "PrAjo Notebook"; src: url("prajo-notebook.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Heavy"; src: url("prajo-heavy.woff2") format("woff2"); font-weight: 900; font-display: swap; }
+@font-face { font-family: "PrAjo Sport"; src: url("prajo-sport.woff2") format("woff2"); font-weight: 900; font-style: italic; font-display: swap; }
+@font-face { font-family: "PrAjo Modern"; src: url("prajo-modern.woff2") format("woff2"); font-weight: 700; font-display: swap; }
+@font-face { font-family: "PrAjo Plain"; src: url("prajo-plain.woff2") format("woff2"); font-weight: 400; font-display: swap; }

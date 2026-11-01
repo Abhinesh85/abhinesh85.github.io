@@ -1,0 +1,11 @@
+Fonts hosted by PrAjo Custom Studio (converted from the original files to WOFF2 without changing the letter shapes).
+
+Cinzel Decorative Black   (PrAjo Royal)     Copyright (c) 2012 Natanael Gama, with Reserved Font Name "Cinzel". SIL Open Font License 1.1, http://scripts.sil.org/OFL
+Amatic Bold               (PrAjo Sketch)    Copyright (c) 2011 Vernon Adams. SIL Open Font License 1.1, http://scripts.sil.org/OFL
+Architects Daughter       (PrAjo Notebook)  Copyright (c) 2010 Kimberly Geswein. SIL Open Font License 1.1, http://scripts.sil.org/OFL
+Figtree Black             (PrAjo Heavy)     Copyright 2022 The Figtree Project Authors (https://github.com/erikdkennedy/figtree). SIL Open Font License 1.1, https://openfontlicense.org
+Montserrat Black Italic   (PrAjo Sport)     Copyright 2011 The Montserrat Project Authors (https://github.com/JulietaUla/Montserrat). SIL Open Font License 1.1, http://scripts.sil.org/OFL
+Open Sans Bold            (PrAjo Modern)    Digitized data copyright 2010-2011 Google Corporation. Apache License 2.0, http://www.apache.org/licenses/LICENSE-2.0
+Bitstream Vera Sans       (PrAjo Plain)     Copyright (c) 2003 Bitstream, Inc. All Rights Reserved. Bitstream Vera is a trademark of Bitstream, Inc. Free to use, copy and distribute under the Bitstream Vera license.
+
+The SIL Open Font License 1.1 allows these fonts to be used, embedded and redistributed, including for commercial use, provided they are not sold on their own. Full text: https://openfontlicense.org
