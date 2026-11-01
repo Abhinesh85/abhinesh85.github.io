@@ -212,6 +212,8 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 .card .ph img + img { opacity: 0; }
 .card .ph.wide::before { content: ""; position: absolute; inset: 0; background: var(--bg) center / cover; filter: blur(22px) brightness(.72); transform: scale(1.25); }
 .card .ph.wide img:not(.cs) { object-fit: contain; }
+.card .ph.tall { background: #efefef; } .card .ph.tall img:not(.cs) { object-fit: contain; }
+.slides img.tall, .thumbs img.tall { object-fit: contain; background: #efefef; }
 .card.dig .ph { background: #fff; } .card.dig .ph img { object-fit: contain; }
 .card.seeall .ph { display: grid; place-content: center; gap: 8px; padding: 18px; text-align: center; background: var(--panel-2, #13213a); border-style: dashed; }
 .card.seeall b { font-family: var(--f-display); font-size: 22px; color: var(--gold-2); } .card.seeall small { font-size: 14px; color: var(--muted); }
@@ -1160,7 +1162,8 @@ function designList(slug) {   // each product has its own designs (admin → Tum
 }
 const prodSlug = (p) => (tplFor(p) ? tplFor(p).slug : "tumbler");
 /* wide photos (Etsy shots are often landscape) show whole on a soft blur of themselves instead of being cropped to a sliver */
-window.__cardFit = (im) => { const ph = im.closest(".ph"); if (!ph || ph.dataset.fit || !im.naturalHeight) return; ph.dataset.fit = "1"; if (im.naturalWidth / im.naturalHeight > 1.2 && !ph.closest(".dig")) { ph.classList.add("wide"); ph.style.setProperty("--bg", `url("${im.currentSrc || im.src}")`); } };
+window.__tallFit = (im) => { if (im.naturalHeight && im.naturalWidth / im.naturalHeight < .72) im.classList.add("tall"); };
+window.__cardFit = (im) => { const ph = im.closest(".ph"); if (!ph || ph.dataset.fit || !im.naturalHeight) return; ph.dataset.fit = "1"; if (im.naturalWidth / im.naturalHeight < .72 && !ph.closest(".dig")) ph.classList.add("tall"); if (im.naturalWidth / im.naturalHeight > 1.2 && !ph.closest(".dig")) { ph.classList.add("wide"); ph.style.setProperty("--bg", `url("${im.currentSrc || im.src}")`); } };
 /* shop cards of "custom" listings (tumbler, luggage tag...) flip through the first designs of their list by themselves, so people see they can pick */
 let csTimer = 0;
 window.__cardShows = function () {
@@ -1236,8 +1239,8 @@ function openProduct(id) {
   cur = p || null;
   if (!p) { closeProduct(true); return; }
   lastFocus = lastFocus || document.activeElement;
-  $("slides").innerHTML = p.images.map((im, i) => `<img src="${esc(im.large)}" alt="${esc(p.name)}${i ? ` photo ${i + 1}` : ""}" ${i ? 'loading="lazy"' : ""}>`).join("");
-  $("thumbs").innerHTML = p.images.length > 1 ? p.images.map((im, i) => `<button type="button" data-i="${i}" aria-label="Photo ${i + 1}" aria-current="${i === 0}"><img src="${esc(im.card)}" alt="" loading="lazy"></button>`).join("") : "";
+  $("slides").innerHTML = p.images.map((im, i) => `<img src="${esc(im.large)}" alt="${esc(p.name)}${i ? ` photo ${i + 1}` : ""}" ${i ? 'loading="lazy"' : ""} onload="window.__tallFit&&__tallFit(this)">`).join("");
+  $("thumbs").innerHTML = p.images.length > 1 ? p.images.map((im, i) => `<button type="button" data-i="${i}" aria-label="Photo ${i + 1}" aria-current="${i === 0}"><img src="${esc(im.card)}" alt="" loading="lazy" onload="window.__tallFit&&__tallFit(this)"></button>`).join("") : "";
   const cat = CATS.find((c) => c.id === p.category);
   const perks = p.digital ? ["Instant download", "Print at home", "Use again and again"]
     : (SITE.perks || "").split("\n").map((x) => x.trim()).filter(Boolean).length ? SITE.perks.split("\n").map((x) => x.trim()).filter(Boolean)
