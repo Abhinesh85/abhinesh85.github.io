@@ -597,6 +597,8 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
 <button type="button" class="mini" id="mini" aria-label="Back to the big preview"><canvas id="miniCv" width="132" height="289"></canvas></button>
 <div class="toast2" id="toast2" role="status" aria-live="polite"></div>
 <script>
+const lcName = (n) => (/[A-Z]{2}/.test(n) ? n : n.toLowerCase());   // keeps acronyms like "PVC ID card"
+
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const shade = (hex, to, amt) => {
@@ -769,9 +771,9 @@ function setTemplate(t) {
   [base, layer].forEach((c) => { c.width = PH.W * K; c.height = PH.H * K; }); cv.width = PH.W * K; cv.height = PH.H * K;
   stage.style.aspectRatio = `${PH.W} / ${PH.H}`; stage.style.width = PH.H / PH.W < .8 ? "min(460px, 88vw)" : PH.H / PH.W < 1.3 ? "min(400px, 88vw)" : "";
   $("spinHint").textContent = flat ? "Drag to catch the light" : "Drag to spin"; $("spinHint").classList.remove("off");
-  $("tpTitle").textContent = `See your ${t.name.toLowerCase()} before we make it`;
+  $("tpTitle").textContent = `See your ${lcName(t.name)} before we make it`;
   $("prodBar").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.p === t.slug));
-  $("orderName").textContent = (PV.showName ? `Order a ${t.name.toLowerCase()} with this name` : `Order a ${t.name.toLowerCase()}`) + " →";
+  $("orderName").textContent = (PV.showName ? `Order a ${lcName(t.name)} with this name` : `Order a ${lcName(t.name)}`) + " →";
   const img = new Image(); img.crossOrigin = "anonymous";
   img.onload = () => {
     photo = img;
@@ -854,7 +856,7 @@ $("fontBox").insertAdjacentHTML("beforeend", Object.entries(FONTS).map(([id, F])
 $("fontBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-f]"); if (!b) return; PV.font = b.dataset.f; $("fontBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); setName(true); });
 function setName(on) {
   PV.showName = on; const t = $("nameToggle"); t.setAttribute("aria-checked", on); t.textContent = "Show name: " + (on ? "On" : "Off");
-  const pn = (PV.template ? PV.template.name : "tumbler").toLowerCase(); $("orderName").textContent = (on ? `Order a ${pn} with this name` : `Order a ${pn}`) + " →"; sizeName();
+  const pn = lcName(PV.template ? PV.template.name : "tumbler"); $("orderName").textContent = (on ? `Order a ${pn} with this name` : `Order a ${pn}`) + " →"; sizeName();
 }
 $("nameToggle").addEventListener("click", () => setName(!PV.showName));
 $("inkBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-i]"); if (!b) return; PV.ink = b.dataset.i; $("inkBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); sizeName(); });
