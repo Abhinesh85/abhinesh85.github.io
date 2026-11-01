@@ -493,6 +493,8 @@ nav.links a { padding: 12px 4px; }
 .fav[aria-pressed="true"] { color: #ff6f8e; } .fav:focus-visible { outline: 2px solid var(--gold-2, #e9c46a); }
 .favline { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; } .favline .btn { padding: 9px 14px; font-size: 14px; }
 .favline .btn[aria-pressed="true"] { color: #ff6f8e; border-color: #ff6f8e; }
+footer a { display: inline-flex; align-items: center; min-height: 44px; }
+footer .bizline { display: inline-flex; flex-wrap: wrap; gap: 0 6px; align-items: center; } footer .bizline a { min-height: 0; padding: 0; display: inline; }
 .shopbar select { min-height: 44px; border-radius: 999px; border: 1px solid rgba(245, 236, 220, .2); background: rgba(245, 236, 220, .05); color: var(--cream); padding: 0 38px 0 16px; font: inherit; font-size: 14px; font-weight: 600; }
 .shopbar select option { color: #14110a; }
 .shopbar .count { margin-left: auto; font-size: 13.5px; color: var(--muted); }
@@ -717,7 +719,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
         <div class="step">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/></svg>
           <h3 data-s="step2Title">We print or engrave it</h3>
-          <p data-s="step2Text">Full-color UV printing that won't peel or wash off, or laser engraving that's etched in for good.</p>
+          <p data-s="step2Text">Durable full-color UV printing, or laser engraving that's etched into the surface.</p>
         </div>
         <div class="step">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7ZM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7Z"/></svg>
@@ -769,7 +771,8 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
         <details><summary>How long does an order take?</summary><p>Every piece is made to order. We'll message you if anything about your timeline changes. Need it by a date? Say so in the personalization box or message us before you order.</p></details>
         <details><summary>How much is shipping?</summary><p>Shipping is by USPS to anywhere in the US and depends on what you order, shown in your cart before you pay. Made-to-order items totaling $75 or more ship free. Digital downloads never ship.</p></details>
         <details><summary>Can I personalize my order?</summary><p>Yes. Choose "Add name" or type your text in the personalization box on the product page. For logos, photos or a layout of your own, request a quote or message us.</p></details>
-        <details><summary>Returns &amp; problems with my order</summary><p>We want you to love your order, and we'll work with you to make it right. <b>Please message us before sending anything back</b> so we can understand what happened, find the best fix together and approve your return. If your order arrives damaged or isn't what you ordered, send us a photo within 14 days and we'll gladly replace it or refund you, and we'll cover the return shipping.</p><p>Because each piece is personalized just for you, we can't accept returns for a change of mind. If we do approve a return for another reason, the return shipping is paid by the buyer. Digital downloads are final sale, but if a file won't open, we'll help you right away.</p></details>
+        <details><summary>Returns &amp; problems with my order</summary><p><a href="returns.html">Read our full returns &amp; refunds policy.</a> We want you to love your order, and we'll work with you to make it right. <b>Please message us before sending anything back</b> so we can understand what happened, find the best fix together and approve your return. If your order arrives damaged or isn't what you ordered, send us a photo within 14 days and we'll gladly replace it or refund you, and we'll cover the return shipping.</p><p>Because each piece is personalized just for you, we can't accept returns for a change of mind. If we do approve a return for another reason, the return shipping is paid by the buyer. Digital downloads are final sale, but if a file won't open, we'll help you right away.</p></details>
+        <details><summary>Privacy: how do I delete my information?</summary><p>Email <a href="mailto:hello@prajocustomstudio.com">hello@prajocustomstudio.com</a> with the subject "Delete my data" and we will remove your messages and uploaded pictures. See our <a href="privacy.html">privacy policy</a>.</p></details>
         <details><summary>Can I cancel my order?</summary><p>Yes, message us as soon as you can. We can cancel for free until production starts, usually within 24 hours of ordering. After that the piece is already being made.</p></details>
         <details><summary>How do I care for my tumbler?</summary><p>Hand wash for the longest-lasting print. UV prints and engraving won't peel or wash off with normal use, but avoid abrasive scrubbing and soaking for long periods.</p></details>
         <details><summary>Do you offer bulk or business orders?</summary><p>Yes: weddings, teams, schools, corporate gifts and memorials. Tap "Request a quote" above with your quantity and date and we'll reply within a day.</p></details>
@@ -800,6 +803,10 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     <a data-link="etsy" href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Find us on Etsy ↗</a>
     <a href="#faq">Shipping &amp; FAQ</a>
     <a href="#track" data-track>Track my order</a>
+    <a href="returns.html">Returns &amp; refunds</a>
+    <a href="privacy.html">Privacy</a>
+    <a href="terms.html">Terms</a>
+    <span class="bizline">PrAjo Custom Studio · Sacramento, California · <a href="mailto:hello@prajocustomstudio.com">hello@prajocustomstudio.com</a></span>
     <button class="btn btn-line share-shop" type="button" data-share-site>Share our shop</button>
     <span data-s="footerCopy">© 2026 PrAjo Custom Studio</span>
   </div>
@@ -815,6 +822,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     <div class="row2"><label>Quantity<input id="qQty" type="number" min="1" max="500" inputmode="numeric" value="10"></label><label>Needed by<input id="qDate" type="date"></label></div>
     <label>What do you need?<textarea id="qMsg" maxlength="1500" placeholder="Product, colors, names or logo, anything that helps"></textarea></label>
     <label>Logo or picture (optional)<input id="qFile" type="file" accept="image/*" multiple></label>
+    <p style="margin:0;font-size:13px;color:var(--muted)">We only use your details to reply and make your order. <a href="privacy.html" target="_blank" rel="noopener">Privacy policy</a></p>
     <input id="qSite" tabindex="-1" autocomplete="off" aria-hidden="true" style="position:absolute;left:-9999px">
     <p class="err" id="qErr" hidden></p><p class="ok" id="qOk" hidden></p>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-gold" id="qGo" type="submit">Send request</button><button class="btn btn-line" type="button" data-dclose>Close</button></div>
@@ -1345,7 +1353,7 @@ function openProduct(id) {
   const cat = CATS.find((c) => c.id === p.category);
   const perks = p.digital ? ["Instant download", "Print at home", "Use again and again"]
     : (SITE.perks || "").split("\n").map((x) => x.trim()).filter(Boolean).length ? SITE.perks.split("\n").map((x) => x.trim()).filter(Boolean)
-    : ["Made to order in Sacramento", "Won't peel or wash off", "Gift-ready packaging", "Local delivery or pickup"];
+    : ["Made to order in Sacramento", "Durable UV print", "Gift-ready packaging", "Local delivery or pickup"];
   $("info").innerHTML = `
     <div class="eyebrow">${esc(cat ? cat.label : "")}</div>
     <h2 id="pTitle">${esc(p.name)}</h2>
@@ -1574,7 +1582,7 @@ function renderChat() {
       <input class="hp" id="cSite" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p class="chat-err" id="chatErr" hidden></p>
       <button class="btn btn-gold" type="submit" id="cGo">Send message</button>
-      <p style="font-size:12.5px">We only use your email to reply to you.</p>
+      <p style="font-size:13px">We only use your details to reply to you and make your order. <a href="privacy.html" target="_blank" rel="noopener">Privacy policy</a></p>
     </form>`;
     $("chatFoot").hidden = true;
     return;
