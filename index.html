@@ -1233,6 +1233,19 @@ function mountDesignPicker(p) {
   if (!sel.value) window.__tplReady.then(() => blankTumbler(tplFor(p))).then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
   return true;
 }
+// Printing both sides: once "Both sides" is chosen, offer a second picture for the back (a design from the list, or the customer's own).
+function mountBackPicker(p) {
+  document.querySelector("#info .backpick")?.remove(); window.__backNote = ""; window.__backSync = null;
+  const inp = $("pPersonal"), both = (p.variations || []).some((v) => v.values.some((x) => /both sides/i.test(x)));
+  if (!both || !inp) return;
+  const list = (p.tags || []).includes("custom") ? designList(prodSlug(p)) : [];
+  inp.closest("label").insertAdjacentHTML("beforebegin", `<div class="backpick opt" style="display:none"><span>Back side</span>${list.length ? `<select id="pDesignBack"><option value="">Choose a design for the back…</option>${list.map((d) => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join("")}</select>` : ""}
+    <p class="hint" style="margin:6px 2px 10px;font-size:13px;opacity:.85">📷 ${list.length ? "Or send" : "Send"} us the picture or text for the back: <button type="button" data-chat style="background:none;border:0;padding:0;color:var(--gold-2);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer">Send it to us</button>. Mention “back” so we print it on the right side.</p></div>`);
+  const wrap = document.querySelector("#info .backpick"), sel = $("pDesignBack");
+  const sync = () => { const on = Object.values(chosenOptions()).some((v) => /both sides/i.test(v)); wrap.style.display = on ? "" : "none"; const d = on && sel ? list.find((x) => x.id === sel.value) : null; window.__backNote = d ? `Back: ${d.name}` : ""; };
+  window.__backSync = sync; if (sel) sel.onchange = sync; sync();
+}
+$("info").addEventListener("click", (e) => { if (e.target.closest(".chips button")) setTimeout(() => window.__backSync && window.__backSync(), 0); });
 document.addEventListener("designs-ready", () => { if (!cur || $("sheet").hidden) return; const sel = $("pDesign"); if (!sel || sel.dataset.prod !== prodSlug(cur)) { const keep = sel ? sel.value : ""; mountDesignPicker(cur); if (keep && $("pDesign") && [...$("pDesign").options].some((o) => o.value === keep)) { $("pDesign").value = keep; $("pDesign").dispatchEvent(new Event("change")); } } });
 function openProduct(id) {
   const p = P.find((x) => x.id === id);
@@ -1273,6 +1286,7 @@ function openProduct(id) {
   pQty = 1;
   if (window.__prefill && $("pPersonal") && !$("pPersonal").value) $("pPersonal").value = window.__prefill;
   if (!mountDesignPicker(p) && window.__prefill && $("pPersonal")) $("pPersonal").closest("label").insertAdjacentHTML("beforebegin", `<div class="yourdesign">${window.__preview ? `<img src="${esc(window.__preview)}" alt="Your design preview">` : ""}<div><b>Your design</b><small>${esc(window.__prefill)}</small></div></div>`);
+  mountBackPicker(p);
   { const q = new URLSearchParams(location.search), pdv = q.get("pd"), pov = q.get("po"), ptv = q.get("pt");   // a link from a message: reopen with the same choices
     if (pdv && $("pDesign")) { $("pDesign").value = pdv; $("pDesign").dispatchEvent(new Event("change")); }
     if (pov) pov.split("|").forEach((pair) => { const i = pair.indexOf(":"), k = pair.slice(0, i), v = pair.slice(i + 1), vi = p.variations.findIndex((x) => x.name === k);
@@ -1673,7 +1687,7 @@ $("info").addEventListener("click", (e) => {
     return;
   }
   if (e.target.closest("#addCart") && cur) {
-    const options = chosenOptions(), typed = ($("pPersonal")?.value || "").trim(), personalization = [typed, /Design:/i.test(typed) ? "" : (window.__designNote || "")].filter(Boolean).join(" · ").slice(0, 200);
+    const options = chosenOptions(), typed = ($("pPersonal")?.value || "").trim(), personalization = [typed, /Design:/i.test(typed) ? "" : (window.__designNote || ""), window.__backNote || ""].filter(Boolean).join(" · ").slice(0, 200);
     const items = cart.get();
     const same = items.find((i) => i.id === cur.id && JSON.stringify(i.options) === JSON.stringify(options) && i.personalization === personalization && (i.design || "") === (($("pDesign") && $("pDesign").value) || ""));
     if (same) same.qty = cur.digital ? 1 : Math.min(50, same.qty + pQty);
