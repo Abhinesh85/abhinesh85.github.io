@@ -499,13 +499,14 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <p class="hint">Best artwork: a wide image (around 2000 × 1700 px), JPG or PNG. Transparent PNGs are placed on white. We resize everything automatically.</p></div>
       <label class="td-prod">Designs for <select id="tdProd" aria-label="Which product these designs are for"></select></label>
       <p class="hint" style="margin:0 0 10px">Each product has its own designs. Pick the product first, then add or sort its designs.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="tdAdd">＋ Add designs</button><button class="btn" type="button" id="tdSelBtn" aria-pressed="false">☑ Select several</button><button class="btn" type="button" id="tdAZ">Sort A–Z</button><span class="hint" id="tdMsg" style="margin:0"></span></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="tdAdd">＋ Add designs</button><button class="btn" type="button" id="tdOrig" title="Match your original full-size files to designs already here, by file name">📎 Attach original files</button><button class="btn" type="button" id="tdSelBtn" aria-pressed="false">☑ Select several</button><button class="btn" type="button" id="tdAZ">Sort A–Z</button><span class="hint" id="tdMsg" style="margin:0"></span></div>
       <input class="in" id="tdSearch" placeholder="Search designs" aria-label="Search designs" autocomplete="off" style="margin:10px 0 0;width:100%">
       <div class="bulkbar" id="tdBulk" hidden><b id="tdBulkN">0 selected</b>
         <button class="btn" type="button" id="tdAll">Select all shown</button><button class="btn gold" type="button" id="tdMoveTo">📍 Move to…</button><button class="btn" type="button" id="tdTop">⬆ Top</button><button class="btn" type="button" id="tdBottom">⬇ Bottom</button>
         <div id="tdPlace" hidden style="flex:1 1 100%;display:none;gap:8px;align-items:center;flex-wrap:wrap"><b style="margin-right:auto" id="tdPlaceTxt"></b><button class="btn gold" type="button" id="tdBefore" aria-pressed="true">Before it</button><button class="btn" type="button" id="tdAfter" aria-pressed="false">After it</button><button class="btn" type="button" id="tdPlaceX">Cancel</button></div>
         <button class="btn" type="button" id="tdShow">Show</button><button class="btn" type="button" id="tdHide">Hide</button><button class="btn" type="button" id="tdDelSel" style="color:#ffb4a8">Delete</button><button class="btn" type="button" id="tdDone">Done</button></div>
       <input type="file" id="tdFile" accept="image/*" multiple hidden>
+      <input type="file" id="tdOrigFile" accept="image/*" multiple hidden>
       <div id="tdList" class="td-list"><p class="hint">Loading…</p></div>
     </div>
   </div>
@@ -1759,7 +1760,7 @@ async function tdMake(file) {
     const sc = cover ? Math.max(w / bmp.width, h / bmp.height) : w / bmp.width, dw = bmp.width * sc, dh = bmp.height * sc; x.drawImage(bmp, (w - dw) / 2, (h - dh) / 2, dw, dh); return c; };
   const blob = (c, q) => new Promise((ok) => c.toBlob(ok, "image/jpeg", q));
   const aw = Math.min(1000, bmp.width), ah = Math.round(aw * bmp.height / bmp.width);
-  return { art: await blob(draw(aw, ah, false), .74), card: await blob(draw(336, 460, true), .74), thumb: await blob(draw(120, 120, true), .72) };
+  return { art: await blob(draw(aw, ah, false), .74), card: await blob(draw(336, 460, true), .74), thumb: await blob(draw(120, 120, true), .72), orig: file };
 }
 $("tdAdd").onclick = () => $("tdFile").click();
 $("tdFile").addEventListener("change", async () => {
@@ -1773,11 +1774,35 @@ $("tdFile").addEventListener("change", async () => {
         if (error) throw error; return sb.storage.from("design-art").getPublicUrl(path).data.publicUrl; };
       const art = await up("art", b.art), card = await up("card", b.card), thumb = await up("thumb", b.thumb);
       const sort = (tdMine().reduce((m, r) => Math.max(m, r.sort), 0)) + 10;
-      const { data, error } = await sb.from("tumbler_designs").insert({ slug, name: tdTitle(f), art, card, thumb, sort, product: tdProd }).select().single();
+      // keep the untouched original file too, so the print file is never a shrunken copy
+      let original = null; try { const ext = (f.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "png", op = `${slug}/original.${ext}`; const { error: oe } = await sb.storage.from("design-art").upload(op, f, { contentType: f.type || "image/png", upsert: true }); if (!oe) original = sb.storage.from("design-art").getPublicUrl(op).data.publicUrl; } catch { /* the original is a bonus */ }
+      const row = { slug, name: tdTitle(f), art, card, thumb, sort, product: tdProd };
+      let { data, error } = await sb.from("tumbler_designs").insert(original ? { ...row, original } : row).select().single();
+      if (error && /original/i.test(error.message || "")) ({ data, error } = await sb.from("tumbler_designs").insert(row).select().single());   // the "original" column isn't set up yet
       if (error) throw error; tdRows.push(data); tdRender(); ok++;
     } catch (err) { toast(/decode|bitmap|heic/i.test(String(err)) ? `“${f.name}” couldn't be read. Try a JPG or PNG.` : `“${f.name}” didn't upload: ` + (err.message || err)); }
   }
   $("tdMsg").textContent = ok ? `Added ${ok}. Tap a name to rename it.` : ""; if (ok) toast(`Added ${ok} design${ok > 1 ? "s" : ""}`);
+});
+// "Attach original files": pick your full-size files; each one is matched to a design by its name (letters and numbers only) and saved as that design's print file
+const tdNorm = (t) => String(t).toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9]+/g, "");
+$("tdOrig").onclick = () => $("tdOrigFile").click();
+$("tdOrigFile").addEventListener("change", async () => {
+  const files = [...$("tdOrigFile").files].filter((f) => f.type.startsWith("image/")); $("tdOrigFile").value = ""; if (!files.length) return;
+  const byName = new Map(); tdRows.forEach((r) => { const k = tdNorm(r.name); if (!byName.has(k)) byName.set(k, r); });
+  let done = 0, miss = [], failed = 0, n = 0;
+  for (const f of files) {
+    n++; $("tdMsg").textContent = `Attaching ${n} of ${files.length}…`;
+    const row = byName.get(tdNorm(f.name)); if (!row) { miss.push(f.name); continue; }
+    try {
+      const ext = (f.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "png", op = `${row.slug}/original.${ext}`;
+      const { error } = await sb.storage.from("design-art").upload(op, f, { contentType: f.type || "image/png", upsert: true }); if (error) throw error;
+      const url = sb.storage.from("design-art").getPublicUrl(op).data.publicUrl, { error: ue } = await sb.from("tumbler_designs").update({ original: url }).eq("slug", row.slug); if (ue) throw ue;
+      row.original = url; done++;
+    } catch (err) { failed++; if (/original/i.test(String(err.message || err))) { $("tdMsg").textContent = "Set up first: run the one-line SQL in Supabase to add the “original” column (see the note I gave you)."; return; } }
+  }
+  $("tdMsg").textContent = `Attached ${done} original${done === 1 ? "" : "s"}${miss.length ? `, ${miss.length} had no matching design` : ""}${failed ? `, ${failed} failed` : ""}.` + (miss.length ? ` Not matched: ${miss.slice(0, 6).join(", ")}${miss.length > 6 ? "…" : ""}` : "");
+  toast(`Attached ${done} original${done === 1 ? "" : "s"}`);
 });
 /* ---------- home page showcase: the three tumblers at the top of the home page (saved in site_settings.showcase) ---------- */
 const SC_FONT_OPTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"]];
