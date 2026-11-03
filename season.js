@@ -88,7 +88,7 @@
   }
 
   let cvs = null, ctx = null, parts = [], raf = 0, last = 0, theme = null, dpr = 1, W = 0, H = 0;
-  const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches || (navigator.connection && navigator.connection.saveData) || (() => { try { return localStorage.getItem("prajo:still") === "1"; } catch { return false; } })();
+  const still = () => { let f = null; try { f = localStorage.getItem("prajo:still"); } catch { /* private mode */ } return f === "1" || (f !== "0" && (matchMedia("(prefers-reduced-motion: reduce)").matches || !!(navigator.connection && navigator.connection.saveData))); };   // "0" = the visitor chose Play
   function make(first) {
     const spec = theme.p[Math.floor(Math.random() * theme.p.length)], kind = spec.split("|")[0], up = kind === "ghost";
     const size = kind === "snow" ? 3 + Math.random() * 5 : kind === "ghost" ? 26 + Math.random() * 16 : kind === "hat" ? 16 + Math.random() * 6 : 9 + Math.random() * 9;

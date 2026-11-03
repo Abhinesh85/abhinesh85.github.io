@@ -439,6 +439,10 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 .cart-foot .tot { display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; }
 .cart-foot .tot b { font-family: var(--f-display); color: var(--gold-2); font-size: 22px; }
 .cart-foot .note { font-size: 13px; color: var(--muted); margin: 0; }
+.consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; line-height: 1.45; cursor: pointer; }
+.consent input { width: 22px; height: 22px; flex: none; margin: 1px 0 0; accent-color: #d9ab4f; }
+.consent a { color: var(--gold-2, #e9c46a); }
+.consent.need { outline: 2px solid #ff8a8a; outline-offset: 4px; border-radius: 6px; }
 .pay-btn { min-height: 54px; font-size: 16px; }
 .pay-marks { display: flex; justify-content: center; gap: 8px; flex-wrap: wrap; font-size: 12.5px; color: var(--muted); }
 .pay-marks span { border: 1px solid var(--line-soft); border-radius: 6px; padding: 3px 8px; }
@@ -692,7 +696,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
           <button class="gal-nav gal-prev" type="button" id="galPrev" aria-label="Previous design">‹</button>
           <button class="gal-nav gal-next" type="button" id="galNext" aria-label="Next design">›</button>
         </div>
-        <div class="gal-cap" aria-live="polite"><b id="galName">Gothic Roses</b><small>Tap the design in front to try it on a tumbler with your name</small></div>
+        <div class="gal-cap" aria-live="polite"><b id="galName">Gothic Roses</b><small>Tap the design in front to try it on a tumbler with your name</small><button type="button" class="stillbtn" id="galPlay" hidden>▶ Play animation (your device has motion turned down)</button></div>
       </div>
     </div>
   </section>
@@ -902,7 +906,8 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
       <div class="disc" id="cartDisc" hidden></div>
       <div class="suggest" id="cartSuggest" hidden></div>
       <p class="note" id="cartNote"></p>
-      <p class="note polnote">Personalized items are non-refundable except for mistakes or defects. <a href="returns.html" target="_blank" rel="noopener">Returns &amp; refunds</a> · <a href="terms.html" target="_blank" rel="noopener">Terms</a> · <a href="privacy.html" target="_blank" rel="noopener">Privacy</a>. By checking out you agree to the Terms.</p>
+      <p class="note polnote">Personalized items are non-refundable except for mistakes or defects.</p>
+      <label class="consent"><input type="checkbox" id="coConsent"> <span>I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of service</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy policy</a> and <a href="returns.html" target="_blank" rel="noopener">Returns &amp; refunds policy</a>.</span></label>
       <p class="chat-err" id="cartErr" hidden></p>
       <button class="btn btn-gold pay-btn" type="button" id="checkoutBtn">Checkout</button>
       <div class="pay-marks" aria-label="Accepted payments"><span> Pay</span><span>G Pay</span><span>Visa · Mastercard · Amex</span></div>
@@ -1090,10 +1095,13 @@ function refreshShop() { applyOrder(); renderCollections(); setFilter(filter); }
 const isNew = (p) => p.created && (Date.now() - p.created) / 86400000 <= newDays();
 const soldOut = (p) => !p.digital && p.stock <= 0;
 /* "Pause animations": a visitor can stop all motion (snow, flipping previews, rotating gallery); remembered on this device */
-const stillOn = () => { try { return localStorage.getItem("prajo:still") === "1"; } catch { return false; } };
-const paintStill = () => { const on = stillOn(); document.documentElement.classList.toggle("still", on); const b = document.getElementById("stillBtn"); if (b) { b.setAttribute("aria-pressed", on); b.textContent = on ? "Play animations" : "Pause animations"; } };
+// "1" = paused by the visitor, "0" = visitor chose to play (even if the device is set to Reduce Motion), nothing = follow the device setting
+const stillFlag = () => { try { return localStorage.getItem("prajo:still"); } catch { return null; } };
+const stillOn = () => stillFlag() === "1" || (matchMedia("(prefers-reduced-motion: reduce)").matches && stillFlag() !== "0");
+const paintStill = () => { const on = stillOn(); document.documentElement.classList.toggle("still", on); const b = document.getElementById("stillBtn"); if (b) { b.setAttribute("aria-pressed", on); b.textContent = on ? "Play animations" : "Pause animations"; } const g = document.getElementById("galPlay"); if (g) g.hidden = !on; };
 paintStill();
-document.getElementById("stillBtn")?.addEventListener("click", () => { try { localStorage.setItem("prajo:still", stillOn() ? "0" : "1"); } catch { /* private mode */ } paintStill(); if (window.__season) window.__season(typeof SITE !== "undefined" ? SITE.season : undefined); if (window.__cardShows) window.__cardShows(); toast(stillOn() ? "Animations paused" : "Animations on"); });
+const toggleStill = () => { try { localStorage.setItem("prajo:still", stillOn() ? "0" : "1"); } catch { /* private mode */ } paintStill(); if (window.__season) window.__season(typeof SITE !== "undefined" ? SITE.season : undefined); if (window.__cardShows) window.__cardShows(); if (window.__galAuto) window.__galAuto(!stillOn()); toast(stillOn() ? "Animations paused" : "Animations on"); };
+document.getElementById("stillBtn")?.addEventListener("click", toggleStill); document.getElementById("galPlay")?.addEventListener("click", toggleStill);
 /* favourites: hearts on products and designs, kept on this phone only */
 const favs = (() => { let f = { p: [], d: [] }; try { const c = JSON.parse(localStorage.getItem("prajo:favs") || "null"); if (c && Array.isArray(c.p) && Array.isArray(c.d)) f = c; } catch { /* none yet */ } return {
   has: (k, id) => f[k].some((x) => (k === "d" ? x.id : x) === id),
@@ -1266,7 +1274,7 @@ window.__cardFit = (im) => { const ph = im.closest(".ph"); if (!ph || ph.dataset
 let csTimer = 0;
 window.__cardShows = function () {
   clearInterval(csTimer);
-  if (matchMedia("(prefers-reduced-motion: reduce)").matches || stillOn() || typeof P === "undefined") return;
+  if (stillOn() || typeof P === "undefined") return;
   const shows = [];
   document.querySelectorAll("#grid .card").forEach((a) => {
     const id = decodeURIComponent((a.getAttribute("href") || "").replace(/^#p\//, "")), p = P.find((x) => x.id === id), ph = a.querySelector(".ph");
@@ -1375,6 +1383,7 @@ function mountDesignPicker(p) {
     $("pTitle").textContent = d ? d.name : p.name;
     document.title = `${$("pTitle").textContent} · PrAjo Custom Studio`; $("sbName").textContent = $("pTitle").textContent;
     if (d) $("slides").scrollLeft = 0;
+    if (window.__nameRefresh2) window.__nameRefresh2();
     card.hidden = !d; $("pNameFx").hidden = !d; $("pFxHint").hidden = !!nameVal(); rotRow.style.display = d && tplFor(p) ? "flex" : "none"; if (!d) { window.__designNote = ""; note.textContent = ""; return; }
     card.querySelector("img").src = (window.__preview && pre && pre.id === d.id) ? window.__preview : d.card;
     card.querySelector("b").textContent = d.name; { const tp = tplFor(p); card.querySelector("small").textContent = `Printed on your ${tp ? tp.name.toLowerCase() : "tumbler"}`; }
@@ -1395,7 +1404,7 @@ function mountDesignPicker(p) {
 const NF_LIST = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"], ["royal", "Royal"], ["sketch", "Sketch"], ["notebook", "Notebook"], ["heavy", "Heavy"], ["sport", "Sport"], ["modern", "Modern"], ["plain", "Plain"]];
 const NI_LIST = [["gold", "Gold", "linear-gradient(#fff3cf,#e9c46a,#a97a22)"], ["silver", "Silver", "linear-gradient(#fff,#c9ced6,#7f8896)"], ["rosegold", "Rose gold", "linear-gradient(#ffe3dc,#e8a598,#b76e62)"], ["white", "White", "#ffffff"], ["black", "Black", "#15171c"], ["#d62839", "Red", "#d62839"], ["#ff5fa2", "Pink", "#ff5fa2"], ["#ff8a00", "Orange", "#ff8a00"], ["#f5c400", "Yellow", "#f5c400"], ["#1fa34a", "Green", "#1fa34a"], ["#14b8a6", "Teal", "#14b8a6"], ["#2563eb", "Blue", "#2563eb"], ["#1e2a5a", "Navy", "#1e2a5a"], ["#7c3aed", "Purple", "#7c3aed"]];
 function mountSimpleNameStyle(p) {
-  document.querySelector("#info .namefx2")?.remove(); window.__nameNote2 = "";
+  document.querySelector("#info .namefx2")?.remove(); window.__nameNote2 = ""; window.__nameRefresh2 = null;
   const inp = $("pPersonal"); if (!inp || p.digital) return;
   const st = { f: "script", i: "gold" };
   inp.closest("label").insertAdjacentHTML("afterend", `<div class="namefx namefx2" id="pNameFx2" hidden><b>Name style</b>
@@ -1411,7 +1420,7 @@ function mountSimpleNameStyle(p) {
     wrap.style.background = v === "white" ? "#2a2f3a" : v === "black" ? "#efefef" : "#8e94a2";
     const typed = nm(); window.__nameNote2 = typed ? `Name style: ${(NF_LIST.find((x) => x[0] === st.f) || [0, st.f])[1]} font, ${inkName()} ink` : "";
   };
-  const show = () => { const add = Object.values(chosenOptions()).some((x) => /^add name$/i.test(x)); box.hidden = !(nm() || add); if (box.hidden) window.__nameNote2 = ""; else paint(); };
+  const show = () => { if (!document.body.contains(box)) return; const add = Object.values(chosenOptions()).some((x) => /^add name$/i.test(x)), designed = !!($("pDesign") && $("pDesign").value); box.hidden = designed || !(nm() || add); if (box.hidden) window.__nameNote2 = ""; else paint(); };
   $("pFx2Fonts").onclick = (e) => { const b = e.target.closest("button[data-f]"); if (!b) return; st.f = b.dataset.f; $("pFx2Fonts").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); show(); };
   const setInk = (v, btn) => { st.i = v; $("pFx2Inks").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === btn)); show(); };
   $("pFx2Inks").onclick = (e) => { const b = e.target.closest("button[data-ink]"); if (b) setInk(b.dataset.ink, b); };
@@ -1475,7 +1484,7 @@ function openProduct(id) {
   pQty = 1;
   if (window.__prefill && $("pPersonal") && !$("pPersonal").value) $("pPersonal").value = window.__prefill;
   if (!mountDesignPicker(p) && window.__prefill && $("pPersonal")) $("pPersonal").closest("label").insertAdjacentHTML("beforebegin", `<div class="yourdesign">${window.__preview ? `<img src="${esc(window.__preview)}" alt="Your design preview">` : ""}<div><b>Your design</b><small>${esc(window.__prefill)}</small></div></div>`);
-  if (!(p.tags || []).includes("custom")) mountSimpleNameStyle(p); else { document.querySelector("#info .namefx2")?.remove(); window.__nameNote2 = ""; }
+  mountSimpleNameStyle(p);   // every listing with a name box; on design-picker listings it hides itself once a design is chosen (the designer-style controls take over)
   mountBackPicker(p);
   { const q = new URLSearchParams(location.search), pdv = q.get("pd"), pov = q.get("po"), ptv = q.get("pt");   // a link from a message: reopen with the same choices
     if (pdv && $("pDesign")) { $("pDesign").value = pdv; $("pDesign").dispatchEvent(new Event("change")); }
@@ -1521,7 +1530,7 @@ function route() {
   const m = location.hash.match(/^#p\/(.+)$/);
   if (m) openProduct(decodeURIComponent(m[1])); else closeProduct(true);
   if (location.hash === "#cart") { history.replaceState(null, "", location.pathname); openCart(); }
-  const o = location.hash.match(/^#order\/(cs_[\w]+)$/);
+  const o = location.hash.match(/^#order\/(cs_[\w]+|anet_[A-Z0-9]+)$/);
   if (o) showThanks(o[1]);
 }
 let inApp = false;
@@ -1943,12 +1952,22 @@ $("cartList").addEventListener("click", (e) => {
   if (e.target.closest("[data-crm]")) items.splice(+row.dataset.idx, 1);
   cart.set(items); renderCart();
 });
+$("coConsent").addEventListener("change", () => { if ($("coConsent").checked) { $("coConsent").closest(".consent").classList.remove("need"); $("cartErr").hidden = true; } });
 $("checkoutBtn").onclick = async () => {
-  const btn = $("checkoutBtn"), err = $("cartErr");
+  const btn = $("checkoutBtn"), err = $("cartErr"), ok = $("coConsent");
+  // The customer must tick the Terms / Privacy / Returns box themselves; nothing is sent until they do.
+  if (!ok.checked) { const l = ok.closest(".consent"); l.classList.add("need"); err.textContent = "Please tick the box to agree to the Terms, Privacy policy and Returns policy."; err.hidden = false; ok.focus(); return; }
+  ok.closest(".consent").classList.remove("need");
+  // One attempt id per visit: a double tap or a retry reopens the same payment page instead of making a second one.
+  let attempt = ""; try { attempt = sessionStorage.getItem("prajo:attempt") || ""; if (!attempt) { attempt = crypto.randomUUID(); sessionStorage.setItem("prajo:attempt", attempt); } } catch { attempt = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2); }
   btn.disabled = true; btn.textContent = "Opening secure checkout…"; err.hidden = true;
   try {
-    const r = await fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "create", items: cart.get() }) });
+    const r = await fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "create", items: cart.get(), consent: true, attempt }) });
     const d = await r.json().catch(() => ({}));
+    if (r.ok && d.postUrl && d.token) {   // backup gateway: the card form is on the gateway's own page, reached with a one-time token
+      const f = document.createElement("form"); f.method = "POST"; f.action = d.postUrl; f.style.display = "none";
+      const t = document.createElement("input"); t.type = "hidden"; t.name = "token"; t.value = d.token; f.appendChild(t); document.body.appendChild(f); f.submit(); return;
+    }
     if (!r.ok || !d.url) throw new Error(d.error || "Checkout isn't available right now. Please try again or message us.");
     location.href = d.url;
   } catch (x) {
@@ -2051,7 +2070,7 @@ route();
   setTimeout(() => ring.querySelectorAll('img[loading="lazy"]').forEach((im) => { im.loading = "eager"; }), 800);   // the ring is 3D, so the browser's "near the screen" test comes too late
   }
   build();
-  let rot = 0, target = 0, vel = 0, dragging = false, moved = 0, last = 0, raf = 0, auto = !matchMedia("(prefers-reduced-motion: reduce)").matches && !stillOn(), visible = false, idle = 0;
+  let rot = 0, target = 0, vel = 0, dragging = false, moved = 0, last = 0, raf = 0, auto = !stillOn(), visible = false, idle = 0;
   function size() {
     const W = gal.clientWidth < 560 ? Math.round(gal.clientWidth * .4) : Math.round(Math.min(176, Math.max(110, gal.clientWidth * .2))), H = Math.round(W * 1.37), R = Math.round((W / 2) / Math.tan(Math.PI / N) * 1.16);
     gal.style.setProperty("--W", W + "px"); gal.style.setProperty("--H", H + "px"); gal._R = R; paint();
@@ -2080,6 +2099,7 @@ route();
     if (visible && (dragging || auto || Math.abs(target - rot) > .05 || Math.abs(vel) > .004)) raf = requestAnimationFrame(tick); else last = 0;
   }
   const kick = () => { if (!raf) raf = requestAnimationFrame(tick); };
+  window.__galAuto = (on) => { auto = on; idle = Date.now() - 3000; kick(); };
   const stop = () => { auto = false; idle = Date.now(); };
   const go = (n) => { stop(); target = (Math.round(target / STEP) + n) * STEP; vel = 0; kick(); };
   new IntersectionObserver(([e]) => { visible = e.isIntersecting; if (visible) kick(); }).observe(gal);
