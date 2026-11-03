@@ -1283,7 +1283,13 @@ function renderCo() {
     <div class="co-row master"><div class="co-top"><div><b>Store checkout</b><small>${co.enabled ? (anyOn ? "On: customers can pay with card, Apple Pay or Google Pay" : "On, but every delivery option is off, so nobody can check out") : "Paused: customers see “Order on Etsy” instead of Add to cart"}</small></div>${sw("enabled", "Store checkout")}</div></div>
     ${CO_ROWS.map((r) => `<div class="co-row ${co[r.k] ? "" : "off"}"><div class="co-top"><div><b>${r.t}</b><small>${r.d}</small></div>${sw(r.k, r.t)}</div>
       ${r.k === "shipping" && co.shipping ? rateTable() : ""}
-      ${r.fees.length && co[r.k] ? `<div class="co-fees">${r.fees.map(([f, l]) => `<label class="f"><span class="hint">${l}</span><input class="in" type="number" inputmode="decimal" min="0" step="0.5" data-fee="${f}" value="${co[f]}"></label>`).join("")}</div>` : ""}</div>`).join("")}`;
+      ${r.fees.length && co[r.k] ? `<div class="co-fees">${r.fees.map(([f, l]) => `<label class="f"><span class="hint">${l}</span><input class="in" type="number" inputmode="decimal" min="0" step="0.5" data-fee="${f}" value="${co[f]}"></label>`).join("")}</div>` : ""}</div>`).join("")}
+    <div class="co-row ${co.manual?.enabled ? "" : "off"}"><div class="co-top"><div><b>Pay by bank transfer</b><small>${co.manual?.enabled ? "On: customers can pay with Zelle, Venmo, Cash App or Apple Cash. No card company involved." : "Off. Add your payment details below, then switch it on. A backup that works even if a card processor pauses your account."}</small></div>
+      <label class="switch"><input type="checkbox" data-mp="enabled" ${co.manual?.enabled ? "checked" : ""} aria-label="Pay by bank transfer"></label></div>
+      <div class="co-fees" style="display:grid;gap:8px">
+        ${[["zelle", "Zelle (phone or email)"], ["venmo", "Venmo (@username)"], ["cashapp", "Cash App ($cashtag)"], ["applecash", "Apple Cash (phone or email)"]].map(([k, l]) => `<label class="f"><span class="hint">${l}</span><input class="in" type="text" maxlength="80" data-mpf="${k}" value="${esc(co.manual?.[k] || "")}" placeholder="Leave empty to hide"></label>`).join("")}
+        <label class="f"><span class="hint">Message shown to the customer (optional)</span><input class="in" type="text" maxlength="300" data-mpf="note" value="${esc(co.manual?.note || "")}" placeholder="e.g. Personal accounts only. We start your order when the payment arrives."></label>
+        <p class="hint" style="margin:0">Customers see these only after they place an order. When the money arrives, open the order in the Orders tab and tap <b>Mark paid</b>: stock goes down and the print files reach your Telegram. Check each app's rules about business use before you switch it on.</p></div></div>`;
 }
 async function saveCo(msg) {
   try { co = await coCall({ action: "save_settings", settings: co }); renderCo(); toast(msg); }
@@ -1304,6 +1310,12 @@ $("coList").addEventListener("change", (e) => {
     co.rates = { ...(co.rates || {}), [c]: { ...(co.rates?.[c] || {}), [w]: n } }; saveCo("Shipping rates saved");
   }
   if (t.dataset.fee) { const n = Number(t.value); if (!(n >= 0)) return toast("Enter a number"); co[t.dataset.fee] = n; saveCo("Fee saved"); }
+  if (t.dataset.mp === "enabled") {
+    co.manual = { ...(co.manual || {}), enabled: t.checked };
+    if (t.checked && !["zelle", "venmo", "cashapp", "applecash"].some((k) => (co.manual[k] || "").trim())) { co.manual.enabled = false; renderCo(); return toast("Add at least one payment handle first"); }
+    saveCo(`Bank transfer ${t.checked ? "on" : "off"}`);
+  }
+  if (t.dataset.mpf) { co.manual = { ...(co.manual || {}), [t.dataset.mpf]: t.value.trim() }; saveCo("Payment details saved"); }
 });
 
 /* ---------- site settings: text and choices the store page reads at load (table site_settings) ---------- */

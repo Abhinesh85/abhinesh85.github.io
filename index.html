@@ -439,6 +439,10 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 .cart-foot .tot { display: flex; justify-content: space-between; font-size: 17px; font-weight: 700; }
 .cart-foot .tot b { font-family: var(--f-display); color: var(--gold-2); font-size: 22px; }
 .cart-foot .note { font-size: 13px; color: var(--muted); margin: 0; }
+.xfer-total { font-family: var(--f-display); font-size: 28px; color: var(--gold-2, #e9c46a); margin: 4px 0; }
+.xfer-ref { display: inline-block; padding: 6px 12px; border-radius: 10px; background: rgba(233,196,106,.16); border: 1px dashed var(--gold-2, #e9c46a); font-weight: 800; letter-spacing: .04em; }
+.xfer-app { display: flex; justify-content: space-between; align-items: center; gap: 10px; padding: 12px 14px; border-radius: 14px; border: 1px solid rgba(245,236,220,.2); background: rgba(245,236,220,.05); }
+.xfer-app b { display: block; } .xfer-app span { overflow-wrap: anywhere; } .xfer-app .btn { min-height: 44px; padding: 0 14px; }
 .consent { display: flex; gap: 10px; align-items: flex-start; font-size: 13.5px; line-height: 1.45; cursor: pointer; }
 .consent input { width: 22px; height: 22px; flex: none; margin: 1px 0 0; accent-color: #d9ab4f; }
 .consent a { color: var(--gold-2, #e9c46a); }
@@ -853,6 +857,27 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-gold" id="qGo" type="submit">Send request</button><button class="btn btn-line" type="button" data-dclose>Close</button></div>
   </form>
 </div>
+<div class="dlg" id="xferDlg" hidden role="dialog" aria-modal="true" aria-labelledby="xferTitle">
+  <form id="xferForm" novalidate>
+    <h3 id="xferTitle">Pay by bank transfer</h3>
+    <div id="xferFormBody">
+      <p style="margin:0;color:var(--muted)">Tell us where to send your order. On the next screen you'll see how to pay with your own app. We start making it as soon as your payment arrives.</p>
+      <label>Your name<input id="xName" autocomplete="name" maxlength="80"></label>
+      <label>Email<input id="xEmail" type="email" autocomplete="email" inputmode="email" maxlength="160"></label>
+      <label>Phone<input id="xPhone" type="tel" autocomplete="tel" inputmode="tel" maxlength="30"></label>
+      <label>How would you like it?<select id="xMethod"></select></label>
+      <div id="xAddr" hidden>
+        <label>Street address<input id="xLine1" autocomplete="address-line1" maxlength="120"></label>
+        <label>Apt, suite (optional)<input id="xLine2" autocomplete="address-line2" maxlength="120"></label>
+        <div class="row2"><label>City<input id="xCity" autocomplete="address-level2" maxlength="60"></label><label>State<input id="xState" autocomplete="address-level1" maxlength="2" placeholder="CA" style="text-transform:uppercase"></label></div>
+        <label>ZIP<input id="xZip" autocomplete="postal-code" inputmode="numeric" maxlength="10"></label>
+      </div>
+      <p class="err" id="xErr" hidden></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn btn-gold" id="xGo" type="submit">Place order</button><button class="btn btn-line" type="button" data-dclose>Close</button></div>
+    </div>
+    <div id="xferDone" hidden></div>
+  </form>
+</div>
 <div class="dlg" id="trackDlg" hidden role="dialog" aria-modal="true" aria-labelledby="trackTitle">
   <form id="trackForm" novalidate>
     <h3 id="trackTitle">Track my order</h3>
@@ -910,6 +935,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
       <label class="consent"><input type="checkbox" id="coConsent"> <span>I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of service</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy policy</a> and <a href="returns.html" target="_blank" rel="noopener">Returns &amp; refunds policy</a>.</span></label>
       <p class="chat-err" id="cartErr" hidden></p>
       <button class="btn btn-gold pay-btn" type="button" id="checkoutBtn">Checkout</button>
+      <button class="btn btn-line" type="button" id="xferBtn" hidden>Or pay by Zelle, Venmo, Cash App or Apple Cash</button>
       <div class="pay-marks" aria-label="Accepted payments"><span> Pay</span><span>G Pay</span><span>Visa · Mastercard · Amex</span></div>
     </div>
   </div>
@@ -1578,7 +1604,7 @@ $("trackForm").addEventListener("submit", async (e) => {
     const r = await fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: CHAT.key, Authorization: `Bearer ${CHAT.key}` }, body: JSON.stringify({ action: "lookup", orderNo: $("tNo").value, email: $("tEmail").value }) });
     const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || "Something went wrong.");
     const at = TRACK.findIndex((x) => x[0] === d.stage), local = /pickup/i.test(d.method) ? "Ready for pickup" : /local delivery/i.test(d.method) ? "Out for delivery" : "Shipped";
-    out.innerHTML = `<b>Order #${esc(d.orderNo)}</b><div class="track-steps">${TRACK.map(([k, l], i) => `<span class="${i < at ? "done" : i === at ? "now" : ""}">${k === "shipped" ? local : l}</span>`).join("")}</div><small style="color:var(--muted)">${d.items.map((x) => `${x.qty} × ${esc(x.name)}`).join(", ")}</small>`;
+    out.innerHTML = `${d.awaitingPayment ? `<p style="margin:0 0 8px;padding:10px 12px;border-radius:12px;background:rgba(233,196,106,.16);border:1px dashed var(--gold-2,#e9c46a)"><b>⏳ Waiting for your payment.</b> We start your order as soon as it arrives. Use order #${esc(d.orderNo)} in the payment note.</p>` : ""}<b>Order #${esc(d.orderNo)}</b><div class="track-steps">${TRACK.map(([k, l], i) => `<span class="${i < at ? "done" : i === at ? "now" : ""}">${k === "shipped" ? local : l}</span>`).join("")}</div><small style="color:var(--muted)">${d.items.map((x) => `${x.qty} × ${esc(x.name)}`).join(", ")}</small>`;
     out.hidden = false;
   } catch (x) { err.textContent = x.message; err.hidden = false; } finally { go.disabled = false; go.textContent = "Look it up"; }
 });
@@ -1947,6 +1973,9 @@ function renderCart() {
     : physical ? `${ways.join(" ")} California sales tax is added at checkout.${known.some((i) => i.p.digital) ? " Downloads are ready right after you pay." : ""}`
     : "💾 Instant download: your files are ready right after you pay. Nothing is shipped.";
   $("checkoutBtn").disabled = !ok;
+  // bank transfer: only when the owner switched it on, and only for made-to-order carts (downloads are delivered after a card payment)
+  const mp = CO.manual || {}; $("xferBtn").hidden = !(ok && mp.enabled && physical && !known.some((i) => i.p.digital));
+  $("xferBtn").textContent = `Or pay by ${(mp.methods || []).join(", ").replace(/, ([^,]*)$/, " or $1") || "bank transfer"}`;
   if (listingsLoaded && items.length !== known.length) cart.set(known.map(({ p, ...i }) => i));
 }
 $("cartList").addEventListener("click", (e) => {
@@ -1957,6 +1986,69 @@ $("cartList").addEventListener("click", (e) => {
   if (e.target.closest("[data-crm]")) items.splice(+row.dataset.idx, 1);
   cart.set(items); renderCart();
 });
+// Print-ready files: each personalized item is redrawn exactly as the customer set it (design, name, font, color, size, angle),
+// so the shop gets a file to drop straight into the printer software. If one can't be made, the order still goes through.
+async function buildPrints(items, btn) {
+  const prints = []; let bytes = 0;
+  const want = items.map((it, i) => [it, i]).filter(([it]) => it.print);
+  if (!want.length || typeof printFile !== "function") return prints;
+  const old = btn.textContent; btn.textContent = "Preparing your print file…";
+  try { await window.__tplReady; } catch { /* templates are optional */ }
+  for (const [it, i] of want) {
+    try {
+      const sp = it.print, d = sp.d ? (window.__allDesigns || []).find((x) => x.id === sp.d) || null : null, tpl = (window.__tpls || []).find((t) => t.slug === sp.tpl) || null;
+      let url = await printFile(sp, d, tpl);
+      if (url.length > 3.5e6) {   // big photo-style file: send a high-quality JPEG instead, so the request stays small
+        const im = new Image(); im.src = url; await im.decode(); const cv = document.createElement("canvas"); cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+        const cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0); url = cv.toDataURL("image/jpeg", .92);
+      }
+      const png = url.split(",")[1] || ""; bytes += png.length;
+      if (png && bytes < 9e6) prints.push({ i, png });
+    } catch { /* skip this one */ }
+  }
+  btn.textContent = old === "Preparing your print file…" ? "Opening secure checkout…" : old;
+  return prints;
+}
+/* ---------- pay by bank transfer ---------- */
+const xferNeedConsent = () => { const ok = $("coConsent"), err = $("cartErr"); if (ok.checked) return true; ok.closest(".consent").classList.add("need"); err.textContent = "Please tick the box to agree to the Terms, Privacy policy and Returns policy."; err.hidden = false; ok.focus(); return false; };
+$("xferBtn").onclick = () => {
+  if (!xferNeedConsent()) return;
+  const ways = [CO.shipping && ["shipping", "Ship it to me (USPS)"], CO.delivery && ["delivery", "Local delivery (Sacramento area)"], CO.pickup && ["pickup", "I'll pick it up in Sacramento"]].filter(Boolean);
+  $("xMethod").innerHTML = ways.map(([v, l]) => `<option value="${v}">${l}</option>`).join(""); $("xAddr").hidden = !ways.length || ways[0][0] === "pickup";
+  $("xferFormBody").hidden = false; $("xferDone").hidden = true; $("xErr").hidden = true; $("xGo").disabled = false; $("xGo").textContent = "Place order"; $("xferTitle").textContent = "Pay by bank transfer";
+  openDlg("xferDlg");
+};
+$("xMethod").addEventListener("change", () => { $("xAddr").hidden = $("xMethod").value === "pickup"; });
+$("xferForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const err = $("xErr"), go = $("xGo"); err.hidden = true;
+  const f = { name: $("xName").value.trim(), email: $("xEmail").value.trim(), phone: $("xPhone").value.trim(), method: $("xMethod").value, address: { line1: $("xLine1").value.trim(), line2: $("xLine2").value.trim(), city: $("xCity").value.trim(), state: $("xState").value.trim(), zip: $("xZip").value.trim() } };
+  const bad = f.name.length < 2 ? "Please add your name." : !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email) ? "Please enter a valid email so we can reach you." : f.phone.replace(/\D/g, "").length < 7 ? "Please add a phone number."
+    : f.method !== "pickup" && (!f.address.line1 || !f.address.city || !/^[A-Za-z]{2}$/.test(f.address.state) || !/^\d{5}(-\d{4})?$/.test(f.address.zip)) ? "Please add your full address (street, city, state and 5-digit ZIP)." : "";
+  if (bad) { err.textContent = bad; err.hidden = false; return; }
+  let attempt = ""; try { attempt = sessionStorage.getItem("prajo:attempt") || ""; if (!attempt) { attempt = crypto.randomUUID(); sessionStorage.setItem("prajo:attempt", attempt); } } catch { attempt = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2); }
+  go.disabled = true; go.textContent = "Placing your order…";
+  try {
+    const items = cart.get(), prints = await buildPrints(items, go);
+    const r = await fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "create", pay: "manual", items, consent: true, attempt, prints, manual: f }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok || !d.manual) throw new Error(d.error || "We couldn't place the order right now. Please try again or message us.");
+    cart.set([]); try { sessionStorage.removeItem("prajo:attempt"); } catch { /* fine */ }
+    const m2 = (n) => "$" + Number(n).toFixed(2);
+    $("xferTitle").textContent = `Order #${d.orderNo} placed`;
+    $("xferFormBody").hidden = true; $("xferDone").hidden = false;
+    $("xferDone").innerHTML = `<p style="margin:0">Thank you, ${esc(f.name)}! Your order is saved. <b>It's not paid yet.</b> Please send the payment now:</p>
+      <div class="xfer-total">${m2(d.total)}</div>
+      <p style="margin:0;color:var(--muted);font-size:14px">${m2(d.subtotal)} items${d.discount ? ` − ${m2(d.discount)} bundle` : ""} + ${m2(d.tax)} tax${d.shipping ? ` + ${m2(d.shipping)} ${d.method === "delivery" ? "delivery" : "shipping"}` : ""}</p>
+      <p style="margin:10px 0 4px">In the payment note, write this reference so we can match it:</p><p style="margin:0"><span class="xfer-ref">Order #${d.orderNo}</span></p>
+      <div style="display:grid;gap:8px;margin:14px 0">${d.handles.map((h) => `<div class="xfer-app"><div><b>${esc(h.label)}</b><span>${esc(h.handle)}</span></div><button class="btn btn-line" type="button" data-copy="${esc(h.handle)}">Copy</button></div>`).join("")}</div>
+      ${d.note ? `<p style="margin:0;font-size:14px">${esc(d.note)}</p>` : ""}
+      <p style="margin:8px 0 0;font-size:14px;color:var(--muted)">We start making your order as soon as the payment arrives, usually the same day. Check progress any time with “Track my order” (order #${d.orderNo} and your email). Questions? Tap “Message us”.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-gold" type="button" data-dclose>Done</button></div>`;
+    closeCart();
+  } catch (x) { err.textContent = x.message; err.hidden = false; go.disabled = false; go.textContent = "Place order"; }
+});
+document.addEventListener("click", async (e) => { const b = e.target.closest("[data-copy]"); if (!b) return; try { await navigator.clipboard.writeText(b.dataset.copy); const t = b.textContent; b.textContent = "Copied"; setTimeout(() => { b.textContent = t; }, 1500); } catch { prompt("Copy this", b.dataset.copy); } });
 $("coConsent").addEventListener("change", () => { if ($("coConsent").checked) { $("coConsent").closest(".consent").classList.remove("need"); $("cartErr").hidden = true; } });
 $("checkoutBtn").onclick = async () => {
   const btn = $("checkoutBtn"), err = $("cartErr"), ok = $("coConsent");
@@ -1967,27 +2059,7 @@ $("checkoutBtn").onclick = async () => {
   let attempt = ""; try { attempt = sessionStorage.getItem("prajo:attempt") || ""; if (!attempt) { attempt = crypto.randomUUID(); sessionStorage.setItem("prajo:attempt", attempt); } } catch { attempt = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2); }
   btn.disabled = true; btn.textContent = "Opening secure checkout…"; err.hidden = true;
   try {
-    // Print-ready files: each personalized item is redrawn exactly as the customer set it (design, name, font, color, size, angle),
-    // so the shop gets a file to drop straight into the printer software. If one can't be made, the order still goes through.
-    const items = cart.get(), prints = []; let bytes = 0;
-    const want = items.map((it, i) => [it, i]).filter(([it]) => it.print);
-    if (want.length && typeof printFile === "function") {
-      btn.textContent = "Preparing your print file…";
-      try { await window.__tplReady; } catch { /* templates are optional */ }
-      for (const [it, i] of want) {
-        try {
-          const sp = it.print, d = sp.d ? (window.__allDesigns || []).find((x) => x.id === sp.d) || null : null, tpl = (window.__tpls || []).find((t) => t.slug === sp.tpl) || null;
-          let url = await printFile(sp, d, tpl);
-          if (url.length > 3.5e6) {   // big photo-style file: send a high-quality JPEG instead, so the request stays small
-            const im = new Image(); im.src = url; await im.decode(); const cv = document.createElement("canvas"); cv.width = im.naturalWidth; cv.height = im.naturalHeight;
-            const cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0); url = cv.toDataURL("image/jpeg", .92);
-          }
-          const png = url.split(",")[1] || ""; bytes += png.length;
-          if (png && bytes < 9e6) prints.push({ i, png });
-        } catch { /* skip this one */ }
-      }
-      btn.textContent = "Opening secure checkout…";
-    }
+    const items = cart.get(), prints = await buildPrints(items, btn);
     const r = await fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "create", items, consent: true, attempt, prints }) });
     const d = await r.json().catch(() => ({}));
     if (r.ok && d.postUrl && d.token) {   // backup gateway: the card form is on the gateway's own page, reached with a one-time token
