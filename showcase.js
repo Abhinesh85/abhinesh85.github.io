@@ -12,8 +12,8 @@ const SC_FONTS = {
   royal: { fam: '"PrAjo Royal", Georgia, serif', wt: 900, size: 80, upper: true, ls: 2 }, sketch: { fam: '"PrAjo Sketch", cursive', wt: 700, size: 130, upper: true }, notebook: { fam: '"PrAjo Notebook", cursive', wt: 400, size: 100 },
   heavy: { fam: '"PrAjo Heavy", sans-serif', wt: 900, size: 84 }, sport: { fam: '"PrAjo Sport", sans-serif', wt: 900, size: 80, upper: true, style: "italic" }, modern: { fam: '"PrAjo Modern", sans-serif', wt: 700, size: 90 }, plain: { fam: '"PrAjo Plain", sans-serif', wt: 400, size: 90 } };
 const scFont = (F, px) => `${F.style || "normal"} ${F.wt} ${px}px ${F.fam}`;
-function nameSprite(name, fk, ink, maxW, mul) {   // the name drawn flat, same look as the designer
-  const F = SC_FONTS[fk] || SC_FONTS.script, K = 2, text = F.upper ? name.toUpperCase() : name, RAD = TP.RAD;
+function nameSprite(name, fk, ink, maxW, mul, KK, forPrint) {   // the name drawn flat, same look as the designer (forPrint: sharper, and no drop shadow, which would print as a grey smudge)
+  const F = SC_FONTS[fk] || SC_FONTS.script, K = KK || 2, text = F.upper ? name.toUpperCase() : name, RAD = TP.RAD;
   const m = document.createElement("canvas").getContext("2d"); m.font = scFont(F, F.size); if ("letterSpacing" in m) m.letterSpacing = (F.ls || 0) + "px";
   let tw = m.measureText(text).width; const mm = Math.max(.3, Math.min(2, mul || 1)), fs = F.size * Math.min(mm, (maxW || RAD * 2) / Math.max(tw, 1)); tw = tw * fs / F.size;
   const pad = 24, oh = Math.ceil(fs * 1.7), o = document.createElement("canvas"); o.width = Math.ceil((tw + pad * 2) * K); o.height = oh * K;
@@ -23,7 +23,8 @@ function nameSprite(name, fk, ink, maxW, mul) {   // the name drawn flat, same l
   else if (ink === "silver" || ink === "rosegold") { const c3 = ink === "silver" ? ["#ffffff", "#c9ced6", "#7f8896"] : ["#ffe3dc", "#e8a598", "#b76e62"], g = oc.createLinearGradient(0, mid - fs * .5, 0, mid + fs * .5); g.addColorStop(0, c3[0]); g.addColorStop(.45, c3[1]); g.addColorStop(1, c3[2]); oc.shadowColor = "rgba(0,0,0,.4)"; oc.shadowBlur = 2; oc.shadowOffsetY = 1.2; oc.fillStyle = g; }
   else if (/^#[0-9a-f]{6}$/i.test(ink || "")) { oc.shadowColor = "rgba(0,0,0,.35)"; oc.shadowBlur = 2.5; oc.shadowOffsetY = 1; oc.fillStyle = ink; }
   else if (ink === "white") { oc.shadowColor = "rgba(0,0,0,.45)"; oc.shadowBlur = 3; oc.shadowOffsetY = 1; oc.fillStyle = "#ffffff"; } else oc.fillStyle = "#15171c";
-  oc.fillText(text, x0, mid); return { o, tw, oh, x0 };
+  if (forPrint) { oc.shadowColor = "transparent"; oc.shadowBlur = 0; oc.shadowOffsetY = 0; }
+  oc.fillText(text, x0, mid); return { o, tw, oh, x0, K };
 }
 let blankTp = "";
 async function blankTumbler(tpl) {
@@ -40,6 +41,44 @@ function artBoxed(im) {   // art on a white or transparent square (round, arched
     for (const [sx, sy] of spots) { x.clearRect(0, 0, n, n); x.drawImage(im, sx, sy, k, k, 0, 0, n, n); const d = x.getImageData(0, 0, n, n).data; let a = 0, l = 0; for (let i = 0; i < d.length; i += 4) { a += d[i + 3]; l += (d[i] + d[i + 1] + d[i + 2]) / 3; } const px = d.length / 4; if (a / px < 40 || l / px > 238) light++; }
     return (im.__boxed = light >= 3);
   } catch { return (im.__boxed = false); }
+}
+/* ---------- print-ready file for an order ----------
+   Only the printable area, no product photo, at production size; transparent wherever nothing prints.
+   spec: { kind: "flat" | "round" | "name", name, f, i, ns, na, nx, ny, adj: { rot, s, x, y } }   d: the design (uses its full-size original when there is one) */
+async function printFile(spec, d, tpl) {
+  const LONG = 1600, cv = document.createElement("canvas"), c = cv.getContext("2d");
+  if (document.fonts && SC_FONTS[spec.f]) { try { await document.fonts.load(scFont(SC_FONTS[spec.f], 60), spec.name || "Aa"); } catch { /* fallback font */ } }
+  if (spec.kind === "name") {                                       // ready-made design: just the name, to print on its own
+    const nm = nameSprite(spec.name, spec.f, spec.i, 4000, (Number(spec.ns) || 100) / 100, 8, true);
+    cv.width = nm.o.width; cv.height = nm.o.height; c.drawImage(nm.o, 0, 0); return cv.toDataURL("image/png");
+  }
+  const art = d ? await loadImg(d.original || artOf(d)) : null, a = spec.adj || {};
+  if (spec.kind === "flat" && tpl) {
+    const g = tpl.geom, L = g.L, R = g.R, T = g.T, B = g.B, aw = R - L, ah = B - T, k = LONG / Math.max(aw, ah);
+    cv.width = Math.round(aw * k); cv.height = Math.round(ah * k); c.scale(k, k); c.translate(-L, -T);
+    const r = Math.min(g.radius || 0, aw / 2, ah / 2); c.beginPath(); c.moveTo(L + r, T); c.arcTo(R, T, R, B, r); c.arcTo(R, B, L, B, r); c.arcTo(L, B, L, T, r); c.arcTo(L, T, R, T, r); c.closePath(); c.clip();
+    if (art) {
+      const th = (Number(a.rot) || 0) * Math.PI / 180, cs = Math.abs(Math.cos(th)), sn = Math.abs(Math.sin(th)), iw0 = art.naturalWidth, ih0 = art.naturalHeight;
+      const sc = artBoxed(art) ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), z = (Number(a.s) || 100) / 100;
+      c.save(); c.translate(L + aw / 2 + (Number(a.x) || 0) / 100 * aw, T + ah / 2 + (Number(a.y) || 0) / 100 * ah); c.rotate(th); c.drawImage(art, -iw0 * sc * z / 2, -ih0 * sc * z / 2, iw0 * sc * z, ih0 * sc * z); c.restore();
+    }
+    if (spec.name) {
+      const KK = Math.ceil(2 * k) + 1, nm = nameSprite(spec.name, spec.f, spec.i, aw * .88, 1, KK, true), ny = spec.ny == null || spec.ny === "" ? (g.TY || (T + B) / 2) : T + ah * Math.max(0, Math.min(100, Number(spec.ny))) / 100;
+      const z = Math.max(.3, Math.min(2, (Number(spec.ns) || 100) / 100)), w = nm.o.width / KK;
+      c.save(); c.translate((L + R) / 2 + (Number(spec.nx) || 0) / 100 * aw, ny); c.rotate((Number(spec.na) || 0) * Math.PI / 180); c.scale(z, z); c.drawImage(nm.o, -w / 2, -nm.oh / 2, w, nm.oh); c.restore();
+    }
+    return cv.toDataURL("image/png");
+  }
+  // tumbler: the flat wrap that goes around the cup, with the name where the customer turned it to
+  const { T, B, RAD } = TP, aw = Math.PI * 2 * RAD, ah = B - T, k = LONG / Math.max(aw, ah);
+  cv.width = Math.round(aw * k); cv.height = Math.round(ah * k); c.scale(k, k);
+  if (art) { const sc = Math.max(aw / art.naturalWidth, ah / art.naturalHeight), dw = art.naturalWidth * sc, dh = art.naturalHeight * sc; c.drawImage(art, (aw - dw) / 2, (ah - dh) / 2, dw, dh); }
+  if (spec.name) {
+    const KK = Math.ceil(2 * k) + 1, nm = nameSprite(spec.name, spec.f, spec.i, undefined, (Number(spec.ns) || 100) / 100, KK, true), w = nm.o.width / KK;
+    const y = (spec.ny == null || spec.ny === "" ? 560 : T + ah * Math.max(0, Math.min(100, Number(spec.ny))) / 100) - T, x = aw / 2 + RAD * (Number(spec.na) || 0) * Math.PI / 180;
+    c.drawImage(nm.o, x - w / 2, y - nm.oh / 2, w, nm.oh);
+  }
+  return cv.toDataURL("image/png");
 }
 const flatCache = {};
 async function flatPreview(d, tpl, opt) {   // a design printed on a flat product (luggage tag...): cover-fit into its printable area; its strap, slot and stitching stay on top

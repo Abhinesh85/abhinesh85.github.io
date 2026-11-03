@@ -1316,6 +1316,7 @@ function designFilter(sel, list, ph) {
   sel.addEventListener("change", paint);
 }
 function mountDesignPicker(p) {
+  window.__printSpecD = null;   // what to put in the print file for this product (set below when there is a design picker)
   const inp = $("pPersonal"), list = designList(prodSlug(p));
   if (!inp || !(p.tags || []).includes("custom") || !list.length) return false;
   document.querySelector("#info .designpick")?.remove();
@@ -1370,6 +1371,8 @@ function mountDesignPicker(p) {
   $("pNyReset").onclick = () => { fx.ny = null; fx.ns = 100; fx.na = 0; fx.nx = 0; syncNy(); nsync(); fxGo(); }; syncNy(); nsync();
   if (inp.__fxh) inp.removeEventListener("input", inp.__fxh);
   inp.__fxh = () => { if (!$("pDesign")) return; $("pFxHint").hidden = !!nameVal(); fxGo(); }; inp.addEventListener("input", inp.__fxh);
+  // everything needed to rebuild this exact design as a print file at checkout
+  window.__printSpecD = () => { if (!sel.value) return null; const tp = tplFor(p); return { kind: tp ? "flat" : "round", tpl: tp ? tp.slug : "tumbler", d: sel.value, adj: { rot: adj.rot, s: adj.s, x: adj.x, y: adj.y }, name: nameVal(), f: fx.f, i: fx.i, ny: fx.ny, ns: fx.ns, na: fx.na, nx: fx.nx }; };
   const apply = () => {
     const d = list.find((x) => x.id === sel.value);
     const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img");
@@ -1404,9 +1407,10 @@ function mountDesignPicker(p) {
 const NF_LIST = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"], ["royal", "Royal"], ["sketch", "Sketch"], ["notebook", "Notebook"], ["heavy", "Heavy"], ["sport", "Sport"], ["modern", "Modern"], ["plain", "Plain"]];
 const NI_LIST = [["gold", "Gold", "linear-gradient(#fff3cf,#e9c46a,#a97a22)"], ["silver", "Silver", "linear-gradient(#fff,#c9ced6,#7f8896)"], ["rosegold", "Rose gold", "linear-gradient(#ffe3dc,#e8a598,#b76e62)"], ["white", "White", "#ffffff"], ["black", "Black", "#15171c"], ["#d62839", "Red", "#d62839"], ["#ff5fa2", "Pink", "#ff5fa2"], ["#ff8a00", "Orange", "#ff8a00"], ["#f5c400", "Yellow", "#f5c400"], ["#1fa34a", "Green", "#1fa34a"], ["#14b8a6", "Teal", "#14b8a6"], ["#2563eb", "Blue", "#2563eb"], ["#1e2a5a", "Navy", "#1e2a5a"], ["#7c3aed", "Purple", "#7c3aed"]];
 function mountSimpleNameStyle(p) {
-  document.querySelector("#info .namefx2")?.remove(); window.__nameNote2 = ""; window.__nameRefresh2 = null;
+  document.querySelector("#info .namefx2")?.remove(); window.__nameNote2 = ""; window.__nameRefresh2 = null; window.__printSpecN = null;
   const inp = $("pPersonal"); if (!inp || p.digital) return;
   const st = { f: "script", i: "gold" };
+  window.__printSpecN = () => { const n = inp.value.trim().slice(0, 30); return n ? { kind: "name", name: n, f: st.f, i: st.i } : null; };
   inp.closest("label").insertAdjacentHTML("afterend", `<div class="namefx namefx2" id="pNameFx2" hidden><b>Name style</b>
     <div class="fxsample" id="pSample"><span></span></div>
     <div class="fxrow" id="pFx2Fonts" role="group" aria-label="Name font">${NF_LIST.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === st.f}" aria-label="${l} font" style="font-family:${(SC_FONTS[k] || {}).fam || "inherit"}">${l}</button>`).join("")}</div>
@@ -1894,7 +1898,8 @@ $("info").addEventListener("click", (e) => {
     const same = items.find((i) => i.id === cur.id && JSON.stringify(i.options) === JSON.stringify(options) && i.personalization === personalization && (i.design || "") === (($("pDesign") && $("pDesign").value) || ""));
     if (same) same.qty = cur.digital ? 1 : Math.min(50, same.qty + pQty);
     else { const dz = $("pDesign") && $("pDesign").value ? designList(prodSlug(cur)).find((d) => d.id === $("pDesign").value) : null;   // a picked design: show its picture in the cart
-      items.push({ id: cur.id, qty: cur.digital ? 1 : pQty, options, personalization, ...(dz ? { thumb: dz.card, design: dz.id } : {}), ...(cur.digital ? { digital: true } : {}) }); }
+      const spec = cur.digital ? null : (window.__printSpecD && window.__printSpecD()) || (window.__printSpecN && window.__printSpecN());
+      items.push({ id: cur.id, qty: cur.digital ? 1 : pQty, options, personalization, ...(dz ? { thumb: dz.card, design: dz.id } : {}), ...(spec ? { print: spec } : {}), ...(cur.digital ? { digital: true } : {}) }); }
     cart.set(items);
     pQty = 1;
     closeProduct(false);
@@ -1962,7 +1967,28 @@ $("checkoutBtn").onclick = async () => {
   let attempt = ""; try { attempt = sessionStorage.getItem("prajo:attempt") || ""; if (!attempt) { attempt = crypto.randomUUID(); sessionStorage.setItem("prajo:attempt", attempt); } } catch { attempt = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2); }
   btn.disabled = true; btn.textContent = "Opening secure checkout…"; err.hidden = true;
   try {
-    const r = await fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "create", items: cart.get(), consent: true, attempt }) });
+    // Print-ready files: each personalized item is redrawn exactly as the customer set it (design, name, font, color, size, angle),
+    // so the shop gets a file to drop straight into the printer software. If one can't be made, the order still goes through.
+    const items = cart.get(), prints = []; let bytes = 0;
+    const want = items.map((it, i) => [it, i]).filter(([it]) => it.print);
+    if (want.length && typeof printFile === "function") {
+      btn.textContent = "Preparing your print file…";
+      try { await window.__tplReady; } catch { /* templates are optional */ }
+      for (const [it, i] of want) {
+        try {
+          const sp = it.print, d = sp.d ? (window.__allDesigns || []).find((x) => x.id === sp.d) || null : null, tpl = (window.__tpls || []).find((t) => t.slug === sp.tpl) || null;
+          let url = await printFile(sp, d, tpl);
+          if (url.length > 3.5e6) {   // big photo-style file: send a high-quality JPEG instead, so the request stays small
+            const im = new Image(); im.src = url; await im.decode(); const cv = document.createElement("canvas"); cv.width = im.naturalWidth; cv.height = im.naturalHeight;
+            const cx = cv.getContext("2d"); cx.fillStyle = "#fff"; cx.fillRect(0, 0, cv.width, cv.height); cx.drawImage(im, 0, 0); url = cv.toDataURL("image/jpeg", .92);
+          }
+          const png = url.split(",")[1] || ""; bytes += png.length;
+          if (png && bytes < 9e6) prints.push({ i, png });
+        } catch { /* skip this one */ }
+      }
+      btn.textContent = "Opening secure checkout…";
+    }
+    const r = await fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "create", items, consent: true, attempt, prints }) });
     const d = await r.json().catch(() => ({}));
     if (r.ok && d.postUrl && d.token) {   // backup gateway: the card form is on the gateway's own page, reached with a one-time token
       const f = document.createElement("form"); f.method = "POST"; f.action = d.postUrl; f.style.display = "none";
@@ -2121,10 +2147,10 @@ route();
   gal.addEventListener("keydown", (e) => { if (e.key === "ArrowLeft") { e.preventDefault(); go(-1); } else if (e.key === "ArrowRight") { e.preventDefault(); go(1); } });
   idle = Date.now(); size();
   // designs from the database (admin → Tumbler designs)
-  fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/tumbler_designs?select=slug,name,card,art,product&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
+  fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/tumbler_designs?select=slug,name,card,art,original,product&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
     .then((r) => (r.ok ? r.json() : null)).then((rows) => {
       if (!rows || !rows.length) return;
-      const everyone = rows.map((r) => ({ id: r.slug, name: r.name, card: r.card, art: r.art, product: r.product || "tumbler" })); window.__allDesigns = everyone;
+      const everyone = rows.map((r) => ({ id: r.slug, name: r.name, card: r.card, art: r.art, ...(r.original ? { original: r.original } : {}), product: r.product || "tumbler" })); window.__allDesigns = everyone;
       try { localStorage.setItem("prajo:alldesigns", JSON.stringify(everyone)); } catch { /* optional */ }
       D2 = everyone.filter((d) => d.product === "tumbler");   // the home page gallery shows tumbler designs
       try { localStorage.setItem("prajo:gallery", JSON.stringify(D2)); } catch { /* optional */ }
