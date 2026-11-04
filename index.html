@@ -866,6 +866,9 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
       <label>Email<input id="xEmail" type="email" autocomplete="email" inputmode="email" maxlength="160"></label>
       <label>Phone<input id="xPhone" type="tel" autocomplete="tel" inputmode="tel" maxlength="30"></label>
       <label>How would you like it?<select id="xMethod"></select></label>
+      <label>Which app will you pay with?<select id="xApp"></select></label>
+      <label>Name or username on that account<input id="xPayFrom" autocomplete="off" maxlength="80" placeholder="e.g. Ana Lee or $analee"></label>
+      <p style="margin:-4px 0 0;font-size:13px;color:var(--muted)">So we can match your payment to your order, even if you forget the note.</p>
       <div id="xAddr" hidden>
         <label>Street address<input id="xLine1" autocomplete="address-line1" maxlength="120"></label>
         <label>Apt, suite (optional)<input id="xLine2" autocomplete="address-line2" maxlength="120"></label>
@@ -2022,6 +2025,7 @@ $("xferBtn").onclick = () => {
   if (!xferNeedConsent()) return;
   const ways = [CO.shipping && ["shipping", "Ship it to me (USPS)"], CO.delivery && ["delivery", "Local delivery (Sacramento area)"], CO.pickup && ["pickup", "I'll pick it up in Sacramento"]].filter(Boolean);
   $("xMethod").innerHTML = ways.map(([v, l]) => `<option value="${v}">${l}</option>`).join(""); $("xAddr").hidden = !ways.length || ways[0][0] === "pickup";
+  $("xApp").innerHTML = ((CO.manual || {}).methods || []).map((n) => `<option>${esc(n)}</option>`).join("");
   $("xferFormBody").hidden = false; $("xferDone").hidden = true; $("xErr").hidden = true; $("xGo").disabled = false; $("xGo").textContent = "Place order"; $("xferTitle").textContent = "Pay by bank transfer";
   openDlg("xferDlg");
 };
@@ -2029,8 +2033,9 @@ $("xMethod").addEventListener("change", () => { $("xAddr").hidden = $("xMethod")
 $("xferForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const err = $("xErr"), go = $("xGo"); err.hidden = true;
-  const f = { name: $("xName").value.trim(), email: $("xEmail").value.trim(), phone: $("xPhone").value.trim(), method: $("xMethod").value, address: { line1: $("xLine1").value.trim(), line2: $("xLine2").value.trim(), city: $("xCity").value.trim(), state: $("xState").value.trim(), zip: $("xZip").value.trim() } };
+  const f = { name: $("xName").value.trim(), email: $("xEmail").value.trim(), phone: $("xPhone").value.trim(), method: $("xMethod").value, app: $("xApp").value, payFrom: $("xPayFrom").value.trim(), address: { line1: $("xLine1").value.trim(), line2: $("xLine2").value.trim(), city: $("xCity").value.trim(), state: $("xState").value.trim(), zip: $("xZip").value.trim() } };
   const bad = f.name.length < 2 ? "Please add your name." : !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email) ? "Please enter a valid email so we can reach you." : f.phone.replace(/\D/g, "").length < 7 ? "Please add a phone number."
+    : !f.app ? "Please choose which app you'll pay with." : f.payFrom.length < 2 ? "Please add the name or username on the account you'll pay from, so we can match your payment."
     : f.method !== "pickup" && (!f.address.line1 || !f.address.city || !/^[A-Za-z]{2}$/.test(f.address.state) || !/^\d{5}(-\d{4})?$/.test(f.address.zip)) ? "Please add your full address (street, city, state and 5-digit ZIP)." : "";
   if (bad) { err.textContent = bad; err.hidden = false; return; }
   let attempt = ""; try { attempt = sessionStorage.getItem("prajo:attempt") || ""; if (!attempt) { attempt = crypto.randomUUID(); sessionStorage.setItem("prajo:attempt", attempt); } } catch { attempt = crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random().toString(36).slice(2); }
@@ -2048,7 +2053,8 @@ $("xferForm").addEventListener("submit", async (e) => {
       <div class="xfer-total">${m2(d.total)}</div>
       <p style="margin:0;color:var(--muted);font-size:14px">${m2(d.subtotal)} items${d.discount ? ` − ${m2(d.discount)} bundle` : ""} + ${m2(d.tax)} tax${d.shipping ? ` + ${m2(d.shipping)} ${d.method === "delivery" ? "delivery" : "shipping"}` : ""}</p>
       <p style="margin:10px 0 4px">In the payment note, write this reference so we can match it:</p><p style="margin:0"><span class="xfer-ref">Order #${d.orderNo}</span></p>
-      <div style="display:grid;gap:8px;margin:14px 0">${d.handles.map((h) => `<div class="xfer-app"><div><b>${esc(h.label)}</b><span>${esc(h.handle)}</span></div><button class="btn btn-line" type="button" data-copy="${esc(h.handle)}">Copy</button></div>`).join("")}</div>
+      <p style="margin:10px 0 0;font-size:14px">You said you'll pay with <b>${esc(f.app)}</b> from <b>${esc(f.payFrom)}</b>. Send it to:</p>
+      <div style="display:grid;gap:8px;margin:10px 0 14px">${[...d.handles].sort((a, b) => (b.label === f.app) - (a.label === f.app)).map((h) => `<div class="xfer-app"${h.label === f.app ? ' style="border-color:var(--gold-2,#e9c46a)"' : ""}><div><b>${esc(h.label)}${h.label === f.app ? " · your choice" : ""}</b><span>${esc(h.handle)}</span></div><button class="btn btn-line" type="button" data-copy="${esc(h.handle)}">Copy</button></div>`).join("")}</div>
       ${d.note ? `<p style="margin:0;font-size:14px">${esc(d.note)}</p>` : ""}
       <p style="margin:8px 0 0;font-size:14px;color:var(--muted)">We start making your order as soon as the payment arrives, usually the same day. Check progress any time with “Track my order” (order #${d.orderNo} and your email). Questions? Tap “Message us”.</p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:12px"><button class="btn btn-gold" type="button" data-dclose>Done</button></div>`;
