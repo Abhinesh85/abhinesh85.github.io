@@ -1354,7 +1354,7 @@ function mountDesignPicker(p) {
     <p class="hint" style="margin:2px 2px 10px;font-size:13px;opacity:.85">📷 Want your own picture instead? <button type="button" data-chat style="background:none;border:0;padding:0;color:var(--gold-2);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer">Send it to us</button> and we'll print it.</p>
     <div class="yourdesign" id="pDesignCard" hidden><img alt="Design preview"><div><b></b><small></small><a class="etsy-link" id="pDesignLink" href="#">See it with your name in the designer</a>
       <div class="favline" style="margin-top:8px"><button type="button" class="btn btn-line" id="pDesFav" aria-pressed="false">♡ Save design</button><button type="button" class="btn btn-line" id="pDesShare">Share this design</button></div></div></div>
-    <div class="namefx" id="pNameFx" hidden><b>Name style</b><img id="pFxPrev" class="fxprev" alt="Preview of your name on the design"><p class="hint" style="margin:0 0 8px;font-size:13px;opacity:.85" id="pFxHint">The preview shows a sample name, Aleesa. Type yours in the box below.</p>
+    <div class="namefx" id="pNameFx" hidden><b>Name style</b><img id="pFxPrev" class="fxprev" alt="Preview of your name on the design"><p class="hint" style="margin:0 0 8px;font-size:13px;opacity:.85" id="pFxHint">Type your name in the box below to see it on the design.</p>
       <div class="fxrow" id="pFxFonts" role="group" aria-label="Name font"></div>
       <div class="fxrow swatches2" id="pFxInks" role="group" aria-label="Name color"></div>
       <label class="adj"><span>Size</span><input type="range" id="pNsRange" min="40" max="160" step="1" value="100"><output id="pNsOut">100%</output></label>
@@ -1375,8 +1375,8 @@ function mountDesignPicker(p) {
   // name style (font, color, height): the same look as the designer, shown on the design as the customer types
   const NAME_FONTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"], ["royal", "Royal"], ["sketch", "Sketch"], ["notebook", "Notebook"], ["heavy", "Heavy"], ["sport", "Sport"], ["modern", "Modern"], ["plain", "Plain"]];
   const fx = window.__nameFx = { f: "script", i: "gold", ny: null, ns: 100, na: 0, nx: 0 }, nameVal = () => ($("pPersonal")?.value || "").trim().slice(0, 30);
-  // before anyone types, the preview shows the sample name "Aleesa" (like the designer); it is never added to the order
-  window.__noNameClick = false; const noNameChosen = () => window.__noNameClick === true, pvName = () => nameVal() || (noNameChosen() ? "" : "Aleesa");
+  // the picture shows only the name the customer types (no sample name: it could be mistaken for what gets printed)
+  window.__noNameClick = false; const noNameChosen = () => window.__noNameClick === true, pvName = () => nameVal();
   const optsFor = (tpl) => { const n = pvName(); if (!tpl) return n ? { name: n, f: fx.f, i: fx.i, y: fx.ny, ns: fx.ns, a: fx.na } : undefined; return { rot: adj.rot, s: adj.s, x: adj.x, y: adj.y, ...(n ? { name: n, f: fx.f, i: fx.i, ny: fx.ny, ns: fx.ns, na: fx.na, nx: fx.nx } : {}) }; };
   $("pFxFonts").innerHTML = NAME_FONTS.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === fx.f}" aria-label="${l} font" style="font-family:${(SC_FONTS[k] || {}).fam || "inherit"}">${l}</button>`).join("");
   const defNy = () => { const t = tplFor(p), g = t && t.geom; return g ? Math.round(((g.TY || (g.T + g.B) / 2) - g.T) / (g.B - g.T) * 100) : 43; };
@@ -1445,7 +1445,7 @@ function mountSimpleNameStyle(p) {
   const inkName = () => (ink() ? ink()[1] : "custom " + st.i).toLowerCase(), nm = () => inp.value.trim().slice(0, 30);
   const paint = () => {
     const F = SC_FONTS[st.f] || {}, v = st.i, wrap = $("pSample"), grad = ink() && /gradient/.test(ink()[2]);
-    samp.textContent = nm() || "Aleesa"; samp.style.cssText = `font-family:${F.fam || "inherit"};font-weight:${F.wt || 400};font-style:${F.style || "normal"};text-transform:${F.upper ? "uppercase" : "none"};letter-spacing:${F.ls ? F.ls / 20 + "px" : "0"}`;
+    samp.textContent = nm() || "Sample name"; samp.style.cssText = `font-family:${F.fam || "inherit"};font-weight:${F.wt || 400};font-style:${F.style || "normal"};text-transform:${F.upper ? "uppercase" : "none"};letter-spacing:${F.ls ? F.ls / 20 + "px" : "0"}`;
     if (grad) { samp.style.backgroundImage = ink()[2]; samp.style.webkitBackgroundClip = "text"; samp.style.backgroundClip = "text"; samp.style.color = "transparent"; } else samp.style.color = v === "white" ? "#fff" : v === "black" ? "#15171c" : v;
     wrap.style.background = v === "white" ? "#2a2f3a" : v === "black" ? "#efefef" : "#8e94a2";
     const typed = nm(); window.__nameNote2 = typed ? `Name style: ${(NF_LIST.find((x) => x[0] === st.f) || [0, st.f])[1]} font, ${inkName()} ink` : "";
