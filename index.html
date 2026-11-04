@@ -546,6 +546,30 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 .designpick input[type=search], .backpick input[type=search] { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line, rgba(255,255,255,.18)); background: rgba(255,255,255,.06); color: inherit; font: inherit; margin-bottom: 8px; }
 .backpick select { width: 100%; padding: 12px 14px; border-radius: 12px; border: 1px solid var(--line, rgba(255,255,255,.18)); background: rgba(255,255,255,.06); color: inherit; font: inherit; margin-bottom: 10px; }
 .backpick select option { color: #111; }
+.eta { margin: 10px 0; padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.06); } .eta label { font-weight: 700; font-size: 14px; display: block; margin-bottom: 6px; }
+.eta-row { display: flex; gap: 8px; } .eta-row input { flex: 1; min-width: 0; font-size: 16px; } .eta p { margin: 8px 0 0; font-size: 13.5px; line-height: 1.5; }
+.steps { display: flex; gap: 6px; list-style: none; margin: 0 0 12px; padding: 0; font-size: 13px; }
+.steps li { flex: 1; display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-radius: 12px; background: rgba(255,255,255,.06); opacity: .7; line-height: 1.2; }
+.steps li b { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: rgba(255,255,255,.18); font-size: 12px; }
+.steps li.now { opacity: 1; outline: 1.5px solid var(--gold-2, #e9c46a); } .steps li.now b { background: var(--gold-2, #e9c46a); color: #1b1305; }
+.steps li.done { opacity: 1; } .steps li.done b { background: #4caf7a; color: #fff; } .steps li.done b::before { content: "✓"; } .steps li.done b { font-size: 0; } .steps li.done b::before { font-size: 12px; }
+@media (max-width: 420px) { .steps { font-size: 12px; } .steps li { padding: 7px 6px; } }
+.dbr { position: fixed; inset: 0; z-index: 200; background: rgba(5, 9, 17, .96); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.dbr[hidden] { display: none; } .dbr-box { max-width: 1100px; margin: 0 auto; padding: 0 14px 80px; }
+.dbr-head { position: sticky; top: 0; z-index: 3; display: flex; justify-content: space-between; align-items: center; padding: 10px 0; background: rgba(5, 9, 17, .98); } .dbr-head h3 { margin: 0; font-size: 22px; }
+.dbr-x { width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(255,255,255,.25); background: rgba(10, 18, 32, .8); color: inherit; font-size: 24px; cursor: pointer; }
+#dbrQ { width: 100%; padding: 13px 16px; border-radius: 999px; border: 1px solid rgba(255,255,255,.25); background: rgba(255,255,255,.06); color: inherit; font: inherit; font-size: 16px; margin: 4px 0 10px; }
+.dbr-chips { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 10px; scrollbar-width: thin; }
+.dbr-chips button { flex: none; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(245,236,220,.25); background: rgba(245,236,220,.06); color: inherit; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+.dbr-chips button small { opacity: .65; margin-left: 4px; } .dbr-chips button[aria-pressed="true"] { background: var(--gold-2, #e9c46a); color: #1b1305; border-color: transparent; }
+.dbr-count { font-size: 13px; opacity: .7; margin: 2px 2px 10px; }
+.dbr-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; } @media (min-width: 640px) { .dbr-grid { grid-template-columns: repeat(4, 1fr); } } @media (min-width: 900px) { .dbr-grid { grid-template-columns: repeat(6, 1fr); } }
+.dbr-tile { position: relative; border-radius: 14px; background: rgba(255,255,255,.06); border: 2px solid transparent; overflow: hidden; } .dbr-tile.on { border-color: var(--gold-2, #e9c46a); }
+.dbr-pick { display: block; width: 100%; padding: 0; border: 0; background: none; color: inherit; font: inherit; text-align: left; cursor: pointer; }
+.dbr-pick img { display: block; width: 100%; aspect-ratio: 3 / 4; object-fit: contain; background: #efefef; } .dbr-pick span { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; font-size: 12px; line-height: 1.3; padding: 6px 8px 8px; min-height: 40px; }
+.dbr-fav { position: absolute; top: 6px; right: 6px; width: 38px; height: 38px; border-radius: 50%; border: 0; display: grid; place-items: center; background: rgba(13, 21, 38, .6); color: #fff; cursor: pointer; } .dbr-fav[aria-pressed="true"] { color: #ff6f8e; }
+.dbr-none { grid-column: 1 / -1; padding: 24px 6px; opacity: .85; }
+.dbr-open { width: 100%; margin: 0 0 10px; min-height: 52px; font-size: 16px; }
 .dsr { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 340px; overflow-y: auto; margin: 0 0 10px; padding: 2px; }
 .dsr button { display: flex; flex-direction: column; gap: 4px; padding: 5px; border-radius: 12px; border: 2px solid transparent; background: rgba(255,255,255,.06); color: inherit; font: inherit; cursor: pointer; text-align: left; }
 .dsr button[aria-pressed="true"] { border-color: var(--gold-2, #e9c46a); }
@@ -934,6 +958,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
       <div class="disc" id="cartDisc" hidden></div>
       <div class="suggest" id="cartSuggest" hidden></div>
       <p class="note" id="cartNote"></p>
+      <div class="eta" id="cartEta" hidden><label for="etaZip">When will it arrive?</label><div class="eta-row"><input id="etaZip" inputmode="numeric" maxlength="5" placeholder="Your ZIP code" autocomplete="postal-code" aria-describedby="etaOut"><button type="button" class="btn btn-line" id="etaGo">Check</button></div><p id="etaOut" aria-live="polite"></p></div>
       <p class="note polnote">Personalized items are non-refundable except for mistakes or defects.</p>
       <label class="consent"><input type="checkbox" id="coConsent"> <span>I have read and agree to the <a href="terms.html" target="_blank" rel="noopener">Terms of service</a>, <a href="privacy.html" target="_blank" rel="noopener">Privacy policy</a> and <a href="returns.html" target="_blank" rel="noopener">Returns &amp; refunds policy</a>.</span></label>
       <p class="chat-err" id="cartErr" hidden></p>
@@ -1140,7 +1165,7 @@ const favs = (() => { let f = { p: [], d: [] }; try { const c = JSON.parse(local
 let toastT = 0;
 function toast(msg) {
   let t = document.getElementById("toastMsg");
-  if (!t) { t = document.createElement("div"); t.id = "toastMsg"; t.setAttribute("role", "status"); t.style.cssText = "position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:90;max-width:88vw;padding:11px 18px;border-radius:999px;background:#f5ecdc;color:#10192d;font:600 14px system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.4);transition:opacity .25s;opacity:0;pointer-events:none"; document.body.appendChild(t); }
+  if (!t) { t = document.createElement("div"); t.id = "toastMsg"; t.setAttribute("role", "status"); t.style.cssText = "position:fixed;left:50%;bottom:90px;transform:translateX(-50%);z-index:300;max-width:88vw;padding:11px 18px;border-radius:999px;background:#f5ecdc;color:#10192d;font:600 14px system-ui,sans-serif;box-shadow:0 8px 28px rgba(0,0,0,.4);transition:opacity .25s;opacity:0;pointer-events:none"; document.body.appendChild(t); }
   t.textContent = msg; t.style.opacity = "1"; clearTimeout(toastT); toastT = setTimeout(() => { t.style.opacity = "0"; }, 2200);
 }
 const HEART = (on) => `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.8 6.5 4.8c2 0 3.6 1 5.5 3 1.9-2 3.5-3 5.5-3 3.5 0 5.6 3.6 4.1 7C19.5 16.4 12 21 12 21z" fill="${on ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
@@ -1326,31 +1351,84 @@ window.__cardShows = function () {
 };
 document.addEventListener("designs-ready", () => window.__cardShows && window.__cardShows());
 const adjNote = (a) => { const b = []; if (a.rot) b.push(`rotated ${a.rot}°`); if (a.s !== 100) b.push(`size ${a.s}%`); if (a.x || a.y) b.push(`moved ${a.x ? `${a.x > 0 ? "right" : "left"} ${Math.abs(a.x)}%` : ""}${a.x && a.y ? ", " : ""}${a.y ? `${a.y > 0 ? "down" : "up"} ${Math.abs(a.y)}%` : ""}`); return b.length ? ` (${b.join(", ")})` : ""; };
-// A long design list gets a search box above it that narrows the dropdown as you type (the chosen design always stays in it).
-function designFilter(sel, list, ph) {
-  if (!sel || list.length < 8) return;
-  const inp = document.createElement("input"); inp.type = "search"; inp.placeholder = "Search " + list.length + " designs…"; inp.setAttribute("aria-label", "Search designs"); inp.style.marginBottom = "8px";
-  const grid = document.createElement("div"); grid.className = "dsr"; grid.hidden = true;
-  sel.parentNode.insertBefore(inp, sel); sel.parentNode.insertBefore(grid, sel);
-  const paint = () => { grid.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.id === sel.value)); };
-  inp.oninput = () => {
-    const q = inp.value.trim().toLowerCase(), keep = sel.value, hit = list.filter((d) => !q || d.name.toLowerCase().includes(q)), kd = keep && !hit.some((d) => d.id === keep) ? list.find((d) => d.id === keep) : null;
-    sel.innerHTML = `<option value="">${q ? hit.length + " match" + (hit.length === 1 ? "" : "es") : esc(ph)}</option>` + (kd ? `<option value="${esc(kd.id)}">${esc(kd.name)}</option>` : "") + hit.map((d) => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join("");
-    sel.value = keep;
-    // matching designs show as pictures to tap, so people see them before choosing
-    grid.hidden = !q; if (!q) { grid.innerHTML = ""; return; }
-    grid.innerHTML = hit.length ? hit.slice(0, 36).map((d) => `<button type="button" data-id="${esc(d.id)}" aria-pressed="${d.id === keep}"><img src="${esc(d.thumb || d.card)}" alt="" loading="lazy"><span>${esc(d.name)}</span></button>`).join("") + (hit.length > 36 ? `<p class="dsrmore">Showing 36 of ${hit.length}. Type more of the name to narrow it down.</p>` : "") : `<p class="dsrmore">No design has “${esc(inp.value.trim())}” in its name. Try another word, or send us your own picture.</p>`;
+/* ---------- design browser: full-screen grid of pictures with category chips and search ---------- */
+// Categories are guessed from the design's name (no database change); anything unmatched goes to "More".
+const DESIGN_CATS = [
+ ["holiday","Holidays",/christmas|santa|xmas|halloween|pumpkin|ghost|easter|thanksgiving|valentine|gnome|snow|reindeer|elf\b|holiday|turkey|peppermint|candy cane|mistletoe|wreath|ornament/i],
+ ["heritage","Heritage & culture",/tapa|canoe|papel|hibiscus|diya|tartan|hmong|polynesian|plumeria|thistle|hawai|samoan|tonga|maori|filipino|desi\b|aztec|inca\b|mayan|celtic|african|kente|we the people|heritage|flag|fiji|philippin|india|afghan|mexic|iraq|korea|usa|america|patriot|veteran|military|1776|eagle|constitution|memorial/i],
+ ["work","Work & careers",/saving lives|lifesaver|first responder|caregiver|nurse|doctor|medical|\brn\b|firefight|fire rescue|police|teacher|school|student|graduat|phleb|dental|pharma|stethoscope|paramedic|\bems\b|trucker|engineer|mechanic|chef|barber|hair stylist|realtor|security/i],
+ ["food","Food & fun",/kimchi|cafecito|\bpho\b|sushi|boba|masala|curry|salsa|mantu|banh|hot pot|k-drama|karaoke|ramen|taco|pizza|burger|bbq|grill|coffee|beer|wine|snack|dessert|cake/i],
+ ["money","Money & trading",/money|trade|trading|stock|market|chart|invest|wealth|profit|bull\b|bear\b|crypto|bitcoin|finance|cash|risk|portfolio|candle/i],
+ ["games","Games & cards",/chess|\bace\b|spades|clubs|diamonds|poker|card|dice|game|joker|king of|queen of|domino|checkmate|pawn|rook/i],
+ ["warriors","Warriors & armor",/armor|armour|knight|warrior|samurai|katana|sword|spartan|archer|viking|gladiator|ninja|crusader|paladin|battle|shield|axe\b|helmet|soldier|lancer|ronin/i],
+ ["creatures","Dragons & creatures",/dragon|wolf|lion|tiger|phoenix|griffin|serpent|snake|demon|demoness|reaper|skull|\bbats?\b|raven|\bcrows?\b|\bowls?\b|\bfox|\bbears?\b|horse|unicorn|beast|monster|hydra|kraken|creature|spider|\bcats?\b/i],
+ ["portraits","Fantasy portraits",/woman|girl|queen|goddess|princess|angel|witch|mage|sorceress|maiden|lady|empress|priestess|huntress|boy|man\b|king|lord|prince|figure|hooded|portrait|geisha|anime|elf|halo|winged/i],
+ ["cosmic","Cosmic & night",/moon|cosmic|galaxy|star|stars|orbit|space|planet|nebula|astro|solar|eclipse|night|universe|void|aurora|constellation|zodiac|celestial/i],
+ ["nature","Nature & flowers",/mountain|forest|tree|lotus|cherry|sakura|blossom|butterfly|ocean|sea\b|water|flower|floral|rose|garden|feather|leaf|sunset|sunrise|river|waterfall|beach|island|desert|jungle|bee\b|bird|peacock|dream|crane|peony|poppy|daisy|bouquet|temple|vase/i],
+ ["spiritual","Spiritual & memorial",/in loving memory|memory|memorial|rip\b|rest in|buddha|shiva|sanskrit|ganesh|krishna|hindu|om\b|mandala|chakra|yoga|zen|meditat|prayer|bible|cross|faith|god\b|allah|jesus|mary|angelic|karma|dharma/i],
+ ["maps","Maps & compass",/\bmap\b|compass|world|road|city|travel|journey|globe|atlas|explor|adventure|route|passport|airport/i],
+ ["quotes","Quotes & motivation",/excuses|results|rank|efforts|process|affirmation|positiv|smile|alone|consistency|hungry|mistakes|possible|better|purpose|different|picture|fight|reality|direction|speed|mode|monday|peace|real\b|code|train|study|pray|win\b|rare|next|affirm|cant|fairytale|book|obstacle|path\b|manifest|lucky|list\b|focus|discipline|success|mindset|quote|trust|silence|time|you\b|your|work|stay calm|text|poster|mind|ego|plan|motivat|hustle|grind|believe|dream|vision|goal|strong|power|brave|courage|patience|growth|rise|never|always|today|keep|move|life|love|feelings|chai|tea\b|good|first|before|later|infinity/i],
+ ["minimal","Minimal & abstract",/minimal|line art|ink|watercolor|sketch|abstract|diagram|collage|geometric|pattern|texture|gradient|neon|glow|smoke|crystal|art\b|black|white|gold|golden|silver|red|blue|purple|pink|green|fire|flame|ice|lightning|glowing/i],
+];
+const designCat = (name) => { for (const [id, , re] of DESIGN_CATS) if (re.test(name)) return id; return "other"; };
+const designCatLabel = (id) => (DESIGN_CATS.find((c) => c[0] === id) || [0, "More"])[1];
+function openDesignBrowser({ list, selected, listingId, title, onPick }) {
+  let box = document.getElementById("dbrSheet");
+  if (!box) {
+    box = document.createElement("div"); box.id = "dbrSheet"; box.className = "dbr"; box.hidden = true; box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-labelledby", "dbrTitle");
+    box.innerHTML = `<div class="dbr-box"><div class="dbr-head"><h3 id="dbrTitle">Choose a design</h3><button type="button" class="dbr-x" id="dbrClose" aria-label="Close">×</button></div>
+      <input type="search" id="dbrQ" aria-label="Search designs" autocomplete="off">
+      <div class="dbr-chips" id="dbrChips" role="group" aria-label="Design categories"></div>
+      <div class="dbr-count" id="dbrCount" aria-live="polite"></div>
+      <div class="dbr-grid" id="dbrGrid"></div><div id="dbrMore" style="height:1px"></div></div>`;
+    document.body.appendChild(box);
+  }
+  const q$ = (s) => box.querySelector(s), st = { cat: "all", q: "", n: 60 }, prevOverflow = document.body.style.overflow;
+  const withCat = list.map((d) => ({ d, c: designCat(d.name) }));
+  const counts = {}; withCat.forEach((x) => { counts[x.c] = (counts[x.c] || 0) + 1; });
+  const savedN = () => withCat.filter((x) => favs.has("d", x.d.id)).length;
+  const filtered = () => { const s = st.q.toLowerCase(); return withCat.filter((x) => (st.cat === "all" || (st.cat === "saved" ? favs.has("d", x.d.id) : x.c === st.cat)) && (!s || x.d.name.toLowerCase().includes(s) || designCatLabel(x.c).toLowerCase().includes(s))); };
+  q$("#dbrTitle").textContent = title || "Choose a design"; q$("#dbrQ").placeholder = `Search ${list.length} designs…`; q$("#dbrQ").value = "";
+  const chip = (id, label, n) => `<button type="button" data-cat="${id}" aria-pressed="${st.cat === id}">${esc(label)} <small>${n}</small></button>`;
+  const paintChips = () => { q$("#dbrChips").innerHTML = chip("all", "All", list.length) + (savedN() ? chip("saved", "♥ Saved", savedN()) : "") + [...DESIGN_CATS.map((c) => [c[0], c[1]]), ["other", "More"]].filter(([id]) => counts[id]).map(([id, l]) => chip(id, l, counts[id])).join(""); };
+  const paint = () => {
+    const all = filtered(), shown = all.slice(0, st.n);
+    q$("#dbrCount").textContent = all.length ? `${all.length} design${all.length === 1 ? "" : "s"}` : "";
+    q$("#dbrGrid").innerHTML = shown.map(({ d }) => `<div class="dbr-tile${d.id === selected ? " on" : ""}"><button type="button" class="dbr-pick" data-id="${esc(d.id)}" aria-label="Choose ${esc(d.name)}"><img src="${esc(d.thumb || d.card)}" alt="" loading="lazy" width="168" height="224"><span>${esc(d.name)}</span></button><button type="button" class="dbr-fav" data-fav="${esc(d.id)}" aria-pressed="${favs.has("d", d.id)}" aria-label="Save ${esc(d.name)}">${HEART(favs.has("d", d.id))}</button></div>`).join("") + (all.length ? "" : `<p class="dbr-none">No design matches${st.q ? ` “${esc(st.q)}”` : ""} in this group. Try another word or category.</p>`);
   };
-  grid.addEventListener("click", (e) => { const b = e.target.closest("button[data-id]"); if (!b) return; sel.value = b.dataset.id; sel.dispatchEvent(new Event("change")); paint(); });
-  sel.addEventListener("change", paint);
+  paintChips(); paint();
+  const io = new IntersectionObserver(([e]) => { if (e.isIntersecting && st.n < filtered().length) { st.n += 60; paint(); } }, { root: box, rootMargin: "400px" }); io.observe(q$("#dbrMore"));
+  const close = () => { box.hidden = true; document.body.style.overflow = prevOverflow; io.disconnect(); box.onclick = null; };
+  q$("#dbrQ").oninput = (e) => { st.q = e.target.value.trim(); st.n = 60; paint(); };
+  q$("#dbrClose").onclick = close;
+  box.onclick = (e) => {
+    if (e.target === box) return close();
+    const c = e.target.closest("[data-cat]"); if (c) { st.cat = c.dataset.cat; st.n = 60; paintChips(); paint(); box.scrollTop = 0; return; }
+    const f = e.target.closest("[data-fav]"); if (f) { const on = favs.toggle("d", f.dataset.fav, listingId); f.setAttribute("aria-pressed", on); f.innerHTML = HEART(on); paintChips(); if (st.cat === "saved") paint(); toast(on ? "Design saved ♥" : "Removed from saved"); return; }
+    const pk = e.target.closest(".dbr-pick"); if (pk) { const d = list.find((x) => x.id === pk.dataset.id); close(); if (d) onPick(d); }
+  };
+  box.onkeydown = (e) => { if (e.key === "Escape") close(); };
+  box.hidden = false; document.body.style.overflow = "hidden"; box.scrollTop = 0; q$("#dbrQ").focus({ preventScroll: true });
+}
+// Long design lists: the dropdown is swapped for a "Browse designs" button that opens the picture browser above.
+function designFilter(sel, list, ph, p) {
+  if (!sel || list.length < 8) return;
+  const back = /back/i.test(ph), btn = document.createElement("button"); btn.type = "button"; btn.className = "btn btn-gold dbr-open";
+  const label = () => (sel.value ? "🎨 Change design" : back ? `🎨 Browse designs for the back (${list.length})` : `🎨 Browse ${list.length} designs`);
+  btn.textContent = label(); sel.parentNode.insertBefore(btn, sel); sel.style.display = "none"; sel.setAttribute("aria-hidden", "true");
+  btn.onclick = () => openDesignBrowser({ list, selected: sel.value, listingId: p && p.id, title: back ? "Pick a design for the back" : "Choose a design", onPick: (d) => { sel.value = d.id; sel.dispatchEvent(new Event("change")); btn.textContent = label(); } });
+  sel.addEventListener("change", () => { btn.textContent = label(); });
 }
 function mountDesignPicker(p) {
   window.__nameOpen = false; window.__printSpecD = null;   // what to put in the print file for this product (set below when there is a design picker)
   const inp = $("pPersonal"), list = designList(prodSlug(p));
   if (!inp || !(p.tags || []).includes("custom") || !list.length) return false;
-  document.querySelector("#info .designpick")?.remove();
+  document.querySelector("#info .designpick")?.remove(); document.querySelector("#info .steps")?.remove();
   const m = (inp.value || "").match(/Design:\s*([^·]+?)\s*$/), pre = m && list.find((d) => d.name.toLowerCase() === m[1].toLowerCase());
   const lab = document.querySelector("#info .opt") || inp.closest("label");
+  lab.insertAdjacentHTML("beforebegin", `<ol class="steps" id="pSteps" aria-label="How to order"><li data-s="1"><b>1</b> Pick a design</li><li data-s="2"><b>2</b> Add a name</li><li data-s="3"><b>3</b> Add to cart</li></ol>`);
+  { const paintSteps = () => { const d = !!($("pDesign") || {}).value, n = !!(inp.value || "").replace(/Design:[^·]*$/, "").replace(/[·\s]/g, ""), st = d ? (n ? 3 : 2) : 1, ol = $("pSteps"); if (!ol || !document.body.contains(ol)) return; ol.querySelectorAll("li").forEach((li) => { const k = +li.dataset.s; li.className = k < st ? "done" : k === st ? "now" : ""; }); };
+    setTimeout(() => { paintSteps(); const dsel = $("pDesign"); if (dsel) dsel.addEventListener("change", paintSteps); inp.addEventListener("input", paintSteps); }, 0); }
   lab.insertAdjacentHTML("beforebegin", `<div class="designpick opt"><span>Design</span><select id="pDesign" data-prod="${esc(prodSlug(p))}"><option value="">Choose a design…</option>${list.map((d) => `<option value="${esc(d.id)}"${pre && pre.id === d.id ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select>
     <div id="pRotRow" style="display:none;gap:8px 14px;margin:0 0 10px;flex-wrap:wrap;align-items:center"><button type="button" class="btn btn-line" id="pRot">↻ Turn 90°</button><button type="button" class="btn btn-line" id="pAdjReset">Reset</button>
       <label class="adj"><span>Angle</span><input type="range" id="pRotRange" min="-180" max="180" step="1" value="0"><output id="pRotRangeOut">0°</output></label><label class="adj"><span>Size</span><input type="range" id="pSzRange" min="30" max="200" step="1" value="100"><output id="pSzRangeOut">100%</output></label><label class="adj"><span>Left / right</span><input type="range" id="pXRange" min="-50" max="50" step="1" value="0"><output id="pXRangeOut">0%</output></label><label class="adj"><span>Up / down</span><input type="range" id="pYRange" min="-50" max="50" step="1" value="0"><output id="pYRangeOut">0%</output></label></div>
@@ -1366,7 +1444,7 @@ function mountDesignPicker(p) {
       <label class="adj" id="pNxWrap"><span>Left / right</span><input type="range" id="pNxRange" min="-40" max="40" step="1" value="0"><output id="pNxOut">0%</output></label>
       <button type="button" class="btn btn-line" id="pNyReset" style="margin-top:6px">Reset name position and size</button></div>
   </div>`);
-  designFilter($("pDesign"), list, "Choose a design…");
+  designFilter($("pDesign"), list, "Choose a design…", p);
   const sel = $("pDesign"), card = $("pDesignCard"), rotRow = $("pRotRow"), qp = new URLSearchParams(location.search); let rotT = 0;
   const adj = { rot: Number(qp.get("pr")) || 0, s: Number(qp.get("ps")) || 100, x: Number(qp.get("px")) || 0, y: Number(qp.get("py")) || 0 }; window.__adj = adj; window.__rot = adj.rot;
   const normA = (a) => ((Math.round(a) + 180) % 360 + 360) % 360 - 180, ids = [["pRotRange", "rot", "°"], ["pSzRange", "s", "%"], ["pXRange", "x", "%"], ["pYRange", "y", "%"]];
@@ -1478,7 +1556,7 @@ function mountBackPicker(p) {
     <p class="hint" style="margin:6px 2px 10px;font-size:13px;opacity:.85">📷 ${list.length ? "Or send" : "Send"} us the picture or text for the back: <button type="button" data-chat style="background:none;border:0;padding:0;color:var(--gold-2);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer">Send it to us</button>. Mention “back” so we print it on the right side.</p></div>`);
   const wrap = document.querySelector("#info .backpick"), sel = $("pDesignBack");
   const sync = () => { const on = Object.values(chosenOptions()).some((v) => /both sides/i.test(v)); wrap.style.display = on ? "" : "none"; const d = on && sel ? list.find((x) => x.id === sel.value) : null; window.__backNote = d ? `Back: ${d.name}` : ""; };
-  designFilter(sel, list, "Choose a design for the back…");
+  designFilter(sel, list, "Choose a design for the back…", p);
   window.__backSync = sync; if (sel) sel.onchange = sync; sync();
 }
 $("info").addEventListener("click", (e) => { const nb = e.target.closest(".chips button"); if (nb && /^(no name|add name)$/i.test(nb.dataset.val || "")) window.__noNameClick = /^no name$/i.test(nb.dataset.val); if (e.target.closest(".chips button")) setTimeout(() => { window.__backSync && window.__backSync(); window.__nameRefresh && window.__nameRefresh(); window.__nameRefresh2 && window.__nameRefresh2(); }, 0); });
@@ -1866,7 +1944,7 @@ document.addEventListener("click", (e) => {
 /* ---------- cart & checkout (Supabase Edge Function "checkout" → Stripe: cards, Apple Pay, Google Pay) ---------- */
 const CHECKOUT_URL = "https://mrnnrmyvjkyjcjnfomna.supabase.co/functions/v1/checkout";
 // Which options are on is set on the admin page; the checkout function charges the real amounts.
-let CO = { enabled: true, shipping: true, shipFee: 8, freeOver: 75, delivery: true, deliveryFee: 7, pickup: true,
+let CO = { enabled: true, shipping: true, shipFee: 8, freeOver: 75, delivery: true, deliveryFee: 7, pickup: true, makeDays: 3,
   rates: { tumblers: { first: 12, extra: 4 }, mugs: { first: 12, extra: 4 }, tags: { first: 5, extra: 1.5 }, apparel: { first: 6, extra: 2 }, other: { first: 8, extra: 2 } } };
 // Same math as the checkout function: the priciest item pays its first-item rate, every other item adds its extra rate.
 function shipEstimate(items) {
@@ -1875,6 +1953,27 @@ function shipEstimate(items) {
   const rs = []; phys.forEach((i) => { const r = CO.rates?.[i.p.category] || CO.rates?.other || { first: CO.shipFee, extra: 0 }; for (let k = 0; k < i.qty; k++) rs.push(r); });
   rs.sort((a, b) => b.first - a.first);
   return Math.round((rs[0].first + rs.slice(1).reduce((t, r) => t + r.extra, 0)) * 100) / 100;
+}
+/* ---- delivery estimate by ZIP: business days to make it (admin setting) + a transit guess from the ZIP's first digit ---- */
+const addBiz = (n) => { const d = new Date(); let k = 0; while (k < n) { d.setDate(d.getDate() + 1); if (d.getDay() % 6) k++; } return d; };
+const etaDate = (d) => d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+function etaFor(zip) {
+  const make = Number.isFinite(+CO.makeDays) ? +CO.makeDays : 3, z = String(zip || "").replace(/\D/g, "");
+  if (z.length !== 5) return "";
+  const local = /^95[5-9]/.test(z), t = { 9: [2, 4], 8: [3, 5], 7: [3, 6], 6: [3, 6], 5: [4, 7], 4: [4, 7], 3: [4, 7], 2: [5, 8], 1: [5, 8], 0: [5, 8] }[z[0]];
+  const rng = (a, b) => (a === b ? etaDate(addBiz(a)) : `${etaDate(addBiz(a))} – ${etaDate(addBiz(b))}`);
+  const lines = [];
+  if (CO.shipping) lines.push(`📦 Shipped: arrives ${rng(make + t[0], make + t[1])}`);
+  if (CO.delivery && local) lines.push(`🚗 Local delivery: ${rng(make + 1, make + 2)}`);
+  if (CO.pickup) lines.push(`🏠 Pickup: ready ${etaDate(addBiz(make))}`);
+  return lines.length ? lines.join("\n") + `\nEstimates count business days after payment (made in ${make}, then shipped). Busy seasons can add a day or two.` : "";
+}
+function paintEta() {
+  const zi = $("etaZip"), out = $("etaOut"); if (!zi || !out) return;
+  if (!zi.dataset.init) { zi.dataset.init = "1"; let s = ""; try { s = localStorage.getItem("prajo:zip") || ""; } catch { /* private mode */ } zi.value = s || zi.value;
+    const go = () => { const v = zi.value.replace(/\D/g, ""); try { localStorage.setItem("prajo:zip", v); } catch { /* private mode */ } paintEta(); if (v.length === 5 && !$("xZip").value) $("xZip").value = v; };
+    $("etaGo").onclick = go; zi.addEventListener("input", () => { zi.value = zi.value.replace(/\D/g, ""); if (zi.value.length === 5) go(); }); zi.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); go(); } }); }
+  const v = zi.value.replace(/\D/g, ""); out.style.whiteSpace = "pre-line"; out.textContent = v.length === 5 ? etaFor(v) : "Enter your ZIP to see an estimated delivery date.";
 }
 const canBuy = () => CO.enabled && (CO.shipping || CO.delivery || CO.pickup);
 const buyable = (p) => p.digital ? CO.enabled && !!p.hasFile : canBuy() && !vacationOn() && !soldOut(p);
@@ -1978,6 +2077,7 @@ function renderCart() {
     CO.pickup && "Free local pickup in Sacramento.",
   ].filter(Boolean);
   const physical = known.some((i) => !i.p.digital), ok = known.every((i) => buyable(i.p));
+  $("cartEta").hidden = !physical || !canBuy(); paintEta();
   const blocked = known.find((i) => !buyable(i.p));
   $("cartNote").textContent = !ok ? (blocked && soldOut(blocked.p) ? `${blocked.p.name} just sold out. Please remove it to continue.` : vacationOn() && physical ? vacationText() + " Remove made-to-order items to buy printables now." : "Online checkout is paused right now. Please order on Etsy or message us.")
     : physical ? `${ways.join(" ")} California sales tax is added at checkout.${known.some((i) => i.p.digital) ? " Downloads are ready right after you pay." : ""}`
