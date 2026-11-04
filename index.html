@@ -1342,7 +1342,7 @@ function designFilter(sel, list, ph) {
   sel.addEventListener("change", paint);
 }
 function mountDesignPicker(p) {
-  window.__printSpecD = null;   // what to put in the print file for this product (set below when there is a design picker)
+  window.__nameOpen = false; window.__printSpecD = null;   // what to put in the print file for this product (set below when there is a design picker)
   const inp = $("pPersonal"), list = designList(prodSlug(p));
   if (!inp || !(p.tags || []).includes("custom") || !list.length) return false;
   document.querySelector("#info .designpick")?.remove();
@@ -1376,7 +1376,12 @@ function mountDesignPicker(p) {
   const NAME_FONTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"], ["royal", "Royal"], ["sketch", "Sketch"], ["notebook", "Notebook"], ["heavy", "Heavy"], ["sport", "Sport"], ["modern", "Modern"], ["plain", "Plain"]];
   const fx = window.__nameFx = { f: "script", i: "gold", ny: null, ns: 100, na: 0, nx: 0 }, nameVal = () => ($("pPersonal")?.value || "").trim().slice(0, 30);
   // the picture shows only the name the customer types (no sample name: it could be mistaken for what gets printed)
-  window.__noNameClick = false; const noNameChosen = () => window.__noNameClick === true, pvName = () => nameVal();
+  window.__noNameClick = false;
+  // the style controls (fonts, colors, size…) stay out of the way until the customer taps the name box, types, or chooses "Add name"
+  const nameOpen = () => !!(window.__nameOpen || nameVal() || Object.values(chosenOptions()).some((x) => /^add name$/i.test(x)));
+  const openNow = () => { window.__nameOpen = true; if (window.__nameRefresh2) window.__nameRefresh2(); const f = $("pNameFx"), s = $("pDesign"); if (f && s && s.value) f.hidden = false; };
+  inp.addEventListener("focus", openNow); inp.addEventListener("click", openNow);
+  const noNameChosen = () => window.__noNameClick === true, pvName = () => nameVal();
   const optsFor = (tpl) => { const n = pvName(); if (!tpl) return n ? { name: n, f: fx.f, i: fx.i, y: fx.ny, ns: fx.ns, a: fx.na } : undefined; return { rot: adj.rot, s: adj.s, x: adj.x, y: adj.y, ...(n ? { name: n, f: fx.f, i: fx.i, ny: fx.ny, ns: fx.ns, na: fx.na, nx: fx.nx } : {}) }; };
   $("pFxFonts").innerHTML = NAME_FONTS.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === fx.f}" aria-label="${l} font" style="font-family:${(SC_FONTS[k] || {}).fam || "inherit"}">${l}</button>`).join("");
   const defNy = () => { const t = tplFor(p), g = t && t.geom; return g ? Math.round(((g.TY || (g.T + g.B) / 2) - g.T) / (g.B - g.T) * 100) : 43; };
@@ -1413,7 +1418,7 @@ function mountDesignPicker(p) {
     document.title = `${$("pTitle").textContent} · PrAjo Custom Studio`; $("sbName").textContent = $("pTitle").textContent;
     if (d) $("slides").scrollLeft = 0;
     if (window.__nameRefresh2) window.__nameRefresh2();
-    card.hidden = !d; $("pNameFx").hidden = !d; $("pFxHint").hidden = !!nameVal(); rotRow.style.display = d && tplFor(p) ? "flex" : "none"; if (!d) { window.__designNote = ""; note.textContent = ""; return; }
+    card.hidden = !d; $("pNameFx").hidden = !(d && nameOpen()); $("pFxHint").hidden = !!nameVal(); rotRow.style.display = d && tplFor(p) ? "flex" : "none"; if (!d) { window.__designNote = ""; note.textContent = ""; return; }
     card.querySelector("img").src = (window.__preview && pre && pre.id === d.id) ? window.__preview : d.card;
     card.querySelector("b").textContent = d.name; { const tp = tplFor(p); card.querySelector("small").textContent = `Printed on your ${tp ? tp.name.toLowerCase() : "tumbler"}`; }
     $("pDesignLink").href = `tumbler.html?${tplFor(p) ? "p=" + encodeURIComponent(tplFor(p).slug) + "&" : ""}d=${encodeURIComponent(d.id)}${nameVal() ? `&name=${encodeURIComponent(nameVal().slice(0, 14))}&f=${fx.f}&i=${encodeURIComponent(fx.i)}${fx.ns !== 100 ? `&ns=${fx.ns}` : ""}${fx.na && tplFor(p) && tplFor(p).kind === "flat" ? `&nt=${fx.na}` : ""}` : ""}`;
@@ -1445,17 +1450,19 @@ function mountSimpleNameStyle(p) {
   const inkName = () => (ink() ? ink()[1] : "custom " + st.i).toLowerCase(), nm = () => inp.value.trim().slice(0, 30);
   const paint = () => {
     const F = SC_FONTS[st.f] || {}, v = st.i, wrap = $("pSample"), grad = ink() && /gradient/.test(ink()[2]);
-    samp.textContent = nm() || "Sample name"; samp.style.cssText = `font-family:${F.fam || "inherit"};font-weight:${F.wt || 400};font-style:${F.style || "normal"};text-transform:${F.upper ? "uppercase" : "none"};letter-spacing:${F.ls ? F.ls / 20 + "px" : "0"}`;
+    samp.textContent = nm() || "Your name will show here"; samp.style.cssText = `font-family:${F.fam || "inherit"};font-weight:${F.wt || 400};font-style:${F.style || "normal"};text-transform:${F.upper ? "uppercase" : "none"};letter-spacing:${F.ls ? F.ls / 20 + "px" : "0"}`;
     if (grad) { samp.style.backgroundImage = ink()[2]; samp.style.webkitBackgroundClip = "text"; samp.style.backgroundClip = "text"; samp.style.color = "transparent"; } else samp.style.color = v === "white" ? "#fff" : v === "black" ? "#15171c" : v;
     wrap.style.background = v === "white" ? "#2a2f3a" : v === "black" ? "#efefef" : "#8e94a2";
     const typed = nm(); window.__nameNote2 = typed ? `Name style: ${(NF_LIST.find((x) => x[0] === st.f) || [0, st.f])[1]} font, ${inkName()} ink` : "";
   };
-  const show = () => { if (!document.body.contains(box)) return; const add = Object.values(chosenOptions()).some((x) => /^add name$/i.test(x)), designed = !!($("pDesign") && $("pDesign").value); box.hidden = designed || !(nm() || add); if (box.hidden) window.__nameNote2 = ""; else paint(); };
+  const show = () => { if (!document.body.contains(box)) return; const add = Object.values(chosenOptions()).some((x) => /^add name$/i.test(x)), designed = !!($("pDesign") && $("pDesign").value); box.hidden = designed || !(nm() || add || window.__nameOpen); if (box.hidden) window.__nameNote2 = ""; else paint(); };
   $("pFx2Fonts").onclick = (e) => { const b = e.target.closest("button[data-f]"); if (!b) return; st.f = b.dataset.f; $("pFx2Fonts").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); show(); };
   const setInk = (v, btn) => { st.i = v; $("pFx2Inks").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === btn)); show(); };
   $("pFx2Inks").onclick = (e) => { const b = e.target.closest("button[data-ink]"); if (b) setInk(b.dataset.ink, b); };
   $("pFx2Custom").oninput = () => setInk($("pFx2Custom").value, null);
   if (inp.__fx2) inp.removeEventListener("input", inp.__fx2); inp.__fx2 = show; inp.addEventListener("input", show);
+  const tapName = () => { window.__nameOpen = true; show(); };   // tapping the name box reveals the fonts and colors
+  inp.addEventListener("focus", tapName); inp.addEventListener("click", tapName);
   window.__nameRefresh2 = show; show();
 }
 // Printing both sides: once "Both sides" is chosen, offer a second picture for the back (a design from the list, or the customer's own).
