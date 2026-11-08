@@ -1050,7 +1050,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
   </div>
 </div>
 
-<script src="showcase.js"></script>
+<script src="showcase.js?v=stk2"></script>
 <script src="fontsheet.js"></script>
 <script src="season.js" defer></script>
 <script>
@@ -1603,7 +1603,7 @@ function mountDesignPicker(p) {
     const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img");
     if (s0) { s0.src = d ? d.card : p.images[0].large; s0.style.objectFit = d ? "contain" : ""; } if (t0) t0.src = d ? d.card : p.images[0].card;
     window.__tplReady.then(() => { const tpl = tplFor(p);
-      if (!d) blankTumbler(tpl).then((u) => { if (!sel.value) { if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
+      if (!d && !(tpl && tpl.slug === "uv-dtf-sticker")) blankTumbler(tpl).then((u) => { if (!sel.value) { if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
       const my = ++pvSeq;
       if (d) (pvName() ? fontReady(fx.f) : Promise.resolve()).then(() => tumblerPreview(d, optsFor(tpl), tpl)).then((u) => { if (sel.value === d.id && my === pvSeq) { if (s0) s0.src = u; if (t0) t0.src = u; const fp = $("pFxPrev"); if (fp) fp.src = u; } }).catch(() => { /* keep the flat artwork */ }); });
     const eb = document.querySelector("#info .eyebrow"); if (eb && eb.dataset.o === undefined) eb.dataset.o = eb.textContent;
@@ -1625,7 +1625,7 @@ function mountDesignPicker(p) {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) navigator.share({ title: data.title, text: data.text, url: data.url }).catch(() => {}); else openShare(data); };
   };
   sel.onchange = apply; apply();
-  if (!sel.value) window.__tplReady.then(() => blankTumbler(tplFor(p))).then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
+  if (!sel.value && p.id !== "custom-uv-dtf-stickers") window.__tplReady.then(() => blankTumbler(tplFor(p))).then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
   return true;
 }
 // Listings with a name box but no design picker (ready-made designs): let the customer choose how the name looks. The choice goes into the order text.
