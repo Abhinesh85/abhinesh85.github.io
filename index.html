@@ -2319,6 +2319,7 @@ async function showThanks(sessionId, tries = 0) {
     if (d.paid && !d.orderNo && tries < 5) setTimeout(() => showThanks(sessionId, tries + 1), 2500);
     if (d.paid) {
       cart.set([]);
+      try { sessionStorage.removeItem("prajo:attempt"); } catch { /* fine */ }   // the next checkout is a new attempt, not the page just paid
       if (d.orderNo) $("thanksTitle").textContent = `Thank you! Order #${d.orderNo}`;
       const dl = d.downloads || [];
       $("thanksText").textContent = `${d.name ? d.name.split(" ")[0] + ", y" : "Y"}our order of ${fmt(d.total)} is confirmed. A receipt is on its way to ${d.email || "your email"}.` +
