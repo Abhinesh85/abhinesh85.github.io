@@ -553,10 +553,17 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 .steps li.now { opacity: 1; outline: 1.5px solid var(--gold-2, #e9c46a); } .steps li.now b { background: var(--gold-2, #e9c46a); color: #1b1305; }
 .steps li.done { opacity: 1; } .steps li.done b { background: #4caf7a; color: #fff; } .steps li.done b::before { content: "✓"; } .steps li.done b { font-size: 0; } .steps li.done b::before { font-size: 12px; }
 @media (max-width: 420px) { .steps { font-size: 12px; } .steps li { padding: 7px 6px; } }
+.trust { padding: 6px 0 2px; } .trust ul { list-style: none; margin: 0 auto; padding: 0 var(--gutter, 16px); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+.trust li { padding: 12px 14px; border-radius: 14px; background: rgba(245,236,220,.05); border: 1px solid rgba(245,236,220,.12); } .trust b { display: block; font-size: 14px; color: var(--cream); } .trust span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.35; }
+.deadline { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px auto 0; padding: 9px 14px; max-width: 760px; border-radius: 999px; background: rgba(233,196,106,.14); border: 1px solid rgba(233,196,106,.4); font-size: 14px; text-align: center; } .deadline[hidden] { display: none; } .deadline button { background: none; border: 0; color: inherit; font-size: 20px; cursor: pointer; opacity: .7; min-width: 32px; min-height: 32px; }
+.who { display: flex; gap: 8px; overflow-x: auto; padding: 2px 0 10px; scrollbar-width: none; } .who::-webkit-scrollbar { display: none; }
+.who button { flex: none; min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid rgba(245,236,220,.25); background: rgba(245,236,220,.06); color: inherit; font: inherit; font-size: 14px; font-weight: 600; cursor: pointer; white-space: nowrap; } .who button[aria-pressed="true"] { background: var(--gold-2, #e9c46a); color: #1b1305; border-color: transparent; }
+.badge.best { background: linear-gradient(180deg, #ffe2a4, #e2b04f); color: #1b1305; border-color: transparent; }
+@media (max-width: 700px) { .trust ul { grid-template-columns: 1fr 1fr; gap: 8px; } .trust li { padding: 10px 11px; } .trust span { font-size: 12px; } }
 /* phones: products first. Hero is compact, the shop comes straight after it, and the inspiration sections move below the products */
 @media (max-width: 700px) {
   main#top { display: flex; flex-direction: column; }
-  main#top > .hero { order: 1; padding-bottom: 22px; } main#top > .marquee { display: none; }
+  main#top > .hero { order: 1; padding-bottom: 14px; } main#top > .trust { order: 1; } main#top > .deadline { order: 1; width: calc(100% - 32px); } main#top > .marquee { display: none; }
   main#top > #shop { order: 2; padding-top: 6px !important; } main#top > #collections { order: 3; } main#top > #gallery { order: 4; } main#top > #ownpic { order: 5; }
   main#top > #how { order: 6; } main#top > #reviews { order: 7; } main#top > #custom { order: 8; } main#top > #faq { order: 9; } main#top > #about { order: 10; }
   .hero .teaser { display: none; }
@@ -707,6 +714,16 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
     </div>
   </section>
 
+  <section class="trust" id="trust" aria-label="Why shop with us">
+    <ul class="wrap">
+      <li><b>Made in Sacramento</b><span>Printed and engraved in our own studio</span></li>
+      <li><b id="trustShip">Ships in about 3 days</b><span>Plus delivery time. Local pickup is free</span></li>
+      <li><b>Secure checkout</b><span>Card, Apple Pay, Google Pay or bank transfer</span></li>
+      <li><b>We fix our mistakes</b><span>Wrong print? We remake it</span></li>
+    </ul>
+  </section>
+  <div class="deadline" id="deadline" hidden><span id="deadlineTxt"></span><button type="button" id="deadlineX" aria-label="Hide this message">×</button></div>
+
   <div class="marquee" aria-hidden="true"><div class="track" id="track"></div></div>
 
   <section class="band ownpic" id="ownpic" aria-labelledby="ownTitle" style="padding-block:34px 10px">
@@ -753,6 +770,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
         <div><div class="eyebrow" data-s="shopEyebrow">The shop</div><h2 data-s="shopTitle">Find your piece</h2></div>
         <div class="chips" role="group" aria-label="Filter products" id="filters"></div>
       </div>
+      <div class="who" id="who" role="group" aria-label="Shop by person or occasion"></div>
       <div class="shopbar">
         <input id="shopQ" type="search" placeholder="Search designs and products…" aria-label="Search designs and products" autocomplete="off">
         <select id="sortSel" aria-label="Sort products"><option value="">Sort: Featured</option><option value="new">Newest</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select>
@@ -1179,6 +1197,14 @@ function toast(msg) {
 }
 const HEART = (on) => `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.8 6.5 4.8c2 0 3.6 1 5.5 3 1.9-2 3.5-3 5.5-3 3.5 0 5.6 3.6 4.1 7C19.5 16.4 12 21 12 21z" fill="${on ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
 let sortBy = "", occ = "", sq = "";
+// shop by person / occasion: chips that reuse the occasion filter (only chips that match at least one product are shown)
+const WHO = [["Moms &amp; grandmas", "\\bmom\\b|mother|grandma|mama|\\bmum\\b"], ["Dads &amp; grandpas", "\\bdad\\b|father|grandpa|papa"], ["Kids", "kids|child|preschool|coloring|learning|baby|toddler"], ["Teachers", "teacher|classroom|school|educator"], ["Nurses &amp; first responders", "nurse|medical|\\brn\\b|firefight|first responder|paramedic"], ["Weddings &amp; couples", "wedding|bridal|couple|anniversary|valentine"], ["Pet lovers", "\\bpet\\b|\\bdog\\b|\\bcat\\b|paw"], ["Heritage pride", "flag|heritage|eagle|jeepney|aztec"], ["Christmas", "christmas|reindeer|santa|holiday"], ["Graduation", "graduat"]];
+function renderWho() {
+  const box = $("who"); if (!box) return;
+  const has = (re) => { const r = new RegExp(re, "i"); return P.some((p) => r.test(`${p.name} ${(p.tags || []).join(" ")} ${p.description || ""}`)); };
+  box.innerHTML = WHO.filter(([, re]) => has(re) || occ === re).map(([l, re]) => `<button type="button" data-w="${esc(re)}" aria-pressed="${occ === re}">${l}</button>`).join("");
+  box.hidden = !box.children.length;
+}
 function setFilter(f) {
   filter = f;
   $("filters").innerHTML = [{ id: "all", label: "All" }, ...CATS].filter((c) => c.id === "all" || byCat(c.id).length)
@@ -1187,7 +1213,7 @@ function setFilter(f) {
   const total = list.length;
   if (occ) { const re = new RegExp(occ, "i"); list = list.filter((p) => re.test(`${p.name} ${(p.tags || []).join(" ")} ${p.description || ""}`)); }
   if (sq) { const t = sq.toLowerCase(); list = list.filter((p) => `${p.name} ${(p.tags || []).join(" ")}`.toLowerCase().includes(t)); }
-  designHits();
+  designHits(); renderWho();
   if (sortBy === "lo") list = [...list].sort((a, b) => a.price - b.price);
   else if (sortBy === "hi") list = [...list].sort((a, b) => b.price - a.price);
   else if (sortBy === "new") list = [...list].sort((a, b) => (b.created || 0) - (a.created || 0));
@@ -1197,7 +1223,8 @@ function setFilter(f) {
   if (!list.length) { $("grid").innerHTML = `<div class="empty-shop"><b>${filter === "saved" ? "Nothing saved yet." : sq ? (!$("dhits").hidden ? "No product is named “" + esc(sq) + "”." : "No product matches “" + esc(sq) + "”.") : "Nothing matches that yet."}</b><br>${sq && !$("dhits").hidden ? "Tap a design above to see it on a product." : "Try another word or occasion, or ask us for a custom piece."}<br><button class="btn btn-line" type="button" id="clearOcc">Show everything</button></div>`; return; }
   $("grid").innerHTML = list.map((p) => {
     const badge = soldOut(p) ? `<span class="badge out">Sold out</span>`
-      : p.stock > 0 && p.stock <= lowAt() && !p.digital ? `<span class="badge low">Only ${p.stock} left</span>` : "";
+      : p.stock > 0 && p.stock <= lowAt() && !p.digital ? `<span class="badge low">Only ${p.stock} left</span>`
+      : (p.tags || []).some((t) => /^best ?seller$/i.test(t)) ? `<span class="badge best">Best seller</span>` : "";
     return `<a class="card${soldOut(p) ? " soldout" : ""}${p.digital ? " dig" : ""}" href="#p/${esc(p.id)}">
       <span class="ph"><button type="button" class="fav" data-fav-p="${esc(p.id)}" aria-pressed="${favs.has("p", p.id)}" aria-label="Save ${esc(p.name)}">${HEART(favs.has("p", p.id))}</button>${badge}${isNew(p) && !soldOut(p) ? `<span class="badge new">New</span>` : ""}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy" onload="window.__cardFit&&__cardFit(this)">${p.images[1] ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
       <span class="nm">${esc(p.name)}</span>
@@ -1227,6 +1254,7 @@ $("dhits").addEventListener("click", (e) => { const a = e.target.closest("a[data
 $("filters").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setFilter(b.dataset.f); });
 $("sortSel").onchange = () => { sortBy = $("sortSel").value; setFilter(filter); };
 $("occSel").onchange = () => { occ = $("occSel").value; setFilter(filter); };
+$("who").addEventListener("click", (e) => { const b = e.target.closest("button[data-w]"); if (!b) return; occ = occ === b.dataset.w ? "" : b.dataset.w; $("occSel").value = ""; setFilter(filter); });
 $("grid").addEventListener("click", (e) => { const fb = e.target.closest("[data-fav-p]"); if (fb) { e.preventDefault(); e.stopPropagation(); const on = favs.toggle("p", fb.dataset.favP); fb.setAttribute("aria-pressed", on); fb.innerHTML = HEART(on); if (filter === "saved") setFilter(favs.count() ? "saved" : "all"); else setFilter(filter); toast(on ? "Saved ♥" : "Removed from saved"); return; } const sa = e.target.closest(".seeall"); if (sa) { setFilter(sa.dataset.f); $("shop").scrollIntoView({ behavior: "smooth" }); return; } if (e.target.id === "clearOcc") { occ = sortBy = ""; $("occSel").value = $("sortSel").value = ""; setFilter(filter); } });
 setFilter(filter);
 shopReady = true;
@@ -1473,7 +1501,7 @@ function mountDesignPicker(p) {
   inp.addEventListener("focus", openNow); inp.addEventListener("click", openNow);
   const noNameChosen = () => window.__noNameClick === true, pvName = () => nameVal();
   const optsFor = (tpl) => { const n = pvName(); if (!tpl) return n ? { name: n, f: fx.f, i: fx.i, y: fx.ny, ns: fx.ns, a: fx.na } : undefined; return { rot: adj.rot, s: adj.s, x: adj.x, y: adj.y, ...(n ? { name: n, f: fx.f, i: fx.i, ny: fx.ny, ns: fx.ns, na: fx.na, nx: fx.nx } : {}) }; };
-  $("pFxFonts").innerHTML = NAME_FONTS.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === fx.f}" aria-label="${l} font" style="font-family:${(SC_FONTS[k] || {}).fam || "inherit"}">${l}</button>`).join("");
+  $("pFxFonts").innerHTML = NAME_FONTS.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === fx.f}" aria-label="${l} font" style="font-family:${((SC_FONTS[k] || {}).fam || "inherit").replace(/"/g, "'")};font-weight:${(SC_FONTS[k] || {}).wt || 400};font-style:${(SC_FONTS[k] || {}).style || "normal"}">${l}</button>`).join("");
   const defNy = () => { const t = tplFor(p), g = t && t.geom; return g ? Math.round(((g.TY || (g.T + g.B) / 2) - g.T) / (g.B - g.T) * 100) : 43; };
   const syncNy = () => { $("pNyRange").value = fx.ny == null ? defNy() : fx.ny; $("pNyOut").textContent = fx.ny == null ? "auto" : fx.ny + "%"; };
   let pvSeq = 0; const fontReady = (k) => (document.fonts && SC_FONTS[k] ? document.fonts.load(scFont(SC_FONTS[k], 40)).catch(() => {}) : Promise.resolve());
@@ -1535,7 +1563,7 @@ function mountSimpleNameStyle(p) {
   window.__printSpecN = () => { const n = inp.value.trim().slice(0, 30); return n ? { kind: "name", name: n, f: st.f, i: st.i } : null; };
   inp.closest("label").insertAdjacentHTML("afterend", `<div class="namefx namefx2" id="pNameFx2" hidden><b>Name style</b>
     <div class="fxsample" id="pSample"><span></span></div>
-    <div class="fxrow" id="pFx2Fonts" role="group" aria-label="Name font">${NF_LIST.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === st.f}" aria-label="${l} font" style="font-family:${(SC_FONTS[k] || {}).fam || "inherit"}">${l}</button>`).join("")}</div>
+    <div class="fxrow" id="pFx2Fonts" role="group" aria-label="Name font">${NF_LIST.map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${k === st.f}" aria-label="${l} font" style="font-family:${((SC_FONTS[k] || {}).fam || "inherit").replace(/"/g, "'")};font-weight:${(SC_FONTS[k] || {}).wt || 400};font-style:${(SC_FONTS[k] || {}).style || "normal"}">${l}</button>`).join("")}</div>
     <div class="fxrow swatches2" id="pFx2Inks" role="group" aria-label="Name color">${NI_LIST.map(([v, l, bg]) => `<button type="button" data-ink="${v}" aria-pressed="${v === st.i}" aria-label="${l}" title="${l}" style="background:${bg}">${l}</button>`).join("")}<label class="cust" title="Pick any color" aria-label="Pick any color">🎨<input type="color" id="pFx2Custom" value="#e11d48"></label></div></div>`);
   const box = $("pNameFx2"), samp = $("pSample").firstElementChild, ink = () => NI_LIST.find((x) => x[0] === st.i);
   const inkName = () => (ink() ? ink()[1] : "custom " + st.i).toLowerCase(), nm = () => inp.value.trim().slice(0, 30);
@@ -1979,6 +2007,22 @@ function etaFor(zip) {
   if (CO.pickup) lines.push(`🏠 Pickup: ready ${etaDate(addBiz(make))}`);
   return lines.length ? lines.join("\n") + `\nEstimates count business days after payment (made in ${make}, then shipped). Busy seasons can add a day or two.` : "";
 }
+function renderDeadline() {
+  const el = $("deadline"), make = Number.isFinite(+CO.makeDays) ? +CO.makeDays : 3, ts = $("trustShip");
+  if (ts) ts.textContent = make === 0 ? "Ready quickly" : `Made in ${make} business day${make === 1 ? "" : "s"}`;
+  if (!el) return; let off = false; try { off = localStorage.getItem("prajo:dl") === "1"; } catch { /* private mode */ }
+  const now = new Date(), y = now.getFullYear(), xmas = new Date(y, 11, 24), start = new Date(y, 9, 25);
+  if (off || now < start || now > xmas || !CO.enabled || !(CO.shipping || CO.delivery || CO.pickup)) { el.hidden = true; return; }
+  const back = (bd) => { const d = new Date(xmas); let k = 0; while (k < bd) { d.setDate(d.getDate() - 1); if (d.getDay() % 6) k++; } return d; };
+  const ship = back(make + 10), loc = back(make + 2), day0 = new Date(y, now.getMonth(), now.getDate()), parts = [];
+  if (CO.shipping && day0 <= ship) parts.push(`Order by ${etaDate(ship)} for Christmas delivery by mail`);
+  else if (CO.shipping) parts.push("Mailing for Christmas has closed");
+  if ((CO.delivery || CO.pickup) && day0 <= loc) parts.push(`local delivery and pickup until ${etaDate(loc)}`);
+  if (!parts.length || (parts.length === 1 && /closed/.test(parts[0]))) { el.hidden = true; return; }
+  $("deadlineTxt").textContent = "🎄 " + parts.join(" · ") + ".";
+  el.hidden = false;
+}
+$("deadlineX") && ($("deadlineX").onclick = () => { try { localStorage.setItem("prajo:dl", "1"); } catch { /* private mode */ } $("deadline").hidden = true; });
 function paintEta() {
   const zi = $("etaZip"), out = $("etaOut"); if (!zi || !out) return;
   if (!zi.dataset.init) { zi.dataset.init = "1"; let s = ""; try { s = localStorage.getItem("prajo:zip") || ""; } catch { /* private mode */ } zi.value = s || zi.value;
@@ -2010,7 +2054,7 @@ function bundleCalc(prods) {
   return { amt: Math.round(Math.round(low.price * 100) * pct / 100) / 100, pct, item: low };
 }
 fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "settings" }) })
-  .then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && typeof d.enabled === "boolean") { CO = d; renderCartBadge(); } }).catch(() => {});
+  .then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && typeof d.enabled === "boolean") { CO = d; renderCartBadge(); renderDeadline(); } }).catch(() => {});
 const cart = {
   get() { try { return JSON.parse(localStorage.getItem("prajo:cart") || "[]"); } catch { return []; } },
   set(v) { try { localStorage.setItem("prajo:cart", JSON.stringify(v)); } catch {} renderCartBadge(); },
@@ -2269,7 +2313,7 @@ document.addEventListener("click", (e) => {
   const pf = e.target.closest("[data-fav-pp]"); if (pf && cur) { const on = favs.toggle("p", cur.id); pf.setAttribute("aria-pressed", on); pf.textContent = on ? "♥ Saved" : "♡ Save"; setFilter(filter); toast(on ? "Saved ♥" : "Removed from saved"); }
   if (e.target.closest("[data-share-site]")) share(null);
 });
-renderCartBadge();
+renderCartBadge(); renderDeadline();
 route();
 </script>
 <script>
