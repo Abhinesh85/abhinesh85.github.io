@@ -53,6 +53,10 @@ async function printFile(spec, d, tpl) {
     cv.width = nm.o.width; cv.height = nm.o.height; c.drawImage(nm.o, 0, 0); return cv.toDataURL("image/png");
   }
   const art = d ? await loadImg(d.original || artOf(d)) : null, a = spec.adj || {};
+  if (spec.kind === "flat" && tpl && tpl.slug === "uv-dtf-sticker" && art) {   // sticker: the design exactly as it is, uncropped
+    const k = 2000 / Math.max(art.naturalWidth, art.naturalHeight); cv.width = Math.round(art.naturalWidth * k); cv.height = Math.round(art.naturalHeight * k);
+    c.drawImage(art, 0, 0, cv.width, cv.height); return cv.toDataURL("image/png");
+  }
   if (spec.kind === "flat" && tpl) {
     const g = tpl.geom, L = g.L, R = g.R, T = g.T, B = g.B, aw = R - L, ah = B - T, k = LONG / Math.max(aw, ah);
     cv.width = Math.round(aw * k); cv.height = Math.round(ah * k); c.scale(k, k); c.translate(-L, -T);
@@ -95,6 +99,7 @@ async function flatPreview(d, tpl, opt) {   // a design printed on a flat produc
   c.restore(); return (flatCache[key] = cv.toDataURL("image/jpeg", .9));
 }
 async function tumblerPreview(d, opt, tpl) {   // opt = { name, f, i } also prints a name on it
+  if (tpl && tpl.slug === "uv-dtf-sticker") return artOf(d);   // stickers: show the sticker itself, not a mock-up
   if (tpl && tpl.kind === "flat") return flatPreview(d, tpl, opt);
   const key = d.id + (opt && opt.name ? `|${opt.name}|${opt.f}|${opt.i}|${opt.y ?? ""}|${opt.a ?? ""}|${opt.ns || ""}` : ""); if (tpCache[key]) return tpCache[key];
   const [photo, art] = await Promise.all([loadImg("tumbler-white.jpg"), loadImg(artOf(d))]);

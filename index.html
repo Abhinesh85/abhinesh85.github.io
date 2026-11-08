@@ -614,6 +614,15 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 .mix-row b { flex: 1; min-width: 0; font-size: 14px; line-height: 1.25; overflow-wrap: anywhere; }
 .mix-row .qty button { width: 40px; height: 40px; }
 .mix-count { font-weight: 700; font-size: 14px; margin: 8px 0 2px; } .mix-count.ok { color: var(--leaf); } .mix-count.bad { color: var(--saffron); }
+.sizeguide { border: 1px solid var(--line); border-radius: 16px; padding: 10px 14px; margin: 0 0 12px; background: rgba(245,236,220,.04); }
+.sizeguide summary { cursor: pointer; font-weight: 700; min-height: 40px; display: flex; align-items: center; }
+.sg-row { display: flex; align-items: flex-end; justify-content: space-between; gap: 6px; padding: 12px 0 6px; }
+.sg-item { display: grid; justify-items: center; gap: 3px; background: none; border: 0; color: inherit; font: inherit; padding: 4px 0; cursor: pointer; min-width: 0; }
+.sg-box { background: #efefef; border-radius: 6px; display: grid; place-items: center; overflow: hidden; border: 2px solid transparent; }
+.sg-box img { width: 100%; height: 100%; object-fit: contain; }
+.sg-item[aria-pressed="true"] .sg-box { border-color: var(--gold-2); }
+.sg-item b { font-size: 13px; white-space: nowrap; } .sg-item small { font-size: 11.5px; color: var(--muted); white-space: nowrap; }
+.sg-tab { width: 100%; border-collapse: collapse; font-size: 13.5px; margin-top: 6px; } .sg-tab td { padding: 6px 4px; border-top: 1px solid var(--line-soft); vertical-align: top; } .sg-tab td:first-child { white-space: nowrap; font-weight: 700; }
 .dbr-open { width: 100%; margin: 0 0 10px; min-height: 52px; font-size: 16px; }
 .dsr { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; max-height: 340px; overflow-y: auto; margin: 0 0 10px; padding: 2px; }
 .dsr button { display: flex; flex-direction: column; gap: 4px; padding: 5px; border-radius: 12px; border: 2px solid transparent; background: rgba(255,255,255,.06); color: inherit; font: inherit; cursor: pointer; text-align: left; }
@@ -1050,7 +1059,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
   </div>
 </div>
 
-<script src="showcase.js?v=stk2"></script>
+<script src="showcase.js?v=stk3"></script>
 <script src="fontsheet.js"></script>
 <script src="season.js" defer></script>
 <script>
@@ -1721,6 +1730,7 @@ function openProduct(id) {
   mountSimpleNameStyle(p);   // every listing with a name box; on design-picker listings it hides itself once a design is chosen (the designer-style controls take over)
   mountBackPicker(p);
   mountMixPack(p);
+  mountSizeGuide(p);
   { const q = new URLSearchParams(location.search), pdv = q.get("pd"), pov = q.get("po"), ptv = q.get("pt");   // a link from a message: reopen with the same choices
     if (pdv && $("pDesign")) { $("pDesign").value = pdv; $("pDesign").dispatchEvent(new Event("change")); }
     if (pov) pov.split("|").forEach((pair) => { const i = pair.indexOf(":"), k = pair.slice(0, i), v = pair.slice(i + 1), vi = p.variations.findIndex((x) => x.name === k);
@@ -2171,6 +2181,23 @@ function mountMixPack(p) {
   $("mixAdd").onclick = () => openDesignBrowser({ list, selected: "", listingId: p.id, title: "Add a design to your pack", onPick: (d) => { const ex = mix.find((m) => m.d.id === d.id); if (ex) ex.n += 1; else { if (mix.length >= 8) return toast("Up to 8 different designs in one pack"); mix.push({ d, n: 1 }); } paint(); box.scrollIntoView({ block: "center", behavior: "smooth" }); } });
   box.addEventListener("click", (e) => { const b = e.target.closest("[data-mx]"); if (!b) return; const [i, dlt] = b.dataset.mx.split(":").map(Number); const m = mix[i]; if (!m) return; m.n += dlt; if (m.n <= 0) mix.splice(i, 1); paint(); });
   $("info").addEventListener("click", (e) => { if (e.target.closest(".chips button")) setTimeout(paint, 0); });   // a new pack size changes the target number
+  paint();
+}
+/* ---------- UV DTF stickers: size guide (drawn to scale relative to each other; tap a size to choose it) ---------- */
+function mountSizeGuide(p) {
+  if (p.id !== "custom-uv-dtf-stickers") return;
+  const chip = document.querySelector('#info .chips button[data-val="1 in"]'), where = chip && chip.closest(".opt"); if (!where) return;
+  const sizes = [["1 in", 1, "2.5 cm", "Tiny accents: phone camera corner, earbuds case, journal pages"], ["1.5 in", 1.5, "3.8 cm", "Small accents: phone case, keys, notebooks"], ["2.5 in", 2.5, "6.4 cm", "Most popular: tumblers, bottles, helmets, laptops"], ["3 in", 3, "7.6 cm", "Laptops, water bottles, guitar cases"], ["4 in", 4, "10 cm", "Big statement piece: large bottles, car window, toolbox"]];
+  const img = esc(p.images[0].card), PX = 22;
+  const box = document.createElement("details"); box.className = "sizeguide"; box.id = "sizeGuide";
+  box.innerHTML = `<summary>📏 Size guide: see how big each size is</summary>
+    <div class="sg-row">${sizes.map(([v, n, cm]) => `<button type="button" class="sg-item" data-sz="${v}" aria-pressed="false" aria-label="Choose ${v}"><span class="sg-box" style="width:${Math.round(n * PX)}px;height:${Math.round(n * PX)}px"><img src="${img}" alt=""></span><b>${v}</b><small>${cm}</small></div>`.replace("</div>", "</button>")).join("")}</div>
+    <p class="hint" style="margin:2px 0 6px;font-size:13px;opacity:.85">Drawn to scale next to each other. The size is the longest side of each sticker. Tap a size to choose it.</p>
+    <table class="sg-tab">${sizes.map(([v, , cm, use]) => `<tr><td>${v} <small style="font-weight:400;color:var(--muted)">(${cm})</small></td><td>${esc(use)}</td></tr>`).join("")}</table>`;
+  where.insertAdjacentElement("afterend", box);
+  const paint = () => { const cur = chosenOptions()["Sticker size"]; box.querySelectorAll(".sg-item").forEach((b) => b.setAttribute("aria-pressed", b.dataset.sz === cur)); };
+  box.addEventListener("click", (e) => { const b = e.target.closest(".sg-item"); if (!b) return; const c = document.querySelector(`#info .chips button[data-val="${b.dataset.sz}"]`); if (c) c.click(); setTimeout(paint, 0); });
+  $("info").addEventListener("click", (e) => { if (e.target.closest(".chips button")) setTimeout(paint, 0); });
   paint();
 }
 function chosenOptions() {
