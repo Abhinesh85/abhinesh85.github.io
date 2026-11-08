@@ -6,3 +6,20 @@
 @font-face { font-family: "PrAjo Sport"; src: url("prajo-sport.woff2") format("woff2"); font-weight: 900; font-style: italic; font-display: swap; }
 @font-face { font-family: "PrAjo Modern"; src: url("prajo-modern.woff2") format("woff2"); font-weight: 700; font-display: swap; }
 @font-face { font-family: "PrAjo Plain"; src: url("prajo-plain.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+
+/* PrAjo original name fonts (made for this shop; see LICENSES.txt) */
+@font-face { font-family: "PrAjo Round"; src: url("prajo-rnd.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Bubble"; src: url("prajo-bub.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Condensed"; src: url("prajo-slim.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Block"; src: url("prajo-chunky.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Wide"; src: url("prajo-wide.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Outline"; src: url("prajo-outl.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Drop"; src: url("prajo-shadow.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Inline"; src: url("prajo-rainbow.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Marker"; src: url("prajo-brushpen.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Kids"; src: url("prajo-kids.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Signature"; src: url("prajo-calli.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Serif"; src: url("prajo-roman.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Headline"; src: url("prajo-headl.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Stencil"; src: url("prajo-stencil.woff2") format("woff2"); font-weight: 400; font-display: swap; }
+@font-face { font-family: "PrAjo Pixel"; src: url("prajo-pixel.woff2") format("woff2"); font-weight: 400; font-display: swap; }

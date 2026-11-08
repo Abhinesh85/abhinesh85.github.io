@@ -24,10 +24,8 @@
 <link rel="preload" as="image" href="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-0.jpg" fetchpriority="high">
 <link rel="preload" as="image" href="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-1.jpg" fetchpriority="high">
 <link rel="preload" as="image" href="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-2.jpg" fetchpriority="high">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,700;0,9..144,800;1,9..144,500;1,9..144,700&family=Great+Vibes&family=Manrope:wght@400;500;600;700;800&family=Pacifico&family=Dancing+Script:wght@700&family=Caveat:wght@700&family=Playfair+Display:ital,wght@1,700&family=Bebas+Neue&family=Permanent+Marker&family=Lobster&family=Satisfy&display=swap">
+<link rel="stylesheet" href="fonts/google-main.css">
 <link rel="preconnect" href="https://i.etsystatic.com">
 <script src="products.js?v=d6fe29f995"></script>
 <style>
@@ -1454,7 +1452,7 @@ function mountDesignPicker(p) {
   ids.forEach(([id, k, u]) => { $(id).oninput = () => { adj[k] = Number($(id).value) || (k === "s" ? 100 : 0); window.__rot = adj.rot; $(id + "Out").textContent = adj[k] + u; clearTimeout(rotT); rotT = setTimeout(apply, 70); }; });
   inp.closest("label").insertAdjacentHTML("afterend", `<p class="hint" id="pDesignNote" style="margin:6px 2px 0;font-size:13px;opacity:.8"></p>`); const note = $("pDesignNote"); window.__designNote = ""; note.after($("pNameFx"));   // the name style controls sit right under the name box
   // name style (font, color, height): the same look as the designer, shown on the design as the customer types
-  const NAME_FONTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"], ["royal", "Royal"], ["sketch", "Sketch"], ["notebook", "Notebook"], ["heavy", "Heavy"], ["sport", "Sport"], ["modern", "Modern"], ["plain", "Plain"]];
+  const NAME_FONTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"], ["royal", "Royal"], ["sketch", "Sketch"], ["notebook", "Notebook"], ["heavy", "Heavy"], ["sport", "Sport"], ["modern", "Modern"], ["plain", "Plain"], ["rnd", "Round"], ["bub", "Bubble"], ["slim", "Slim"], ["chunky", "Chunky"], ["wide", "Wide"], ["outl", "Outline"], ["shadow", "Shadow"], ["rainbow", "Inline"], ["brushpen", "Brush Pen"], ["kids", "Kids"], ["calli", "Calligraphy"], ["roman", "Roman"], ["headl", "Headline"], ["stencil", "Stencil"], ["pixel", "Pixel"]];
   const fx = window.__nameFx = { f: "script", i: "gold", ny: null, ns: 100, na: 0, nx: 0 }, nameVal = () => ($("pPersonal")?.value || "").trim().slice(0, 30);
   // the picture shows only the name the customer types (no sample name: it could be mistaken for what gets printed)
   window.__noNameClick = false;
@@ -1516,7 +1514,7 @@ function mountDesignPicker(p) {
   return true;
 }
 // Listings with a name box but no design picker (ready-made designs): let the customer choose how the name looks. The choice goes into the order text.
-const NF_LIST = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"], ["royal", "Royal"], ["sketch", "Sketch"], ["notebook", "Notebook"], ["heavy", "Heavy"], ["sport", "Sport"], ["modern", "Modern"], ["plain", "Plain"]];
+const NF_LIST = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"], ["royal", "Royal"], ["sketch", "Sketch"], ["notebook", "Notebook"], ["heavy", "Heavy"], ["sport", "Sport"], ["modern", "Modern"], ["plain", "Plain"], ["rnd", "Round"], ["bub", "Bubble"], ["slim", "Slim"], ["chunky", "Chunky"], ["wide", "Wide"], ["outl", "Outline"], ["shadow", "Shadow"], ["rainbow", "Inline"], ["brushpen", "Brush Pen"], ["kids", "Kids"], ["calli", "Calligraphy"], ["roman", "Roman"], ["headl", "Headline"], ["stencil", "Stencil"], ["pixel", "Pixel"]];
 const NI_LIST = [["gold", "Gold", "linear-gradient(#fff3cf,#e9c46a,#a97a22)"], ["silver", "Silver", "linear-gradient(#fff,#c9ced6,#7f8896)"], ["rosegold", "Rose gold", "linear-gradient(#ffe3dc,#e8a598,#b76e62)"], ["white", "White", "#ffffff"], ["black", "Black", "#15171c"], ["#d62839", "Red", "#d62839"], ["#ff5fa2", "Pink", "#ff5fa2"], ["#ff8a00", "Orange", "#ff8a00"], ["#f5c400", "Yellow", "#f5c400"], ["#1fa34a", "Green", "#1fa34a"], ["#14b8a6", "Teal", "#14b8a6"], ["#2563eb", "Blue", "#2563eb"], ["#1e2a5a", "Navy", "#1e2a5a"], ["#7c3aed", "Purple", "#7c3aed"]];
 function mountSimpleNameStyle(p) {
   document.querySelector("#info .namefx2")?.remove(); window.__nameNote2 = ""; window.__nameRefresh2 = null; window.__printSpecN = null;

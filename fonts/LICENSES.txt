@@ -9,3 +9,6 @@ Open Sans Bold            (PrAjo Modern)    Digitized data copyright 2010-2011 G
 Bitstream Vera Sans       (PrAjo Plain)     Copyright (c) 2003 Bitstream, Inc. All Rights Reserved. Bitstream Vera is a trademark of Bitstream, Inc. Free to use, copy and distribute under the Bitstream Vera license.
 
 The SIL Open Font License 1.1 allows these fonts to be used, embedded and redistributed, including for commercial use, provided they are not sold on their own. Full text: https://openfontlicense.org
+
+PrAjo Round, Bubble, Condensed, Block, Wide, Outline, Drop, Inline, Marker, Kids, Signature, Serif, Headline, Stencil, Pixel
+   Original fonts made for PrAjo Custom Studio (2026). Drawn from scratch; no outlines from other fonts were used. Owned by PrAjo Custom Studio.
