@@ -1,0 +1,2171 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<title>Store Admin · PrAjo Custom Studio</title>
+<meta name="theme-color" content="#0a1220">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="stylesheet" href="fonts/google-main.css">
+<style id="antiFrame">html{display:none!important}</style>
+<script src="season.js" data-run="off"></script>
+<script src="showcase.js"></script>
+<script>/* refuse to be shown inside another website (clickjacking) */ if (self === top) document.getElementById("antiFrame").remove(); else top.location = self.location;</script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js" integrity="sha384-BWcjm9OdFth9TbhCxZPdm+gAOUMAzQy9nmTs12ioXdCcbVnJaPMn+fMUoQCLt60R" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js" integrity="sha384-BSxuMLxX+FCbTdYec3TbXlnMGEEM2QXTFdtDaveen71o+jswm2J36+xFqp8k4VHM" crossorigin="anonymous"></script>
+<script src="products.js"></script>
+<style>
+/* Layout: the store's navy-and-gold palette in a calm working layout: toolbar, card grid, and an edit sheet. */
+:root {
+  color-scheme: dark;
+  --ink: #0a1220; --navy: #0f1b2e; --panel: #13213a; --panel-2: #182a47;
+  --line: rgba(217, 171, 79, .22); --line-soft: rgba(245, 236, 220, .1);
+  --gold: #d9ab4f; --gold-2: #f3d48a; --saffron: #f28a24; --leaf: #3bb35a; --danger: #ff7a6b;
+  --cream: #f5ecdc; --muted: #a3adbf;
+  --f-display: "Fraunces", Georgia, serif; --f-body: "Manrope", system-ui, sans-serif; --f-label: "Cinzel", Georgia, serif;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--ink); color: var(--cream); font: 15px/1.5 var(--f-body); -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); background: var(--ink); z-index: 60; }
+button, input, select, textarea { font: inherit; color: inherit; }
+img { max-width: 100%; display: block; }
+.wrap { max-width: 1200px; margin: 0 auto; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.lbl { font-family: var(--f-label); font-size: 11.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--gold); }
+h1, h2 { font-family: var(--f-display); margin: 0; letter-spacing: -.01em; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid transparent; font-weight: 800; font-size: 14.5px; cursor: pointer; text-decoration: none; white-space: nowrap; }
+.btn:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+.btn[disabled] { opacity: .5; cursor: not-allowed; }
+.gold { background: linear-gradient(135deg, var(--gold-2), var(--gold) 55%, #b98a32); color: #1b1305; }
+.line { border-color: var(--line); background: rgba(245, 236, 220, .03); }
+.danger { border-color: rgba(255, 122, 107, .35); color: var(--danger); background: none; }
+.in { width: 100%; min-height: 46px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); padding: 10px 13px; font-size: 16px; }
+.in:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(217, 171, 79, .18); }
+textarea.in { min-height: 180px; resize: vertical; line-height: 1.45; }
+label.f, div.f { display: grid; gap: 6px; min-width: 0; }
+label.f > span, div.f > span { font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.hint { margin: 0; font-size: 13px; color: var(--muted); }
+.row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.row3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 520px) { .row3 { grid-template-columns: 1fr 1fr; } }
+
+header.top { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 40; background: rgba(10, 18, 32, .85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-bottom: 1px solid var(--line-soft); }
+header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64px; flex-wrap: wrap; padding-block: 8px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; margin-right: auto; color: inherit; }
+.brand img { width: 38px; height: 38px; border-radius: 50%; }
+.brand b { font-family: var(--f-label); letter-spacing: .12em; }
+.brand small { display: block; font-size: 11px; color: var(--gold); letter-spacing: .14em; text-transform: uppercase; }
+
+.tools { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin: 20px 0 16px; }
+.tools .in { max-width: 280px; min-height: 42px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chips button { min-height: 38px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-soft); background: none; color: var(--muted); font-weight: 700; font-size: 13.5px; cursor: pointer; }
+.chips button[aria-pressed="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+.dp-tabs { display: flex; gap: 8px; margin: 0 0 12px; }
+.dp-grp { border: 1px solid var(--line, #3a3a3a); border-radius: 14px; padding: 10px; margin: 12px 0; }
+.dp-grp > h4 { margin: 0 0 8px; font-size: 13px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.dp-tag { font-size: 11px; padding: 2px 8px; border-radius: 999px; background: rgba(217,171,79,.18); color: var(--gold, #d9ab4f); }
+.dp-row { display: flex; gap: 10px; align-items: center; padding: 6px; border-radius: 10px; cursor: pointer; }
+.dp-row.sel { background: rgba(255,120,100,.12); outline: 1px solid rgba(255,120,100,.5); }
+.dp-row img { width: 56px; height: 56px; object-fit: cover; border-radius: 8px; background: #fff; flex: none; }
+.dp-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dp-row small { display: block; opacity: .65; }
+.dp-row input[type=checkbox] { width: 22px; height: 22px; flex: none; }
+.dp-keep { font-size: 12px; padding: 4px 10px; }
+.bulkbar { position: sticky; top: 0; z-index: 20; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 10px 12px; margin: 0 0 14px; border-radius: 14px; background: var(--panel-2, #16203a); border: 1px solid var(--gold, #d9ab4f); }
+.bulkbar[hidden] { display: none; }
+.bulkbar b { margin-right: auto; }
+.item.pick { cursor: pointer; }
+.item.pick .ph::before { content: ""; position: absolute; top: 10px; left: 10px; width: 24px; height: 24px; border-radius: 8px; border: 2px solid #fff; background: rgba(0,0,0,.45); z-index: 3; }
+.item.pick.sel .ph::before { background: var(--gold, #d9ab4f); border-color: var(--gold, #d9ab4f); content: "✓"; color: #1a1305; font-weight: 900; text-align: center; line-height: 20px; }
+.item.pick.sel { outline: 2px solid var(--gold, #d9ab4f); border-radius: 18px; }
+.item.pick .grab, .item.pick .switch { display: none; }
+.count { color: var(--muted); font-size: 13.5px; margin-left: auto; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 14px; padding-bottom: 60px; }
+@media (max-width: 520px) { .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } }
+.item { position: relative; background: var(--panel); border: 1px solid var(--line-soft); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+.item.off { opacity: .55; }
+.item .ph { position: relative; aspect-ratio: 1; background: var(--navy); cursor: pointer; }
+.item .ph img { width: 100%; height: 100%; object-fit: cover; }
+.item .ph .none { position: absolute; inset: 0; display: grid; place-items: center; color: var(--muted); font-size: 13px; }
+.item .grab { position: absolute; top: 8px; left: 8px; width: 34px; height: 34px; border-radius: 10px; background: rgba(10, 18, 32, .8); border: 1px solid var(--line); display: grid; place-items: center; cursor: grab; touch-action: none; color: var(--gold-2); font-size: 16px; }
+.item .tag { position: absolute; top: 8px; right: 8px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 4px 8px; border-radius: 999px; background: rgba(10, 18, 32, .85); border: 1px solid var(--line); color: var(--gold-2); }
+.item .meta { padding: 10px 12px 12px; display: grid; gap: 6px; }
+.item .nm { font-weight: 700; font-size: 14px; line-height: 1.3; cursor: pointer; }
+.item .pr { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
+.item .pr b { font-family: var(--f-display); color: var(--gold-2); font-size: 17px; }
+.item .pr small { font-size: 11px; color: var(--leaf); font-weight: 800; }
+.sortable-ghost { opacity: .35; }
+.sortable-chosen { box-shadow: 0 0 0 2px var(--gold); }
+
+.switch { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 13px; color: var(--muted); user-select: none; }
+.switch input { appearance: none; -webkit-appearance: none; width: 42px; height: 24px; border-radius: 999px; background: #2a3550; position: relative; cursor: pointer; transition: background .2s; flex: none; margin: 0; }
+.switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform .2s; }
+.switch input:checked { background: var(--leaf); }
+.switch input:checked::after { transform: translateX(18px); }
+.switch input:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+
+.empty { text-align: center; padding: 50px 20px; border: 1px dashed var(--line); border-radius: 22px; display: grid; gap: 12px; justify-items: center; }
+.empty b { font-family: var(--f-display); font-size: 22px; }
+
+/* editor sheet */
+.sheet { position: fixed; inset: 0; z-index: 80; background: rgba(5, 9, 17, .7); backdrop-filter: blur(4px); display: flex; justify-content: flex-end; }
+.panel { width: min(720px, 100%); height: 100%; background: var(--navy); border-left: 1px solid var(--line); display: flex; flex-direction: column; }
+.panel-head { display: flex; align-items: center; gap: 10px; padding: calc(12px + env(safe-area-inset-top, 0px)) 16px 12px; border-bottom: 1px solid var(--line-soft); }
+.panel-head h2 { font-size: 20px; flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.x { width: 42px; height: 42px; border-radius: 50%; border: 1px solid var(--line); background: none; cursor: pointer; font-size: 20px; flex: none; }
+.panel-body { flex: 1; overflow-y: auto; padding: 18px 16px 30px; display: grid; gap: 22px; align-content: start; }
+.panel-foot { display: flex; gap: 10px; flex-wrap: wrap; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid var(--line-soft); background: var(--navy); }
+.panel-foot .gold { flex: 1; }
+.sec { display: grid; gap: 12px; }
+
+.drop { border: 2px dashed var(--line); border-radius: 18px; padding: 22px 16px; text-align: center; display: grid; gap: 8px; justify-items: center; cursor: pointer; transition: border-color .2s, background .2s; }
+.drop.over { border-color: var(--gold-2); background: rgba(217, 171, 79, .08); }
+.drop b { font-size: 15.5px; }
+.drop svg { width: 34px; height: 34px; color: var(--gold-2); }
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: 10px; }
+.ph-item { position: relative; border-radius: 14px; overflow: hidden; background: var(--panel); border: 1px solid var(--line-soft); display: flex; flex-direction: column; }
+.ph-item .im { position: relative; aspect-ratio: 1; cursor: grab; touch-action: none; }
+.ph-item .im img { width: 100%; height: 100%; object-fit: cover; }
+.ph-item .cover { position: absolute; left: 6px; top: 6px; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; background: var(--gold-2); color: #1b1305; padding: 3px 7px; border-radius: 999px; }
+.ph-item .del { position: absolute; right: 6px; top: 6px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(10, 18, 32, .85); cursor: pointer; font-size: 16px; }
+.ph-item select { border: 0; border-top: 1px solid var(--line-soft); background: var(--panel-2); color: var(--cream); font-size: 12.5px; padding: 7px 6px; min-height: 34px; width: 100%; }
+.ph-item.busy .im::after { content: "Uploading…"; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(10, 18, 32, .7); font-size: 12px; font-weight: 700; }
+
+.opt-group { border: 1px solid var(--line-soft); border-radius: 14px; padding: 12px; display: grid; gap: 10px; background: var(--panel); }
+.opt-head { display: flex; gap: 8px; }
+.vals { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.val { display: inline-flex; align-items: center; gap: 4px; padding: 6px 6px 6px 12px; border-radius: 999px; background: var(--panel-2); border: 1px solid var(--line-soft); font-size: 14px; }
+.val button { width: 24px; height: 24px; border-radius: 50%; border: 0; background: rgba(255, 255, 255, .08); cursor: pointer; line-height: 1; }
+.vals input { flex: 1; min-width: 120px; min-height: 36px; font-size: 15px; }
+.price-box { border: 1px solid var(--line); border-radius: 14px; padding: 12px; display: grid; gap: 10px; background: rgba(217, 171, 79, .05); }
+.linked { font-size: 13.5px; color: var(--muted); }
+.linked b { color: var(--gold-2); font-family: var(--f-display); font-size: 18px; }
+
+/* custom designs from the Design studio */
+.ds-list { display: grid; gap: 12px; }
+.ds { border: 1px solid var(--line-soft); background: var(--panel); border-radius: 16px; overflow: hidden; }
+.ds-top { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 10px; cursor: pointer; align-items: center; }
+.ds-top img { width: 84px; height: 84px; object-fit: contain; border-radius: 10px; background: #15233c; }
+.ds-top .ph { width: 84px; height: 84px; border-radius: 10px; background: #15233c; display: grid; place-items: center; color: var(--muted); font-size: 11px; }
+.ds-top b { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.ds-top small { display: block; color: var(--muted); }
+.ds-code { font-family: ui-monospace, Menlo, Consolas, monospace; color: var(--gold-2); }
+.ds-badge { font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; border: 1px solid var(--line); }
+.ds-badge.new { background: var(--gold-2); color: #1b1305; border-color: var(--gold-2); }
+.ds-more { border-top: 1px solid var(--line-soft); padding: 12px; display: grid; gap: 12px; }
+.ds-more img.big { width: 100%; max-height: 360px; object-fit: contain; border-radius: 12px; background: #15233c; }
+.ds-more dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 14px; }
+.ds-more dt { color: var(--muted); }
+.ds-more dd { margin: 0; overflow-wrap: anywhere; }
+.ds-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.ds-actions .btn { min-height: 38px; padding: 0 14px; font-size: 13px; }
+.ds-actions select { max-width: 180px; min-height: 38px; }
+
+.toast .tundo { margin-left: 10px; border: 0; background: var(--ink); color: var(--cream); border-radius: 999px; padding: 4px 12px; font-weight: 800; cursor: pointer; }
+.qp { cursor: text; border-bottom: 1px dashed var(--gold-2); } .qp:hover { background: rgba(217,171,79,.15); border-radius: 6px; }
+.qpin { width: 84px; padding: 4px 8px; border-radius: 8px; border: 1px solid var(--gold); background: var(--panel); color: inherit; font: inherit; font-weight: 800; }
+.step { display: inline-flex; align-items: center; gap: 6px; } .step button { width: 24px; height: 24px; border-radius: 8px; border: 1px solid var(--line-soft, rgba(255,255,255,.2)); background: transparent; color: inherit; font-weight: 900; cursor: pointer; line-height: 1; } .step button:hover { background: var(--gold); color: #1a1305; }
+.item { transition: transform .15s, box-shadow .15s; } .item:hover { transform: translateY(-2px); }
+.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); z-index: 100; background: var(--cream); color: var(--ink); padding: 10px 18px; border-radius: 999px; font-weight: 800; font-size: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, .4); }
+
+.signin { max-width: 400px; margin: 12vh auto 0; padding: 26px; border-radius: 24px; border: 1px solid var(--line); background: var(--navy); display: grid; gap: 14px; }
+.err { color: #ffb4a8; font-size: 14px; margin: 0; }
+.linkish { background: none; border: 0; color: var(--gold-2); font-weight: 700; font-size: 14px; cursor: pointer; justify-self: center; text-decoration: underline; padding: 6px; }
+/* products to design */
+.pt-item { display: grid; grid-template-columns: 56px 1fr auto auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); }
+.pt-item.off { opacity: .55; }
+.pt-item img { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; background: #1a2238; }
+.pt-item b { display: block; font-size: 15.5px; } .pt-item small { color: var(--muted); }
+.pt-item .ed { min-height: 44px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line); background: transparent; color: var(--cream); cursor: pointer; font-weight: 700; }
+@media (max-width: 520px) { .pt-item { grid-template-columns: 48px 1fr auto; } .pt-item .tg { grid-column: 2; justify-self: start; } .pt-item img { width: 48px; height: 48px; } }
+.val input.add { width: 92px; min-height: 30px; margin: 0 6px; padding: 0 8px; border-radius: 8px; border: 1px solid var(--line-soft); background: var(--ink); color: var(--cream); font: 600 13px var(--f-body); }
+/* tumbler designs + help */
+.td-how { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px 16px; background: rgba(217, 171, 79, .06); display: grid; gap: 8px; }
+.td-how ol { margin: 0; padding-left: 20px; display: grid; gap: 6px; font-size: 14.5px; }
+.td-list.placing .td-item.sel { opacity: .35; outline: 2px dashed var(--gold, #d9ab4f); }
+.td-list.placing .td-item:not(.sel):hover { outline: 2px solid #5ad08a; }
+.td-list.picking { grid-template-columns: repeat(auto-fill, minmax(104px, 1fr)); gap: 10px; }
+.td-list.picking .td-item { grid-template-columns: 1fr; justify-items: center; text-align: center; padding: 8px; cursor: pointer; position: relative; }
+.td-list.picking .td-item img { width: 100%; height: 84px; }
+.td-list.picking .td-item .tdgrab, .td-list.picking .td-item .tg, .td-list.picking .td-item .rm { display: none; }
+.td-list.picking .td-item input.nm { pointer-events: none; min-height: 34px; font-size: 12.5px; text-align: center; padding: 0 4px; }
+.td-list.picking .td-item::before { content: ""; position: absolute; top: 12px; left: 12px; width: 22px; height: 22px; border-radius: 7px; border: 2px solid #fff; background: rgba(0,0,0,.45); z-index: 2; }
+.td-list.picking .td-item.sel { outline: 2px solid var(--gold, #d9ab4f); } .td-list.picking .td-item.sel::before { content: "✓"; background: var(--gold, #d9ab4f); border-color: var(--gold, #d9ab4f); color: #1a1305; font-weight: 900; text-align: center; line-height: 18px; }
+#tdBulk { position: sticky; top: 0; z-index: 5; margin: 10px 0; }
+.td-list { display: grid; gap: 8px; }
+.td-item { display: grid; grid-template-columns: 30px 56px 1fr auto auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); }
+.td-item.off { opacity: .55; }
+.td-item.busy { opacity: .6; }
+.td-item img { width: 56px; height: 56px; object-fit: cover; border-radius: 10px; background: #1a2238; }
+.td-item input.nm { width: 100%; min-width: 0; min-height: 44px; border-radius: 10px; border: 1px solid var(--line-soft); background: var(--ink); color: var(--cream); padding: 0 10px; font: 600 15px var(--f-body); }
+.tdgrab { cursor: grab; text-align: center; color: var(--muted); font-size: 20px; user-select: none; touch-action: none; }
+.td-item .tg { position: relative; width: 52px; height: 30px; border-radius: 999px; border: 1px solid rgba(245, 236, 220, .25); background: #3a3f4d; cursor: pointer; padding: 0; }
+.td-item .tg::after { content: ""; position: absolute; top: 3px; left: 3px; width: 22px; height: 22px; border-radius: 50%; background: #f5ecdc; transition: transform .18s; }
+.td-item .tg[aria-checked="true"] { background: #2f9e62; border-color: #2f9e62; }
+.td-item .tg[aria-checked="true"]::after { transform: translateX(22px); }
+.td-item .rm { min-width: 44px; min-height: 44px; border-radius: 10px; border: 1px solid var(--line-soft); background: transparent; color: #ffb4a8; cursor: pointer; font-size: 18px; }
+.td-item .rm.arm { background: #5a1f1f; color: #fff; font-size: 13px; padding: 0 10px; }
+.help section { display: grid; gap: 10px; }
+.help h3 { font-size: 18px; color: var(--gold-2); }
+.help dl { margin: 0; display: grid; gap: 12px; }
+.help dt { font-weight: 800; }
+.help dd { margin: 2px 0 0; color: var(--muted); line-height: 1.55; }
+.help ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; color: var(--muted); line-height: 1.55; }
+.help code { background: rgba(245, 236, 220, .08); padding: 1px 6px; border-radius: 6px; }
+@media (max-width: 520px) { .td-item { grid-template-columns: 26px 48px 1fr; } .td-item .tg, .td-item .rm { justify-self: end; } .td-item img { width: 48px; height: 48px; } }
+/* checkout settings */
+.co-list { display: grid; gap: 12px; }
+.co-row { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px; background: var(--panel); display: grid; gap: 12px; }
+.co-row.master { border-color: var(--line); background: rgba(217, 171, 79, .05); }
+.co-row.off { opacity: .6; }
+.co-top { display: flex; align-items: center; gap: 12px; }
+.co-top div { flex: 1; min-width: 0; }
+.co-top b { display: block; font-size: 15.5px; }
+.co-top small { color: var(--muted); font-size: 13px; }
+.co-top .switch input { width: 50px; height: 28px; }
+.co-top .switch input::after { width: 22px; height: 22px; }
+.co-top .switch input:checked::after { transform: translateX(22px); }
+.co-fees { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
+.co-list[data-paused] .co-row:not(.master) { opacity: .45; }
+/* settings menu */
+.sc-slot { border: 1px solid var(--line-soft); border-radius: 16px; padding: 14px; margin: 12px 0; display: grid; gap: 10px; background: rgba(255,255,255,.03); }
+.sc-slot h3 { margin: 0; font-size: 15px; } .sc-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; } .sc-slot label { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); font-weight: 700; }
+.sc-slot select, .sc-slot input { width: 100%; min-height: 46px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: inherit; font: inherit; font-size: 16px; }
+.sc-slot .sc-thumb { width: 64px; height: 56px; border-radius: 10px; object-fit: cover; background: #222; }
+@media (max-width: 520px) { .sc-row { grid-template-columns: 1fr; } }
+.sc-body { display: grid; grid-template-columns: 92px 1fr; gap: 14px; align-items: start; } .sc-form { display: grid; gap: 10px; min-width: 0; }
+.sc-pv img { width: 92px; height: auto; border-radius: 12px; background: #ededed; display: block; }
+.sc-slot input[type=range] { min-height: 32px; padding: 0; accent-color: #d9ab4f; }
+@media (max-width: 520px) { .sc-body { grid-template-columns: 72px 1fr; gap: 10px; } .sc-pv img { width: 72px; } }
+.td-prod { display: flex; gap: 10px; align-items: center; font-weight: 800; margin: 4px 0 6px; } .td-prod select { flex: 1; min-height: 46px; padding: 8px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); color: inherit; font: inherit; font-size: 16px; }
+.menu-wrap { position: relative; }
+.menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 260px; background: var(--navy); border: 1px solid var(--line); border-radius: 16px; padding: 6px; display: grid; gap: 2px; box-shadow: 0 18px 40px rgba(0, 0, 0, .45); }
+.menu button, .menu a { display: grid; gap: 2px; text-align: left; padding: 10px 12px; border-radius: 10px; border: 0; background: none; color: inherit; font: inherit; font-weight: 700; font-size: 14.5px; cursor: pointer; text-decoration: none; }
+.menu small { font-weight: 500; font-size: 12.5px; color: var(--muted); }
+.menu .swrow { display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; padding: 10px 12px; border-radius: 10px; }
+.menu .swtxt { display: grid; gap: 2px; font-weight: 700; font-size: 14.5px; }
+.menu button.tg { position: relative; display: block; width: 74px; height: 36px; padding: 0; border-radius: 999px; border: 1px solid rgba(245, 236, 220, .25); background: #3a3f4d; flex: none; }
+.menu button.tg i { position: absolute; top: 3px; left: 3px; width: 28px; height: 28px; border-radius: 50%; background: #f5ecdc; transition: transform .18s; }
+.menu button.tg span { position: absolute; top: 0; bottom: 0; display: grid; place-items: center; font-size: 11px; font-weight: 800; letter-spacing: .06em; }
+.menu button.tg .on { left: 10px; color: #14221a; opacity: 0; } .menu button.tg .off { right: 9px; color: #c9c3b6; }
+.menu button.tg[aria-checked="true"] { background: #2f9e62; border-color: #2f9e62; }
+.menu button.tg[aria-checked="true"] i { transform: translateX(38px); }
+.menu button.tg[aria-checked="true"] .on { opacity: 1; } .menu button.tg[aria-checked="true"] .off { opacity: 0; }
+.menu .swask { grid-column: 1 / -1; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 8px 10px; border-radius: 10px; background: rgba(245, 236, 220, .07); font-size: 13px; font-weight: 600; }
+.menu .swask span { flex: 1 1 100%; }
+.menu .swask .btn { min-height: 38px; padding: 6px 16px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid rgba(245, 236, 220, .3); border-radius: 999px; font-weight: 800; }
+.menu .swask .btn.gold { background: linear-gradient(180deg, #f1d98f, #d9b45c); color: #1a1405; border-color: transparent; }
+/* phones: Settings opens as a big bottom sheet instead of a small dropdown */
+@media (max-width: 700px) {
+  header.top { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(10, 18, 32, .97); }   /* a blur here would trap the fixed sheet inside the header */
+  .menu { position: fixed; left: 0; right: 0; top: auto; bottom: 0; width: auto; max-height: 90vh; overflow-y: auto; -webkit-overflow-scrolling: touch; border-radius: 24px 24px 0 0; padding: 22px 14px calc(22px + env(safe-area-inset-bottom, 0px)); gap: 4px; box-shadow: 0 0 0 100vmax rgba(0, 0, 0, .6); overscroll-behavior: contain; }
+  .menu::before { content: ""; justify-self: center; width: 44px; height: 5px; border-radius: 999px; background: rgba(245, 236, 220, .3); margin: -10px 0 8px; }
+  .menu button, .menu a { padding: 16px 14px; font-size: 18px; border-radius: 14px; min-height: 60px; }
+  .menu small { font-size: 15px; }
+  .menu .swrow { padding: 14px; }
+  .menu .swtxt { font-size: 18px; }
+  .menu .swtxt small { font-size: 15px; }
+  .menu button.tg { width: 88px; height: 44px; } .menu button.tg i { width: 36px; height: 36px; } .menu button.tg[aria-checked="true"] i { transform: translateX(44px); } .menu button.tg span { font-size: 13px; }
+  .menu .swask { font-size: 16px; padding: 12px; } .menu .swask .btn { min-height: 48px; padding: 8px 22px; font-size: 16px; }
+}
+/* tablets and desktops: a roomy panel that fits the screen and scrolls, instead of a narrow strip */
+@media (min-width: 701px) {
+  header.top { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(10, 18, 32, .97); }   /* a blur on the header would trap the fixed panel inside it */
+  .menu { position: fixed; right: 16px; top: 76px; width: min(560px, calc(100vw - 32px)); max-height: calc(100vh - 96px); overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 12px; gap: 4px; border-radius: 20px; }
+  .menu button, .menu a { padding: 14px 16px; font-size: 16.5px; border-radius: 12px; min-height: 58px; }
+  .menu small { font-size: 14px; }
+  .menu .swrow { padding: 12px 16px; } .menu .swtxt { font-size: 16.5px; } .menu .swtxt small { font-size: 14px; }
+  .menu button.tg { width: 82px; height: 40px; } .menu button.tg i { width: 32px; height: 32px; } .menu button.tg[aria-checked="true"] i { transform: translateX(42px); }
+}
+@media (min-width: 1000px) { .menu { width: min(860px, calc(100vw - 48px)); grid-template-columns: 1fr 1fr; } .menu .swrow { grid-column: auto; } }
+.menu button:hover, .menu a:hover, .menu button:focus-visible, .menu a:focus-visible { background: rgba(245, 236, 220, .06); outline: none; }
+.stks { display: flex; gap: 8px; flex-wrap: wrap; font-size: 11.5px; font-weight: 800; }
+.stk { color: var(--muted); }
+.stk.out { color: #ff8f8f; }
+.stk.low { color: #ffcf8a; }
+.stk.new { color: var(--gold-2); }
+.bchips { display: flex; flex-wrap: wrap; gap: 6px; }
+/* download files */
+.dl-list { display: grid; gap: 8px; }
+.dl-item { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--panel); font-weight: 700; font-size: 14.5px; }
+.dl-item span { min-width: 0; overflow-wrap: anywhere; }
+.dl-item small { display: block; font-weight: 500; font-size: 12.5px; color: var(--muted); }
+.dl-item.busy { opacity: .6; }
+.dl-none { margin: 0; font-size: 13.5px; color: #ffcf8a; }
+.rtab { display: grid; grid-template-columns: minmax(0, 1.3fr) 1fr 1fr; gap: 8px; align-items: center; font-size: 13.5px; }
+.rtab b { font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.rtab .in { min-height: 40px; padding: 6px 10px; }
+/* site settings */
+.sgroup { border: 1px solid var(--line-soft); border-radius: 16px; background: var(--panel); }
+.sgroup > summary { list-style: none; cursor: pointer; padding: 14px 16px; font-weight: 800; font-size: 15.5px; display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.sgroup > summary::-webkit-details-marker { display: none; }
+.sgroup > summary::after { content: "+"; color: var(--gold-2); font-size: 20px; }
+.sgroup[open] > summary::after { content: "−"; }
+.sgroup > summary small { display: block; font-weight: 500; font-size: 12.5px; color: var(--muted); }
+.sgroup .sfields { padding: 0 16px 16px; display: grid; gap: 12px; }
+.sgroup textarea.in { min-height: 92px; }
+.colrow { display: grid; grid-template-columns: 46px 1fr 40px; gap: 8px; align-items: center; }
+.colrow input[type=color] { width: 46px; height: 42px; border: 1px solid var(--line-soft); border-radius: 10px; background: none; padding: 2px; cursor: pointer; }
+.colrow .rm { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--line-soft); background: none; cursor: pointer; color: inherit; font-size: 18px; }
+.ssw { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+/* two-step sign-in */
+.mfa { position: fixed; inset: 0; z-index: 300; background: rgba(5, 9, 17, .88); backdrop-filter: blur(6px); display: grid; place-items: center; padding: 16px; overflow-y: auto; }
+.mfa-card { width: min(420px, 100%); background: #121722; color: #f5ecdc; border: 1px solid rgba(217, 171, 79, .35); border-radius: 22px; padding: 24px 22px; display: grid; gap: 12px; }
+.mfa-card h2 { margin: 0; font-size: 22px; }
+.mfa-card p, .mfa-card ol { margin: 0; font-size: 14.5px; line-height: 1.5; color: #c9c2b4; }
+.mfa-card ol { padding-left: 20px; display: grid; gap: 4px; }
+.mfa-card a { color: #e9c477; }
+.mfa-qr { width: 180px; height: 180px; justify-self: center; background: #fff; border-radius: 12px; padding: 8px; }
+.mfa-card details { font-size: 13.5px; color: #c9c2b4; }
+.mfa-card code { display: block; margin-top: 6px; padding: 8px 10px; border-radius: 8px; background: #0b0f17; word-break: break-all; font-size: 14px; letter-spacing: .06em; user-select: all; }
+#mfaCode { width: 100%; min-height: 54px; border-radius: 14px; border: 1px solid rgba(217, 171, 79, .45); background: #0b0f17; color: #f5ecdc; font: 700 26px/1 ui-monospace, Menlo, monospace; letter-spacing: .35em; text-align: center; }
+#mfaCode:focus { outline: none; border-color: #e9c477; box-shadow: 0 0 0 3px rgba(217, 171, 79, .2); }
+.mfa-err { color: #ffb4a8 !important; }
+.mfa-go { min-height: 50px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #ecc876, #c99a3f); color: #1b1305; font-weight: 800; font-size: 16px; cursor: pointer; }
+.mfa-go[disabled] { opacity: .6; }
+.mfa-out { background: none; border: 0; color: #9a978f; text-decoration: underline; cursor: pointer; font-size: 14px; justify-self: center; }
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <a class="brand" href="./" title="Open the store">
+      <img src="logo.png" alt="">
+      <span><b>PRAJO</b><small>Store admin</small></span>
+    </a>
+    <div class="menu-wrap" id="menuWrap" hidden>
+      <button class="btn line" type="button" id="menuBtn" aria-haspopup="menu" aria-expanded="false">⚙ Settings</button>
+      <div class="menu" id="menu" role="menu" hidden>
+        <div class="swrow" id="vacRow"><div class="swtxt"><b>🌴 Vacation mode</b><small id="vacState">Checking…</small></div>
+          <button type="button" class="tg" role="switch" aria-checked="false" id="vacBtn" aria-label="Vacation mode"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
+          <div class="swask" id="vacAsk" hidden><span id="vacAskT"></span><button type="button" class="btn gold" id="vacYes">Confirm</button><button type="button" class="btn line" id="vacNo">Cancel</button></div></div>
+        <button type="button" role="menuitem" id="siteBtn">Site settings<small>Homepage text, announcement, colors, links</small></button>
+        <button type="button" role="menuitem" id="bulkBtn">Attach download files<small>Add files to many digital listings at once</small></button>
+        <div class="swrow" id="studioRow"><div class="swtxt"><b>🔤 Design studio on the store</b><small id="studioState">Checking…</small></div>
+          <button type="button" class="tg" role="switch" aria-checked="false" id="studioToggle" aria-label="Design studio on the store"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
+          <div class="swask" id="studioAsk" hidden><span id="studioAskT"></span><button type="button" class="btn gold" id="studioYes">Confirm</button><button type="button" class="btn line" id="studioNo">Cancel</button></div></div>
+        <button type="button" role="menuitem" id="ptBtn">🧩 Products to design<small id="ptState">Tumbler, mug, coaster, badge and more</small></button>
+        <button type="button" role="menuitem" id="scBtn">🏠 Home page showcase<small id="scState">The three tumblers at the top of your home page</small></button>
+        <button type="button" role="menuitem" id="snBtn">🎄 Seasonal effects<small id="snState">Falling snow, hearts, ghosts and more on holidays</small></button>
+        <button type="button" role="menuitem" id="tdBtn">🥤 Tumbler designs<small id="tdState">Artwork customers can try on a tumbler</small></button>
+        <button type="button" role="menuitem" id="dpBtn">🔍 Find duplicates<small>Spot repeated designs and listings, then clear them out</small></button>
+        <button type="button" role="menuitem" id="helpBtn">📘 How to update your site<small>Plain-language steps, no coding</small></button>
+        <button type="button" role="menuitem" id="dsBtn">🎨 Custom designs<small id="dsState">Designs customers sent from the Design studio</small></button>
+        <button type="button" role="menuitem" id="slBtn">🏷 Run a sale<small id="slState">Percent off selected or all products</small></button>
+        <button type="button" role="menuitem" id="lvBtn">🟢 Live visitors<small id="lvState">Who is on the store right now, and from where</small></button>
+        <button type="button" role="menuitem" id="rvBtn">⭐ Reviews<small id="rvState">Approve customer reviews, ask buyers for one</small></button>
+        <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
+        <button type="button" role="menuitem" id="pwBtn">Change password<small>For this admin page and the pricing app</small></button>
+        <a role="menuitem" href="/PrAjoCustomStudio/" target="_blank" rel="noopener">Open pricing app ↗<small>Costs, orders, messages, invoices</small></a>
+        <a role="menuitem" href="./" target="_blank" rel="noopener">View store ↗<small>Opens the live shop in a new tab</small></a>
+        <button type="button" role="menuitem" id="outBtn">Sign out</button>
+      </div>
+    </div>
+    <button class="btn gold" type="button" id="newBtn" hidden>+ New listing</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <form class="signin" id="signin" hidden novalidate>
+    <h2>Sign in</h2>
+    <p class="hint">Use the same email and password as your PrAjo Pricing app.</p>
+    <label class="f"><span>Email</span><input class="in" id="siEmail" type="email" autocomplete="email"></label>
+    <label class="f"><span>Password</span><input class="in" id="siPw" type="password" autocomplete="current-password"></label>
+    <p class="err" id="siErr" hidden></p>
+    <p class="hint" id="siMsg" hidden></p>
+    <button class="btn gold" type="submit">Sign in</button>
+    <button class="linkish" type="button" id="siForgot">Forgot password?</button>
+  </form>
+
+  <div id="appView" hidden>
+    <div class="tools">
+      <input class="in" id="search" placeholder="Search listings" aria-label="Search listings" autocomplete="off">
+      <div class="chips" id="cats" role="group" aria-label="Filter"></div>
+      <button class="btn" type="button" id="selBtn" aria-pressed="false">☑ Select several</button>
+      <span class="count" id="count"></span>
+    </div>
+    <div class="bulkbar" id="bulkBar" hidden><b id="bulkN">0 selected</b>
+      <button class="btn" type="button" id="bulkAll">Select all shown</button>
+      <button class="btn gold" type="button" id="bulkOn">Show on store</button>
+      <button class="btn" type="button" id="bulkOff">Hide from store</button>
+      <button class="btn" type="button" id="bulkDone">Done</button></div>
+    <p class="hint" style="margin:-6px 0 14px">Drag <b>⠿</b> to change the order on the store. Tap a listing to edit it. Changes go live as soon as you save.</p>
+    <div class="grid" id="grid"></div>
+  </div>
+</main>
+
+<div class="sheet" id="sheet" hidden role="dialog" aria-modal="true" aria-labelledby="edTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="edTitle">Edit listing</h2>
+      <button class="x" type="button" id="edClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body" id="edBody"></div>
+    <div class="panel-foot">
+      <button class="btn danger" type="button" id="edDelete">Delete</button>
+      <button class="btn line" type="button" id="edDup">Duplicate</button>
+      <button class="btn gold" type="button" id="edSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="slSheet" hidden role="dialog" aria-modal="true" aria-labelledby="slTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="slTitle">Run a sale</h2>
+      <button class="x" type="button" id="slClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body">
+      <p class="hint">Takes a percentage off the price. The store shows the old price crossed out, and checkout charges the sale price. Variation add-ons (like “both sides”) are discounted too.</p>
+      <div class="co-list">
+        <div class="co-row master"><div class="co-top"><div><b id="slHead">Sale is OFF</b><small id="slSub">Turn it on, choose the products, then Save.</small></div>
+          <label class="switch"><input type="checkbox" id="slOn" aria-label="Sale on"></label></div></div>
+        <div class="co-row">
+          <div class="co-fees">
+            <label><small>Percent off</small><input class="in" id="slPct" type="number" inputmode="numeric" min="1" max="90" step="1" value="20"></label>
+            <label><small>Last day (optional)</small><input class="in" id="slEnds" type="date"></label>
+          </div>
+          <label><small>Sale name (optional)</small><input class="in" id="slLabel" maxlength="30" placeholder="Sale, Black Friday, Holiday sale…"></label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn gold" type="button" id="slAll" aria-pressed="true">All products</button><button class="btn" type="button" id="slSome" aria-pressed="false">Selected products</button></div>
+          <div id="slPick" hidden>
+            <input class="in" id="slSearch" type="search" placeholder="Search products" aria-label="Search products" style="margin-bottom:8px">
+            <div style="display:flex;gap:8px;margin-bottom:8px"><button class="btn" type="button" id="slTickAll">Tick shown</button><button class="btn" type="button" id="slTickNone">Clear</button></div>
+            <div id="slItems" style="display:grid;gap:4px;max-height:42vh;overflow:auto"></div>
+          </div>
+        </div>
+        <button class="btn gold" type="button" id="slSave">Save sale</button>
+        <p class="hint" id="slMsg"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="lvSheet" hidden role="dialog" aria-modal="true" aria-labelledby="lvTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="lvTitle">Live visitors</h2>
+      <button class="x" type="button" id="lvClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body">
+      <p class="hint">People on the store right now. City, region and ZIP are worked out from each visitor’s internet connection, so they are approximate (a ZIP can be the provider’s area, not their home). No IP address is kept. Visitors who send “Do Not Track” are not counted. It updates by itself.</p>
+      <div class="co-list" id="lvList"><p class="hint">Connecting…</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="rvSheet" hidden role="dialog" aria-modal="true" aria-labelledby="rvTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="rvTitle">Customer reviews</h2>
+      <button class="x" type="button" id="rvClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body">
+      <div class="co-row" style="margin-bottom:14px">
+        <div class="co-top"><div><b>Ask customers for a review</b><small>Emails everyone whose order is marked Completed (at least a day ago), once each. Needs the Resend secrets <code>RESEND_API_KEY</code> and <code>RESEND_FROM</code> in Supabase.</small></div></div>
+        <button class="btn gold" type="button" id="rvSend">Send review requests</button>
+      </div>
+      <p class="hint">4 and 5 star reviews go live by themselves unless they contain a web link. Others wait here for your OK.</p>
+      <div class="co-list" id="rvList"><p class="hint">Loading…</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="coSheet" hidden role="dialog" aria-modal="true" aria-labelledby="coTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="coTitle">Checkout options</h2>
+      <button class="x" type="button" id="coClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body">
+      <p class="hint">Switch things on or off for store customers. Changes save and go live straight away.</p>
+      <div class="co-list" id="coList"><p class="hint">Loading…</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="dsSheet" hidden role="dialog" aria-modal="true" aria-labelledby="dsTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="dsTitle">Custom designs</h2>
+      <button class="x" type="button" id="dsClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body">
+      <div class="chips" id="dsChips" role="group" aria-label="Filter by status"></div>
+      <div class="empty" id="dsPay" hidden style="padding:16px"><b style="font-size:17px">Let customers pay for designs</b>
+        <p class="hint">Create the “Custom design” store item once. Customers who send a design then get an “Add to cart” button, and the design code travels with the order. Set its price, photo and shipping category later in the normal listing editor.</p>
+        <button class="btn gold" type="button" id="dsMakeItem">Create the Custom design item</button></div>
+      <div id="dsList" class="ds-list"><p class="hint">Loading…</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="ptSheet" hidden role="dialog" aria-modal="true" aria-labelledby="ptTitle">
+  <div class="panel">
+    <div class="panel-head"><button class="btn ghost" type="button" id="ptBack" hidden style="padding:8px 12px">‹ Back</button><h2 id="ptTitle">Products to design</h2><button class="x" type="button" id="ptClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="ptListView">
+      <div class="td-how"><b>What this is</b>
+        <p class="hint" style="margin:0">Each product here appears as a button on the “Design yours” page, so customers can try a design on a tumbler, mug, coaster, badge, keychain and more. For each one you upload a straight-on photo of the blank product and mark where the artwork prints.</p></div>
+      <div><button class="btn gold" type="button" id="ptAdd">＋ Add a product</button></div>
+      <div id="ptList" class="td-list"><p class="hint">Loading…</p></div>
+    </div>
+    <div class="panel-body" id="ptEditView" hidden>
+      <label class="f"><span>Product name</span><input class="in" id="ptName" maxlength="40" placeholder="e.g. Coaster, Mug, ID badge"></label>
+      <div class="f"><span>What shape is it?</span>
+        <div class="chips" role="group" aria-label="Shape" id="ptKind"><button type="button" data-k="flat" aria-pressed="true">Flat (coaster, badge, keychain, plaque)</button><button type="button" data-k="round" aria-pressed="false">Round (tumbler, mug, bottle)</button></div></div>
+      <label class="f"><span>Where do orders go in your shop?</span><select class="in" id="ptCat"><option value="tumblers">Tumblers</option><option value="mugs">Mugs</option><option value="tags">Badges & tags</option><option value="apparel">Apparel</option><option value="other">Everything else</option></select></label>
+      <div class="f"><span>The shop item customers order after designing</span>
+        <select class="in" id="ptListing"><option value="">None (send them to the shop category)</option></select>
+        <p class="hint" style="margin:0">Pick a listing such as “Custom Tumbler (your design)”. Its options and prices (for example 20oz and 30oz) are used, and the customer's design details are filled in for you.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><button class="btn line" type="button" id="ptMakeItem">＋ Create this shop item for me</button><label class="f" style="min-width:150px"><span>Starting price ($)</span><input class="in" id="ptPrice" type="number" inputmode="decimal" min="0" step="0.5" value="25"></label></div>
+        <p class="hint" style="margin:0" id="ptMakeMsg"></p></div>
+      <div class="f"><span>Photo of the blank product</span>
+        <p class="hint" style="margin:0">Straight on, on a plain light background, evenly lit. For a mug, turn the handle to the side.</p>
+        <div><button class="btn line" type="button" id="ptPhotoBtn">Choose a photo</button> <span class="hint" id="ptPhotoName"></span></div>
+        <input type="file" id="ptPhotoIn" accept="image/*" hidden></div>
+      <div class="f" id="ptCalWrap" hidden><span>Mark where the artwork prints</span>
+        <p class="hint" style="margin:0" id="ptCalHint">Drag the gold dots so the box covers exactly the printable area.</p>
+        <canvas id="ptCal" style="width:100%;max-width:520px;border-radius:14px;border:1px solid var(--line);touch-action:none;background:#222"></canvas>
+        <div id="ptFlatOpts" style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          <div class="chips" role="group" aria-label="Print shape" id="ptShape"><button type="button" data-s="rect" aria-pressed="true">Square / rectangle</button><button type="button" data-s="ellipse" aria-pressed="false">Circle / oval</button></div>
+          <label class="f" style="min-width:200px"><span>Rounded corners</span><input type="range" id="ptRadius" min="0" max="120" value="0"></label></div>
+      </div>
+      <p class="hint bad" id="ptErr" hidden></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn gold" type="button" id="ptSave">Save product</button><span class="hint" id="ptMsg" style="margin:0"></span></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="scSheet" hidden role="dialog" aria-modal="true" aria-labelledby="scTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="scTitle">Home page showcase</h2><button class="x" type="button" id="scClose" aria-label="Close">×</button></div>
+    <div class="panel-body">
+      <div class="td-how"><b>The three tumblers customers see first</b>
+        <p class="hint" style="margin:6px 0 0">For each one, choose a design, type a name and pick the lettering. The home page draws them for you. Tapping one opens the designer with the same choices.</p></div>
+      <div id="scSlots"></div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px"><button class="btn gold" type="button" id="scSave">Save showcase</button><button class="btn" type="button" id="scReset">Use the original pictures</button><span class="hint" id="scMsg" style="margin:0"></span></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="tdSheet" hidden role="dialog" aria-modal="true" aria-labelledby="tdTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="tdTitle">Tumbler designs</h2><button class="x" type="button" id="tdClose" aria-label="Close">×</button></div>
+    <div class="panel-body">
+      <div class="td-how"><b>How to add a design</b>
+        <ol><li>Tap <b>＋ Add designs</b> and choose your flat wrap artwork (the image you print on a tumbler). You can pick several at once.</li>
+        <li>Give each one a clear name. Customers see it in the gallery and on the tumbler page.</li>
+        <li>Drag the ⠿ handle to change the order. The first ones show first. Use the switch to hide a design without deleting it.</li></ol>
+        <p class="hint">Best artwork: a wide image (around 2000 × 1700 px), JPG or PNG. Transparent PNGs are placed on white. We resize everything automatically.</p></div>
+      <label class="td-prod">Designs for <select id="tdProd" aria-label="Which product these designs are for"></select></label>
+      <p class="hint" style="margin:0 0 10px">Each product has its own designs. Pick the product first, then add or sort its designs.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="tdAdd">＋ Add designs</button><button class="btn" type="button" id="tdOrig" title="Match your original full-size files to designs already here, by file name">📎 Attach original files</button><button class="btn" type="button" id="tdSelBtn" aria-pressed="false">☑ Select several</button><button class="btn" type="button" id="tdAZ">Sort A–Z</button><span class="hint" id="tdMsg" style="margin:0"></span></div>
+      <input class="in" id="tdSearch" placeholder="Search designs" aria-label="Search designs" autocomplete="off" style="margin:10px 0 0;width:100%">
+      <div class="bulkbar" id="tdBulk" hidden><b id="tdBulkN">0 selected</b>
+        <button class="btn" type="button" id="tdAll">Select all shown</button><button class="btn gold" type="button" id="tdMoveTo">📍 Move to…</button><button class="btn" type="button" id="tdTop">⬆ Top</button><button class="btn" type="button" id="tdBottom">⬇ Bottom</button>
+        <div id="tdPlace" hidden style="flex:1 1 100%;display:none;gap:8px;align-items:center;flex-wrap:wrap"><b style="margin-right:auto" id="tdPlaceTxt"></b><button class="btn gold" type="button" id="tdBefore" aria-pressed="true">Before it</button><button class="btn" type="button" id="tdAfter" aria-pressed="false">After it</button><button class="btn" type="button" id="tdPlaceX">Cancel</button></div>
+        <button class="btn" type="button" id="tdShow">Show</button><button class="btn" type="button" id="tdHide">Hide</button><button class="btn" type="button" id="tdDelSel" style="color:#ffb4a8">Delete</button><button class="btn" type="button" id="tdDone">Done</button></div>
+      <input type="file" id="tdFile" accept="image/*" multiple hidden>
+      <input type="file" id="tdOrigFile" accept="image/*" multiple hidden>
+      <div id="tdList" class="td-list"><p class="hint">Loading…</p></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="dpSheet" hidden role="dialog" aria-modal="true" aria-labelledby="dpTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="dpTitle">Find duplicates</h2><button class="x" type="button" id="dpClose" aria-label="Close">×</button></div>
+    <div class="panel-body">
+      <div class="dp-tabs"><button class="btn gold" type="button" id="dpTabD" aria-pressed="true">🥤 Designs</button><button class="btn" type="button" id="dpTabL" aria-pressed="false">🛍 Listings</button></div>
+      <label class="td-prod" id="dpProdWrap">Designs for <select id="dpProd" aria-label="Which product's designs to check"></select></label>
+      <p class="hint" id="dpHow" style="margin:0 0 10px"></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="dpScan">🔍 Scan now</button><span class="hint" id="dpMsg" style="margin:0"></span></div>
+      <div class="bulkbar" id="dpBulk" hidden><b id="dpN">0 selected</b>
+        <button class="btn" type="button" id="dpAllX">Select all extras</button><button class="btn" type="button" id="dpNone">Clear</button>
+        <button class="btn" type="button" id="dpHide">Hide</button><button class="btn" type="button" id="dpDel" style="color:#ffb4a8">Delete</button></div>
+      <div id="dpList"></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="snSheet" hidden role="dialog" aria-modal="true" aria-labelledby="snTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="snTitle">Seasonal effects</h2><button class="x" type="button" id="snClose" aria-label="Close">×</button></div>
+    <div class="panel-body">
+      <p class="hint" style="margin:0 0 12px">Falling decorations appear on your store around each holiday: Santa hats, snow and a decorated tree at Christmas, floating ghosts at Halloween, hearts for Valentine's Day, and more for the major US and Canadian holidays. Leave it on Automatic and it follows the calendar.</p>
+      <label class="td-prod">Show <select id="snSel" aria-label="Which seasonal effect to show"></select></label>
+      <p class="hint" id="snNow" style="margin:0 0 12px"></p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="snSave">Save</button><a class="btn" id="snPrev" href="./" target="_blank" rel="noopener">Preview on the store ↗</a><span class="hint" id="snMsg" style="margin:0"></span></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="helpSheet" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="helpTitle">How to update your site</h2><button class="x" type="button" id="helpClose" aria-label="Close">×</button></div>
+    <div class="panel-body help">
+      <section><h3>Everyday jobs (no coding)</h3>
+        <dl>
+          <dt>Add or change a product</dt><dd>On this page, tap <b>+ New listing</b> (or tap a product). Add photos, price, stock and description, then <b>Save</b>. It appears on the store straight away.</dd>
+          <dt>Add a product people can design (mug, coaster, badge…)</dt><dd><b>⚙ Settings → 🧩 Products to design → ＋ Add a product.</b> Name it, choose Flat or Round, upload a straight-on photo of the blank product, then drag the gold dots to mark where the artwork prints. It becomes a button on the “Design yours” page.</dd>
+          <dt>Add a design to the gallery</dt><dd><b>⚙ Settings → 🥤 Tumbler designs → ＋ Add designs.</b> Upload the flat artwork and name it. It shows up in the 3D gallery and the tumbler designer. Drag to reorder, switch off to hide.</dd>
+          <dt>Change words on the website</dt><dd><b>⚙ Settings → Site settings.</b> Headline, intro, banner, shipping and returns answers (FAQ), contact details and more.</dd>
+          <dt>Pause orders while you're away</dt><dd>Turn on <b>🌴 Vacation mode</b> in the Settings menu. Digital downloads stay available.</dd>
+          <dt>Shipping prices and local pickup</dt><dd><b>⚙ Settings → Checkout options.</b></dd>
+          <dt>See and answer customers</dt><dd>Open the <b>pricing app → Messages</b>. You also get a Telegram alert with a link.</dd>
+          <dt>Look at orders</dt><dd>Open the <b>pricing app → Orders</b>. Move each order along: New → In production → Ready → Shipped → Completed.</dd>
+        </dl></section>
+      <section><h3>Good to know</h3>
+        <ul>
+          <li>Changes you make here show on the live site within a minute. Refresh the store page to see them.</li>
+          <li>Pictures are resized for you, so don't worry about file size. JPG and PNG work best.</li>
+          <li>Sign-in uses your password plus the 6-digit code from your authenticator app (and your backup app). Keep both safe.</li>
+          <li>Hidden things are never deleted: switch a design or product off to hide it, and back on to bring it back.</li>
+        </ul></section>
+      <section><h3>Things that need a developer (or Claude)</h3>
+        <ul>
+          <li>Changing the page layout, adding new kinds of sections, or new features.</li>
+          <li>Swapping the base tumbler photo used in the designer (the file <code>tumbler-white.jpg</code>).</li>
+          <li>Updating the website files on GitHub.</li>
+        </ul><p class="hint">Everything else on this page you can do yourself.</p></section>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="siteSheet" hidden role="dialog" aria-modal="true" aria-labelledby="siteTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="siteTitle">Site settings</h2>
+      <button class="x" type="button" id="siteClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body" id="siteBody"><p class="hint">Loading…</p></div>
+    <div class="panel-foot">
+      <a class="btn line" href="./" target="_blank" rel="noopener">View store ↗</a>
+      <button class="btn gold" type="button" id="siteSave">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="bulkSheet" hidden role="dialog" aria-modal="true" aria-labelledby="bulkTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="bulkTitle">Attach download files</h2>
+      <button class="x" type="button" id="bulkClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body" id="bulkBody"></div>
+    <div class="panel-foot">
+      <button class="btn line" type="button" id="bulkPick">Choose folder…</button>
+      <button class="btn gold" type="button" id="bulkGo" disabled>Upload and attach</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="bulkDir" webkitdirectory multiple hidden>
+
+<div class="sheet" id="pwSheet" hidden role="dialog" aria-modal="true" aria-labelledby="pwTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="pwTitle">Change password</h2>
+      <button class="x" type="button" id="pwClose" aria-label="Close">×</button>
+    </div>
+    <form class="panel-body" id="pwForm" novalidate>
+      <p class="hint" id="pwIntro">One password for this admin page and your PrAjo Pricing app. Use something long and unique, and let your iPhone or Mac Passwords app save it.</p>
+      <label class="f"><span>New password</span><input class="in" id="pwNew" type="password" autocomplete="new-password" minlength="10"></label>
+      <label class="f"><span>Type it again</span><input class="in" id="pwAgain" type="password" autocomplete="new-password"></label>
+      <label class="f" id="pwNonceRow" hidden><span>Code from the email we just sent you</span><input class="in" id="pwNonce" inputmode="numeric" autocomplete="one-time-code"></label>
+      <p class="hint" id="pwHint">At least 10 characters. A short phrase works well, like <b>tumbler-sunset-river-42</b>.</p>
+      <p class="err" id="pwErr" hidden></p>
+      <button class="btn gold" type="submit" id="pwSave">Save new password</button>
+    </form>
+  </div>
+</div>
+
+<div class="toast" id="toast" hidden></div>
+<input type="file" id="filePick" accept="image/*" multiple hidden>
+<input type="file" id="dlPick" accept=".pdf,.zip,.png,.jpg,.jpeg,.epub,application/pdf,application/zip" multiple hidden>
+
+<script>
+const CFG = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", owner: "abhi.prasad85@gmail.com", bucket: "listing-photos" };
+const CATS = [{ id: "tumblers", label: "Tumblers" }, { id: "mugs", label: "Mugs" }, { id: "tags", label: "Badges, Tags & Keychains" }, { id: "printables", label: "Printables" }, { id: "coasters", label: "Coasters" }, { id: "stickers", label: "Stickers" }, { id: "apparel", label: "Apparel" }, { id: "other", label: "Other" }];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const money = (n) => "$" + Number(n || 0).toFixed(2);
+// Arriving from a "reset your password" email: remember it, then ask for the authenticator code before the new password.
+try { if (/type=recovery/.test(location.hash)) sessionStorage.setItem("prajo:setpw", "1"); } catch {}
+const sb = window.supabase.createClient(CFG.url, CFG.key, { auth: { persistSession: true, autoRefreshToken: true } });
+sb.auth.onAuthStateChange((ev) => { if (ev === "PASSWORD_RECOVERY") try { sessionStorage.setItem("prajo:setpw", "1"); } catch {} });
+let rows = [], prices = {}, filter = "all", ed = null, sortable = null;
+let toastT;
+let undoFn = null;
+function toast(m, undo) { const t = $("toast"); undoFn = undo || null; t.innerHTML = esc(m) + (undo ? ` <button type="button" class="tundo">Undo</button>` : ""); t.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => (t.hidden = true), undo ? 7000 : 2400); }
+document.addEventListener("click", (e) => { if (e.target.closest(".tundo") && undoFn) { const f = undoFn; undoFn = null; $("toast").hidden = true; f(); } });
+const slug = (s) => String(s).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 48) || "listing";
+
+/* ---------- two-step sign-in: a 6-digit code from an authenticator app (Supabase MFA, TOTP) ---------- */
+// Returns true when this sign-in already passed the second step; otherwise shows the code (or first-time setup) screen.
+async function mfaGate(sb) {
+  let aal = null;
+  try { aal = (await sb.auth.mfa.getAuthenticatorAssuranceLevel()).data; } catch { return true; }   // offline: the database still checks
+  if (!aal || aal.currentLevel === "aal2") return true;
+  const { data: list, error: listErr } = await sb.auth.mfa.listFactors();
+  // A sign-in saved in this browser can stop working (expired or signed out elsewhere): ask for a fresh sign-in.
+  const expired = async () => {
+    await sb.auth.signOut({ scope: "local" }).catch(() => {});
+    box.innerHTML = `<div class="mfa-card"><h2 id="mfaTitle">Please sign in again</h2><p>Your sign-in on this device has expired. Sign in with your password and authenticator code.</p><button class="mfa-go" type="button" onclick="location.reload()">Sign in</button></div>`;
+    return false;
+  };
+  let factor = (list?.totp || []).find((f) => f.status === "verified");
+  const box = document.createElement("div");
+  box.className = "mfa";
+  box.setAttribute("role", "dialog"); box.setAttribute("aria-modal", "true"); box.setAttribute("aria-labelledby", "mfaTitle");
+  document.body.appendChild(box);
+  if (listErr || !list) return expired();
+  const form = (intro) => `
+    <form class="mfa-card" id="mfaForm" novalidate>
+      <h2 id="mfaTitle">${factor && !factor.setup ? "Enter your code" : "Turn on two-step sign-in"}</h2>
+      ${intro}
+      <input id="mfaCode" inputmode="numeric" autocomplete="one-time-code" maxlength="6" placeholder="123456" aria-label="6-digit code">
+      <p class="mfa-err" id="mfaErr" hidden></p>
+      <button class="mfa-go" type="submit">${factor && !factor.setup ? "Continue" : "Turn on and continue"}</button>
+      <button class="mfa-out" type="button" id="mfaOut">Sign out</button>
+    </form>`;
+  if (factor) {
+    box.innerHTML = form(`<p>Open your authenticator app and type the 6-digit code for <b>PrAjo Custom Studio</b>.</p>`);
+  } else {
+    // Clear any half-finished setup, then start a fresh one.
+    for (const f of list?.all || []) if (f.status !== "verified") await sb.auth.mfa.unenroll({ factorId: f.id }).catch(() => {});
+    const { data: en, error } = await sb.auth.mfa.enroll({ factorType: "totp", issuer: "PrAjo Custom Studio", friendlyName: "Authenticator " + new Date().toISOString().slice(0, 10) });
+    if (error && /bearer|jwt|session|token/i.test(error.message)) return expired();
+    if (error) { box.innerHTML = `<div class="mfa-card"><h2 id="mfaTitle">Two-step sign-in</h2><p class="mfa-err">${esc(error.message)}</p><button class="mfa-out" type="button" id="mfaOut">Sign out</button></div>`; }
+    else {
+      factor = { id: en.id, setup: true };
+      box.innerHTML = form(`
+        <p>This keeps your shop safe even if someone learns your password. One time only:</p>
+        <ol><li>On your phone, open an authenticator app (iPhone <b>Passwords</b>, Google Authenticator or Authy).</li>
+          <li>Scan this code, or on this phone <a href="${en.totp.uri}">tap here to add it</a>.</li>
+          <li>Type the 6-digit code it shows.</li></ol>
+        <img class="mfa-qr" src="${en.totp.qr_code}" alt="QR code for your authenticator app">
+        <details><summary>Can't scan? Enter this key instead</summary><code>${en.totp.secret}</code></details>`);
+    }
+  }
+  $("mfaOut").onclick = async () => { await sb.auth.signOut({ scope: "local" }).catch(() => {}); location.reload(); };
+  const code = $("mfaCode");
+  if (code) {
+    code.focus({ preventScroll: true });
+    code.addEventListener("input", () => { code.value = code.value.replace(/\D/g, "").slice(0, 6); if (code.value.length === 6) $("mfaForm").requestSubmit(); });
+    $("mfaForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const err = $("mfaErr"), btn = $("mfaForm").querySelector(".mfa-go");
+      if (code.value.length !== 6) { err.textContent = "Type the 6-digit code."; err.hidden = false; return; }
+      btn.disabled = true; err.hidden = true;
+      const { error } = await sb.auth.mfa.challengeAndVerify({ factorId: factor.id, code: code.value });
+      btn.disabled = false;
+      if (error) { err.textContent = /invalid|expired/i.test(error.message) ? "That code didn't match. Wait for a fresh code and try again." : error.message; err.hidden = false; code.value = ""; code.focus(); return; }
+      location.reload();
+    };
+  }
+  return false;
+}
+
+/* ---------- sign in ---------- */
+async function boot() {
+  const { data } = await sb.auth.getSession();
+  const email = data.session?.user?.email?.toLowerCase();
+  if (!email) { $("signin").hidden = false; return; }
+  if (email !== CFG.owner) { $("signin").hidden = false; $("siErr").textContent = `${email} can't edit this store.`; $("siErr").hidden = false; return; }
+  if (!(await mfaGate(sb))) return;
+  $("appView").hidden = false; $("newBtn").hidden = false; $("menuWrap").hidden = false;
+  let resetting = false; try { resetting = sessionStorage.getItem("prajo:setpw") === "1"; } catch {}
+  if (resetting) openPw(true);
+  await Promise.all([loadRows(), loadPrices(), paintVac(), paintStudio(), dsCount()]);
+  deepLink();
+}
+/* ---------- vacation mode: one tap from the menu (full text in Site settings) ---------- */
+async function readSiteRow() { const { data } = await sb.from("site_settings").select("data").eq("id", 1).maybeSingle(); return data?.data || {}; }
+/* Switches: tapping asks "Confirm?" first so a stray tap can't pause the shop. The menu stays open while you decide. */
+function bindSwitch(key, ids, texts) {
+  const btn = $(ids.btn), ask = $(ids.ask);
+  const paint = async () => {
+    try { const on = !!(await readSiteRow())[key]; btn.setAttribute("aria-checked", on); $(ids.state).textContent = on ? texts.onState : texts.offState; }
+    catch { $(ids.state).textContent = "Set up Site settings first"; }
+  };
+  const close = () => { ask.hidden = true; };
+  $(ids.row).addEventListener("click", (e) => e.stopPropagation());
+  btn.onclick = () => { const on = btn.getAttribute("aria-checked") === "true"; $(ids.ask + "T").textContent = on ? texts.askOff : texts.askOn; ask.hidden = false; };
+  $(ids.no).onclick = close;
+  $(ids.yes).onclick = async () => {
+    const cur = await readSiteRow(), next = { ...cur };
+    if (cur[key]) delete next[key]; else next[key] = true;
+    const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+    if (error) return toast("Couldn't change it: " + error.message);
+    close(); toast(next[key] ? texts.doneOn : texts.doneOff); paint();
+  };
+  return paint;
+}
+const paintVac = bindSwitch("vacationOn", { row: "vacRow", btn: "vacBtn", state: "vacState", ask: "vacAsk", yes: "vacYes", no: "vacNo" }, {
+  onState: "ON: made-to-order items are paused", offState: "Off: the shop is open",
+  askOn: "Pause all made-to-order items? Printables stay available.", askOff: "Reopen the shop for made-to-order items?",
+  doneOn: "Vacation mode ON. Made-to-order items are paused", doneOff: "Vacation mode OFF. The shop is open" });
+const paintStudio = bindSwitch("studioOn", { row: "studioRow", btn: "studioToggle", state: "studioState", ask: "studioAsk", yes: "studioYes", no: "studioNo" }, {
+  onState: "ON: customers can design name tiles", offState: "Off: hidden from the store",
+  askOn: "Show the Design studio to customers?", askOff: "Hide the Design studio from the store?",
+  doneOn: "Design studio is ON. Customers can see it", doneOff: "Design studio is OFF. Hidden from the store" });
+$("outBtn").onclick = async () => { await sb.auth.signOut({ scope: "local" }).catch(() => {}); location.reload(); };   // this device only
+// Settings menu: everything that isn't a listing lives here.
+const setMenu = (open) => { $("menu").hidden = !open; $("menuBtn").setAttribute("aria-expanded", open); };
+$("menuBtn").onclick = (e) => { e.stopPropagation(); setMenu($("menu").hidden); };
+$("menu").addEventListener("click", () => setMenu(false));
+document.addEventListener("click", (e) => { if (!e.target.closest("#menuWrap")) setMenu(false); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("menu").hidden) { setMenu(false); $("menuBtn").focus(); } });
+$("signin").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const { error } = await sb.auth.signInWithPassword({ email: $("siEmail").value.trim(), password: $("siPw").value });
+  if (error) { $("siErr").textContent = error.message; $("siErr").hidden = false; return; }
+  location.reload();
+});
+
+/* ---------- data ---------- */
+async function loadRows() {
+  const { data, error } = await sb.from("listings").select("*").order("sort").order("name");
+  if (error) { $("grid").innerHTML = `<div class="empty"><b>Store listings aren't set up yet</b><p class="hint">Run listings-setup.sql in Supabase first.</p></div>`; return; }
+  rows = data; render();
+}
+async function loadPrices() {
+  const { data } = await sb.from("docs").select("data").eq("coll", "app").eq("id", "store-prices").maybeSingle();
+  prices = data?.data?.prices || {};
+}
+const priceOf = (r) => r.price_source === "pricing" && prices[r.pricing_id] ? prices[r.pricing_id].sell : Number(r.price);
+
+/* ---------- list ---------- */
+function stockTag(r) {
+  const out = [];
+  if (!r.digital) out.push(`<span class="step"><button type="button" data-stk="-1" aria-label="One less in stock">−</button>${r.stock <= 0 ? `<span class="stk out">● Sold out</span>` : r.stock <= 3 ? `<span class="stk low">● ${r.stock} left</span>` : `<span class="stk">${r.stock} in stock</span>`}<button type="button" data-stk="1" aria-label="One more in stock">+</button></span>`);
+  if (r.created_at && Date.now() - Date.parse(r.created_at) < 14 * 86400000) out.push(`<span class="stk new">✦ New</span>`);
+  return out.length ? `<div class="stks">${out.join("")}</div>` : "";
+}
+async function setField(r, patch, label) {
+  const prev = {}; Object.keys(patch).forEach((k) => (prev[k] = r[k]));
+  Object.assign(r, patch); render();
+  const { error } = await sb.from("listings").update({ ...patch, updated_at: new Date().toISOString() }).eq("id", r.id);
+  if (error) { Object.assign(r, prev); render(); return toast("Couldn't save. Try again."); }
+  toast(label, async () => { Object.assign(r, prev); render(); await sb.from("listings").update({ ...prev, updated_at: new Date().toISOString() }).eq("id", r.id); });
+}
+let selMode = false, picked = new Set(), shown = [];
+function setSel(on) { selMode = on; picked.clear(); $("selBtn").setAttribute("aria-pressed", on); $("bulkBar").hidden = !on; render(); }
+async function bulkVis(on) {
+  const ids = [...picked]; if (!ids.length) return toast("Tap the listings you want first.");
+  const { error } = await sb.from("listings").update({ visible: on, updated_at: new Date().toISOString() }).in("id", ids);
+  if (error) return toast("Couldn't update. Try again.");
+  rows.forEach((r) => { if (picked.has(r.id)) r.visible = on; });
+  toast(`${ids.length} listing${ids.length > 1 ? "s" : ""} ${on ? "now on the store" : "hidden from the store"}`, async () => { rows.forEach((r) => { if (ids.includes(r.id)) r.visible = !on; }); render(); await sb.from("listings").update({ visible: !on, updated_at: new Date().toISOString() }).in("id", ids); }); picked.clear(); render();
+}
+function render() {
+  const q = $("search").value.trim().toLowerCase();
+  $("cats").innerHTML = [{ id: "all", label: "All" }, ...CATS.filter((c) => rows.some((r) => r.category === c.id)), { id: "hidden", label: "Hidden" }]
+    .map((c) => `<button type="button" data-f="${c.id}" aria-pressed="${filter === c.id}">${esc(c.label)}</button>`).join("");
+  if (!rows.length) {
+    $("grid").innerHTML = `<div class="empty" style="grid-column:1/-1"><b>No listings in the database yet</b>
+      <p class="hint">Bring in the ${(window.PRAJO_PRODUCTS || []).length || "current"} products from your live store to start editing.</p>
+      <button class="btn gold" type="button" id="importBtn">Import current store products</button></div>`;
+    $("count").textContent = ""; return;
+  }
+  const list = rows.filter((r) => (filter === "all" || (filter === "hidden" ? !r.visible : r.category === filter))
+    && (!q || (r.name + " " + (r.title || "")).toLowerCase().includes(q)));
+  $("count").textContent = `${list.length} of ${rows.length}`; shown = list.map((r) => r.id); $("bulkN").textContent = `${picked.size} selected`;
+  $("grid").innerHTML = list.map((r) => `
+    <div class="item${r.visible ? "" : " off"}${selMode ? " pick" : ""}${selMode && picked.has(r.id) ? " sel" : ""}" data-id="${esc(r.id)}">
+      <div class="ph" data-edit>${r.images?.[0] ? `<img src="${esc(r.images[0].card)}" alt="" loading="lazy">` : `<span class="none">No photo yet</span>`}
+        <span class="grab" title="Drag to reorder" aria-label="Drag to reorder">⠿</span>
+        ${r.visible ? "" : `<span class="tag">Hidden</span>`}</div>
+      <div class="meta">
+        <span class="nm" data-edit>${esc(r.name)}</span>
+        <div class="pr">${r.price_source === "pricing" ? `<b>${money(priceOf(r))}</b>` : `<b class="qp" data-qp title="Tap to change the price">${money(priceOf(r))}</b>`}${r.price_source === "pricing" ? `<small>⟲ from app</small>` : ""}</div>
+        ${stockTag(r)}
+        <label class="switch"><input type="checkbox" data-vis ${r.visible ? "checked" : ""} aria-label="Show on store"> On store</label>
+      </div>
+    </div>`).join("");
+  sortable?.destroy();
+  sortable = (filter === "all" && !q && !selMode) ? Sortable.create($("grid"), { handle: ".grab", animation: 160, onEnd: saveOrder }) : null;
+}
+$("search").addEventListener("input", render);
+$("selBtn").onclick = () => setSel(!selMode); $("bulkDone").onclick = () => setSel(false);
+$("bulkAll").onclick = () => { shown.forEach((id) => picked.add(id)); render(); };
+$("bulkOn").onclick = () => bulkVis(true); $("bulkOff").onclick = () => bulkVis(false);
+$("cats").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) { filter = b.dataset.f; render(); } });
+$("grid").addEventListener("click", async (e) => {
+  if (e.target.id === "importBtn") return importStore(e.target);
+  const it = e.target.closest(".item"); if (!it) return;
+  const rr = rows.find((x) => x.id === it.dataset.id);
+  if (!selMode && e.target.closest("[data-stk]")) { const n = Math.max(0, (Number(rr.stock) || 0) + Number(e.target.closest("[data-stk]").dataset.stk)); setField(rr, { stock: n }, `Stock set to ${n}`); return; }
+  if (!selMode && e.target.matches("[data-qp]")) {
+    const b = e.target, inp = document.createElement("input"); inp.type = "number"; inp.step = "0.01"; inp.min = "0"; inp.className = "qpin"; inp.value = Number(rr.price).toFixed(2); b.replaceWith(inp); inp.focus(); inp.select();
+    let done = false; const fin = (ok) => { if (done) return; done = true; const v = Math.round(Number(inp.value) * 100) / 100; if (ok && v > 0 && v !== Number(rr.price)) setField(rr, { price: v }, `Price now ${money(v)}`); else render(); };
+    inp.onkeydown = (ev) => { if (ev.key === "Enter") fin(true); if (ev.key === "Escape") fin(false); }; inp.onblur = () => fin(true); return;
+  }
+  if (selMode) { const id = it.dataset.id; picked.has(id) ? picked.delete(id) : picked.add(id); render(); return; }
+  if (e.target.matches("[data-vis]")) {
+    const r = rows.find((x) => x.id === it.dataset.id); setField(r, { visible: e.target.checked }, e.target.checked ? "Now on the store" : "Hidden from the store"); return;
+  }
+  if (e.target.closest("[data-edit]") && !e.target.closest(".grab")) openEditor(rows.find((x) => x.id === it.dataset.id));
+});
+async function saveOrder() {
+  const ids = [...$("grid").querySelectorAll(".item")].map((el) => el.dataset.id);
+  const changed = [];
+  ids.forEach((id, i) => { const r = rows.find((x) => x.id === id); if (r.sort !== (i + 1) * 10) { r.sort = (i + 1) * 10; changed.push(r); } });
+  rows.sort((a, b) => a.sort - b.sort);
+  for (const r of changed) await sb.from("listings").update({ sort: r.sort }).eq("id", r.id);
+  if (changed.length) toast("Order saved");
+}
+
+/* ---------- one-time import from the current store (products.js) ---------- */
+function blocksToText(blocks) {
+  return (blocks || []).map((b) => b.type === "head" ? b.text.toUpperCase() : b.type === "list" ? b.items.map((i) => "• " + i).join("\n") : b.text).join("\n\n");
+}
+async function importStore(btn) {
+  const src = window.PRAJO_PRODUCTS || [];
+  if (!src.length) return toast("Couldn't find the current products.");
+  btn.disabled = true; btn.textContent = "Importing…";
+  const toRow = (p, i) => {
+    const images = p.images.map((im, idx) => {
+      const shows = (p.variations || []).flatMap((v) => Object.entries(v.photos || {}).filter(([, n]) => n === idx).map(([val]) => ({ name: v.name, value: val })))[0];
+      return shows ? { card: abs(im.card), large: abs(im.large), shows } : { card: abs(im.card), large: abs(im.large) };
+    });
+    return { id: p.id, name: p.name, title: p.title, category: p.category, price: p.price, currency: p.currency || "USD", stock: p.stock,
+      digital: !!p.digital, personalizable: !!p.personalizable, visible: true, sort: (i + 1) * 10,
+      variations: (p.variations || []).map((v) => ({ name: v.name, values: v.values })), images, tags: p.tags || [], description: blocksToText(p.description) };
+  };
+  const { error } = await sb.from("listings").upsert(src.map(toRow));
+  if (error) { toast("Import failed: " + error.message); btn.disabled = false; btn.textContent = "Import current store products"; return; }
+  toast(`Imported ${src.length} listings`);
+  loadRows();
+}
+const abs = (u) => /^https?:/.test(u) ? u : new URL(u, location.href).href;
+
+/* ---------- editor ---------- */
+function openEditor(r, isNew) {
+  ed = JSON.parse(JSON.stringify(r || { id: "", name: "", title: "", category: "tumblers", price: 0, currency: "USD", stock: 10, digital: false, personalizable: true, visible: true, sort: (rows.length + 1) * 10, variations: [], images: [], tags: [], description: "", pricing_id: null, price_source: "manual" }));
+  ed._new = isNew || !r;
+  ed._folder = ed.id || "new-" + Math.random().toString(36).slice(2, 8);
+  $("edTitle").textContent = ed._new ? "New listing" : ed.name;
+  $("edDelete").hidden = ed._new; $("edDup").hidden = ed._new;
+  renderEditor();
+  $("sheet").hidden = false; document.body.style.overflow = "hidden";
+}
+function closeEditor() { $("sheet").hidden = true; document.body.style.overflow = ""; ed = null; delArmed = false; $("edDelete").textContent = "Delete"; }
+$("edClose").onclick = closeEditor;
+$("sheet").addEventListener("click", (e) => { if (e.target.id === "sheet") closeEditor(); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && ed) closeEditor(); });
+$("newBtn").onclick = () => openEditor(null, true);
+
+function optionChoices() {
+  return ed.variations.flatMap((v) => v.values.map((val) => ({ name: v.name, value: val })));
+}
+function renderEditor() {
+  const pricingList = Object.entries(prices).sort((a, b) => a[1].name.localeCompare(b[1].name));
+  const linked = ed.price_source === "pricing" && prices[ed.pricing_id];
+  const choices = optionChoices();
+  $("edBody").innerHTML = `
+    <section class="sec">
+      <div class="lbl">Photos</div>
+      <div class="drop" id="drop" tabindex="0" role="button" aria-label="Add photos">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="m21 17-5-5-7 7"/><path d="M12 3v4M10 5h4"/></svg>
+        <b>Drag photos here or tap to add</b>
+        <span class="hint">JPG, PNG or HEIC from your phone. They're resized automatically. Drag photos to reorder; the first is the cover.</span>
+      </div>
+      <div class="photos" id="photos">${ed.images.map((im, i) => `
+        <div class="ph-item${im._busy ? " busy" : ""}" data-i="${i}">
+          <div class="im"><img src="${esc(im._preview || im.card)}" alt="">${i === 0 ? `<span class="cover">Cover</span>` : ""}
+            <button class="del" type="button" data-del="${i}" aria-label="Remove photo">×</button></div>
+          ${choices.length ? `<select data-shows="${i}" aria-label="Option this photo shows"><option value="">Shows: any option</option>${choices.map((c) => `<option value="${esc(c.name + "\u0001" + c.value)}" ${im.shows && im.shows.name === c.name && im.shows.value === c.value ? "selected" : ""}>${esc(c.name)}: ${esc(c.value)}</option>`).join("")}</select>` : ""}
+        </div>`).join("")}</div>
+    </section>
+
+    <section class="sec">
+      <div class="lbl">Details</div>
+      <label class="f"><span>Name</span><input class="in" id="eName" value="${esc(ed.name)}" placeholder="e.g. Personalized Name Tumbler" maxlength="120"></label>
+      <div class="row">
+        <label class="f"><span>Category</span><select class="in" id="eCat">${CATS.map((c) => `<option value="${c.id}" ${ed.category === c.id ? "selected" : ""}>${c.label}</option>`).join("")}</select></label>
+        <label class="f"><span>In stock</span><input class="in" id="eStock" type="number" inputmode="numeric" min="0" value="${esc(ed.stock)}"></label>
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:16px">
+        <label class="switch"><input type="checkbox" id="eVis" ${ed.visible ? "checked" : ""}> Show on store</label>
+        <label class="switch"><input type="checkbox" id="ePers" ${ed.personalizable ? "checked" : ""}> Personalizable</label>
+        <label class="switch"><input type="checkbox" id="eDig" ${ed.digital ? "checked" : ""}> Digital download</label>
+      </div>
+    </section>
+    ${ed.digital ? `
+    <section class="sec">
+      <div class="lbl">Download files</div>
+      <p class="hint">What buyers download after paying on your site (PDF, ZIP or image, up to 50 MB each). Files are private: only paying customers get a link.</p>
+      <div class="dl-list">${(ed.files || []).map((f, i) => `<div class="dl-item${f._busy ? " busy" : ""}"><span>📄 ${esc(f.name)}<small>${f._busy ? "Uploading…" : fmtSize(f.size)}</small></span>${f._busy ? "" : `<button class="btn line" type="button" data-dlrm="${i}">Remove</button>`}</div>`).join("")
+        || `<p class="dl-none">No file yet. Customers can't buy this on your site until you add one (they'll see “Get it on Etsy”).</p>`}</div>
+      <button class="btn line" type="button" id="dlAdd" style="justify-self:start">+ Add download file</button>
+    </section>` : ""}
+
+    <section class="sec">
+      <div class="lbl">Price</div>
+      <div class="price-box">
+        <label class="switch"><input type="checkbox" id="eLink" ${ed.price_source === "pricing" ? "checked" : ""} ${pricingList.length ? "" : "disabled"}> Use the price from my pricing app</label>
+        ${ed.price_source === "pricing" ? `
+          <label class="f"><span>Pricing-app product</span><select class="in" id="ePid"><option value="">Choose a product…</option>${pricingList.map(([id, p]) => `<option value="${esc(id)}" ${ed.pricing_id === id ? "selected" : ""}>${esc(p.name)} · ${money(p.sell)}</option>`).join("")}</select></label>
+          <p class="linked">${linked ? `Store price: <b>${money(linked.sell)}</b> (cost ${money(linked.cost)}). It updates by itself when you change the price in your pricing app.` : "Pick the product this listing is made from."}</p>`
+        : `<label class="f"><span>Store price ($)</span><input class="in" id="ePrice" type="number" inputmode="decimal" step="0.01" min="0" value="${esc(Number(ed.price).toFixed(2))}"></label>
+           ${pricingList.length ? "" : `<p class="hint">Open your pricing app once to make its prices available here.</p>`}`}
+      </div>
+      <p class="hint">Shown on the store as "from $X" when the listing has options.</p>
+    </section>
+
+    <section class="sec">
+      <div class="lbl">Options</div>
+      <p class="hint">Sizes, colors, designs: anything the customer chooses. Type a choice and press Enter to add it. To charge more for a choice (for example 30oz), type the <b>extra amount in dollars</b> in its box, like <b>5</b> for +$5.</p>
+      <div id="opts" style="display:grid;gap:10px">${ed.variations.map((v, gi) => `
+        <div class="opt-group" data-g="${gi}">
+          <div class="opt-head"><input class="in" data-gname="${gi}" value="${esc(v.name)}" placeholder="Option name, e.g. Size" maxlength="40"><button class="btn danger" type="button" data-gdel="${gi}">Remove</button></div>
+          <div class="vals">${v.values.map((val, vi) => `<span class="val">${esc(val)}<input class="add" type="number" inputmode="decimal" min="0" step="0.5" data-vamt="${gi}:${vi}" value="${(v.adds && v.adds[val]) || ""}" placeholder="+$ extra" aria-label="Extra price for ${esc(val)}" title="Extra price for ${esc(val)} (optional)"><button type="button" data-vdel="${gi}:${vi}" aria-label="Remove ${esc(val)}">×</button></span>`).join("")}
+            <input class="in" data-vadd="${gi}" placeholder="Add a choice…" maxlength="40"></div>
+        </div>`).join("")}</div>
+      <button class="btn line" type="button" id="addGroup">+ Add an option</button>
+    </section>
+
+    <section class="sec">
+      <div class="lbl">Goes well with</div>
+      <p class="hint">Bundle suggestions: customers who add this and one of these get the bundle discount. Products in the same category are suggested automatically; pick specific ones here to choose your own pairs.</p>
+      <div class="bchips">${(ed.bundle_ids || []).map((id) => { const r = rows.find((x) => x.id === id); return `<span class="val">${esc(r ? r.name : id)}<button type="button" data-bdel="${esc(id)}" aria-label="Remove">×</button></span>`; }).join("")}</div>
+      <select class="in" id="bundleAdd"><option value="">+ Add a product…</option>${rows.filter((r) => r.id !== ed.id && !(ed.bundle_ids || []).includes(r.id)).map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join("")}</select>
+    </section>
+
+    <section class="sec">
+      <div class="lbl">Description</div>
+      <textarea class="in" id="eDesc" placeholder="What it is, sizes, materials, care. Start lines with • for bullet points, and write headings in CAPITALS.">${esc(ed.description)}</textarea>
+    </section>`;
+  bindEditor();
+}
+
+function readForm() {
+  if (!ed || !$("eName")) return;
+  ed.name = $("eName").value.trim();
+  ed.category = $("eCat").value;
+  ed.stock = Math.max(0, parseInt($("eStock").value || "0", 10));
+  ed.visible = $("eVis").checked; ed.personalizable = $("ePers").checked; ed.digital = $("eDig").checked;
+  if ($("ePrice")) ed.price = Math.max(0, parseFloat($("ePrice").value || "0"));
+  if ($("ePid")) ed.pricing_id = $("ePid").value || null;
+  ed.description = $("eDesc").value;
+  document.querySelectorAll("[data-gname]").forEach((el) => { ed.variations[+el.dataset.gname].name = el.value.trim(); });
+  document.querySelectorAll("[data-vamt]").forEach((el) => {
+    const [gi, vi] = el.dataset.vamt.split(":").map(Number), g = ed.variations[gi], val = g && g.values[vi]; if (val == null) return;
+    const n = Math.max(0, Math.round((parseFloat(el.value) || 0) * 100) / 100); g.adds = g.adds || {}; if (n > 0) g.adds[val] = n; else delete g.adds[val];
+  });
+}
+
+const fmtSize = (b) => !b ? "" : b > 1048576 ? (b / 1048576).toFixed(1) + " MB" : Math.ceil(b / 1024) + " KB";
+async function addDownloads(fileList) {
+  for (const file of fileList) {
+    if (file.size > 50 * 1048576) { toast(`${file.name} is over 50 MB`); continue; }
+    const safe = file.name.replace(/[^\w.\-]+/g, "-").slice(-80);
+    const item = { path: `${ed._folder}/${Date.now()}-${safe}`, name: file.name, size: file.size, _busy: true };
+    ed.files = [...(ed.files || []), item];
+    readForm(); renderEditor();
+    const { error } = await sb.storage.from("digital-files").upload(item.path, file, { contentType: file.type || "application/octet-stream", upsert: false });
+    if (!ed) return;
+    if (error) { ed.files = ed.files.filter((f) => f !== item); toast("Upload failed: " + error.message); }
+    else delete item._busy;
+    readForm(); renderEditor();
+  }
+}
+function bindEditor() {
+  if ($("bundleAdd")) $("bundleAdd").onchange = () => { const v = $("bundleAdd").value; if (!v) return; readForm(); ed.bundle_ids = [...(ed.bundle_ids || []), v]; renderEditor(); };
+  document.querySelectorAll("[data-bdel]").forEach((b) => (b.onclick = () => { readForm(); ed.bundle_ids = (ed.bundle_ids || []).filter((x) => x !== b.dataset.bdel); renderEditor(); }));
+  if ($("eDig")) $("eDig").onchange = () => { readForm(); renderEditor(); };
+  if ($("dlAdd")) $("dlAdd").onclick = () => $("dlPick").click();
+  document.querySelectorAll("[data-dlrm]").forEach((b) => (b.onclick = async () => {
+    const f = ed.files[+b.dataset.dlrm];
+    if (!b.dataset.armed) { b.dataset.armed = "1"; b.textContent = "Tap again to remove"; return; }
+    ed.files = ed.files.filter((x) => x !== f);
+    await sb.storage.from("digital-files").remove([f.path]).catch(() => {});
+    readForm(); renderEditor(); toast("File removed. Save to update the listing");
+  }));
+  const drop = $("drop");
+  drop.onclick = () => $("filePick").click();
+  drop.onkeydown = (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); $("filePick").click(); } };
+  ["dragenter", "dragover"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add("over"); }));
+  ["dragleave", "drop"].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove("over"); }));
+  drop.addEventListener("drop", (e) => addFiles(e.dataTransfer.files));
+  Sortable.create($("photos"), {
+    animation: 160, handle: ".im", filter: ".del", preventOnFilter: false,
+    onEnd: (ev) => { readForm(); const [m] = ed.images.splice(ev.oldIndex, 1); ed.images.splice(ev.newIndex, 0, m); renderEditor(); },
+  });
+  $("eLink").onchange = (e) => {
+    readForm(); ed.price_source = e.target.checked ? "pricing" : "manual";
+    if (e.target.checked && !ed.pricing_id) {
+      const match = Object.entries(prices).find(([, p]) => p.name.toLowerCase() === ed.name.toLowerCase());
+      if (match) ed.pricing_id = match[0];
+    }
+    renderEditor();
+  };
+  if ($("ePid")) $("ePid").onchange = () => { readForm(); renderEditor(); };
+}
+$("filePick").addEventListener("change", (e) => { addFiles(e.target.files); e.target.value = ""; });
+$("dlPick").addEventListener("change", (e) => { const f = [...e.target.files]; e.target.value = ""; addDownloads(f); });
+
+$("edBody").addEventListener("click", (e) => {
+  const t = e.target;
+  if (t.dataset.del != null) { readForm(); ed.images.splice(+t.dataset.del, 1); renderEditor(); return; }
+  if (t.id === "addGroup") { readForm(); ed.variations.push({ name: "", values: [] }); renderEditor(); setTimeout(() => document.querySelector(`[data-gname="${ed.variations.length - 1}"]`)?.focus(), 0); return; }
+  if (t.dataset.gdel != null) {
+    readForm(); const g = ed.variations[+t.dataset.gdel];
+    ed.images.forEach((im) => { if (im.shows?.name === g.name) delete im.shows; });
+    ed.variations.splice(+t.dataset.gdel, 1); renderEditor(); return;
+  }
+  if (t.dataset.vdel) {
+    readForm(); const [gi, vi] = t.dataset.vdel.split(":").map(Number); const g = ed.variations[gi], val = g.values[vi];
+    ed.images.forEach((im) => { if (im.shows?.name === g.name && im.shows.value === val) delete im.shows; });
+    g.values.splice(vi, 1); renderEditor();
+  }
+});
+$("edBody").addEventListener("keydown", (e) => {
+  if (e.target.dataset.vadd == null || e.key !== "Enter" && e.key !== ",") return;
+  e.preventDefault(); addValue(e.target);
+});
+$("edBody").addEventListener("focusout", (e) => { if (e.target.dataset?.vadd != null && e.target.value.trim()) addValue(e.target); });
+function addValue(input) {
+  readForm();
+  const g = ed.variations[+input.dataset.vadd], v = input.value.trim().replace(/,$/, "");
+  if (v && !g.values.includes(v)) g.values.push(v);
+  renderEditor();
+  setTimeout(() => document.querySelector(`[data-vadd="${input.dataset.vadd}"]`)?.focus(), 0);
+}
+$("edBody").addEventListener("change", (e) => {
+  if (e.target.dataset.shows == null) return;
+  const im = ed.images[+e.target.dataset.shows], v = e.target.value;
+  if (!v) delete im.shows; else { const [name, value] = v.split("\u0001"); im.shows = { name, value }; }
+});
+
+/* ---------- photo upload: resize in the browser, store two sizes ---------- */
+async function resized(file, width) {
+  const bmp = await createImageBitmap(file);
+  const scale = Math.min(1, width / bmp.width);
+  const c = document.createElement("canvas");
+  c.width = Math.round(bmp.width * scale); c.height = Math.round(bmp.height * scale);
+  c.getContext("2d").drawImage(bmp, 0, 0, c.width, c.height);
+  return new Promise((res) => c.toBlob(res, "image/jpeg", .86));
+}
+async function addFiles(fileList) {
+  const files = [...fileList].filter((f) => f.type.startsWith("image/") || /\.(heic|heif)$/i.test(f.name));
+  if (!files.length) return;
+  readForm();
+  for (const f of files) {
+    const item = { card: "", large: "", _busy: true, _preview: URL.createObjectURL(f) };
+    ed.images.push(item); renderEditor();
+    try {
+      const base = `${ed._folder}/${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      for (const [w, suffix, key] of [[1140, "l", "large"], [570, "c", "card"]]) {
+        const blob = await resized(f, w);
+        const { error } = await sb.storage.from(CFG.bucket).upload(`${base}-${suffix}.jpg`, blob, { contentType: "image/jpeg", upsert: false });
+        if (error) throw error;
+        item[key] = sb.storage.from(CFG.bucket).getPublicUrl(`${base}-${suffix}.jpg`).data.publicUrl;
+      }
+      delete item._busy;
+    } catch (err) {
+      ed.images.splice(ed.images.indexOf(item), 1);
+      toast(/heic|decode|bitmap/i.test(String(err)) ? "That photo format isn't supported here. Try a JPG or PNG." : "A photo didn't upload. Try again.");
+    }
+    renderEditor();
+  }
+}
+
+/* ---------- save / duplicate / delete ---------- */
+$("edSave").onclick = async () => {
+  readForm();
+  if (!ed.name) return toast("Give the listing a name");
+  if (ed.images.some((im) => im._busy)) return toast("Wait for the photos to finish uploading");
+  if ((ed.files || []).some((f) => f._busy)) return toast("Wait for the download file to finish uploading");
+  if (ed.price_source === "pricing" && !prices[ed.pricing_id]) return toast("Pick the pricing-app product, or turn off the link");
+  if (ed.price_source !== "pricing" && !(ed.price > 0)) return toast("Enter a store price");
+  ed.variations = ed.variations.filter((v) => v.name && v.values.length);
+  if (ed._new) {
+    let id = slug(ed.name);
+    while (rows.some((r) => r.id === id)) id = slug(ed.name).slice(0, 42) + "-" + Math.random().toString(36).slice(2, 6);
+    ed.id = id;
+  }
+  const row = {
+    id: ed.id, name: ed.name, title: ed.title || ed.name, category: ed.category,
+    price: ed.price_source === "pricing" ? prices[ed.pricing_id].sell : ed.price, currency: ed.currency || "USD",
+    stock: ed.stock, digital: ed.digital, personalizable: ed.personalizable, visible: ed.visible, sort: ed.sort,
+    variations: ed.variations.map((v) => { const adds = Object.fromEntries(Object.entries(v.adds || {}).filter(([k, n]) => v.values.includes(k) && n > 0)); return Object.keys(adds).length ? { name: v.name, values: v.values, adds } : { name: v.name, values: v.values }; }),
+    images: ed.images.map(({ card, large, shows }) => (shows ? { card, large, shows } : { card, large })),
+    tags: ed.tags || [], description: ed.description, bundle_ids: ed.bundle_ids || [], files: (ed.files || []).map(({ path, name, size }) => ({ path, name, size })),
+    pricing_id: ed.price_source === "pricing" ? ed.pricing_id : null, price_source: ed.price_source,
+    updated_at: new Date().toISOString(),
+  };
+  $("edSave").disabled = true; $("edSave").textContent = "Saving…";
+  const { error } = await sb.from("listings").upsert(row);
+  $("edSave").disabled = false; $("edSave").textContent = "Save";
+  if (error) return toast("Couldn't save: " + error.message);
+  toast(ed._new ? "Listing added to the store" : "Saved. Live on the store now");
+  closeEditor(); loadRows();
+};
+$("edDup").onclick = () => {
+  readForm();
+  const copy = JSON.parse(JSON.stringify(ed));
+  copy.id = ""; copy.name = ed.name + " (copy)"; copy.visible = false; copy.sort = ed.sort + 1;
+  closeEditor(); openEditor(copy, true);
+  toast("Copy made: it's hidden until you switch it on");
+};
+let delArmed = false;
+$("edDelete").onclick = async () => {
+  if (!delArmed) { delArmed = true; $("edDelete").textContent = "Tap again to delete"; setTimeout(() => { delArmed = false; $("edDelete").textContent = "Delete"; }, 3500); return; }
+  const { error } = await sb.from("listings").delete().eq("id", ed.id);
+  if (error) return toast("Couldn't delete: " + error.message);
+  toast("Listing deleted"); closeEditor(); loadRows();
+};
+
+
+/* ---------- custom designs: what customers sent from design.html (table custom_designs, bucket design-previews) ---------- */
+const DS_STATUS = [["new", "New"], ["reviewing", "Reviewing"], ["quoted", "Quoted"], ["approved", "Approved"], ["in_production", "Making"], ["done", "Done"], ["cancelled", "Cancelled"]];
+let dsRows = [], dsFilter = "open", dsOpen = null;
+const dsThumbs = new Map();
+async function dsUrl(path) {
+  if (!path) return "";
+  if (!dsThumbs.has(path)) { const { data } = await sb.storage.from("design-previews").createSignedUrl(path, 3600); dsThumbs.set(path, data?.signedUrl || ""); }
+  return dsThumbs.get(path);
+}
+async function dsCount() {
+  const { count, error } = await sb.from("custom_designs").select("id", { count: "exact", head: true }).eq("status", "new");
+  if (error) { $("dsState").textContent = "Run custom-designs-setup.sql in Supabase first"; return; }
+  $("dsState").textContent = count ? `${count} new to look at` : "Designs customers sent from the Design studio";
+}
+async function openDesigns() {
+  $("dsSheet").hidden = false; document.body.style.overflow = "hidden";
+  const { data, error } = await sb.from("custom_designs").select("*").order("created_at", { ascending: false }).limit(200);
+  if (error) { $("dsList").innerHTML = `<div class="empty"><b>Custom designs aren't set up yet</b><p class="hint">Run custom-designs-setup.sql in Supabase first. (${esc(error.message)})</p></div>`; return; }
+  dsRows = data; renderDesigns();
+  const { data: item } = await sb.from("listings").select("id").eq("id", "custom-design").maybeSingle();
+  $("dsPay").hidden = !!item;
+}
+$("dsMakeItem").onclick = async () => {
+  const img = location.origin + "/share-card.jpg";
+  const { error } = await sb.from("listings").upsert({ id: "custom-design", name: "Custom Design", title: "Custom Design (made from your design)", category: "other", price: 25, currency: "USD", stock: 999,
+    digital: false, personalizable: true, visible: true, sort: 9990, variations: [], images: [{ card: img, large: img }], tags: ["custom"], description: "Your own design, made to order. We confirm the details with you before we print.\n• Design code is shown on your order", bundle_ids: [], files: [], pricing_id: null, price_source: "manual", updated_at: new Date().toISOString() });
+  if (error) return toast("Couldn't create it: " + error.message);
+  $("dsPay").hidden = true; toast("Created. Edit its price in the listings (search “Custom Design”)"); loadRows();
+};
+function renderDesigns() {
+  const open = (r) => !["done", "cancelled"].includes(r.status);
+  $("dsChips").innerHTML = [["open", "Open"], ["new", "New"], ["all", "All"]].map(([k, l]) => `<button type="button" data-f="${k}" aria-pressed="${dsFilter === k}">${l}</button>`).join("");
+  const rows = dsRows.filter((r) => dsFilter === "all" || (dsFilter === "open" ? open(r) : r.status === dsFilter));
+  $("dsList").innerHTML = rows.map((r) => `<div class="ds" data-id="${r.id}">
+    <div class="ds-top" data-top><span class="ph" data-ph="${esc(r.preview_path || "")}">…</span>
+      <div><b><span class="ds-code">${esc(r.code)}</span><span class="ds-badge ${r.status === "new" ? "new" : ""}">${esc((DS_STATUS.find((x) => x[0] === r.status) || [0, r.status])[1])}</span></b>
+      <span>${esc(r.summary)}</span><small>${esc(r.customer_name)} · qty ${r.qty} · ${new Date(r.created_at).toLocaleDateString()}</small></div></div>
+    ${dsOpen === r.id ? `<div class="ds-more" id="dsMore"></div>` : ""}</div>`).join("") || `<div class="empty"><b>No designs here</b><p class="hint">When a customer sends a design from the Design studio it shows up here.</p></div>`;
+  $("dsList").querySelectorAll("[data-ph]").forEach(async (el) => { const u = await dsUrl(el.dataset.ph); if (u) el.outerHTML = `<img src="${u}" alt="">`; });
+  if (dsOpen) fillDesign(dsRows.find((r) => r.id === dsOpen));
+}
+async function fillDesign(r) {
+  const box = $("dsMore"); if (!r || !box) return;
+  const u = await dsUrl(r.preview_path);
+  const imgs = (r.design?.layers || []).filter((l) => l.type === "img").length;
+  box.innerHTML = `${u ? `<img class="big" src="${u}" alt="Design preview">` : ""}
+    <dl><dt>Design</dt><dd>${esc(r.summary)}</dd><dt>Customer</dt><dd>${esc(r.customer_name)} · <a href="mailto:${esc(r.customer_email)}?subject=${encodeURIComponent("Your PrAjo design " + r.code)}">${esc(r.customer_email)}</a>${r.customer_phone ? " · " + esc(r.customer_phone) : ""}</dd>
+    <dt>Quantity</dt><dd>${r.qty}${r.needed_by ? ` · needed by ${esc(r.needed_by)}` : ""}</dd>${r.notes ? `<dt>Notes</dt><dd>${esc(r.notes)}</dd>` : ""}
+    ${r.design?.parent ? `<dt>Revises</dt><dd class="ds-code">${esc(r.design.parent)}</dd>` : ""}${imgs ? `<dt>Pictures</dt><dd>${imgs} uploaded by the customer (open in studio to see them)</dd>` : ""}</dl>
+    <label class="f"><span>Your private notes</span><textarea class="in" id="dsNotes" style="min-height:80px">${esc(r.owner_notes || "")}</textarea></label>
+    <div class="ds-actions"><select class="in" id="dsStatus" aria-label="Status">${DS_STATUS.map(([k, l]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${l}</option>`).join("")}</select>
+      <button class="btn gold" type="button" id="dsSave">Save</button>
+      <button class="btn line" type="button" id="dsStudio">Open in studio</button>
+      ${u ? `<a class="btn line" href="${u}" download="${esc(r.code)}.png" target="_blank" rel="noopener">Preview PNG</a>` : ""}
+      <button class="btn danger" type="button" id="dsDel">Delete</button></div>`;
+}
+// Opens the studio with this design loaded; customer pictures are fetched from storage and inlined so the studio can draw and export them.
+async function dsStudio(r) {
+  const d = JSON.parse(JSON.stringify(r.design));
+  for (const L of d.layers || []) if (L.type === "img" && String(L.src).startsWith("storage:")) {
+    const { data, error } = await sb.storage.from("design-previews").download(L.src.slice(8));
+    if (error || !data) { toast("Couldn't fetch a picture: " + (error?.message || "missing")); continue; }
+    L.src = await new Promise((ok) => { const fr = new FileReader(); fr.onload = () => ok(fr.result); fr.readAsDataURL(data); });
+  }
+  try { localStorage.setItem("prajo:design:load", JSON.stringify(d)); } catch { return toast("Couldn't hand the design over (storage full)"); }
+  window.open("design.html?load=1", "_blank");
+}
+$("dsBtn").onclick = openDesigns;
+// Telegram alerts link to admin.html#design=D-XXXXXX: open the Custom designs sheet with that design expanded.
+async function deepLink() {
+  const m = /^#design=(D-[A-Z0-9]{6,8})$/.exec(location.hash); if (!m) return;
+  await openDesigns();
+  const r = dsRows.find((x) => x.code === m[1]);
+  if (!r) return toast("Couldn't find design " + m[1]);
+  dsFilter = "all"; dsOpen = r.id; renderDesigns();
+  document.querySelector(`.ds[data-id="${r.id}"]`)?.scrollIntoView({ block: "start" });
+}
+$("dsClose").onclick = () => { $("dsSheet").hidden = true; document.body.style.overflow = ""; dsCount(); };
+$("dsChips").addEventListener("click", (e) => { const b = e.target.closest("[data-f]"); if (b) { dsFilter = b.dataset.f; renderDesigns(); } });
+$("dsList").addEventListener("click", async (e) => {
+  const card = e.target.closest(".ds"); if (!card) return;
+  const r = dsRows.find((x) => x.id === card.dataset.id);
+  if (e.target.closest("[data-top]")) { dsOpen = dsOpen === r.id ? null : r.id; renderDesigns(); return; }
+  if (e.target.id === "dsSave") {
+    const patch = { status: $("dsStatus").value, owner_notes: $("dsNotes").value.trim() || null };
+    const { error } = await sb.from("custom_designs").update(patch).eq("id", r.id);
+    if (error) return toast("Couldn't save: " + error.message);
+    Object.assign(r, patch); toast("Saved"); renderDesigns();
+  }
+  if (e.target.id === "dsStudio") dsStudio(r);
+  if (e.target.id === "dsDel") {
+    if (e.target.dataset.armed !== "1") { e.target.dataset.armed = "1"; e.target.textContent = "Tap again to delete"; return; }
+    const paths = [r.preview_path, ...(r.design?.layers || []).filter((l) => l.type === "img").map((l) => String(l.src).replace(/^storage:/, ""))].filter(Boolean);
+    const { error } = await sb.from("custom_designs").delete().eq("id", r.id);
+    if (error) return toast("Couldn't delete: " + error.message);
+    if (paths.length) await sb.storage.from("design-previews").remove(paths).catch(() => {});
+    dsRows = dsRows.filter((x) => x.id !== r.id); dsOpen = null; toast("Design deleted"); renderDesigns();
+  }
+});
+
+/* ---------- checkout options (saved by the "checkout" Edge Function) ---------- */
+const CO_URL = CFG.url + "/functions/v1/checkout";
+let co = null;
+async function coCall(body) {
+  const { data } = await sb.auth.getSession();
+  const r = await fetch(CO_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: CFG.key, Authorization: `Bearer ${data.session?.access_token || CFG.key}` }, body: JSON.stringify(body) });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || `Error ${r.status}`);
+  return d;
+}
+const RATE_ROWS = [["tumblers", "Tumblers"], ["mugs", "Mugs"], ["tags", "Badges & tags"], ["apparel", "Apparel"], ["other", "Everything else"]];
+const rateTable = () => `<div class="rtab"><span></span><b>First item ($)</b><b>Each extra ($)</b>${RATE_ROWS.map(([c, l]) => `<span>${l}</span>
+  <input class="in" type="number" inputmode="decimal" min="0" step="0.5" data-rate="${c}:first" value="${co.rates?.[c]?.first ?? 0}" aria-label="${l} first item">
+  <input class="in" type="number" inputmode="decimal" min="0" step="0.5" data-rate="${c}:extra" value="${co.rates?.[c]?.extra ?? 0}" aria-label="${l} each extra item">`).join("")}</div>
+  <p class="hint">An order pays the highest “first item” rate once, then each other item adds its “extra” rate (extra items usually share a box). Printables ship free.</p>`;
+const CO_ROWS = [
+  { k: "shipping", t: "Shipping (USPS)", d: "Mailed anywhere in the US", fees: [["freeOver", "Free shipping when physical items total over ($, 0 = never)"]] },
+  { k: "delivery", t: "Local delivery", d: "You drop it off in the Sacramento area", fees: [["deliveryFee", "Delivery fee ($)"]] },
+  { k: "pickup", t: "Free local pickup", d: "Customer collects it in Sacramento", fees: [] },
+];
+function renderCo() {
+  const sw = (k, label) => `<label class="switch"><input type="checkbox" data-co="${k}" ${co[k] ? "checked" : ""} aria-label="${esc(label)}"></label>`;
+  const anyOn = co.shipping || co.delivery || co.pickup;
+  $("coList").toggleAttribute("data-paused", !co.enabled);
+  $("coList").innerHTML = `
+    <div class="co-row master"><div class="co-top"><div><b>Store checkout</b><small>${co.enabled ? (anyOn ? "On: customers can pay with card, Apple Pay or Google Pay" : "On, but every delivery option is off, so nobody can check out") : "Paused: customers see “Order on Etsy” instead of Add to cart"}</small></div>${sw("enabled", "Store checkout")}</div>
+      <div class="co-fees"><label class="f"><span class="hint">Business days you need to make an order (used for the delivery estimate customers see in the cart)</span><input class="in" type="number" inputmode="numeric" min="0" max="60" step="1" data-fee="makeDays" value="${co.makeDays ?? 3}"></label></div></div>
+    ${CO_ROWS.map((r) => `<div class="co-row ${co[r.k] ? "" : "off"}"><div class="co-top"><div><b>${r.t}</b><small>${r.d}</small></div>${sw(r.k, r.t)}</div>
+      ${r.k === "shipping" && co.shipping ? rateTable() : ""}
+      ${r.fees.length && co[r.k] ? `<div class="co-fees">${r.fees.map(([f, l]) => `<label class="f"><span class="hint">${l}</span><input class="in" type="number" inputmode="decimal" min="0" step="0.5" data-fee="${f}" value="${co[f]}"></label>`).join("")}</div>` : ""}</div>`).join("")}
+    <div class="co-row ${co.manual?.enabled ? "" : "off"}"><div class="co-top"><div><b>Pay by bank transfer</b><small>${co.manual?.enabled ? "On: customers can pay with Zelle, Venmo, Cash App or Apple Cash. No card company involved." : "Off. Add your payment details below, then switch it on. A backup that works even if a card processor pauses your account."}</small></div>
+      <label class="switch"><input type="checkbox" data-mp="enabled" ${co.manual?.enabled ? "checked" : ""} aria-label="Pay by bank transfer"></label></div>
+      <div class="co-fees" style="display:grid;gap:8px">
+        ${[["zelle", "Zelle (phone or email)"], ["venmo", "Venmo (@username)"], ["cashapp", "Cash App ($cashtag)"], ["applecash", "Apple Cash (phone or email)"]].map(([k, l]) => `<label class="f"><span class="hint">${l}</span><input class="in" type="text" maxlength="80" data-mpf="${k}" value="${esc(co.manual?.[k] || "")}" placeholder="Leave empty to hide"></label>`).join("")}
+        <label class="f"><span class="hint">Message shown to the customer (optional)</span><input class="in" type="text" maxlength="300" data-mpf="note" value="${esc(co.manual?.note || "")}" placeholder="e.g. Personal accounts only. We start your order when the payment arrives."></label>
+        <p class="hint" style="margin:0">Customers see these only after they place an order. When the money arrives, open the order in the Orders tab and tap <b>Mark paid</b>: stock goes down and the print files reach your Telegram. Check each app's rules about business use before you switch it on.</p></div></div>`;
+}
+async function saveCo(msg) {
+  try { co = await coCall({ action: "save_settings", settings: co }); renderCo(); toast(msg); }
+  catch (e) { toast("Couldn't save: " + e.message); openCo(); }
+}
+async function openCo() {
+  $("coSheet").hidden = false; document.body.style.overflow = "hidden";
+  try { co = await coCall({ action: "settings" }); renderCo(); }
+  catch (e) { $("coList").innerHTML = `<div class="empty"><b>Checkout isn't set up yet</b><p class="hint">Deploy the checkout function in Supabase first. (${esc(e.message)})</p></div>`; }
+}
+$("coBtn").onclick = openCo;
+/* ---------- customer reviews: owner approves, hides or deletes (table public.reviews, owner-only policies); requests go out via the checkout function ---------- */
+/* ---------- sale: saved in site_settings.data.sale = {on, pct, all, ids, ends, label}; the store and the checkout function both read it ---------- */
+let slAll = true, slIds = new Set();
+const slPaint = (s) => {
+  const on = !!(s && s.on), n = s && !s.all ? (s.ids || []).length : 0;
+  $("slHead").textContent = on ? `Sale is ON · ${s.pct}% off ${s.all ? "everything" : n + " product" + (n === 1 ? "" : "s")}` : "Sale is OFF";
+  $("slState").textContent = on ? `${s.pct}% off ${s.all ? "everything" : n + " selected"}${s.ends ? " until " + s.ends : ""}` : "Percent off selected or all products";
+};
+function slItems() {
+  const q = $("slSearch").value.trim().toLowerCase();
+  $("slItems").innerHTML = rows.filter((r) => !q || String(r.name).toLowerCase().includes(q)).map((r) => `<label style="display:flex;gap:10px;align-items:center;min-height:44px"><input type="checkbox" data-sl="${esc(r.id)}" ${slIds.has(r.id) ? "checked" : ""} style="width:22px;height:22px"><span>${esc(r.name)} <small style="color:var(--muted)">$${esc(Number(r.price).toFixed(2))}${r.visible ? "" : " · hidden"}</small></span></label>`).join("") || '<p class="hint">No products match.</p>';
+}
+function slMode(all) { slAll = all; $("slAll").setAttribute("aria-pressed", all); $("slSome").setAttribute("aria-pressed", !all); $("slAll").classList.toggle("gold", all); $("slSome").classList.toggle("gold", !all); $("slPick").hidden = all; if (!all) slItems(); }
+async function slOpen() {
+  $("slSheet").hidden = false; document.body.style.overflow = "hidden"; $("slMsg").textContent = "";
+  let s = {}; try { s = (await readSiteRow()).sale || {}; } catch { $("slMsg").textContent = "Set up Site settings first."; }
+  $("slOn").checked = !!s.on; $("slPct").value = s.pct || 20; $("slEnds").value = s.ends || ""; $("slLabel").value = s.label || "";
+  slIds = new Set(s.ids || []); slMode(s.all !== false); slPaint(s);
+}
+$("slBtn").onclick = slOpen;
+$("slClose").onclick = () => { $("slSheet").hidden = true; document.body.style.overflow = ""; };
+$("slAll").onclick = () => slMode(true); $("slSome").onclick = () => slMode(false);
+$("slSearch").oninput = slItems;
+$("slItems").addEventListener("change", (e) => { const id = e.target.dataset.sl; if (!id) return; e.target.checked ? slIds.add(id) : slIds.delete(id); });
+$("slTickAll").onclick = () => { $("slItems").querySelectorAll("[data-sl]").forEach((c) => { c.checked = true; slIds.add(c.dataset.sl); }); };
+$("slTickNone").onclick = () => { slIds.clear(); slItems(); };
+$("slSave").onclick = async () => {
+  const on = $("slOn").checked, pct = Math.round(Number($("slPct").value)), msg = $("slMsg");
+  if (on && !(pct >= 1 && pct <= 90)) { msg.textContent = "Percent off must be between 1 and 90."; return; }
+  if (on && !slAll && !slIds.size) { msg.textContent = "Tick at least one product, or choose All products."; return; }
+  if ($("slEnds").value && $("slEnds").value < new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" })) { msg.textContent = "The last day is already in the past."; return; }
+  const sale = { on, pct: pct || 20, all: slAll, ids: slAll ? [] : [...slIds], ends: $("slEnds").value || "", label: $("slLabel").value.trim().slice(0, 30) };
+  const b = $("slSave"); b.disabled = true;
+  try {
+    const cur = await readSiteRow(), next = { ...cur, sale };
+    const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+    if (error) throw error;
+    site = next; slPaint(sale); msg.textContent = on ? "Saved. The sale shows on the store right away. The checkout function must be the latest version so the sale price is charged." : "Saved. The sale is off.";
+    toast(on ? `Sale on: ${sale.pct}% off` : "Sale turned off");
+  } catch (e) { msg.textContent = "Couldn't save: " + (e.message || e); }
+  b.disabled = false;
+};
+/* ---------- live visitors (Supabase Realtime presence; the store joins the same channel) ---------- */
+let lvCh = null, lvN = 0, lvList = [], lvTimer = null;
+function renderLv() {
+  const v = lvList, by = {};
+  v.forEach((x) => { const k = [x.city, x.region, x.country].filter(Boolean).join(", ") || "Somewhere"; (by[k] = by[k] || []).push(x); });
+  const n = $("lvSheet").hidden ? lvN : v.length;
+  $("lvState").textContent = n ? `${n} on the store now` : "Nobody on the store right now";
+  if ($("lvSheet").hidden) return;
+  const ago = (t) => { const m = Math.round((Date.now() - (t || Date.now())) / 60000); return m < 1 ? "just arrived" : m + " min here"; };
+  $("lvList").innerHTML = v.length ? `<div class="co-row master"><div class="co-top"><div><b style="font-size:26px">${v.length}</b><small>${v.length === 1 ? "visitor" : "visitors"} on the store now</small></div></div></div>` +
+    Object.entries(by).sort((a, b) => b[1].length - a[1].length).map(([place, xs]) => `<div class="co-row"><div class="co-top"><div><b>📍 ${esc(place)} <span style="color:var(--gold-2)">× ${xs.length}</span></b>${xs.map((x) => `<small style="display:block">${x.zip ? "ZIP " + esc(x.zip) + " · " : ""}${esc(x.pg || "")} · ${esc(ago(x.since))}</small>`).join("")}</div></div></div>`).join("")
+    : `<div class="empty"><b>Nobody on the store right now</b><p class="hint">This updates by itself when someone opens it.</p></div>`;
+}
+async function pollLv() {
+  try { lvList = (await coCall({ action: "presence_list" })).visitors || []; renderLv(); }
+  catch (e) { if (!$("lvSheet").hidden) $("lvList").innerHTML = `<div class="empty"><b>Can't load visitor places</b><p class="hint">Deploy the latest checkout function first. (${esc(e.message)})</p></div>`; }
+}
+// The count in the menu comes from the public live channel; places and ZIPs come from the checkout function (owner only).
+try { lvCh = sb.channel("store-presence"); lvCh.on("presence", { event: "sync" }, () => { lvN = Object.keys(lvCh.presenceState()).length; if ($("lvSheet").hidden) renderLv(); }).subscribe(); } catch { /* realtime unavailable */ }
+$("lvBtn").onclick = () => { $("lvSheet").hidden = false; document.body.style.overflow = "hidden"; $("lvList").innerHTML = '<p class="hint">Loading…</p>'; pollLv(); clearInterval(lvTimer); lvTimer = setInterval(pollLv, 8000); };
+$("lvClose").onclick = () => { $("lvSheet").hidden = true; document.body.style.overflow = ""; clearInterval(lvTimer); renderLv(); };
+let rvRows = [];
+const rvStars = (n) => "★".repeat(n) + "☆".repeat(5 - n);
+function renderRv() {
+  const order = { pending: 0, published: 1, hidden: 2 }, lab = { pending: "Waiting for OK", published: "Live", hidden: "Hidden" };
+  const rows = [...rvRows].sort((a, b) => order[a.status] - order[b.status] || String(b.created_at).localeCompare(String(a.created_at)));
+  const np = rvRows.filter((r) => r.status === "pending").length;
+  $("rvState").textContent = np ? `${np} waiting for your OK` : "Approve customer reviews, ask buyers for one";
+  $("rvList").innerHTML = rows.length ? rows.map((r) => `<div class="co-row" data-rv="${esc(r.id)}"${r.status === "hidden" ? ' style="opacity:.6"' : ""}>
+    <div class="co-top"><div><b style="color:var(--gold-2)">${rvStars(r.rating)}</b> <small>${esc(lab[r.status] || r.status)}</small>
+      <small style="display:block">${esc(r.name)} · order #${esc(r.order_no)} · ${esc(r.product || r.product_id)}</small></div></div>
+    ${r.body ? `<div style="overflow-wrap:anywhere">${esc(r.body)}</div>` : `<small>No written review</small>`}
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${r.status !== "published" ? `<button class="btn gold" type="button" data-rvact="published">Publish</button>` : ""}
+      ${r.status !== "hidden" ? `<button class="btn" type="button" data-rvact="hidden">Hide</button>` : ""}
+      <button class="btn" type="button" data-rvact="delete">Delete</button></div></div>`).join("")
+    : `<div class="empty"><b>No reviews yet</b><p class="hint">Mark an order Completed, then press “Send review requests”.</p></div>`;
+}
+async function openRv() {
+  $("rvSheet").hidden = false; document.body.style.overflow = "hidden";
+  const { data, error } = await sb.from("reviews").select("*").order("created_at", { ascending: false }).limit(500);
+  if (error) { $("rvList").innerHTML = `<div class="empty"><b>Reviews aren't set up yet</b><p class="hint">Run reviews-setup.sql in the Supabase SQL Editor first. (${esc(error.message)})</p></div>`; return; }
+  rvRows = data || []; renderRv();
+}
+$("rvBtn").onclick = openRv;
+$("rvClose").onclick = () => { $("rvSheet").hidden = true; document.body.style.overflow = ""; };
+$("rvList").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-rvact]"); if (!b) return;
+  const id = b.closest("[data-rv]").dataset.rv, act = b.dataset.rvact;
+  if (act === "delete" && !confirm("Delete this review for good?")) return;
+  b.disabled = true;
+  const q = act === "delete" ? sb.from("reviews").delete().eq("id", id) : sb.from("reviews").update({ status: act }).eq("id", id);
+  const { error } = await q;
+  if (error) { toast("Couldn't save: " + error.message); b.disabled = false; return; }
+  if (act === "delete") rvRows = rvRows.filter((r) => r.id !== id); else rvRows.find((r) => r.id === id).status = act;
+  renderRv(); toast(act === "published" ? "Review is live" : act === "hidden" ? "Review hidden" : "Review deleted");
+});
+$("rvSend").onclick = async () => {
+  const b = $("rvSend"); b.disabled = true; b.textContent = "Sending…";
+  try { const r = await coCall({ action: "send_review_requests" }); toast(`Sent ${r.sent}, skipped ${r.skipped}`); alert(`Review requests sent: ${r.sent}\nSkipped: ${r.skipped}\n\nSkipped means: not Completed for a day yet, already asked, no email, digital-only, unpaid or refunded, or the email couldn't be sent.`); }
+  catch (e) { alert("Couldn't send review requests: " + e.message + (/email isn't set up/i.test(e.message) ? "\n\nAdd RESEND_API_KEY and RESEND_FROM under Supabase → Edge Functions → Secrets." : "")); }
+  b.disabled = false; b.textContent = "Send review requests";
+};
+$("coClose").onclick = () => { $("coSheet").hidden = true; document.body.style.overflow = ""; };
+$("coList").addEventListener("change", (e) => {
+  const t = e.target;
+  if (t.dataset.co) { co[t.dataset.co] = t.checked; saveCo(`${t.dataset.co === "enabled" ? "Store checkout" : CO_ROWS.find((r) => r.k === t.dataset.co).t} ${t.checked ? "on" : "off"}`); }
+  if (t.dataset.rate) {
+    const [c, w] = t.dataset.rate.split(":"), n = Number(t.value); if (!(n >= 0)) return toast("Enter a number");
+    co.rates = { ...(co.rates || {}), [c]: { ...(co.rates?.[c] || {}), [w]: n } }; saveCo("Shipping rates saved");
+  }
+  if (t.dataset.fee) { const n = Number(t.value); if (!(n >= 0)) return toast("Enter a number"); co[t.dataset.fee] = n; saveCo("Fee saved"); }
+  if (t.dataset.mp === "enabled") {
+    co.manual = { ...(co.manual || {}), enabled: t.checked };
+    if (t.checked && !["zelle", "venmo", "cashapp", "applecash"].some((k) => (co.manual[k] || "").trim())) { co.manual.enabled = false; renderCo(); return toast("Add at least one payment handle first"); }
+    saveCo(`Bank transfer ${t.checked ? "on" : "off"}`);
+  }
+  if (t.dataset.mpf) { co.manual = { ...(co.manual || {}), [t.dataset.mpf]: t.value.trim() }; saveCo("Payment details saved"); }
+});
+
+/* ---------- site settings: text and choices the store page reads at load (table site_settings) ---------- */
+// Empty fields use the store's built-in text (shown here as the gray placeholder). **word** makes a word bold.
+const DEFAULT_FAQ_TEXT = "How long does an order take?\nEvery piece is made to order. We'll message you if anything about your timeline changes. Need it by a date? Say so in the personalization box or message us before you order.\n\nHow much is shipping?\nShipping is by USPS to anywhere in the US and depends on what you order, shown in your cart before you pay. Made-to-order items totaling $75 or more ship free. Digital downloads never ship.\n\nCan I personalize my order?\nYes. Choose \"Add name\" or type your text in the personalization box on the product page. For logos, photos or a layout of your own, request a quote or message us.\n\nReturns & problems with my order\nWe want you to love your order, and we'll work with you to make it right. **Please message us before sending anything back** so we can understand what happened, find the best fix together and approve your return. If your order arrives damaged or isn't what you ordered, send us a photo within 14 days and we'll gladly replace it or refund you, and we'll cover the return shipping.Because each piece is personalized just for you, we can't accept returns for a change of mind. If we do approve a return for another reason, the return shipping is paid by the buyer. Digital downloads are final sale, but if a file won't open, we'll help you right away.\n\nCan I cancel my order?\nYes, message us as soon as you can. We can cancel for free until production starts, usually within 24 hours of ordering. After that the piece is already being made.\n\nHow do I care for my tumbler?\nHand wash for the longest-lasting print. UV prints and engraving won't peel or wash off with normal use, but avoid abrasive scrubbing and soaking for long periods.\n\nDo you offer bulk or business orders?\nYes: weddings, teams, schools, corporate gifts and memorials. Tap \"Request a quote\" above with your quantity and date and we'll reply within a day.\n\nWhere is my order?\nUse “Track my order” in the footer with your order number and the email you used at checkout.";
+const SITE_FIELDS = [
+  { g: "Vacation mode", d: "Pause made-to-order items while you're away. Printables stay available.", f: [
+    ["vacationOn", "Vacation mode is ON", "switch"],
+    ["vacationBack", "Back on (optional)", "text", "e.g. Nov 12"],
+    ["vacationMsg", "Message (optional)", "area", "We're on a short break, back Nov 12. Made-to-order items are paused. Printables are still available instantly!"] ] },
+  { g: "Design studio", d: "Lets customers design name tiles on the store. Also in the menu for a quick switch.", f: [
+    ["studioOn", "Design studio is ON", "switch"] ] },
+  { g: "Shipping, returns & FAQ", d: "The questions and answers on your store. Edit, add or delete them here", f: [
+    ["faq", "Questions and answers", "faq"] ] },
+  { g: "Shop display", d: "Order of products, New and low-stock badges, bundle discount", f: [
+    ["productOrder", "Show products", "select", [["", "Newest first (recommended)"], ["custom", "My custom order (the drag order on this page)"]]],
+    ["newDays", "Show the “New” badge for (days)", "number", "14"],
+    ["lowStockAt", "Show “Only N left” when stock is at or below", "number", "3"],
+    ["bundleOff", "Turn OFF bundle discounts", "switch"],
+    ["bundlePct", "Bundle discount (%) off the lower-priced item", "number", "10"] ] },
+  { g: "Announcement bar", d: "A gold strip across the top of every page", f: [
+    ["announceOn", "Show the announcement bar", "switch"],
+    ["announceText", "Message", "text", "e.g. Holiday orders close **Dec 15**"],
+    ["announceLink", "Link when tapped (optional)", "url", "https://…"] ] },
+  { g: "Homepage top", d: "The first thing visitors see", f: [
+    ["heroEyebrow", "Small line above the headline", "text", "Handmade in Sacramento, CA"],
+    ["heroTitle1", "Headline", "text", "Your story,"],
+    ["heroTitle2", "Headline, gold second line", "text", "engraved in light."],
+    ["heroIntro", "Intro paragraph", "area", "Custom tumblers, mugs and keepsakes, UV printed in full color or laser engraved for life. Every piece is made by hand, one order at a time."],
+    ["proof1", "Highlight 1 (after the stars)", "text", "**5.0** on Etsy"],
+    ["proof2", "Highlight 2", "text", "**Local pickup** in Sacramento"],
+    ["proof3", "Highlight 3", "text", "**Personalized** just for you"] ] },
+  { g: "Tumbler preview", d: "The “Try your name” tumbler", f: [
+    ["tumblerName", "Default name", "text", "Aleesa"],
+    ["tumblerColors", "Color choices", "colors"] ] },
+  { g: "Moving banner", d: "The scrolling list of occasions", f: [
+    ["occasions", "One occasion per line", "lines", "Mother's Day\nGraduations\nWeddings\nTeachers\nNurses\nFirefighters\nBirthdays\nHeritage pride\nCorporate gifts\nChristmas"] ] },
+  { g: "Section headings", d: "Collections, shop, how it's made, reviews", f: [
+    ["collEyebrow", "Collections: small line", "text", "Collections"], ["collTitle", "Collections: heading", "text", "Made for every moment"],
+    ["collIntro", "Collections: intro", "area", "From everyday tumblers to heirloom gifts, all customized in our Sacramento studio."],
+    ["shopEyebrow", "Shop: small line", "text", "The shop"], ["shopTitle", "Shop: heading", "text", "Find your piece"],
+    ["howEyebrow", "How it's made: small line", "text", "How it's made"], ["howTitle", "How it's made: heading", "text", "From your idea to your hands"],
+    ["step1Title", "Step 1 title", "text", "You share your story"], ["step1Text", "Step 1 text", "area", "A name, a date, a photo or a logo. Pick a design or send us your own idea and we'll lay it out for you."],
+    ["step2Title", "Step 2 title", "text", "We print or engrave it"], ["step2Text", "Step 2 text", "area", "Full-color UV printing that won't peel or wash off, or laser engraving that's etched in for good."],
+    ["step3Title", "Step 3 title", "text", "Finished by hand"], ["step3Text", "Step 3 text", "area", "Every piece is checked, gift-ready packed and shipped with tracking, or ready for local pickup in Sacramento."],
+    ["revEyebrow", "Reviews: small line", "text", "Reviews"], ["revTitle", "Reviews: heading", "text", "Loved by our customers"],
+    ["revLine", "Reviews: line after the stars", "text", "5.0 average from our Etsy buyers"] ] },
+  { g: "Custom & bulk orders", d: "The “Have something special in mind?” box", f: [
+    ["customEyebrow", "Small line", "text", "Custom & bulk orders"], ["customTitle", "Heading", "text", "Have something special in mind?"],
+    ["customIntro", "Text", "area", "Team names, wedding party gifts, company logos, a photo of someone you love. Tell us the idea and we'll design it with you."],
+    ["customList", "List, one item per line", "lines", "Weddings & bridal party sets\nTeams, schools & graduations\nBusiness logos & corporate gifts\nMemorials & photo keepsakes"] ] },
+  { g: "Our studio", d: "The about section", f: [
+    ["aboutEyebrow", "Small line", "text", "Our studio"], ["aboutTitle", "Heading", "text", "A small studio with a big heart"],
+    ["aboutText1", "Paragraph 1", "area", "We create custom engraved and printed gifts, made with care in Sacramento, CA. From tumblers and mugs to coasters, keychains and T-shirts, every order celebrates your story."],
+    ["aboutText2", "Paragraph 2", "area", "We're a new small business, and every order means the world to us. Message us for custom designs or local pickup."],
+    ["aboutPlace", "Location line", "text", "Sacramento, California"] ] },
+  { g: "Product page", d: "The ✓ points under every made-to-order product", f: [
+    ["perks", "One point per line", "lines", "Made to order in Sacramento\nWon't peel or wash off\nGift-ready packaging\nLocal delivery or pickup"] ] },
+  { g: "Contact & links", d: "Shown in the footer when filled in", f: [
+    ["etsyUrl", "Etsy shop link", "url", "https://www.etsy.com/shop/PrAjoCustomStudio"],
+    ["instagram", "Instagram link", "url", "https://instagram.com/…"], ["facebook", "Facebook link", "url", "https://facebook.com/…"],
+    ["tiktok", "TikTok link", "url", "https://tiktok.com/@…"], ["pinterest", "Pinterest link", "url", "https://pinterest.com/…"],
+    ["email", "Email", "email", "hello@prajocustomstudio.com"], ["phone", "Phone", "tel", "(916) 555-0100"],
+    ["footerLine", "Footer line", "text", "Custom gifts & personalized moments · Sacramento, CA"], ["footerCopy", "Copyright line", "text", "© 2026 PrAjo Custom Studio"] ] },
+  { g: "Messages", d: "The “Message us” chat", f: [
+    ["chatWelcome", "Welcome text before a customer writes", "area", "Questions, custom designs, bulk orders or local pickup: send us a message and we'll reply here."],
+    ["chatReplyTime", "Reply time under the shop name", "text", "We usually reply within a day"] ] },
+];
+const DEFAULT_COLORS = [{ name: "Black", hex: "#2b2f37" }, { name: "Rose pink", hex: "#d48a9b" }, { name: "Navy", hex: "#2c4c86" }, { name: "Green", hex: "#4c8c63" }, { name: "White", hex: "#efe9de" }];
+let site = {}, siteDirty = false;
+function colorRows(list) {
+  return list.map((c, i) => `<div class="colrow" data-ci="${i}"><input type="color" value="${esc(c.hex)}" aria-label="Color"><input class="in" value="${esc(c.name)}" placeholder="Color name" aria-label="Color name"><button class="rm" type="button" data-crm aria-label="Remove color">×</button></div>`).join("")
+    + (list.length < 8 ? `<button class="btn line" type="button" id="colAdd" style="justify-self:start">+ Add color</button>` : "");
+}
+function renderSite() {
+  $("siteBody").innerHTML = `<p class="hint">Change any text on the store. Leave a field empty to keep the text shown in gray. Put <b>**two stars**</b> around words to make them bold. Press <b>Save changes</b> to publish.</p>` +
+    SITE_FIELDS.map((grp, gi) => `<details class="sgroup"${gi === 0 ? " open" : ""}><summary><span>${grp.g}<small>${grp.d}</small></span></summary><div class="sfields">${grp.f.map(([k, label, type, ph]) => {
+      if (type === "select") return `<label class="f"><span>${label}</span><select class="in" data-k="${k}">${ph.map(([v, l]) => `<option value="${v}"${(site[k] || "") === v ? " selected" : ""}>${l}</option>`).join("")}</select></label>`;
+      if (type === "switch") return `<label class="ssw"><span class="switch"><input type="checkbox" data-k="${k}" ${site[k] ? "checked" : ""}></span>${label}</label>`;
+      if (type === "colors") return `<div class="f"><span>${label}</span><div id="colList" style="display:grid;gap:8px">${colorRows(site.tumblerColors?.length ? site.tumblerColors : DEFAULT_COLORS)}</div></div>`;
+      if (type === "faq") return `<div class="f"><span>${label}</span><textarea class="in" data-k="faq" rows="16">${esc(site.faq || DEFAULT_FAQ_TEXT)}</textarea><p class="hint" style="margin:4px 0 0">One question per block, with a blank line between blocks. The <b>first line</b> is the question and the lines under it are the answer. Delete a block to remove that question. To go back to the standard answers, clear the box and save.</p></div>`;
+      const v = esc(site[k] || ""), p = esc(ph || "");
+      return `<label class="f"><span>${label}</span>${type === "area" || type === "lines" ? `<textarea class="in" data-k="${k}" placeholder="${p}" rows="${type === "lines" ? 5 : 3}">${v}</textarea>` : `<input class="in" data-k="${k}" type="${type === "number" ? "number" : type === "url" ? "url" : type === "email" ? "email" : type === "tel" ? "tel" : "text"}" value="${v}" placeholder="${p}">`}</label>`;
+    }).join("")}</div></details>`).join("");
+}
+function readColors() {
+  return [...document.querySelectorAll("#colList .colrow")].map((r) => ({ hex: r.querySelector("input[type=color]").value, name: r.querySelector("input.in").value.trim() })).filter((c) => c.name);
+}
+function readSite() {
+  const out = {};
+  document.querySelectorAll("#siteBody [data-k]").forEach((el) => {
+    const v = el.type === "checkbox" ? el.checked : el.value.trim();
+    if (v) out[el.dataset.k] = v;
+  });
+  if (out.faq === DEFAULT_FAQ_TEXT) delete out.faq;
+  if (site && site.showcase) out.showcase = site.showcase;   // edited in its own panel, so keep it when these settings are saved
+  const cols = readColors();
+  const key = (l) => JSON.stringify(l.map((c) => [c.name, c.hex.toLowerCase()]));
+  if (key(cols) !== key(DEFAULT_COLORS)) out.tumblerColors = cols;
+  return out;
+}
+async function openSite() {
+  $("siteSheet").hidden = false; document.body.style.overflow = "hidden"; siteDirty = false;
+  const { data, error } = await sb.from("site_settings").select("data").eq("id", 1).maybeSingle();
+  if (error) { $("siteBody").innerHTML = `<div class="empty"><b>Site settings aren't set up yet</b><p class="hint">Run site-settings.sql in Supabase first. (${esc(error.message)})</p></div>`; return; }
+  site = data?.data || {};
+  renderSite();
+}
+function closeSite() {
+  if (siteDirty && !confirm("You have unsaved changes. Close without saving?")) return;
+  $("siteSheet").hidden = true; document.body.style.overflow = "";
+}
+$("siteBtn").onclick = openSite;
+$("siteClose").onclick = closeSite;
+$("siteBody").addEventListener("input", () => { siteDirty = true; });
+$("siteBody").addEventListener("click", (e) => {
+  if (e.target.id === "colAdd") { const c = readColors(); c.push({ name: "", hex: "#d9ab4f" }); $("colList").innerHTML = colorRows(c.length ? c : DEFAULT_COLORS); siteDirty = true; $("colList").querySelector(".colrow:last-of-type input.in")?.focus(); }
+  if (e.target.closest("[data-crm]")) { const i = +e.target.closest(".colrow").dataset.ci, c = readColors().filter((_, j) => j !== i); $("colList").innerHTML = colorRows(c); siteDirty = true; }
+});
+$("siteSave").onclick = async () => {
+  const data = readSite();
+  for (const k of ["announceLink", "etsyUrl", "instagram", "facebook", "tiktok", "pinterest"]) if (data[k] && !/^https:\/\//.test(data[k])) return toast("Links need to start with https://");
+  $("siteSave").disabled = true;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data, updated_at: new Date().toISOString() });
+  $("siteSave").disabled = false;
+  if (error) return toast("Couldn't save: " + error.message);
+  site = data; siteDirty = false; toast("Saved. Live on the store now");
+};
+
+/* ---------- bulk attach: a folder with one sub-folder per listing (named by its id) holding that listing's files ---------- */
+let bulkPlan = [];
+function bulkIntro() {
+  $("bulkBody").innerHTML = `<p class="hint">Choose a folder that has one folder per digital listing, named like the listing's web address (for example <b>safari-pals-coloring-book</b>). Every file inside is uploaded privately and attached to that listing. Files a listing already has are skipped.</p>
+    <p class="hint">On your Mac this folder is <b>Downloads → website-downloads</b>.</p>`;
+  $("bulkGo").disabled = true; bulkPlan = [];
+}
+$("bulkBtn").onclick = () => { bulkIntro(); $("bulkSheet").hidden = false; document.body.style.overflow = "hidden"; };
+$("bulkClose").onclick = () => { if ($("bulkGo").dataset.busy) return; $("bulkSheet").hidden = true; document.body.style.overflow = ""; };
+$("bulkPick").onclick = () => $("bulkDir").click();
+$("bulkDir").addEventListener("change", (e) => {
+  const files = [...e.target.files].filter((f) => !f.name.startsWith(".") && f.size > 0);
+  e.target.value = "";
+  const groups = {};
+  for (const f of files) {
+    const parts = (f.webkitRelativePath || f.name).split("/");
+    if (parts.length < 3) continue;                                     // folder/listing-id/file
+    (groups[parts[parts.length - 2]] ||= []).push(f);
+  }
+  bulkPlan = Object.entries(groups).map(([id, fs]) => {
+    const r = rows.find((x) => x.id === id);
+    const have = new Set((r?.files || []).map((x) => x.name));
+    return { id, r, add: r ? fs.filter((f) => !have.has(f.name) && f.size <= 50 * 1048576) : [], skip: r ? fs.filter((f) => have.has(f.name)) : fs, big: fs.filter((f) => f.size > 50 * 1048576) };
+  }).sort((a, b) => (a.r?.name || a.id).localeCompare(b.r?.name || b.id));
+  const n = bulkPlan.reduce((t, g) => t + g.add.length, 0), mb = bulkPlan.reduce((t, g) => t + g.add.reduce((u, f) => u + f.size, 0), 0) / 1048576;
+  $("bulkBody").innerHTML = `<p class="hint"><b>${n} files (${mb.toFixed(0)} MB)</b> ready for ${bulkPlan.filter((g) => g.add.length).length} listings.</p>` + bulkPlan.map((g) => `
+    <div class="dl-item" data-bid="${esc(g.id)}" style="display:block">
+      <b>${g.r ? esc(g.r.name) : `⚠ No listing called “${esc(g.id)}”`}</b>${g.r && !g.r.digital ? ` <small style="color:#ffcf8a">(not marked as a digital download)</small>` : ""}
+      ${g.add.map((f) => `<small data-f="${esc(f.name)}">＋ ${esc(f.name)} · ${fmtSize(f.size)}</small>`).join("")}
+      ${g.r ? g.skip.map((f) => `<small>✓ ${esc(f.name)} (already attached)</small>`).join("") : ""}
+      ${g.big.map((f) => `<small style="color:#ffb4a8">✕ ${esc(f.name)} is over 50 MB</small>`).join("")}
+    </div>`).join("");
+  $("bulkGo").disabled = !n;
+});
+$("bulkGo").onclick = async () => {
+  const btn = $("bulkGo"); btn.disabled = true; btn.dataset.busy = "1"; $("bulkPick").disabled = true;
+  let done = 0, failed = 0;
+  const total = bulkPlan.reduce((t, g) => t + g.add.length, 0);
+  for (const g of bulkPlan) {
+    if (!g.r || !g.add.length) continue;
+    const added = [];
+    for (const f of g.add) {
+      const el = document.querySelector(`[data-bid="${CSS.escape(g.id)}"] [data-f="${CSS.escape(f.name)}"]`);
+      btn.textContent = `Uploading ${done + failed + 1} of ${total}…`;
+      if (el) el.textContent = `⏳ ${f.name} · uploading…`;
+      const path = `${g.id}/${Date.now()}-${f.name.replace(/[^\w.\-]+/g, "-").slice(-80)}`;
+      const { error } = await sb.storage.from("digital-files").upload(path, f, { contentType: f.type || "application/octet-stream", upsert: false });
+      if (error) { failed++; if (el) el.textContent = `✕ ${f.name}: ${error.message}`; continue; }
+      added.push({ path, name: f.name, size: f.size }); done++;
+      if (el) el.textContent = `✓ ${f.name} · uploaded`;
+    }
+    if (added.length) {
+      const files = [...(g.r.files || []), ...added];
+      const { error } = await sb.from("listings").update({ files, updated_at: new Date().toISOString() }).eq("id", g.id);
+      if (error) { failed += added.length; toast(`Couldn't attach files to ${g.r.name}: ${error.message}`); }
+      else g.r.files = files;
+    }
+  }
+  delete btn.dataset.busy; $("bulkPick").disabled = false;
+  btn.textContent = "Upload and attach";
+  toast(failed ? `${done} attached, ${failed} failed. Choose the folder again to retry` : `All ${done} files attached. Live on the store now`);
+  loadRows();
+};
+
+/* ---------- passwords: change while signed in, or reset from an emailed link (always after the authenticator code) ---------- */
+$("siForgot").onclick = async () => {
+  const email = $("siEmail").value.trim(), msg = $("siMsg"), err = $("siErr");
+  err.hidden = true; msg.hidden = true;
+  if (!email) { err.textContent = "Type your email above first, then tap Forgot password."; err.hidden = false; return; }
+  $("siForgot").disabled = true;
+  const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: location.origin + "/admin.html" });
+  $("siForgot").disabled = false;
+  if (error) { err.textContent = error.message; err.hidden = false; return; }
+  msg.textContent = "If that's the shop's email, a reset link is on its way. Open it on this device; you'll enter your authenticator code, then choose a new password.";
+  msg.hidden = false;
+};
+function openPw(fromReset) {
+  $("pwForm").reset(); $("pwErr").hidden = true; $("pwNonceRow").hidden = true;
+  $("pwTitle").textContent = fromReset ? "Choose a new password" : "Change password";
+  $("pwSheet").hidden = false; document.body.style.overflow = "hidden";
+  setTimeout(() => $("pwNew").focus({ preventScroll: true }), 30);
+}
+function closePw() {
+  $("pwSheet").hidden = true; document.body.style.overflow = "";
+  try { sessionStorage.removeItem("prajo:setpw"); } catch {}
+}
+$("pwBtn").onclick = () => openPw(false);
+$("pwClose").onclick = closePw;
+$("pwForm").onsubmit = async (e) => {
+  e.preventDefault();
+  const pw = $("pwNew").value, err = $("pwErr"), btn = $("pwSave");
+  const show = (t) => { err.textContent = t; err.hidden = false; };
+  err.hidden = true;
+  if (pw.length < 10) return show("Use at least 10 characters.");
+  if (pw !== $("pwAgain").value) return show("The two passwords don't match.");
+  if (pw.toLowerCase().includes("prajo") || /^(.)\1+$/.test(pw)) return show("Pick something harder to guess (not your shop name or one repeated character).");
+  btn.disabled = true; btn.textContent = "Saving…";
+  const nonce = $("pwNonce").value.trim();
+  let { error } = await sb.auth.updateUser(nonce ? { password: pw, nonce } : { password: pw });
+  // Supabase may ask to confirm it's really you: it emails a short code, which goes in the extra box.
+  if (error && /reauth/i.test(error.code || error.message) && !nonce) {
+    const r = await sb.auth.reauthenticate();
+    btn.disabled = false; btn.textContent = "Save new password";
+    if (r.error) return show(r.error.message);
+    $("pwNonceRow").hidden = false; $("pwNonce").focus();
+    return show("For safety, we emailed you a code. Type it in the new box and save again.");
+  }
+  btn.disabled = false; btn.textContent = "Save new password";
+  if (error) return show(/same/i.test(error.message) ? "That's your current password. Choose a new one." : error.message);
+  closePw(); toast("Password changed. Use it next time you sign in");
+};
+
+boot();
+
+/* ---------- tumbler designs: add, name, reorder, hide, delete (table tumbler_designs, public bucket design-art) ---------- */
+let tdRows = [], tdSort = null;
+const tdSlug = (t) => (String(t).toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 28) || "design") + "-" + Math.random().toString(36).slice(2, 6);
+const tdTitle = (f) => f.name.replace(/\.[a-z0-9]+$/i, "").replace(/[_-]+/g, " ").replace(/\s+/g, " ").trim().replace(/\b\w/g, (c) => c.toUpperCase()).slice(0, 60) || "New design";
+const tdPath = (url) => { const m = /\/object\/public\/design-art\/(.+)$/.exec(url || ""); return m ? m[1] : null; };
+let tdProd = "tumbler";
+const tdMine = () => tdRows.filter((r) => (r.product || "tumbler") === tdProd);
+async function tdLoad() {
+  const { data: pts } = await sb.from("product_templates").select("slug,name").order("sort");
+  const opts = (pts && pts.length ? pts : [{ slug: "tumbler", name: "Tumbler" }]);
+  $("tdProd").innerHTML = opts.map((p) => `<option value="${esc(p.slug)}"${p.slug === tdProd ? " selected" : ""}>${esc(p.name)}</option>`).join("") + `<option value="__new">＋ New product folder…</option>`;
+  const { data, error } = await sb.from("tumbler_designs").select("*").order("sort");
+  if (error) { $("tdList").innerHTML = `<div class="empty"><b>Not set up yet</b><p class="hint">Run tumbler-designs-setup.sql once in Supabase (SQL Editor). (${esc(error.message)})</p></div>`; return; }
+  tdRows = data; tdRender();
+}
+$("tdProd").onchange = async () => {
+  if ($("tdProd").value === "__new") {
+    const name = (prompt("Name for the new product folder (for example: PVC ID card)") || "").trim().slice(0, 40);
+    if (!name) { $("tdProd").value = tdProd; return; }
+    const slug = ptSlug(name), { data: last } = await sb.from("product_templates").select("sort").order("sort", { ascending: false }).limit(1);
+    const { error } = await sb.from("product_templates").insert({ slug, name, kind: "flat", category: "tags", photo: "", geom: { W: 1000, H: 1000, SY: 0, L: 100, R: 900, T: 100, B: 900, TY: 100, shape: "rect", radius: 0 }, visible: false, sort: ((last && last[0] && last[0].sort) || 0) + 10 });
+    if (error) { toast("Couldn't create the folder: " + error.message); $("tdProd").value = tdProd; return; }
+    tdProd = slug; toast(`Folder “${name}” created. Add designs to it now. It stays off the Design yours page until you add a blank photo in Products to design.`); await tdLoad(); return;
+  }
+  tdProd = $("tdProd").value; tdPicked.clear(); tdRender();
+};
+let tdSelMode = false, tdPicked = new Set(), tdShown = [], tdPlacing = false, tdAfter = false;
+const tdFiltered = () => { const q = $("tdSearch").value.trim().toLowerCase(); return tdMine().filter((r) => !q || r.name.toLowerCase().includes(q)); };
+function tdRender() {
+  tdShown = tdFiltered(); $("tdList").classList.toggle("picking", tdSelMode); $("tdList").classList.toggle("placing", tdPlacing); $("tdBulkN").textContent = `${tdPicked.size} selected`;
+  $("tdList").innerHTML = tdShown.map((r) => `<div class="td-item${r.visible ? "" : " off"}${tdSelMode && tdPicked.has(r.id) ? " sel" : ""}" data-id="${r.id}">
+    <span class="tdgrab" aria-hidden="true" title="Drag to reorder">⠿</span><img src="${esc(r.thumb)}" alt="">
+    <input class="nm" value="${esc(r.name)}" maxlength="60" aria-label="Design name" data-nm>
+    <button class="tg" type="button" role="switch" aria-checked="${r.visible}" aria-label="Show this design" data-vis></button>
+    <button class="rm" type="button" aria-label="Delete this design" data-del>🗑</button></div>`).join("") || `<div class="empty"><b>No designs yet</b><p class="hint">Tap ＋ Add designs to upload your first one.</p></div>`;
+  if (tdSort) tdSort.destroy();
+  tdSort = (tdSelMode || $("tdSearch").value.trim()) ? null : Sortable.create($("tdList"), { handle: ".tdgrab", animation: 150, onEnd: tdSaveOrder });
+  $("tdState").textContent = `${tdRows.filter((r) => r.visible && (r.product || "tumbler") === "tumbler").length} tumbler designs showing`;
+}
+async function tdApplyOrder(list, label) {   // list = this product's designs in the new order
+  const prev = tdMine().map((r) => r.id); tdRows = [...tdRows.filter((r) => !list.includes(r)), ...list];
+  const save = async (arr) => { const by = new Map(tdRows.map((r) => [r.id, r])); const res = await Promise.all(arr.map((id, i) => { const r = by.get(id); if (!r || r.sort === i * 10) return null; r.sort = i * 10; return sb.from("tumbler_designs").update({ sort: i * 10 }).eq("id", id); }).filter(Boolean)); return !res.some((x) => x && x.error); };
+  tdRender(); const ok = await save(list.map((r) => r.id));
+  if (!ok) return toast("Couldn't save the order");
+  toast(label, async () => { const by = new Map(tdRows.map((r) => [r.id, r])); const back = prev.map((id) => by.get(id)).filter(Boolean); tdRows = [...tdRows.filter((r) => !back.includes(r)), ...back]; tdRender(); await save(prev); });
+}
+function tdPlaceUi() { const on = tdPlacing; $("tdPlace").style.display = on ? "flex" : "none"; $("tdPlaceTxt").textContent = `Tap the design to put your ${tdPicked.size} selected ${tdAfter ? "after" : "before"}`; $("tdBefore").className = "btn" + (tdAfter ? "" : " gold"); $("tdAfter").className = "btn" + (tdAfter ? " gold" : ""); $("tdBefore").setAttribute("aria-pressed", !tdAfter); $("tdAfter").setAttribute("aria-pressed", tdAfter); }
+$("tdMoveTo").onclick = () => { if (!tdPicked.size) return toast("Tap the designs you want to move first."); tdPlacing = true; tdPlaceUi(); tdRender(); };
+$("tdBefore").onclick = () => { tdAfter = false; tdPlaceUi(); }; $("tdAfter").onclick = () => { tdAfter = true; tdPlaceUi(); };
+$("tdPlaceX").onclick = () => { tdPlacing = false; tdPlaceUi(); tdRender(); };
+function tdSetSel(on) { tdPlacing = false; tdPlaceUi(); tdSelMode = on; tdPicked.clear(); $("tdSelBtn").setAttribute("aria-pressed", on); $("tdBulk").hidden = !on; tdRender(); }
+const tdPickedRows = () => tdMine().filter((r) => tdPicked.has(r.id));
+$("tdSelBtn").onclick = () => tdSetSel(!tdSelMode); $("tdDone").onclick = () => tdSetSel(false);
+$("tdSearch").addEventListener("input", tdRender);
+$("tdAll").onclick = () => { tdShown.forEach((r) => tdPicked.add(r.id)); tdRender(); };
+$("tdTop").onclick = () => { const p = tdPickedRows(); if (!p.length) return toast("Tap the designs you want to move first."); const rest = tdMine().filter((r) => !tdPicked.has(r.id)); tdPicked.clear(); tdApplyOrder([...p, ...rest], `${p.length} moved to the top`); };
+$("tdBottom").onclick = () => { const p = tdPickedRows(); if (!p.length) return toast("Tap the designs you want to move first."); const rest = tdMine().filter((r) => !tdPicked.has(r.id)); tdPicked.clear(); tdApplyOrder([...rest, ...p], `${p.length} moved to the bottom`); };
+$("tdAZ").onclick = () => { if (!confirm("Sort all " + tdMine().length + " designs A to Z? You can undo it right after.")) return; tdApplyOrder([...tdMine()].sort((x, y) => x.name.localeCompare(y.name, undefined, { sensitivity: "base" })), "Sorted A to Z"); };
+async function tdBulkVis(on) { const p = tdPickedRows(); if (!p.length) return toast("Tap the designs first."); const ids = p.map((r) => r.id), { error } = await sb.from("tumbler_designs").update({ visible: on }).in("id", ids); if (error) return toast("Couldn't update: " + error.message); p.forEach((r) => (r.visible = on)); tdRender(); toast(`${ids.length} design${ids.length > 1 ? "s" : ""} ${on ? "now showing" : "hidden"}`, async () => { p.forEach((r) => (r.visible = !on)); tdRender(); await sb.from("tumbler_designs").update({ visible: !on }).in("id", ids); }); }
+$("tdShow").onclick = () => tdBulkVis(true); $("tdHide").onclick = () => tdBulkVis(false);
+$("tdDelSel").onclick = async () => {
+  const p = tdPickedRows(); if (!p.length) return toast("Tap the designs first.");
+  if (!confirm(`Delete ${p.length} design${p.length > 1 ? "s" : ""} permanently? This can't be undone.`)) return;
+  const ids = p.map((r) => r.id), { error } = await sb.from("tumbler_designs").delete().in("id", ids); if (error) return toast("Couldn't delete: " + error.message);
+  const paths = p.flatMap((r) => [r.art, r.card, r.thumb]).map(tdPath).filter(Boolean); if (paths.length) await sb.storage.from("design-art").remove(paths).catch(() => {});
+  tdRows = tdRows.filter((r) => !ids.includes(r.id)); tdPicked.clear(); tdRender(); toast(`Deleted ${ids.length}`);
+};
+async function tdSaveOrder() {
+  const ids = [...$("tdList").querySelectorAll(".td-item")].map((e) => e.dataset.id), by = new Map(tdRows.map((r) => [r.id, r]));
+  const mine = ids.map((id) => by.get(id)).filter(Boolean); tdRows = [...tdRows.filter((r) => !mine.includes(r)), ...mine];   // only this product's designs are re-ordered
+  const jobs = mine.map((r, i) => (r.sort === i * 10 ? null : sb.from("tumbler_designs").update({ sort: i * 10 }).eq("id", r.id).then(() => { r.sort = i * 10; })));
+  const res = await Promise.all(jobs.filter(Boolean).map((j) => j.catch(() => "x")));
+  toast(res.includes("x") ? "Couldn't save the order" : "Order saved");
+}
+
+/* ---------- find duplicates: designs by picture, listings by name or main photo ---------- */
+let dpTab = "designs", dpGroups = [], dpPick = new Set(), dpItems = new Map(), dpBusy = false;
+const dpNorm = (s) => String(s || "").toLowerCase().replace(/\(.*?\)/g, " ").replace(/\b(copy|duplicate)\b/g, " ").replace(/[^a-z0-9]+/g, "");
+async function dpHash(url) {   // 256-bit gradient fingerprint + 4x4 colour grid of a picture
+  const res = await fetch(url, { cache: "force-cache" }); if (!res.ok) throw new Error("load");
+  const bmp = await createImageBitmap(await res.blob());
+  const grab = (w, h) => { const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d", { willReadFrequently: true }); x.imageSmoothingQuality = "high"; x.fillStyle = "#fff"; x.fillRect(0, 0, w, h); x.drawImage(bmp, 0, 0, w, h); return x.getImageData(0, 0, w, h).data; };
+  const d = grab(17, 16), g = []; for (let i = 0; i < 272; i++) g.push(d[i * 4] * .3 + d[i * 4 + 1] * .59 + d[i * 4 + 2] * .11);
+  const bits = new Uint8Array(256); let k = 0; for (let y = 0; y < 16; y++) for (let x = 0; x < 16; x++) bits[k++] = g[y * 17 + x] > g[y * 17 + x + 1] ? 1 : 0;
+  const c4 = grab(4, 4), col = []; for (let i = 0; i < 16; i++) col.push(c4[i * 4], c4[i * 4 + 1], c4[i * 4 + 2]);
+  bmp.close && bmp.close(); return { bits, col };
+}
+function dpDist(a, b) { let h = 0; for (let i = 0; i < 256; i++) if (a.bits[i] !== b.bits[i]) h++; let c = 0; for (let i = 0; i < 48; i++) c += Math.abs(a.col[i] - b.col[i]); return { h, c: c / 48 }; }
+function dpItemsFor() {
+  if (dpTab === "designs") { const pr = $("dpProd").value || "tumbler"; return tdRows.filter((r) => (r.product || "tumbler") === pr).map((r) => ({ id: r.id, name: r.name, img: r.thumb, off: !r.visible, row: r })); }
+  return rows.filter((r) => r.id !== "custom-design").map((r) => ({ id: r.id, name: r.title || r.name, key: r.name, img: r.images?.[0]?.card || "", off: !r.visible, row: r }));
+}
+async function dpScanRun() {
+  if (dpBusy) return; dpBusy = true; $("dpScan").disabled = true; $("dpList").innerHTML = ""; $("dpBulk").hidden = true; dpPick.clear();
+  const items = dpItemsFor(); dpItems = new Map(items.map((i) => [i.id, i]));
+  let done = 0; const hs = new Map();
+  for (let i = 0; i < items.length; i += 8) {
+    await Promise.all(items.slice(i, i + 8).map(async (it) => { if (it.img) { try { hs.set(it.id, await dpHash(it.img)); } catch (_) {} } done++; $("dpMsg").textContent = `Looking at ${done} of ${items.length}…`; }));
+  }
+  const par = items.map((_, i) => i), find = (i) => (par[i] === i ? i : (par[i] = find(par[i]))), rank = new Map();   // rank: 3 same picture, 2 same name, 1 looks similar
+  const link = (i, j, r) => { const a = find(i), b = find(j); if (a !== b) { par[a] = b; rank.set(b, Math.max(rank.get(a) || 0, rank.get(b) || 0, r)); } else rank.set(a, Math.max(rank.get(a) || 0, r)); };
+  const nk = items.map((it) => dpNorm(it.key || it.name));
+  for (let i = 0; i < items.length; i++) for (let j = i + 1; j < items.length; j++) {
+    let r = 0; const a = hs.get(items[i].id), b = hs.get(items[j].id);
+    if (a && b) { const { h, c } = dpDist(a, b); if (h <= 10 && c < 14) r = 3; else if (h <= 28 && c < 32) r = 1; }
+    if (nk[i] && nk[i] === nk[j]) r = Math.max(r, 2);
+    if (r) link(i, j, r);
+  }
+  const by = new Map(); items.forEach((it, i) => { const k = find(i); (by.get(k) || by.set(k, []).get(k)).push(it); });
+  dpGroups = [...by.entries()].filter(([, v]) => v.length > 1).map(([k, v]) => ({ rank: rank.get(k) || 1, items: v.sort((x, y) => (x.off - y.off)) }));   // showing ones first = the one to keep
+  dpGroups.sort((x, y) => y.rank - x.rank);
+  dpGroups.forEach((g) => { if (g.rank > 1) g.items.slice(1).forEach((it) => dpPick.add(it.id)); });
+  dpBusy = false; $("dpScan").disabled = false; $("dpScan").textContent = "🔍 Scan again";
+  $("dpMsg").textContent = dpGroups.length ? `${dpGroups.length} group${dpGroups.length > 1 ? "s" : ""} found` : `Checked ${items.length}. No duplicates found 🎉`;
+  dpRender();
+}
+function dpRender() {
+  const tag = { 3: "Same picture", 2: "Same name", 1: "Looks similar" };
+  $("dpBulk").hidden = !dpGroups.length; $("dpN").textContent = `${dpPick.size} selected`;
+  $("dpList").innerHTML = dpGroups.map((g, gi) => `<div class="dp-grp"><h4><span class="dp-tag">${tag[g.rank]}</span>${g.items.length} copies${g.rank === 1 ? " · check these by eye, nothing is pre-selected" : " · extras are pre-selected"}</h4>${g.items.map((it) => `<div class="dp-row${dpPick.has(it.id) ? " sel" : ""}" data-id="${esc(it.id)}"><input type="checkbox" ${dpPick.has(it.id) ? "checked" : ""} aria-label="Select ${esc(it.name)}"><img src="${esc(it.img)}" alt="" loading="lazy"><span class="nm">${esc(it.name)}<small>${it.off ? "Hidden from store" : "Showing"}${dpPick.has(it.id) ? "" : " · keeping"}</small></span><button class="btn dp-keep" type="button" data-keep="${gi}">Keep this</button></div>`).join("")}</div>`).join("");
+}
+$("dpList").addEventListener("click", (e) => {
+  const row = e.target.closest(".dp-row"); if (!row) return; const id = row.dataset.id;
+  if (e.target.matches("[data-keep]")) { const g = dpGroups[+e.target.dataset.keep]; g.items.forEach((it) => (it.id === id ? dpPick.delete(it.id) : dpPick.add(it.id))); dpRender(); return; }
+  dpPick.has(id) ? dpPick.delete(id) : dpPick.add(id); dpRender();
+});
+$("dpAllX").onclick = () => { dpPick.clear(); dpGroups.forEach((g) => g.items.slice(1).forEach((it) => dpPick.add(it.id))); dpRender(); };
+$("dpNone").onclick = () => { dpPick.clear(); dpRender(); };
+function dpDrop(ids) { dpGroups.forEach((g) => (g.items = g.items.filter((it) => !ids.includes(it.id)))); dpGroups = dpGroups.filter((g) => g.items.length > 1); ids.forEach((i) => dpPick.delete(i)); dpRender(); $("dpMsg").textContent = dpGroups.length ? `${dpGroups.length} group${dpGroups.length > 1 ? "s" : ""} left` : "All clear 🎉"; }
+const dpPickedIds = () => [...dpPick].filter((id) => dpItems.has(id));
+$("dpHide").onclick = async () => {
+  const ids = dpPickedIds(); if (!ids.length) return toast("Tick the copies first.");
+  const tbl = dpTab === "designs" ? "tumbler_designs" : "listings", stamp = dpTab === "designs" ? {} : { updated_at: new Date().toISOString() };
+  const { error } = await sb.from(tbl).update({ visible: false, ...stamp }).in("id", ids); if (error) return toast("Couldn't hide: " + error.message);
+  const src = dpTab === "designs" ? tdRows : rows; src.forEach((r) => { if (ids.includes(r.id)) r.visible = false; }); ids.forEach((i) => { const it = dpItems.get(i); if (it) it.off = true; }); dpRender(); if (dpTab === "listings") render();
+  toast(`${ids.length} hidden from the store`, async () => { src.forEach((r) => { if (ids.includes(r.id)) r.visible = true; }); ids.forEach((i) => { const it = dpItems.get(i); if (it) it.off = false; }); dpRender(); await sb.from(tbl).update({ visible: true, ...stamp }).in("id", ids); });
+};
+$("dpDel").onclick = async () => {
+  const ids = dpPickedIds(); if (!ids.length) return toast("Tick the copies first.");
+  if (!confirm(`Delete ${ids.length} ${dpTab === "designs" ? "design" : "listing"}${ids.length > 1 ? "s" : ""} permanently? This can't be undone. The ones you didn't tick stay.`)) return;
+  if (dpTab === "designs") {
+    const gone = tdRows.filter((r) => ids.includes(r.id)), { error } = await sb.from("tumbler_designs").delete().in("id", ids); if (error) return toast("Couldn't delete: " + error.message);
+    tdRows = tdRows.filter((r) => !ids.includes(r.id));
+    const keepP = new Set(tdRows.flatMap((r) => [r.art, r.card, r.thumb]).map(tdPath).filter(Boolean)), paths = gone.flatMap((r) => [r.art, r.card, r.thumb]).map(tdPath).filter((p) => p && !keepP.has(p));
+    if (paths.length) await sb.storage.from("design-art").remove(paths).catch(() => {});
+  } else {
+    const { error } = await sb.from("listings").delete().in("id", ids); if (error) return toast("Couldn't delete: " + error.message);
+    rows = rows.filter((r) => !ids.includes(r.id)); render();
+  }
+  toast(`Deleted ${ids.length}`); dpDrop(ids);
+};
+function dpTabSet(t) {
+  dpTab = t; dpGroups = []; dpPick.clear(); $("dpList").innerHTML = ""; $("dpBulk").hidden = true; $("dpMsg").textContent = ""; $("dpScan").textContent = "🔍 Scan now";
+  $("dpTabD").className = "btn" + (t === "designs" ? " gold" : ""); $("dpTabL").className = "btn" + (t === "listings" ? " gold" : ""); $("dpProdWrap").style.display = t === "designs" ? "" : "none";
+  $("dpHow").textContent = t === "designs" ? "Compares the pictures themselves, so a re-saved or resized copy is caught even with a different name." : "Finds listings with the same name, or whose first photo looks the same.";
+}
+$("dpTabD").onclick = () => dpTabSet("designs"); $("dpTabL").onclick = () => dpTabSet("listings"); $("dpScan").onclick = dpScanRun;
+$("dpBtn").onclick = async () => { $("dpSheet").hidden = false; document.body.style.overflow = "hidden"; dpTabSet("designs"); await tdLoad(); $("dpProd").innerHTML = $("tdProd").innerHTML.replace(/<option value="__new">[^<]*<\/option>/, ""); $("dpProd").value = tdProd; };
+$("dpProd").onchange = () => { dpGroups = []; dpPick.clear(); $("dpList").innerHTML = ""; $("dpBulk").hidden = true; $("dpMsg").textContent = ""; };
+$("dpClose").onclick = () => { $("dpSheet").hidden = true; document.body.style.overflow = ""; };
+
+/* ---------- seasonal effects: auto by calendar, or force one, or off (site_settings.data.season) ---------- */
+const snLabel = (id) => (window.PRAJO_SEASONS || []).find((x) => x.id === id)?.label || "";
+function snPrev() { const v = $("snSel").value, id = v === "off" ? "off" : v === "auto" ? (window.prajoSeasonNow() || "christmas") : v; $("snPrev").href = `./?season=${encodeURIComponent(id)}`; }
+async function snOpen() {
+  $("snSheet").hidden = false; document.body.style.overflow = "hidden"; $("snMsg").textContent = "";
+  const cur = (await readSiteRow()).season || "auto", now = window.prajoSeasonNow();
+  $("snSel").innerHTML = `<option value="auto">Automatic (follows the calendar)</option><option value="off">Off</option>` + (window.PRAJO_SEASONS || []).map((x) => `<option value="${esc(x.id)}">${esc(x.label)}</option>`).join("");
+  $("snSel").value = cur; $("snNow").textContent = now ? `Right now Automatic shows: ${snLabel(now)}.` : "Right now Automatic shows nothing, because no holiday is close."; snPrev();
+}
+$("snSel").onchange = snPrev; $("snBtn").onclick = snOpen;
+$("snClose").onclick = () => { $("snSheet").hidden = true; document.body.style.overflow = ""; };
+$("snSave").onclick = async () => {
+  const v = $("snSel").value, cur = await readSiteRow(), next = { ...cur }; if (v === "auto") delete next.season; else next.season = v;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+  if (error) return toast("Couldn't save: " + error.message); toast(v === "auto" ? "Automatic: follows the calendar" : v === "off" ? "Seasonal effects are off" : `Showing ${snLabel(v)} on the store`);
+  site = next; $("snMsg").textContent = "Saved. It shows on the store right away.";
+};
+async function tdOpen() { $("tdSheet").hidden = false; document.body.style.overflow = "hidden"; await tdLoad(); }
+$("tdBtn").onclick = tdOpen;
+$("tdClose").onclick = () => { $("tdSheet").hidden = true; document.body.style.overflow = ""; };
+$("tdList").addEventListener("change", async (e) => {
+  const row = e.target.closest(".td-item"); if (!row || !e.target.matches("[data-nm]")) return;
+  const r = tdRows.find((x) => x.id === row.dataset.id), name = e.target.value.trim().slice(0, 60);
+  if (!name) { e.target.value = r.name; return toast("A design needs a name"); }
+  const { error } = await sb.from("tumbler_designs").update({ name }).eq("id", r.id); if (error) return toast("Couldn't save: " + error.message); r.name = name; toast("Name saved");
+});
+$("tdList").addEventListener("click", async (e) => {
+  const row = e.target.closest(".td-item"); if (!row) return; const r = tdRows.find((x) => x.id === row.dataset.id);
+  if (tdSelMode && tdPlacing) {   // choosing where the selected designs go
+    if (tdPicked.has(r.id)) return toast("Tap a design that isn't selected.");
+    const p = tdPickedRows(), rest = tdMine().filter((x) => !tdPicked.has(x.id)), at = rest.indexOf(r) + (tdAfter ? 1 : 0);
+    const n = p.length, name = r.name; tdPicked.clear(); tdPlacing = false; tdPlaceUi(); tdApplyOrder([...rest.slice(0, at), ...p, ...rest.slice(at)], `${n} moved ${tdAfter ? "after" : "before"} ${name}`); return;
+  }
+  if (tdSelMode) { tdPicked.has(r.id) ? tdPicked.delete(r.id) : tdPicked.add(r.id); tdRender(); return; }
+  if (e.target.matches("[data-vis]")) {
+    const visible = !r.visible, { error } = await sb.from("tumbler_designs").update({ visible }).eq("id", r.id);
+    if (error) return toast("Couldn't change it: " + error.message); r.visible = visible; tdRender(); toast(visible ? "Showing on the store" : "Hidden from the store");
+  }
+  if (e.target.matches("[data-del]")) {
+    if (e.target.dataset.armed !== "1") { e.target.dataset.armed = "1"; e.target.classList.add("arm"); e.target.textContent = "Tap again to delete"; setTimeout(() => { e.target.dataset.armed = ""; e.target.classList.remove("arm"); e.target.textContent = "🗑"; }, 3500); return; }
+    const { error } = await sb.from("tumbler_designs").delete().eq("id", r.id); if (error) return toast("Couldn't delete: " + error.message);
+    const paths = [r.art, r.card, r.thumb].map(tdPath).filter(Boolean); if (paths.length) await sb.storage.from("design-art").remove(paths).catch(() => {});
+    tdRows = tdRows.filter((x) => x.id !== r.id); tdRender(); toast("Deleted");
+  }
+});
+// picks the file, makes three sizes in the browser (full artwork, gallery card, small picker tile), uploads them and adds the row
+async function tdMake(file) {
+  const bmp = await createImageBitmap(file);
+  const draw = (w, h, cover) => { const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, w, h);
+    const sc = cover ? Math.max(w / bmp.width, h / bmp.height) : w / bmp.width, dw = bmp.width * sc, dh = bmp.height * sc; x.drawImage(bmp, (w - dw) / 2, (h - dh) / 2, dw, dh); return c; };
+  const blob = (c, q) => new Promise((ok) => c.toBlob(ok, "image/jpeg", q));
+  const aw = Math.min(1000, bmp.width), ah = Math.round(aw * bmp.height / bmp.width);
+  return { art: await blob(draw(aw, ah, false), .74), card: await blob(draw(336, 460, true), .74), thumb: await blob(draw(120, 120, true), .72), orig: file };
+}
+$("tdAdd").onclick = () => $("tdFile").click();
+$("tdFile").addEventListener("change", async () => {
+  const files = [...$("tdFile").files].filter((f) => f.type.startsWith("image/")); $("tdFile").value = ""; if (!files.length) return;
+  let ok = 0, n = 0;
+  for (const f of files) {
+    n++; $("tdMsg").textContent = `Adding ${n} of ${files.length}…`;
+    try {
+      const b = await tdMake(f), slug = tdSlug(f.name), up = async (suffix, blob) => {
+        const path = `${slug}/${suffix}.jpg`, { error } = await sb.storage.from("design-art").upload(path, blob, { contentType: "image/jpeg", upsert: false });
+        if (error) throw error; return sb.storage.from("design-art").getPublicUrl(path).data.publicUrl; };
+      const art = await up("art", b.art), card = await up("card", b.card), thumb = await up("thumb", b.thumb);
+      const sort = (tdMine().reduce((m, r) => Math.max(m, r.sort), 0)) + 10;
+      // keep the untouched original file too, so the print file is never a shrunken copy
+      let original = null; try { const ext = (f.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "png", op = `${slug}/original.${ext}`; const { error: oe } = await sb.storage.from("design-art").upload(op, f, { contentType: f.type || "image/png", upsert: true }); if (!oe) original = sb.storage.from("design-art").getPublicUrl(op).data.publicUrl; } catch { /* the original is a bonus */ }
+      const row = { slug, name: tdTitle(f), art, card, thumb, sort, product: tdProd };
+      let { data, error } = await sb.from("tumbler_designs").insert(original ? { ...row, original } : row).select().single();
+      if (error && /original/i.test(error.message || "")) ({ data, error } = await sb.from("tumbler_designs").insert(row).select().single());   // the "original" column isn't set up yet
+      if (error) throw error; tdRows.push(data); tdRender(); ok++;
+    } catch (err) { toast(/decode|bitmap|heic/i.test(String(err)) ? `“${f.name}” couldn't be read. Try a JPG or PNG.` : `“${f.name}” didn't upload: ` + (err.message || err)); }
+  }
+  $("tdMsg").textContent = ok ? `Added ${ok}. Tap a name to rename it.` : ""; if (ok) toast(`Added ${ok} design${ok > 1 ? "s" : ""}`);
+});
+// "Attach original files": pick your full-size files; each one is matched to a design by its name (letters and numbers only) and saved as that design's print file
+const tdNorm = (t) => String(t).toLowerCase().replace(/\.[a-z0-9]+$/, "").replace(/[^a-z0-9]+/g, "");
+$("tdOrig").onclick = () => $("tdOrigFile").click();
+$("tdOrigFile").addEventListener("change", async () => {
+  const files = [...$("tdOrigFile").files].filter((f) => f.type.startsWith("image/")); $("tdOrigFile").value = ""; if (!files.length) return;
+  const byName = new Map(); tdRows.forEach((r) => { const k = tdNorm(r.name); if (!byName.has(k)) byName.set(k, r); });
+  let done = 0, miss = [], failed = 0, n = 0;
+  for (const f of files) {
+    n++; $("tdMsg").textContent = `Attaching ${n} of ${files.length}…`;
+    const row = byName.get(tdNorm(f.name)); if (!row) { miss.push(f.name); continue; }
+    try {
+      const ext = (f.name.split(".").pop() || "png").toLowerCase().replace(/[^a-z0-9]/g, "").slice(0, 5) || "png", op = `${row.slug}/original.${ext}`;
+      const { error } = await sb.storage.from("design-art").upload(op, f, { contentType: f.type || "image/png", upsert: true }); if (error) throw error;
+      const url = sb.storage.from("design-art").getPublicUrl(op).data.publicUrl, { error: ue } = await sb.from("tumbler_designs").update({ original: url }).eq("slug", row.slug); if (ue) throw ue;
+      row.original = url; done++;
+    } catch (err) { failed++; if (/original/i.test(String(err.message || err))) { $("tdMsg").textContent = "Set up first: run the one-line SQL in Supabase to add the “original” column (see the note I gave you)."; return; } }
+  }
+  $("tdMsg").textContent = `Attached ${done} original${done === 1 ? "" : "s"}${miss.length ? `, ${miss.length} had no matching design` : ""}${failed ? `, ${failed} failed` : ""}.` + (miss.length ? ` Not matched: ${miss.slice(0, 6).join(", ")}${miss.length > 6 ? "…" : ""}` : "");
+  toast(`Attached ${done} original${done === 1 ? "" : "s"}`);
+});
+/* ---------- home page showcase: the three tumblers at the top of the home page (saved in site_settings.showcase) ---------- */
+const SC_FONT_OPTS = [["script", "Script"], ["pacifico", "Casual"], ["dancing", "Signature"], ["satisfy", "Brush"], ["lobster", "Retro"], ["caveat", "Handwritten"], ["serif", "Serif"], ["playfair", "Elegant"], ["classic", "Classic"], ["block", "Block"], ["bebas", "Tall"], ["marker", "Marker"]];
+const SC_DEFAULT = [{ d: "sunflowers", name: "Grace", f: "dancing", i: "black", y: 43, a: 0 }, { d: "roses", name: "Isabella", f: "script", i: "gold", y: 43, a: 0 }, { d: "eagle1776", name: "Marcus", f: "bebas", i: "white", y: 43, a: 0 }];
+const SC_POS = ["Left", "Middle (front)", "Right"];
+async function scOpen() {
+  $("scSheet").hidden = false; document.body.style.overflow = "hidden"; $("scMsg").textContent = "";
+  const [{ data: ds }, cur] = await Promise.all([sb.from("tumbler_designs").select("slug,name,thumb,art,card").eq("visible", true).order("sort"), readSiteRow()]);
+  const list = ds || [], sc = Array.isArray(cur.showcase) && cur.showcase.length ? cur.showcase : SC_DEFAULT; window.__scDesigns = list;
+  $("scSlots").innerHTML = [0, 1, 2].map((n) => { const v = sc[n] || SC_DEFAULT[n];
+    return `<div class="sc-slot" data-n="${n}"><h3>${SC_POS[n]}</h3><div class="sc-body"><div class="sc-pv"><img alt="Preview" width="92" height="201"></div><div class="sc-form">
+      <div class="sc-row"><label>Design<select data-sc="d">${list.map((d) => `<option value="${esc(d.slug)}"${d.slug === v.d ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select></label>
+      <label>Name on the tumbler<input data-sc="name" maxlength="20" value="${esc(v.name || "")}" placeholder="e.g. Grace" autocomplete="off"></label></div>
+      <div class="sc-row"><label>Lettering<select data-sc="f">${SC_FONT_OPTS.map(([k, l]) => `<option value="${k}"${k === v.f ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label>Ink<select data-sc="i">${[["gold", "Gold"], ["black", "Black"], ["white", "White"]].map(([k, l]) => `<option value="${k}"${k === v.i ? " selected" : ""}>${l}</option>`).join("")}</select></label></div>
+      <div class="sc-row"><label>Name height<input type="range" data-sc="y" min="10" max="90" value="${v.y ?? 43}"></label>
+      <label>Name left / right<input type="range" data-sc="a" min="-70" max="70" value="${v.a ?? 0}"></label></div></div></div></div>`; }).join("");
+  document.querySelectorAll("#scSlots .sc-slot").forEach(scPaint);
+}
+const scTimers = {};
+function scVals(el) { const g = (k) => el.querySelector(`[data-sc="${k}"]`).value.trim(); return { d: g("d"), name: g("name").slice(0, 20), f: g("f"), i: g("i"), y: Number(g("y")), a: Number(g("a")) }; }
+async function scPaint(el) {   // small live preview, drawn the same way as the home page
+  const v = scVals(el), d = (window.__scDesigns || []).find((x) => x.slug === v.d), img = el.querySelector(".sc-pv img"); if (!d) return;
+  const F = SC_FONTS[v.f] || SC_FONTS.script; try { await document.fonts.load(scFont(F, F.size), v.name || "Aa"); } catch { /* fine */ }
+  try { img.src = await tumblerPreview({ id: d.slug, name: d.name, art: d.art, card: d.card }, { name: v.name, f: v.f, i: v.i, y: v.y, a: v.a }); } catch { /* keep the last picture */ }
+}
+$("scSlots").addEventListener("input", (e) => { const el = e.target.closest(".sc-slot"); if (!el) return; clearTimeout(scTimers[el.dataset.n]); scTimers[el.dataset.n] = setTimeout(() => scPaint(el), 150); });
+$("scBtn").onclick = scOpen;
+$("scClose").onclick = () => { $("scSheet").hidden = true; document.body.style.overflow = ""; };
+async function scWrite(list) {
+  const cur = await readSiteRow(), next = { ...cur }; if (list) next.showcase = list; else delete next.showcase;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+  if (error) { toast("Couldn't save: " + error.message); return false; } site = next; return true;
+}
+const SC_BUCKET_RE = /\/design-art\/(showcase\/[^?#]+)$/;
+async function scImage(v, n) {   // draws one showcase tumbler and stores it as a small picture, so the home page only has to load it
+  const d = (window.__scDesigns || []).find((x) => x.slug === v.d); if (!d) throw new Error("design missing");
+  const F = SC_FONTS[v.f] || SC_FONTS.script; try { await document.fonts.load(scFont(F, F.size), v.name || "Aa"); } catch { /* fine */ }
+  const src = await loadImg(await tumblerPreview({ id: d.slug, name: d.name, art: d.art, card: d.card }, { name: v.name, f: v.f, i: v.i, y: v.y, a: v.a }));
+  const c = document.createElement("canvas"); c.width = 440; c.height = Math.round(440 * src.height / src.width); c.getContext("2d").drawImage(src, 0, 0, c.width, c.height);
+  const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", .8)), path = `showcase/s${n}-${Date.now()}.jpg`;
+  const { error } = await sb.storage.from("design-art").upload(path, blob, { contentType: "image/jpeg", upsert: false }); if (error) throw error;
+  // a permanent copy at a fixed address: the home page asks for it straight away, before it has read any settings
+  const fixed = `showcase/slot-${n}.jpg`;
+  const f = await sb.storage.from("design-art").upload(fixed, blob, { contentType: "image/jpeg", cacheControl: "60", upsert: true });
+  if (f.error) console.warn("showcase fixed picture:", f.error.message);
+  return { img: sb.storage.from("design-art").getPublicUrl(path).data.publicUrl, fixed: !f.error };
+}
+$("scSave").onclick = async () => {
+  const list = [...document.querySelectorAll("#scSlots .sc-slot")].map(scVals);
+  if (list.some((x) => !x.d)) return toast("Choose a design for each tumbler");
+  $("scSave").disabled = true; $("scMsg").textContent = "Preparing the pictures…";
+  const old = ((await readSiteRow()).showcase || []).map((x) => x.img).filter(Boolean);
+  try { for (let n = 0; n < list.length; n++) Object.assign(list[n], await scImage(list[n], n)); }
+  catch (e) { $("scSave").disabled = false; $("scMsg").textContent = ""; return toast("Couldn't prepare the pictures: " + (e.message || e)); }
+  const ok = await scWrite(list); $("scSave").disabled = false;
+  if (ok) {
+    $("scMsg").textContent = "Saved. Live on the home page now."; toast("Showcase saved");
+    if (list.some((x) => !x.fixed)) toast("Saved, but the fast-loading copy couldn't be stored. The home page still works.");
+    const gone = old.map((u) => (String(u).match(SC_BUCKET_RE) || [])[1]).filter(Boolean); if (gone.length) sb.storage.from("design-art").remove(gone).catch(() => {});
+  } else $("scMsg").textContent = "";
+};
+$("scReset").onclick = async () => { if (await scWrite(null)) { $("scMsg").textContent = "Back to the original pictures."; toast("Original pictures restored"); scOpen(); } };
+/* ---------- help guide ---------- */
+$("helpBtn").onclick = () => { $("helpSheet").hidden = false; document.body.style.overflow = "hidden"; };
+$("helpClose").onclick = () => { $("helpSheet").hidden = true; document.body.style.overflow = ""; };
+
+/* ---------- products to design: templates (round or flat) with a base photo and a marked printable area ---------- */
+let ptRows = [], ptCur = null, pc = null;   // pc = calibration state
+function ptFillListings(sel) {
+  $("ptListing").innerHTML = `<option value="">None (send them to the shop category)</option>` + (typeof rows !== "undefined" ? rows : []).filter((r) => !r.digital).map((r) => `<option value="${esc(r.id)}">${esc(r.name)}</option>`).join("");
+  $("ptListing").value = sel || ""; $("ptMakeMsg").textContent = "";
+}
+$("ptMakeItem").onclick = async () => {
+  const msg = $("ptMakeMsg"), name = $("ptName").value.trim(); if (!name) { msg.textContent = "Type the product name first."; return; }
+  if (!ptCur) { msg.textContent = "Save the product first, then come back and tap this."; return; }
+  const price = Math.max(0, parseFloat($("ptPrice").value) || 0); if (!price) { msg.textContent = "Enter a starting price."; return; }
+  const id = `custom-${ptCur.slug}`, img = ptCur.photo.startsWith("http") ? ptCur.photo : location.origin + "/" + ptCur.photo.replace(/^\//, "");
+  const { error } = await sb.from("listings").upsert({ id, name: `Custom ${name} (your design)`, title: `Custom ${name} (your design)`, category: $("ptCat").value, price, currency: "USD", stock: 999, digital: false, personalizable: true, visible: true, sort: 9980, variations: [], images: [{ card: img, large: img }], tags: ["custom"], description: "Designed by you in our studio designer, made to order. We confirm the details with you before printing." });
+  if (error) { msg.textContent = "Couldn't create it: " + error.message; return; }
+  if (typeof loadRows === "function") await loadRows(); ptFillListings(id); $("ptListing").value = id; msg.textContent = "Created. Save the product to link it, then add sizes and prices in the listing (open “Custom " + name + "”).";
+};
+const ptSlug = (t) => (String(t).toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 28) || "product") + "-" + Math.random().toString(36).slice(2, 5);
+async function ptLoad() {
+  const { data, error } = await sb.from("product_templates").select("*").order("sort");
+  if (error) { $("ptList").innerHTML = `<div class="empty"><b>Not set up yet</b><p class="hint">Run product-templates-setup.sql once in Supabase (SQL Editor). (${esc(error.message)})</p></div>`; return; }
+  ptRows = data; ptRender();
+}
+function ptRender() {
+  $("ptList").innerHTML = ptRows.map((r) => `<div class="pt-item${r.visible ? "" : " off"}" data-id="${r.id}"><img src="${esc(r.photo)}" alt="">
+    <div><b>${esc(r.name)}</b><small>${r.kind === "round" ? "Round" : "Flat"} · orders go to ${esc(({ tumblers: "Tumblers", mugs: "Mugs", tags: "Badges & tags", apparel: "Apparel", other: "Everything else" })[r.category] || r.category)}</small></div>
+    <button class="tg" type="button" role="switch" aria-checked="${r.visible}" aria-label="Show this product" data-vis style="position:relative;width:52px;height:30px;border-radius:999px;border:1px solid rgba(245,236,220,.25);background:${r.visible ? "#2f9e62" : "#3a3f4d"};cursor:pointer;padding:0"><i style="position:absolute;top:3px;left:${r.visible ? 25 : 3}px;width:22px;height:22px;border-radius:50%;background:#f5ecdc;transition:left .18s"></i></button>
+    <button class="ed" type="button" data-edit>Edit</button><button class="rm" type="button" aria-label="Delete this product" data-del style="min-width:44px;min-height:44px;border-radius:10px;border:1px solid var(--line-soft);background:transparent;color:#ffb4a8;cursor:pointer;font-size:18px">🗑</button></div>`).join("") || `<div class="empty"><b>No products yet</b><p class="hint">Tap ＋ Add a product to start.</p></div>`;
+  $("ptState").textContent = `${ptRows.filter((r) => r.visible).length} to choose from`;
+}
+function ptView(edit) { $("ptListView").hidden = edit; $("ptEditView").hidden = !edit; $("ptBack").hidden = !edit; $("ptTitle").textContent = edit ? (ptCur ? "Edit product" : "Add a product") : "Products to design"; }
+$("ptBtn").onclick = async () => { $("ptSheet").hidden = false; document.body.style.overflow = "hidden"; ptView(false); await ptLoad(); };
+$("ptClose").onclick = () => { $("ptSheet").hidden = true; document.body.style.overflow = ""; };
+$("ptBack").onclick = () => ptView(false);
+$("ptList").addEventListener("click", async (e) => {
+  const row = e.target.closest(".pt-item"); if (!row) return; const r = ptRows.find((x) => x.id === row.dataset.id);
+  if (e.target.closest("[data-vis]")) { const visible = !r.visible, { error } = await sb.from("product_templates").update({ visible }).eq("id", r.id); if (error) return toast("Couldn't change it: " + error.message); r.visible = visible; ptRender(); toast(visible ? "Showing on the store" : "Hidden from the store"); }
+  if (e.target.closest("[data-edit]")) ptEdit(r);
+  if (e.target.closest("[data-del]")) {
+    const b = e.target.closest("[data-del]"); if (b.dataset.armed !== "1") { b.dataset.armed = "1"; b.textContent = "Tap again to delete"; b.style.fontSize = "13px"; b.style.padding = "0 10px"; setTimeout(() => { b.dataset.armed = ""; b.textContent = "🗑"; b.style.fontSize = "18px"; b.style.padding = ""; }, 3500); return; }
+    if (r.slug === "tumbler" && ptRows.length === 1) return toast("Keep at least one product");
+    const { error } = await sb.from("product_templates").delete().eq("id", r.id); if (error) return toast("Couldn't delete: " + error.message);
+    const m = /\/object\/public\/design-art\/(.+)$/.exec(r.photo || ""); if (m) await sb.storage.from("design-art").remove([m[1]]).catch(() => {});
+    ptRows = ptRows.filter((x) => x.id !== r.id); ptRender(); toast("Deleted");
+  }
+});
+$("ptAdd").onclick = () => ptEdit(null);
+function ptEdit(r) {
+  ptCur = r; pc = null; $("ptErr").hidden = true; $("ptMsg").textContent = "";
+  ptFillListings(r && r.listing_id); $("ptName").value = r ? r.name : ""; setSeg("ptKind", "k", r ? r.kind : "flat"); $("ptCat").value = r ? r.category : "other"; $("ptPhotoName").textContent = r ? "Current photo kept. Choose a new one to replace it." : ""; $("ptCalWrap").hidden = true; ptView(true);
+  if (r) { const g = r.geom, img = new Image(); img.crossOrigin = "anonymous"; img.onload = () => ptCalStart(img, { W: g.W, H: g.H, SY: g.SY || 0, L: g.L, R: g.R, T: g.T, B: g.B, TY: g.TY || (g.T + g.B) / 2, shape: g.shape || "rect", radius: g.radius || 0 }, r.kind); img.src = r.photo; }
+}
+function setSeg(id, key, val) { $(id).querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset[key] === val)); }
+$("ptKind").addEventListener("click", (e) => { const b = e.target.closest("button[data-k]"); if (!b) return; setSeg("ptKind", "k", b.dataset.k); if (pc) { pc.kind = b.dataset.k; ptCalUi(); ptCalDraw(); } });
+$("ptShape").addEventListener("click", (e) => { const b = e.target.closest("button[data-s]"); if (!b) return; setSeg("ptShape", "s", b.dataset.s); if (pc) { pc.g.shape = b.dataset.s; ptCalDraw(); } });
+$("ptRadius").addEventListener("input", () => { if (pc) { pc.g.radius = +$("ptRadius").value; ptCalDraw(); } });
+$("ptPhotoBtn").onclick = () => $("ptPhotoIn").click();
+$("ptPhotoIn").addEventListener("change", async () => {
+  const f = $("ptPhotoIn").files[0]; $("ptPhotoIn").value = ""; if (!f) return;
+  try {
+    const bmp = await createImageBitmap(f), sc = Math.min(1, 1100 / Math.max(bmp.width, bmp.height)), W = Math.round(bmp.width * sc), H = Math.round(bmp.height * sc);
+    const c = document.createElement("canvas"); c.width = W; c.height = H; const x = c.getContext("2d"); x.fillStyle = "#fff"; x.fillRect(0, 0, W, H); x.drawImage(bmp, 0, 0, W, H);
+    const img = new Image(); img.onload = () => { $("ptPhotoName").textContent = f.name; pc && (pc.fresh = true); ptCalStart(img, null, $("ptKind").querySelector('[aria-pressed="true"]').dataset.k, true); }; img.src = c.toDataURL("image/jpeg", .85); ptPhotoImg = img;
+  } catch { toast("That photo couldn't be read. Try a JPG or PNG."); }
+});
+let ptPhotoImg = null;
+function ptCalStart(img, g, kind, fresh) {
+  const W = img.naturalWidth, H = (g && g.H) || img.naturalHeight;
+  pc = { img, kind, fresh: !!fresh, g: g || { W: img.naturalWidth, H: img.naturalHeight, SY: 0, L: Math.round(W * .2), R: Math.round(W * .8), T: Math.round(H * .2), B: Math.round(H * .8), TY: Math.round(H * .5), shape: "rect", radius: 0 } };
+  if (fresh && kind === "round") Object.assign(pc.g, { L: Math.round(W * .34), R: Math.round(W * .66), T: Math.round(H * .1), B: Math.round(H * .92), TY: Math.round(H * .5) });
+  if (fresh) { ptPhotoImg = img; }
+  $("ptCalWrap").hidden = false; setSeg("ptShape", "s", pc.g.shape || "rect"); $("ptRadius").value = pc.g.radius || 0; ptCalUi(); ptCalDraw();
+}
+function ptCalUi() { $("ptFlatOpts").hidden = pc.kind !== "flat"; $("ptCalHint").textContent = pc.kind === "round" ? "Drag the dots: left and right are the sides of the body, top and bottom are the printable part. The lower dot (gold line) is where the name sits." : "Drag the gold dots so the box covers exactly the printable area (the surface the artwork prints on)."; }
+const ptHandles = () => { const g = pc.g, mx = (g.L + g.R) / 2, my = (g.T + g.B) / 2; const h = [{ k: "L", x: g.L, y: my }, { k: "R", x: g.R, y: my }, { k: "T", x: mx, y: g.T }, { k: "B", x: mx, y: g.B }]; if (pc.kind === "round") h.push({ k: "TY", x: g.R, y: g.TY }); return h; };
+function ptCalDraw() {
+  const cvs = $("ptCal"), g = pc.g, W = g.W, H = g.H, wcss = cvs.clientWidth || 520, dpr = Math.min(2, devicePixelRatio || 1); cvs.width = Math.round(wcss * dpr); cvs.height = Math.round(wcss * dpr * H / W); cvs.style.height = (wcss * H / W) + "px";
+  const c = cvs.getContext("2d"), k = cvs.width / W; c.setTransform(k, 0, 0, k, 0, 0); c.drawImage(pc.img, 0, g.SY || 0, W, H, 0, 0, W, H);
+  c.fillStyle = "rgba(5,9,17,.55)"; c.beginPath(); c.rect(0, 0, W, H);
+  if (pc.kind === "flat" && g.shape === "ellipse") c.ellipse((g.L + g.R) / 2, (g.T + g.B) / 2, (g.R - g.L) / 2, (g.B - g.T) / 2, 0, 0, 7); else { const r = pc.kind === "flat" ? Math.min(g.radius || 0, (g.R - g.L) / 2, (g.B - g.T) / 2) : 0; c.roundRect(g.L, g.T, g.R - g.L, g.B - g.T, r); }
+  c.fill("evenodd"); c.strokeStyle = "#e8c872"; c.lineWidth = 3 / k * dpr; c.stroke();
+  if (pc.kind === "round") { c.setLineDash([10 / k * dpr, 8 / k * dpr]); c.beginPath(); c.moveTo(g.L, g.TY); c.lineTo(g.R, g.TY); c.stroke(); c.setLineDash([]); }
+  ptHandles().forEach((h) => { c.fillStyle = "#e8c872"; c.strokeStyle = "#1b1305"; c.lineWidth = 2 / k * dpr; c.beginPath(); c.arc(h.x, h.y, 13 / k * dpr, 0, 7); c.fill(); c.stroke(); });
+}
+let ptDrag = null;
+$("ptCal").addEventListener("pointerdown", (e) => {
+  if (!pc) return; const r = $("ptCal").getBoundingClientRect(), s = pc.g.W / r.width, x = (e.clientX - r.left) * s, y = (e.clientY - r.top) * s;
+  let best = null, bd = 1e9; ptHandles().forEach((h) => { const d = Math.hypot(h.x - x, h.y - y); if (d < bd) { bd = d; best = h; } });
+  if (best && bd < 40 * s) { ptDrag = best.k; $("ptCal").setPointerCapture(e.pointerId); e.preventDefault(); }
+});
+$("ptCal").addEventListener("pointermove", (e) => {
+  if (!ptDrag) return; const g = pc.g, r = $("ptCal").getBoundingClientRect(), s = g.W / r.width, x = Math.max(0, Math.min(g.W, (e.clientX - r.left) * s)), y = Math.max(0, Math.min(g.H, (e.clientY - r.top) * s));
+  if (ptDrag === "L") g.L = Math.min(x, g.R - 30); if (ptDrag === "R") g.R = Math.max(x, g.L + 30); if (ptDrag === "T") g.T = Math.min(y, g.B - 30); if (ptDrag === "B") g.B = Math.max(y, g.T + 30); if (ptDrag === "TY") g.TY = Math.max(g.T, Math.min(g.B, y));
+  if (pc.kind === "round") g.TY = Math.max(g.T, Math.min(g.B, g.TY)); ptCalDraw();
+});
+["pointerup", "pointercancel"].forEach((t) => $("ptCal").addEventListener(t, () => { ptDrag = null; }));
+window.addEventListener("resize", () => { if (pc && !$("ptEditView").hidden) ptCalDraw(); });
+$("ptSave").onclick = async () => {
+  const err = $("ptErr"); err.hidden = true; const name = $("ptName").value.trim(), kind = $("ptKind").querySelector('[aria-pressed="true"]').dataset.k, category = $("ptCat").value;
+  const fail = (m) => { err.textContent = m; err.hidden = false; };
+  if (!name) return fail("Give the product a name."); if (!pc) return fail("Choose a photo of the blank product first.");
+  $("ptSave").disabled = true; $("ptMsg").textContent = "Saving…";
+  try {
+    const g = pc.g, slug = ptCur ? ptCur.slug : ptSlug(name); let photo = ptCur ? ptCur.photo : "";
+    if (pc.fresh || !ptCur) {
+      const c = document.createElement("canvas"); c.width = g.W; c.height = g.H; c.getContext("2d").drawImage(pc.img, 0, 0, g.W, g.H);
+      const blob = await new Promise((ok) => c.toBlob(ok, "image/jpeg", .85)), path = `products/${slug}/photo-${Date.now()}.jpg`;
+      const { error } = await sb.storage.from("design-art").upload(path, blob, { contentType: "image/jpeg", upsert: false }); if (error) throw error;
+      photo = sb.storage.from("design-art").getPublicUrl(path).data.publicUrl; g.SY = 0;
+      if (ptCur) { const m = /\/object\/public\/design-art\/(.+)$/.exec(ptCur.photo || ""); if (m) sb.storage.from("design-art").remove([m[1]]).catch(() => {}); }
+    }
+    const geom = { W: g.W, H: g.H, SY: g.SY || 0, L: Math.round(g.L), R: Math.round(g.R), T: Math.round(g.T), B: Math.round(g.B), TY: Math.round(g.TY), shape: kind === "flat" ? (g.shape || "rect") : "rect", radius: kind === "flat" ? Math.round(g.radius || 0) : 0 };
+    const row = { name, kind, category, photo, geom, listing_id: $("ptListing").value || null };
+    const res = ptCur ? await sb.from("product_templates").update(row).eq("id", ptCur.id) : await sb.from("product_templates").insert({ ...row, slug, sort: (ptRows.reduce((m, r) => Math.max(m, r.sort), 0)) + 10 });
+    if (res.error) throw res.error; toast("Saved"); ptCur = null; pc = null; await ptLoad(); ptView(false);
+  } catch (x) { fail("Couldn't save: " + (x.message || x)); }
+  $("ptSave").disabled = false; $("ptMsg").textContent = "";
+};
+</script>
+</body>
+</html>
