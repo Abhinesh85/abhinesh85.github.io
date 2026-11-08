@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="fonts/google-main.css">
 <link rel="preconnect" href="https://i.etsystatic.com">
 <script src="products.js?v=d6fe29f995"></script>
+<script src="fontsheet.js"></script>
 <style>
 /* Layout: dark navy studio with gold line-work from the PrAjo badge; one wide column of full-bleed bands, content capped at 1200px. */
 :root {
@@ -883,6 +884,7 @@ document.querySelector(".swatches").addEventListener("click", (e) => {
 });
 $("fontBox").insertAdjacentHTML("beforeend", Object.entries(FONTS).map(([id, F]) => `<button type="button" data-f="${id}" aria-pressed="${id === PV.font}" style="font-family:${F.fam.replace(/"/g, "'")};font-weight:${F.wt};font-style:${F.style || "normal"};font-size:17px">${F.label}</button>`).join(""));
 $("fontBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-f]"); if (!b) return; PV.font = b.dataset.f; $("fontBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); setName(true); });
+if (window.fontSheet) fontSheet($("fontBox"), { name: () => nameIn.value, nameInput: nameIn });
 function setName(on) {
   PV.showName = on; const t = $("nameToggle"); t.setAttribute("aria-checked", on); t.textContent = "Show name: " + (on ? "On" : "Off");
   const pn = lcName(PV.template ? PV.template.name : "tumbler"); $("orderName").textContent = (on ? `Order a ${pn} with this name` : `Order a ${pn}`) + " →"; sizeName();

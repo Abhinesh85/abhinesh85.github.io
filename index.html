@@ -454,6 +454,7 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 .thanks .big { font-size: 46px; }
 /* share */
 .ask-row { display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.ask-row:has([data-fav-pp]) { grid-template-columns: 1.5fr 1fr 1fr; gap: 8px; } .ask-row:has([data-fav-pp]) .btn { padding: 0 10px; min-height: 46px; font-size: 14px; line-height: 1.15; }
 .ask-row [data-share] svg, .share-shop svg { width: 18px; height: 18px; }
 .share { position: fixed; inset: 0; z-index: 96; background: rgba(5, 9, 17, .72); backdrop-filter: blur(4px); display: grid; place-items: end center; padding: 16px; }
 @media (min-width: 640px) { .share { place-items: center; } }
@@ -552,6 +553,15 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 .steps li.now { opacity: 1; outline: 1.5px solid var(--gold-2, #e9c46a); } .steps li.now b { background: var(--gold-2, #e9c46a); color: #1b1305; }
 .steps li.done { opacity: 1; } .steps li.done b { background: #4caf7a; color: #fff; } .steps li.done b::before { content: "✓"; } .steps li.done b { font-size: 0; } .steps li.done b::before { font-size: 12px; }
 @media (max-width: 420px) { .steps { font-size: 12px; } .steps li { padding: 7px 6px; } }
+/* phones: products first. Hero is compact, the shop comes straight after it, and the inspiration sections move below the products */
+@media (max-width: 700px) {
+  main#top { display: flex; flex-direction: column; }
+  main#top > .hero { order: 1; padding-bottom: 22px; } main#top > .marquee { display: none; }
+  main#top > #shop { order: 2; padding-top: 6px !important; } main#top > #collections { order: 3; } main#top > #gallery { order: 4; } main#top > #ownpic { order: 5; }
+  main#top > #how { order: 6; } main#top > #reviews { order: 7; } main#top > #custom { order: 8; } main#top > #faq { order: 9; } main#top > #about { order: 10; }
+  .hero .teaser { display: none; }
+  .hero .lede { margin-bottom: 0; } .hero-cta { margin-top: 18px; } .hero .proof { margin-top: 16px; }
+}
 .dbr { position: fixed; inset: 0; z-index: 200; background: rgba(5, 9, 17, .96); overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .dbr[hidden] { display: none; } .dbr-box { max-width: 1100px; margin: 0 auto; padding: 0 14px 80px; }
 .dbr-head { position: sticky; top: 0; z-index: 3; display: flex; justify-content: space-between; align-items: center; padding: 10px 0; background: rgba(5, 9, 17, .98); } .dbr-head h3 { margin: 0; font-size: 22px; }
@@ -991,6 +1001,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 </div>
 
 <script src="showcase.js"></script>
+<script src="fontsheet.js"></script>
 <script src="season.js" defer></script>
 <script>
 const $ = (id) => document.getElementById(id);
@@ -1468,6 +1479,7 @@ function mountDesignPicker(p) {
   let pvSeq = 0; const fontReady = (k) => (document.fonts && SC_FONTS[k] ? document.fonts.load(scFont(SC_FONTS[k], 40)).catch(() => {}) : Promise.resolve());
   let fxT = 0; const fxGo = () => { clearTimeout(fxT); fxT = setTimeout(() => apply(), 80); }; window.__nameRefresh = () => { if ($("pDesign")) fxGo(); };
   $("pFxFonts").onclick = (e) => { const b = e.target.closest("button[data-f]"); if (!b) return; fx.f = b.dataset.f; $("pFxFonts").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); fxGo(); };
+  window.fontSheet && fontSheet($("pFxFonts"), { name: () => ($("pPersonal") || {}).value ? $("pPersonal").value.replace(/\s*[·|]?\s*Design:.*$/i, "") : "", nameInput: $("pPersonal") });
   const INKS = [["gold", "Gold", "linear-gradient(#fff3cf,#e9c46a,#a97a22)"], ["silver", "Silver", "linear-gradient(#fff,#c9ced6,#7f8896)"], ["rosegold", "Rose gold", "linear-gradient(#ffe3dc,#e8a598,#b76e62)"], ["white", "White", "#ffffff"], ["black", "Black", "#15171c"], ["#d62839", "Red", "#d62839"], ["#ff5fa2", "Pink", "#ff5fa2"], ["#ff8a00", "Orange", "#ff8a00"], ["#f5c400", "Yellow", "#f5c400"], ["#1fa34a", "Green", "#1fa34a"], ["#14b8a6", "Teal", "#14b8a6"], ["#2563eb", "Blue", "#2563eb"], ["#1e2a5a", "Navy", "#1e2a5a"], ["#7c3aed", "Purple", "#7c3aed"]];
   const inkName = (v) => (INKS.find((x) => x[0] === v) || [0, "custom " + v])[1].toLowerCase();
   $("pFxInks").innerHTML = INKS.map(([v, l, bg]) => `<button type="button" data-ink="${v}" aria-pressed="${v === fx.i}" aria-label="${l}" title="${l}" style="background:${bg}">${l}</button>`).join("") + `<label class="cust" title="Pick any color" aria-label="Pick any color">🎨<input type="color" id="pFxCustom" value="#e11d48"></label>`;
@@ -1536,6 +1548,7 @@ function mountSimpleNameStyle(p) {
   };
   const show = () => { if (!document.body.contains(box)) return; const add = Object.values(chosenOptions()).some((x) => /^add name$/i.test(x)), designed = !!($("pDesign") && $("pDesign").value); box.hidden = designed || !(nm() || add || window.__nameOpen); if (box.hidden) window.__nameNote2 = ""; else paint(); };
   $("pFx2Fonts").onclick = (e) => { const b = e.target.closest("button[data-f]"); if (!b) return; st.f = b.dataset.f; $("pFx2Fonts").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === b)); show(); };
+  window.fontSheet && fontSheet($("pFx2Fonts"), { name: () => ($("pPersonal") || {}).value ? $("pPersonal").value.replace(/\s*[·|]?\s*Design:.*$/i, "") : "", nameInput: $("pPersonal") });
   const setInk = (v, btn) => { st.i = v; $("pFx2Inks").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x === btn)); show(); };
   $("pFx2Inks").onclick = (e) => { const b = e.target.closest("button[data-ink]"); if (b) setInk(b.dataset.ink, b); };
   $("pFx2Custom").oninput = () => setInk($("pFx2Custom").value, null);
