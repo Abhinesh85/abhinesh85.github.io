@@ -1160,7 +1160,8 @@ fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/site_settings?id=eq.1&se
 const CATS = [
   { id: "tumblers", label: "Tumblers", blurb: "Insulated, full-wrap & engraved" },
   { id: "mugs", label: "Mugs", blurb: "Morning coffee, made personal" },
-  { id: "tags", label: "Badges & Tags", blurb: "Heritage & everyday carry" },
+  { id: "tags", label: "Badges, Tags & Keychains", blurb: "Heritage & everyday carry" },
+  { id: "coasters", label: "Coasters", blurb: "Leather-look, any design" },
   { id: "stickers", label: "Stickers", blurb: "UV DTF stickers from any picture" },
   { id: "printables", label: "Printables", blurb: "Instant-download learning fun" },
 ];
@@ -1435,7 +1436,7 @@ const tplFor = (p) => (window.__tpls || []).find((t) => p && t.listing_id === p.
 function designList(slug) {   // each product has its own designs (admin → Tumbler designs → "Designs for")
   slug = slug || "tumbler"; let all = window.__allDesigns;
   if (!all) { try { const c = JSON.parse(localStorage.getItem("prajo:alldesigns") || "null"); if (Array.isArray(c)) all = c; } catch { /* none cached */ } }
-  if (slug === "uv-dtf-sticker" && all && all.length) return all;   // stickers can use any design on the site, whichever product it was added for
+  if ((slug === "uv-dtf-sticker" || slug === "keychain" || slug === "keychain-rect" || slug === "coaster") && all && all.length) return all;   // stickers can use any design on the site, whichever product it was added for
   if (all && all.length) return all.filter((d) => (d.product || "tumbler") === slug);
   if (slug !== "tumbler") return [];
   if (window.__designs && window.__designs.length) return window.__designs;
@@ -1612,7 +1613,7 @@ function mountDesignPicker(p) {
     const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img");
     if (s0) { s0.src = d ? d.card : p.images[0].large; s0.style.objectFit = d ? "contain" : ""; } if (t0) t0.src = d ? d.card : p.images[0].card;
     window.__tplReady.then(() => { const tpl = tplFor(p);
-      if (!d && !(tpl && tpl.slug === "uv-dtf-sticker")) blankTumbler(tpl).then((u) => { if (!sel.value) { if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
+      if (!d && !(tpl && (tpl.slug === "uv-dtf-sticker" || tpl.slug === "keychain" || tpl.slug === "keychain-rect" || tpl.slug === "coaster"))) blankTumbler(tpl).then((u) => { if (!sel.value) { if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
       const my = ++pvSeq;
       if (d) (pvName() ? fontReady(fx.f) : Promise.resolve()).then(() => tumblerPreview(d, optsFor(tpl), tpl)).then((u) => { if (sel.value === d.id && my === pvSeq) { if (s0) s0.src = u; if (t0) t0.src = u; const fp = $("pFxPrev"); if (fp) fp.src = u; } }).catch(() => { /* keep the flat artwork */ }); });
     const eb = document.querySelector("#info .eyebrow"); if (eb && eb.dataset.o === undefined) eb.dataset.o = eb.textContent;
@@ -1634,7 +1635,7 @@ function mountDesignPicker(p) {
       if (navigator.share && matchMedia("(pointer: coarse)").matches) navigator.share({ title: data.title, text: data.text, url: data.url }).catch(() => {}); else openShare(data); };
   };
   sel.onchange = apply; apply();
-  if (!sel.value && p.id !== "custom-uv-dtf-stickers") window.__tplReady.then(() => blankTumbler(tplFor(p))).then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
+  if (!sel.value && p.id !== "custom-uv-dtf-stickers" && p.id !== "custom-photo-keychain" && p.id !== "custom-leather-coaster" && p.id !== "custom-rect-keychain") window.__tplReady.then(() => blankTumbler(tplFor(p))).then((u) => { if (!sel.value) { const s0 = $("slides").firstElementChild, t0 = $("thumbs").querySelector("img"); if (s0) { s0.src = u; s0.style.objectFit = "contain"; } if (t0) t0.src = u; } }).catch(() => {});
   return true;
 }
 // Listings with a name box but no design picker (ready-made designs): let the customer choose how the name looks. The choice goes into the order text.
