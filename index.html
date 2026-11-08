@@ -266,6 +266,7 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 }
 .adj { display: flex; align-items: center; gap: 8px; flex: 1 1 100%; font-weight: 700; } .adj span { min-width: 92px; } .adj input { flex: 1; accent-color: #d9ab4f; } .adj output { min-width: 48px; text-align: right; }
 .card .nm { font-weight: 700; font-size: 15px; line-height: 1.3; }
+.card .rvline { font-size: 12.5px; min-height: 0; }
 .card .pr { font-family: var(--f-display); font-size: 18px; color: var(--gold-2); }
 .card .pr small { font-family: var(--f-body); font-size: 12.5px; color: var(--muted); font-weight: 600; }
 
@@ -331,6 +332,21 @@ footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space
 .opt .chips button { min-height: 40px; }
 .perks { display: flex; flex-wrap: wrap; gap: 8px 16px; font-size: 13.5px; color: var(--muted); }
 .perks span::before { content: "✓ "; color: var(--leaf); font-weight: 800; }
+.was { color: var(--muted); font-weight: 500; text-decoration: line-through; font-size: .8em; }
+.pr .now { color: var(--saffron); } .pr small.off { color: var(--saffron); font-weight: 800; }
+.salebar { background: linear-gradient(90deg, #b3481a, var(--saffron)); color: #1b0d03; text-align: center; font-weight: 800; font-size: 14px; padding: 8px 14px; }
+.stv { color: var(--gold); letter-spacing: 1px; font-size: 14px; white-space: nowrap; }
+.stv i { font-style: normal; color: rgba(245,236,220,.25); }
+.rvline { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); font-weight: 600; min-height: 18px; }
+.rvline:empty { display: none; }
+.rvline button { background: none; border: 0; color: inherit; font: inherit; padding: 6px 0; cursor: pointer; text-decoration: underline; }
+.rvsec { border-top: 1px solid var(--line-soft); margin-top: 18px; padding-top: 16px; }
+.rvsec:empty { display: none; }
+.rvsec h4 { color: var(--cream); font-family: var(--f-label); letter-spacing: .14em; font-size: 12.5px; text-transform: uppercase; margin: 0 0 10px; }
+.rv { padding: 10px 0; border-bottom: 1px solid var(--line-soft); }
+.rv p { margin: 4px 0 0; font-size: 15px; color: var(--cream); overflow-wrap: anywhere; }
+.rv small { color: var(--muted); font-size: 12.5px; }
+.rvmore { margin-top: 10px; min-height: 44px; }
 .desc { color: var(--muted); font-size: 15px; border-top: 1px solid var(--line-soft); padding-top: 16px; }
 .desc h4 { color: var(--cream); font-family: var(--f-label); letter-spacing: .14em; font-size: 12.5px; text-transform: uppercase; margin: 18px 0 6px; }
 .desc ul { margin: 0; padding-left: 18px; }
@@ -553,6 +569,10 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 .steps li.now { opacity: 1; outline: 1.5px solid var(--gold-2, #e9c46a); } .steps li.now b { background: var(--gold-2, #e9c46a); color: #1b1305; }
 .steps li.done { opacity: 1; } .steps li.done b { background: #4caf7a; color: #fff; } .steps li.done b::before { content: "✓"; } .steps li.done b { font-size: 0; } .steps li.done b::before { font-size: 12px; }
 @media (max-width: 420px) { .steps { font-size: 12px; } .steps li { padding: 7px 6px; } }
+.live { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 0 auto 10px; width: fit-content; max-width: calc(100% - 32px); padding: 6px 14px; border-radius: 999px; font-size: 13px; font-weight: 700; color: var(--cream); background: rgba(59,179,90,.12); border: 1px solid rgba(59,179,90,.4); }
+.live[hidden] { display: none; }
+.live i { width: 8px; height: 8px; border-radius: 50%; background: var(--leaf); box-shadow: 0 0 0 0 rgba(59,179,90,.6); animation: livep 2s infinite; flex: none; }
+@keyframes livep { 70% { box-shadow: 0 0 0 7px rgba(59,179,90,0); } 100% { box-shadow: 0 0 0 0 rgba(59,179,90,0); } }
 .trust { padding: 6px 0 2px; } .trust ul { list-style: none; margin: 0 auto; padding: 0 var(--gutter, 16px); display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .trust li { padding: 12px 14px; border-radius: 14px; background: rgba(245,236,220,.05); border: 1px solid rgba(245,236,220,.12); } .trust b { display: block; font-size: 14px; color: var(--cream); } .trust span { display: block; font-size: 12.5px; color: var(--muted); margin-top: 3px; line-height: 1.35; }
 .deadline { display: flex; align-items: center; justify-content: center; gap: 10px; margin: 10px auto 0; padding: 9px 14px; max-width: 760px; border-radius: 999px; background: rgba(233,196,106,.14); border: 1px solid rgba(233,196,106,.4); font-size: 14px; text-align: center; } .deadline[hidden] { display: none; } .deadline button { background: none; border: 0; color: inherit; font-size: 20px; cursor: pointer; opacity: .7; min-width: 32px; min-height: 32px; }
@@ -644,6 +664,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
 <body>
 <a class="skip" href="#shop">Skip to the shop</a>
 <div class="announce" id="announce" hidden><span id="announceText"></span></div>
+<div class="salebar" id="salebar" hidden>🏷 <span id="saleTxt"></span></div>
 <div class="vacation" id="vacation" hidden>🌴 <span id="vacText"></span></div>
 
 <header class="top">
@@ -715,6 +736,7 @@ body.has-sbar .chat-fab { bottom: calc(86px + env(safe-area-inset-bottom, 0px));
   </section>
 
   <section class="trust" id="trust" aria-label="Why shop with us">
+    <div class="live" id="live" hidden role="status"><i></i><span id="liveTxt"></span></div>
     <ul class="wrap">
       <li><b>Made in Sacramento</b><span>Printed and engraved in our own studio</span></li>
       <li><b id="trustShip">Ships in about 3 days</b><span>Plus delivery time. Local pickup is free</span></li>
@@ -1064,6 +1086,10 @@ function applySite() {
   $("studioNav2").hidden = $("studioBtn").hidden = !S.studioOn;
   $("vacation").hidden = !vacationOn();
   if (vacationOn()) $("vacText").textContent = vacationText();
+  { const x = S.sale, live = !!(x && x.on && (x.all ? salePct({ id: "" }) : (x.ids || []).some((i) => salePct({ id: i }))));
+    $("salebar").hidden = !live;
+    if (live) { const when = x.ends ? ` until ${new Date(x.ends + "T12:00:00").toLocaleDateString("en-US", { month: "short", day: "numeric" })}` : "";
+      $("saleTxt").textContent = `${x.label || "Sale"}: ${Math.round(Number(x.pct))}% off ${x.all ? "everything" : "selected items"}${when}`; } }
   if (shopReady) refreshShop();
   const fl = $("faqList"); if (fl) {
     if (!fl.dataset.def) fl.dataset.def = fl.innerHTML;
@@ -1116,14 +1142,20 @@ const CATS = [
   { id: "tumblers", label: "Tumblers", blurb: "Insulated, full-wrap & engraved" },
   { id: "mugs", label: "Mugs", blurb: "Morning coffee, made personal" },
   { id: "tags", label: "Badges & Tags", blurb: "Heritage & everyday carry" },
+  { id: "stickers", label: "Stickers", blurb: "UV DTF stickers from any picture" },
   { id: "printables", label: "Printables", blurb: "Instant-download learning fun" },
 ];
 const fmt = (n) => "$" + (Math.round(n * 100) % 100 ? n.toFixed(2) : String(Math.round(n)));
 // Some options cost extra (set per option in admin). The price shown and charged is the base price plus the extras for the choices made.
 const optAdd = (p, opts) => (p.variations || []).reduce((t, v) => t + Number((v.adds || {})[(opts || {})[v.name] ?? v.values[0]] || 0), 0);
-const unitOf = (p, opts) => p.price + optAdd(p, opts);
+/* sale: set in Admin → Settings → Sale (SITE.sale). The checkout function applies the same percentage, so the price here is the price charged. */
+const salePct = (p) => { const x = SITE.sale; if (!x || !x.on || !p) return 0; const pc = Math.round(Number(x.pct)); if (!(pc >= 1 && pc <= 90)) return 0;
+  if (!x.all && !(Array.isArray(x.ids) && x.ids.includes(p.id))) return 0;
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(x.ends || "")) && new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" }) > x.ends) return 0; return pc; };
+const salePx = (p, amt) => { const pc = salePct(p); return pc ? Math.round(Math.round(amt * 100) * (100 - pc) / 100) / 100 : amt; };
+const unitOf = (p, opts) => salePx(p, Math.round((p.price + optAdd(p, opts)) * 100) / 100);
 const hasAdds = (p) => (p.variations || []).some((v) => Object.values(v.adds || {}).some((n) => n > 0));
-const priceHtml = (p) => `${p.variations.length ? "<small>from </small>" : ""}${fmt(p.price)}`;
+const priceHtml = (p) => salePct(p) ? `${p.variations.length ? "<small>from </small>" : ""}<s class="was">${fmt(p.price)}</s> <span class="now">${fmt(salePx(p, p.price))}</span> <small class="off">−${salePct(p)}%</small>` : `${p.variations.length ? "<small>from </small>" : ""}${fmt(p.price)}`;
 
 /* ---------- reviews (from Etsy) ---------- */
 const REVIEWS = [
@@ -1197,6 +1229,7 @@ function toast(msg) {
 }
 const HEART = (on) => `<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.8 6.5 4.8c2 0 3.6 1 5.5 3 1.9-2 3.5-3 5.5-3 3.5 0 5.6 3.6 4.1 7C19.5 16.4 12 21 12 21z" fill="${on ? "currentColor" : "none"}" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>`;
 let sortBy = "", occ = "", sq = "";
+let RV = {}, rvShown = 5;   // published reviews by product id (filled by loadReviews below)
 // shop by person / occasion: chips that reuse the occasion filter (only chips that match at least one product are shown)
 const WHO = [["Moms &amp; grandmas", "\\bmom\\b|mother|grandma|mama|\\bmum\\b"], ["Dads &amp; grandpas", "\\bdad\\b|father|grandpa|papa"], ["Kids", "kids|child|preschool|coloring|learning|baby|toddler"], ["Teachers", "teacher|classroom|school|educator"], ["Nurses &amp; first responders", "nurse|medical|\\brn\\b|firefight|first responder|paramedic"], ["Weddings &amp; couples", "wedding|bridal|couple|anniversary|valentine"], ["Pet lovers", "\\bpet\\b|\\bdog\\b|\\bcat\\b|paw"], ["Heritage pride", "flag|heritage|eagle|jeepney|aztec"], ["Christmas", "christmas|reindeer|santa|holiday"], ["Graduation", "graduat"]];
 function renderWho() {
@@ -1227,7 +1260,7 @@ function setFilter(f) {
       : (p.tags || []).some((t) => /^best ?seller$/i.test(t)) ? `<span class="badge best">Best seller</span>` : "";
     return `<a class="card${soldOut(p) ? " soldout" : ""}${p.digital ? " dig" : ""}" href="#p/${esc(p.id)}">
       <span class="ph"><button type="button" class="fav" data-fav-p="${esc(p.id)}" aria-pressed="${favs.has("p", p.id)}" aria-label="Save ${esc(p.name)}">${HEART(favs.has("p", p.id))}</button>${badge}${isNew(p) && !soldOut(p) ? `<span class="badge new">New</span>` : ""}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy" onload="window.__cardFit&&__cardFit(this)">${p.images[1] ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
-      <span class="nm">${esc(p.name)}</span>
+      <span class="nm">${esc(p.name)}</span>${rvLine(p.id)}
       <span class="pr">${priceHtml(p)}</span></a>`;
   }).join("") + (more ? `<button class="card seeall" type="button" data-f="printables"><span class="ph"><b>See all ${more} printables</b><small>Workbooks &amp; coloring books, instant download →</small></span></button>` : "");
   if (window.__cardShows) window.__cardShows();
@@ -1306,6 +1339,37 @@ function fromRow(r) {
   return { id: r.id, name: r.name, title: r.title || r.name, category: r.category, price: Number(r.price), currency: r.currency,
     stock: r.stock, sort: r.sort, created: r.created_at ? Date.parse(r.created_at) : 0, bundleIds: r.bundle_ids || [], digital: r.digital, hasFile: (r.files || []).length > 0, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
 }
+/* ---------- customer reviews: one quiet fetch of the published ones; nothing shows (and nothing breaks) if the table isn't there ---------- */
+const starsHtml = (n) => `<span class="stv" aria-hidden="true">${"★".repeat(Math.round(n))}<i>${"★".repeat(5 - Math.round(n))}</i></span>`;
+function rvLine(id, page) {
+  const r = RV[id]; if (!r) return "";
+  const t = `${r.avg.toFixed(1)} · ${r.n} review${r.n === 1 ? "" : "s"}`;
+  return `<span class="rvline" aria-label="Rated ${r.avg.toFixed(1)} out of 5 from ${r.n} review${r.n === 1 ? "" : "s"}">${starsHtml(r.avg)} <span>${page ? `<button type="button" data-rvgo>${t}</button>` : `(${r.n})`}</span></span>`;
+}
+function rvSection(id) {
+  const r = RV[id]; if (!r) return "";
+  const dt = (s) => { try { return new Date(s).toLocaleDateString("en-US", { month: "short", year: "numeric" }); } catch { return ""; } };
+  return `<h4>Customer reviews</h4>${r.list.slice(0, rvShown).map((x) => `<div class="rv">${starsHtml(x.rating)} <small>${esc(x.name)} · ${esc(dt(x.created_at))}</small>${x.body ? `<p>${esc(x.body)}</p>` : ""}</div>`).join("")}${r.list.length > rvShown ? `<button class="btn btn-line rvmore" type="button" data-rvmore>Show more reviews (${r.list.length - rvShown})</button>` : ""}`;
+}
+function paintReviews() {
+  document.querySelectorAll("#info #rvSum, #info #rvSec").forEach((el) => { const id = el.dataset.pid; el.innerHTML = el.id === "rvSum" ? rvLine(id, true) : rvSection(id); });
+}
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-rvmore]")) { rvShown += 5; paintReviews(); }
+  else if (e.target.closest("[data-rvgo]")) $("rvSec")?.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+function loadReviews(rows) {
+  const by = {};
+  (rows || []).forEach((x) => { if (x && x.product_id && x.rating >= 1 && x.rating <= 5) (by[x.product_id] = by[x.product_id] || []).push(x); });
+  RV = {};
+  Object.keys(by).forEach((id) => { const l = by[id].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at))); RV[id] = { n: l.length, avg: l.reduce((t, x) => t + x.rating, 0) / l.length, list: l }; });
+  rvShown = 5;
+  if (typeof refreshShop === "function" && listingsLoaded) refreshShop();
+  paintReviews();
+}
+window.__loadReviews = loadReviews;
+fetch(`${DB.url}/rest/v1/reviews?select=product_id,rating,name,body,created_at&status=eq.published&order=created_at.desc&limit=1000`, { headers: { apikey: DB.key, Authorization: `Bearer ${DB.key}` } })
+  .then((r) => (r.ok ? r.json() : [])).then(loadReviews).catch(() => {});
 let listingsLoaded = false;   // the cart keeps items it can't match yet (e.g. the Custom design item) until the live listings have arrived
 (async function loadListings() {
   try {
@@ -1314,7 +1378,7 @@ let listingsLoaded = false;   // the cart keeps items it can't match yet (e.g. t
     const list = (await r.json()).map(fromRow).filter((p) => p.images.length);
     if (!list.length) return;
     P0 = list; listingsLoaded = true;
-    refreshShop();
+    refreshShop(); paintReviews();
     if (!$("cart").hidden) renderCart();
     if (location.hash.startsWith("#p/")) { $("sheet").hidden = true; route(); }
   } catch { /* keep the built-in copy */ }
@@ -1352,6 +1416,7 @@ const tplFor = (p) => (window.__tpls || []).find((t) => p && t.listing_id === p.
 function designList(slug) {   // each product has its own designs (admin → Tumbler designs → "Designs for")
   slug = slug || "tumbler"; let all = window.__allDesigns;
   if (!all) { try { const c = JSON.parse(localStorage.getItem("prajo:alldesigns") || "null"); if (Array.isArray(c)) all = c; } catch { /* none cached */ } }
+  if (slug === "uv-dtf-sticker" && all && all.length) return all;   // stickers can use any design on the site, whichever product it was added for
   if (all && all.length) return all.filter((d) => (d.product || "tumbler") === slug);
   if (slug !== "tumbler") return [];
   if (window.__designs && window.__designs.length) return window.__designs;
@@ -1615,6 +1680,7 @@ function openProduct(id) {
     <div class="eyebrow">${esc(cat ? cat.label : "")}</div>
     <h2 id="pTitle">${esc(p.name)}</h2>
     <div class="pr">${priceHtml(p)}${p.stock > 0 && p.stock <= 3 && !p.digital ? ` <small>· only ${p.stock} left</small>` : ""}</div>
+    <div id="rvSum" data-pid="${esc(p.id)}">${rvLine(p.id, true)}</div>
     ${p.variations.map((v, vi) => `<div class="opt"><span>${esc(v.name)}</span><div class="chips">${v.values.map((x, i) => `<button type="button" data-v="${vi}" data-val="${esc(x)}" aria-pressed="${i === 0}">${esc(/^\d+$/.test(x) ? x + "oz" : x)}${(v.adds || {})[x] > 0 ? ` <small>+${fmt(v.adds[x])}</small>` : ""}</button>`).join("")}</div></div>`).join("")}
     <div class="perks">${perks.map((x) => `<span>${esc(x)}</span>`).join("")}</div>
     ${!buyable(p) ? `${whyNot(p) ? `<div class="pnote ${whyNot(p).cls}">${esc(whyNot(p).t)}</div>` : ""}<div class="actions">
@@ -1624,10 +1690,10 @@ function openProduct(id) {
     </div>` : `
     ${p.personalizable && !p.digital ? `<label class="personal opt"><span>${p.variations.some((v) => /^personali[sz]ation$/i.test(v.name)) ? "Your name or text" : "Personalization"}</span><input id="pPersonal" maxlength="120" placeholder="Name or text to print (leave empty if none)" autocomplete="off"></label>` : ""}
     <div class="actions">
-      ${p.digital ? `<button class="btn btn-gold" type="button" id="addCart">Buy & download · ${fmt(p.price)}</button>
+      ${p.digital ? `<button class="btn btn-gold" type="button" id="addCart">Buy & download · ${fmt(salePx(p, p.price))}</button>
       <p class="etsy-link" style="margin-top:-2px">💾 Instant download right after you pay. Nothing is shipped.</p>` : `<div class="buy-row">
         <div class="qty" aria-label="Quantity"><button type="button" data-qty="-1" aria-label="One less">−</button><span id="pQty">1</span><button type="button" data-qty="1" aria-label="One more">+</button></div>
-        <button class="btn btn-gold" type="button" id="addCart">Add to cart · ${fmt(p.price)}</button>
+        <button class="btn btn-gold" type="button" id="addCart">Add to cart · ${fmt(salePx(p, p.price))}</button>
       </div>`}
       <p class="polnote">${p.digital ? "Downloads are final sale." : "Personalized items are non-refundable except for mistakes or defects."} <a href="returns.html" target="_blank" rel="noopener">Returns &amp; refunds</a></p>
       <div class="ask-row"><button class="btn btn-line" type="button" data-ask>Ask about this item</button><button class="btn btn-line" type="button" data-share aria-label="Share this product">${SHARE_ICON} Share</button><button class="btn btn-line" type="button" data-fav-pp aria-pressed="${favs.has("p", p.id)}">${favs.has("p", p.id) ? "♥ Saved" : "♡ Save"}</button></div>
@@ -1637,7 +1703,8 @@ function openProduct(id) {
       const plain = !q.variations.length && !(q.personalizable && !q.digital);
       return `<div class="bundle"><img src="${esc(q.images[0].card)}" alt=""><span><b>🎁 Bundle &amp; save ${bundlePct()}%</b><small>Add <b style="display:inline">${esc(q.name)}</b> (${fmt(q.price)}) and take ${bundlePct()}% off the lower-priced item.</small></span>
         <span class="bgo"><a class="btn btn-line" href="#p/${esc(q.id)}">View</a>${plain ? `<button class="btn btn-gold" type="button" data-bundle="${esc(q.id)}">+ Add to cart</button>` : ""}</span></div>`; })()}
-    <div class="desc">${descHtml(p.description)}</div>`;
+    <div class="desc">${descHtml(p.description)}</div>
+    <div class="rvsec" id="rvSec" data-pid="${esc(p.id)}">${rvSection(p.id)}</div>`;
   pQty = 1;
   if (window.__prefill && $("pPersonal") && !$("pPersonal").value) $("pPersonal").value = window.__prefill;
   if (!mountDesignPicker(p) && window.__prefill && $("pPersonal")) $("pPersonal").closest("label").insertAdjacentHTML("beforebegin", `<div class="yourdesign">${window.__preview ? `<img src="${esc(window.__preview)}" alt="Your design preview">` : ""}<div><b>Your design</b><small>${esc(window.__prefill)}</small></div></div>`);
@@ -1672,7 +1739,7 @@ function setProductLd(p) {
   let el = document.getElementById("productLd");
   if (!el) { el = document.createElement("script"); el.type = "application/ld+json"; el.id = "productLd"; document.head.appendChild(el); }
   el.textContent = JSON.stringify({ "@context": "https://schema.org", "@type": "Product", name: p.name, image: (p.images || []).map((i) => i.large), description: String(p.description || "").slice(0, 500),
-    brand: { "@type": "Brand", name: "PrAjo Custom Studio" }, offers: { "@type": "Offer", url: `https://prajocustomstudio.com/#p/${p.id}`, priceCurrency: "USD", price: Number(p.price).toFixed(2), availability: soldOut(p) ? "https://schema.org/OutOfStock" : "https://schema.org/InStock" } });
+    brand: { "@type": "Brand", name: "PrAjo Custom Studio" }, offers: { "@type": "Offer", url: `https://prajocustomstudio.com/#p/${p.id}`, priceCurrency: "USD", price: salePx(p, p.price).toFixed(2), availability: soldOut(p) ? "https://schema.org/OutOfStock" : "https://schema.org/InStock" } });
 }
 function closeProduct(fromHash) {
   if ($("sheet").hidden) return;
@@ -1761,7 +1828,7 @@ $("info").addEventListener("click", (e) => {
 });
 function refreshPrice() {
   if (!cur || !hasAdds(cur)) return; const u = unitOf(cur, chosenOptions());
-  const pr = document.querySelector("#info .pr"); if (pr) pr.innerHTML = `${fmt(u)}${cur.stock > 0 && cur.stock <= 3 && !cur.digital ? ` <small>· only ${cur.stock} left</small>` : ""}`;
+  const pr = document.querySelector("#info .pr"); if (pr) pr.innerHTML = `${salePct(cur) ? `<s class="was">${fmt(cur.price + optAdd(cur, chosenOptions()))}</s> <span class="now">${fmt(u)}</span> <small class="off">−${salePct(cur)}%</small>` : fmt(u)}${cur.stock > 0 && cur.stock <= 3 && !cur.digital ? ` <small>· only ${cur.stock} left</small>` : ""}`;
   const a = $("addCart"); if (a) a.textContent = `${cur.digital ? "Buy & download" : "Add to cart"} · ${fmt(u)}`;
   if ($("sbPrice")) $("sbPrice").textContent = fmt(u);
 }
@@ -1989,7 +2056,7 @@ let CO = { enabled: true, shipping: true, shipFee: 8, freeOver: 75, delivery: tr
 function shipEstimate(items) {
   const phys = items.filter((i) => !i.p.digital); if (!phys.length) return 0;
   if (CO.freeOver > 0 && phys.reduce((t, i) => t + unitOf(i.p, i.options) * i.qty, 0) >= CO.freeOver) return 0;
-  const rs = []; phys.forEach((i) => { const r = CO.rates?.[i.p.category] || CO.rates?.other || { first: CO.shipFee, extra: 0 }; for (let k = 0; k < i.qty; k++) rs.push(r); });
+  const rs = []; phys.forEach((i) => { const r = CO.rates?.[i.p.category === "stickers" ? "tags" : i.p.category] || CO.rates?.other || { first: CO.shipFee, extra: 0 }; for (let k = 0; k < i.qty; k++) rs.push(r); });
   rs.sort((a, b) => b.first - a.first);
   return Math.round((rs[0].first + rs.slice(1).reduce((t, r) => t + r.extra, 0)) * 100) / 100;
 }
@@ -2051,7 +2118,7 @@ function bundleCalc(prods) {
   const part = uniq.filter((a) => uniq.some((b) => related(a, b)));
   if (!part.length) return { amt: 0, pct };
   const low = part.reduce((m, q) => (q.price < m.price ? q : m));
-  return { amt: Math.round(Math.round(low.price * 100) * pct / 100) / 100, pct, item: low };
+  return { amt: Math.round(Math.round(salePx(low, low.price) * 100) * pct / 100) / 100, pct, item: low };
 }
 fetch(CHECKOUT_URL, { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "settings" }) })
   .then((r) => (r.ok ? r.json() : null)).then((d) => { if (d && typeof d.enabled === "boolean") { CO = d; renderCartBadge(); renderDeadline(); } }).catch(() => {});
@@ -2401,6 +2468,42 @@ route();
       const warm = (u) => new Promise((ok) => { const im = new Image(); im.onload = im.onerror = ok; im.src = u; });
       return Promise.race([Promise.all(D2.map((d) => warm(d.card))), new Promise((ok) => setTimeout(ok, 4000))]).then(() => { rot = target = 0; paint.b = -1; build(); size(); kick(); });
     }).catch(() => {});
+})();
+</script>
+<script>
+/* ---------- "N people viewing now": anonymous live presence (Supabase Realtime). Loads late so it never slows the shop.
+   Shares only a random per-visit id, an approximate place from the browser's time zone, and which page type is open. Nothing is stored. ---------- */
+(function () {
+  try { if (navigator.doNotTrack === "1" || !window.WebSocket) return; } catch { return; }
+  const start = () => {
+    const sc = document.createElement("script");
+    sc.src = "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.3/dist/umd/supabase.js"; sc.integrity = "sha384-BWcjm9OdFth9TbhCxZPdm+gAOUMAzQy9nmTs12ioXdCcbVnJaPMn+fMUoQCLt60R"; sc.crossOrigin = "anonymous";
+    sc.onload = go; document.head.appendChild(sc);
+  };
+  const place = () => {
+    let tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch { /* none */ }
+    const city = tz.includes("/") ? tz.split("/").pop().replace(/_/g, " ") : "";
+    const cc = ((navigator.language || "").split("-")[1] || "").toUpperCase();
+    return [city, cc].filter(Boolean).join(", ").slice(0, 40) || "Somewhere";
+  };
+  const where = () => {
+    const h = location.hash;
+    if (h.startsWith("#p/")) { try { const p = P.find((x) => x.id === decodeURIComponent(h.slice(3))); return p ? "Looking at " + p.name : "Looking at a product"; } catch { return "Looking at a product"; } }
+    return h.startsWith("#cart") ? "In the cart" : "Browsing the shop";
+  };
+  function go() {
+    let cl; try { cl = window.supabase.createClient(DB.url, DB.key, { auth: { persistSession: false, autoRefreshToken: false } }); } catch { return; }
+    const id = Math.random().toString(36).slice(2, 10), ch = cl.channel("store-presence", { config: { presence: { key: id } } });
+    const show = () => { const n = Object.keys(ch.presenceState()).length, el = document.getElementById("live");
+      if (!el) return; el.hidden = n < 2; document.getElementById("liveTxt").textContent = `${n} people viewing now`; };
+    const ping = () => fetch(CHECKOUT_URL, { method: "POST", keepalive: true, headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: `Bearer ${DB.key}` }, body: JSON.stringify({ action: "presence_ping", id, pg: where() }) }).catch(() => {});
+    let pt; const track = () => { ch.track({ t: Date.now() }).catch(() => {}); ping(); clearInterval(pt); pt = setInterval(() => { if (!document.hidden) ping(); }, 30000); };
+    ch.on("presence", { event: "sync" }, show).subscribe((st) => { if (st === "SUBSCRIBED" && !document.hidden) track(); });
+    document.addEventListener("visibilitychange", () => { if (document.hidden) { ch.untrack(); clearInterval(pt); } else track(); });
+    let tt; window.addEventListener("hashchange", () => { clearTimeout(tt); tt = setTimeout(() => { if (!document.hidden) track(); }, 800); });
+  }
+  const kick = () => (window.requestIdleCallback ? requestIdleCallback(start, { timeout: 4000 }) : setTimeout(start, 3000));
+  if (document.readyState === "complete") setTimeout(kick, 1500); else window.addEventListener("load", () => setTimeout(kick, 1500));
 })();
 </script>
 </body>

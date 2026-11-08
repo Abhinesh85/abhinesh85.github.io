@@ -356,6 +356,9 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <button type="button" role="menuitem" id="dpBtn">🔍 Find duplicates<small>Spot repeated designs and listings, then clear them out</small></button>
         <button type="button" role="menuitem" id="helpBtn">📘 How to update your site<small>Plain-language steps, no coding</small></button>
         <button type="button" role="menuitem" id="dsBtn">🎨 Custom designs<small id="dsState">Designs customers sent from the Design studio</small></button>
+        <button type="button" role="menuitem" id="slBtn">🏷 Run a sale<small id="slState">Percent off selected or all products</small></button>
+        <button type="button" role="menuitem" id="lvBtn">🟢 Live visitors<small id="lvState">Who is on the store right now, and from where</small></button>
+        <button type="button" role="menuitem" id="rvBtn">⭐ Reviews<small id="rvState">Approve customer reviews, ask buyers for one</small></button>
         <button type="button" role="menuitem" id="coBtn">Checkout options<small>Delivery, pickup, fees, pause checkout</small></button>
         <button type="button" role="menuitem" id="pwBtn">Change password<small>For this admin page and the pricing app</small></button>
         <a role="menuitem" href="/PrAjoCustomStudio/" target="_blank" rel="noopener">Open pricing app ↗<small>Costs, orders, messages, invoices</small></a>
@@ -407,6 +410,67 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       <button class="btn danger" type="button" id="edDelete">Delete</button>
       <button class="btn line" type="button" id="edDup">Duplicate</button>
       <button class="btn gold" type="button" id="edSave">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="slSheet" hidden role="dialog" aria-modal="true" aria-labelledby="slTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="slTitle">Run a sale</h2>
+      <button class="x" type="button" id="slClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body">
+      <p class="hint">Takes a percentage off the price. The store shows the old price crossed out, and checkout charges the sale price. Variation add-ons (like “both sides”) are discounted too.</p>
+      <div class="co-list">
+        <div class="co-row master"><div class="co-top"><div><b id="slHead">Sale is OFF</b><small id="slSub">Turn it on, choose the products, then Save.</small></div>
+          <label class="switch"><input type="checkbox" id="slOn" aria-label="Sale on"></label></div></div>
+        <div class="co-row">
+          <div class="co-fees">
+            <label><small>Percent off</small><input class="in" id="slPct" type="number" inputmode="numeric" min="1" max="90" step="1" value="20"></label>
+            <label><small>Last day (optional)</small><input class="in" id="slEnds" type="date"></label>
+          </div>
+          <label><small>Sale name (optional)</small><input class="in" id="slLabel" maxlength="30" placeholder="Sale, Black Friday, Holiday sale…"></label>
+          <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn gold" type="button" id="slAll" aria-pressed="true">All products</button><button class="btn" type="button" id="slSome" aria-pressed="false">Selected products</button></div>
+          <div id="slPick" hidden>
+            <input class="in" id="slSearch" type="search" placeholder="Search products" aria-label="Search products" style="margin-bottom:8px">
+            <div style="display:flex;gap:8px;margin-bottom:8px"><button class="btn" type="button" id="slTickAll">Tick shown</button><button class="btn" type="button" id="slTickNone">Clear</button></div>
+            <div id="slItems" style="display:grid;gap:4px;max-height:42vh;overflow:auto"></div>
+          </div>
+        </div>
+        <button class="btn gold" type="button" id="slSave">Save sale</button>
+        <p class="hint" id="slMsg"></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="lvSheet" hidden role="dialog" aria-modal="true" aria-labelledby="lvTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="lvTitle">Live visitors</h2>
+      <button class="x" type="button" id="lvClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body">
+      <p class="hint">People on the store right now. City, region and ZIP are worked out from each visitor’s internet connection, so they are approximate (a ZIP can be the provider’s area, not their home). No IP address is kept. Visitors who send “Do Not Track” are not counted. It updates by itself.</p>
+      <div class="co-list" id="lvList"><p class="hint">Connecting…</p></div>
+    </div>
+  </div>
+</div>
+
+<div class="sheet" id="rvSheet" hidden role="dialog" aria-modal="true" aria-labelledby="rvTitle">
+  <div class="panel">
+    <div class="panel-head">
+      <h2 id="rvTitle">Customer reviews</h2>
+      <button class="x" type="button" id="rvClose" aria-label="Close">×</button>
+    </div>
+    <div class="panel-body">
+      <div class="co-row" style="margin-bottom:14px">
+        <div class="co-top"><div><b>Ask customers for a review</b><small>Emails everyone whose order is marked Completed (at least a day ago), once each. Needs the Resend secrets <code>RESEND_API_KEY</code> and <code>RESEND_FROM</code> in Supabase.</small></div></div>
+        <button class="btn gold" type="button" id="rvSend">Send review requests</button>
+      </div>
+      <p class="hint">4 and 5 star reviews go live by themselves unless they contain a web link. Others wait here for your OK.</p>
+      <div class="co-list" id="rvList"><p class="hint">Loading…</p></div>
     </div>
   </div>
 </div>
@@ -619,7 +683,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 
 <script>
 const CFG = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", owner: "abhi.prasad85@gmail.com", bucket: "listing-photos" };
-const CATS = [{ id: "tumblers", label: "Tumblers" }, { id: "mugs", label: "Mugs" }, { id: "tags", label: "Badges & Tags" }, { id: "printables", label: "Printables" }, { id: "apparel", label: "Apparel" }, { id: "other", label: "Other" }];
+const CATS = [{ id: "tumblers", label: "Tumblers" }, { id: "mugs", label: "Mugs" }, { id: "tags", label: "Badges & Tags" }, { id: "printables", label: "Printables" }, { id: "stickers", label: "Stickers" }, { id: "apparel", label: "Apparel" }, { id: "other", label: "Other" }];
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 const money = (n) => "$" + Number(n || 0).toFixed(2);
@@ -1300,6 +1364,111 @@ async function openCo() {
   catch (e) { $("coList").innerHTML = `<div class="empty"><b>Checkout isn't set up yet</b><p class="hint">Deploy the checkout function in Supabase first. (${esc(e.message)})</p></div>`; }
 }
 $("coBtn").onclick = openCo;
+/* ---------- customer reviews: owner approves, hides or deletes (table public.reviews, owner-only policies); requests go out via the checkout function ---------- */
+/* ---------- sale: saved in site_settings.data.sale = {on, pct, all, ids, ends, label}; the store and the checkout function both read it ---------- */
+let slAll = true, slIds = new Set();
+const slPaint = (s) => {
+  const on = !!(s && s.on), n = s && !s.all ? (s.ids || []).length : 0;
+  $("slHead").textContent = on ? `Sale is ON · ${s.pct}% off ${s.all ? "everything" : n + " product" + (n === 1 ? "" : "s")}` : "Sale is OFF";
+  $("slState").textContent = on ? `${s.pct}% off ${s.all ? "everything" : n + " selected"}${s.ends ? " until " + s.ends : ""}` : "Percent off selected or all products";
+};
+function slItems() {
+  const q = $("slSearch").value.trim().toLowerCase();
+  $("slItems").innerHTML = rows.filter((r) => !q || String(r.name).toLowerCase().includes(q)).map((r) => `<label style="display:flex;gap:10px;align-items:center;min-height:44px"><input type="checkbox" data-sl="${esc(r.id)}" ${slIds.has(r.id) ? "checked" : ""} style="width:22px;height:22px"><span>${esc(r.name)} <small style="color:var(--muted)">$${esc(Number(r.price).toFixed(2))}${r.visible ? "" : " · hidden"}</small></span></label>`).join("") || '<p class="hint">No products match.</p>';
+}
+function slMode(all) { slAll = all; $("slAll").setAttribute("aria-pressed", all); $("slSome").setAttribute("aria-pressed", !all); $("slAll").classList.toggle("gold", all); $("slSome").classList.toggle("gold", !all); $("slPick").hidden = all; if (!all) slItems(); }
+async function slOpen() {
+  $("slSheet").hidden = false; document.body.style.overflow = "hidden"; $("slMsg").textContent = "";
+  let s = {}; try { s = (await readSiteRow()).sale || {}; } catch { $("slMsg").textContent = "Set up Site settings first."; }
+  $("slOn").checked = !!s.on; $("slPct").value = s.pct || 20; $("slEnds").value = s.ends || ""; $("slLabel").value = s.label || "";
+  slIds = new Set(s.ids || []); slMode(s.all !== false); slPaint(s);
+}
+$("slBtn").onclick = slOpen;
+$("slClose").onclick = () => { $("slSheet").hidden = true; document.body.style.overflow = ""; };
+$("slAll").onclick = () => slMode(true); $("slSome").onclick = () => slMode(false);
+$("slSearch").oninput = slItems;
+$("slItems").addEventListener("change", (e) => { const id = e.target.dataset.sl; if (!id) return; e.target.checked ? slIds.add(id) : slIds.delete(id); });
+$("slTickAll").onclick = () => { $("slItems").querySelectorAll("[data-sl]").forEach((c) => { c.checked = true; slIds.add(c.dataset.sl); }); };
+$("slTickNone").onclick = () => { slIds.clear(); slItems(); };
+$("slSave").onclick = async () => {
+  const on = $("slOn").checked, pct = Math.round(Number($("slPct").value)), msg = $("slMsg");
+  if (on && !(pct >= 1 && pct <= 90)) { msg.textContent = "Percent off must be between 1 and 90."; return; }
+  if (on && !slAll && !slIds.size) { msg.textContent = "Tick at least one product, or choose All products."; return; }
+  if ($("slEnds").value && $("slEnds").value < new Date().toLocaleDateString("en-CA", { timeZone: "America/Los_Angeles" })) { msg.textContent = "The last day is already in the past."; return; }
+  const sale = { on, pct: pct || 20, all: slAll, ids: slAll ? [] : [...slIds], ends: $("slEnds").value || "", label: $("slLabel").value.trim().slice(0, 30) };
+  const b = $("slSave"); b.disabled = true;
+  try {
+    const cur = await readSiteRow(), next = { ...cur, sale };
+    const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+    if (error) throw error;
+    site = next; slPaint(sale); msg.textContent = on ? "Saved. The sale shows on the store right away. The checkout function must be the latest version so the sale price is charged." : "Saved. The sale is off.";
+    toast(on ? `Sale on: ${sale.pct}% off` : "Sale turned off");
+  } catch (e) { msg.textContent = "Couldn't save: " + (e.message || e); }
+  b.disabled = false;
+};
+/* ---------- live visitors (Supabase Realtime presence; the store joins the same channel) ---------- */
+let lvCh = null, lvN = 0, lvList = [], lvTimer = null;
+function renderLv() {
+  const v = lvList, by = {};
+  v.forEach((x) => { const k = [x.city, x.region, x.country].filter(Boolean).join(", ") || "Somewhere"; (by[k] = by[k] || []).push(x); });
+  const n = $("lvSheet").hidden ? lvN : v.length;
+  $("lvState").textContent = n ? `${n} on the store now` : "Nobody on the store right now";
+  if ($("lvSheet").hidden) return;
+  const ago = (t) => { const m = Math.round((Date.now() - (t || Date.now())) / 60000); return m < 1 ? "just arrived" : m + " min here"; };
+  $("lvList").innerHTML = v.length ? `<div class="co-row master"><div class="co-top"><div><b style="font-size:26px">${v.length}</b><small>${v.length === 1 ? "visitor" : "visitors"} on the store now</small></div></div></div>` +
+    Object.entries(by).sort((a, b) => b[1].length - a[1].length).map(([place, xs]) => `<div class="co-row"><div class="co-top"><div><b>📍 ${esc(place)} <span style="color:var(--gold-2)">× ${xs.length}</span></b>${xs.map((x) => `<small style="display:block">${x.zip ? "ZIP " + esc(x.zip) + " · " : ""}${esc(x.pg || "")} · ${esc(ago(x.since))}</small>`).join("")}</div></div></div>`).join("")
+    : `<div class="empty"><b>Nobody on the store right now</b><p class="hint">This updates by itself when someone opens it.</p></div>`;
+}
+async function pollLv() {
+  try { lvList = (await coCall({ action: "presence_list" })).visitors || []; renderLv(); }
+  catch (e) { if (!$("lvSheet").hidden) $("lvList").innerHTML = `<div class="empty"><b>Can't load visitor places</b><p class="hint">Deploy the latest checkout function first. (${esc(e.message)})</p></div>`; }
+}
+// The count in the menu comes from the public live channel; places and ZIPs come from the checkout function (owner only).
+try { lvCh = sb.channel("store-presence"); lvCh.on("presence", { event: "sync" }, () => { lvN = Object.keys(lvCh.presenceState()).length; if ($("lvSheet").hidden) renderLv(); }).subscribe(); } catch { /* realtime unavailable */ }
+$("lvBtn").onclick = () => { $("lvSheet").hidden = false; document.body.style.overflow = "hidden"; $("lvList").innerHTML = '<p class="hint">Loading…</p>'; pollLv(); clearInterval(lvTimer); lvTimer = setInterval(pollLv, 8000); };
+$("lvClose").onclick = () => { $("lvSheet").hidden = true; document.body.style.overflow = ""; clearInterval(lvTimer); renderLv(); };
+let rvRows = [];
+const rvStars = (n) => "★".repeat(n) + "☆".repeat(5 - n);
+function renderRv() {
+  const order = { pending: 0, published: 1, hidden: 2 }, lab = { pending: "Waiting for OK", published: "Live", hidden: "Hidden" };
+  const rows = [...rvRows].sort((a, b) => order[a.status] - order[b.status] || String(b.created_at).localeCompare(String(a.created_at)));
+  const np = rvRows.filter((r) => r.status === "pending").length;
+  $("rvState").textContent = np ? `${np} waiting for your OK` : "Approve customer reviews, ask buyers for one";
+  $("rvList").innerHTML = rows.length ? rows.map((r) => `<div class="co-row" data-rv="${esc(r.id)}"${r.status === "hidden" ? ' style="opacity:.6"' : ""}>
+    <div class="co-top"><div><b style="color:var(--gold-2)">${rvStars(r.rating)}</b> <small>${esc(lab[r.status] || r.status)}</small>
+      <small style="display:block">${esc(r.name)} · order #${esc(r.order_no)} · ${esc(r.product || r.product_id)}</small></div></div>
+    ${r.body ? `<div style="overflow-wrap:anywhere">${esc(r.body)}</div>` : `<small>No written review</small>`}
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      ${r.status !== "published" ? `<button class="btn gold" type="button" data-rvact="published">Publish</button>` : ""}
+      ${r.status !== "hidden" ? `<button class="btn" type="button" data-rvact="hidden">Hide</button>` : ""}
+      <button class="btn" type="button" data-rvact="delete">Delete</button></div></div>`).join("")
+    : `<div class="empty"><b>No reviews yet</b><p class="hint">Mark an order Completed, then press “Send review requests”.</p></div>`;
+}
+async function openRv() {
+  $("rvSheet").hidden = false; document.body.style.overflow = "hidden";
+  const { data, error } = await sb.from("reviews").select("*").order("created_at", { ascending: false }).limit(500);
+  if (error) { $("rvList").innerHTML = `<div class="empty"><b>Reviews aren't set up yet</b><p class="hint">Run reviews-setup.sql in the Supabase SQL Editor first. (${esc(error.message)})</p></div>`; return; }
+  rvRows = data || []; renderRv();
+}
+$("rvBtn").onclick = openRv;
+$("rvClose").onclick = () => { $("rvSheet").hidden = true; document.body.style.overflow = ""; };
+$("rvList").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-rvact]"); if (!b) return;
+  const id = b.closest("[data-rv]").dataset.rv, act = b.dataset.rvact;
+  if (act === "delete" && !confirm("Delete this review for good?")) return;
+  b.disabled = true;
+  const q = act === "delete" ? sb.from("reviews").delete().eq("id", id) : sb.from("reviews").update({ status: act }).eq("id", id);
+  const { error } = await q;
+  if (error) { toast("Couldn't save: " + error.message); b.disabled = false; return; }
+  if (act === "delete") rvRows = rvRows.filter((r) => r.id !== id); else rvRows.find((r) => r.id === id).status = act;
+  renderRv(); toast(act === "published" ? "Review is live" : act === "hidden" ? "Review hidden" : "Review deleted");
+});
+$("rvSend").onclick = async () => {
+  const b = $("rvSend"); b.disabled = true; b.textContent = "Sending…";
+  try { const r = await coCall({ action: "send_review_requests" }); toast(`Sent ${r.sent}, skipped ${r.skipped}`); alert(`Review requests sent: ${r.sent}\nSkipped: ${r.skipped}\n\nSkipped means: not Completed for a day yet, already asked, no email, digital-only, unpaid or refunded, or the email couldn't be sent.`); }
+  catch (e) { alert("Couldn't send review requests: " + e.message + (/email isn't set up/i.test(e.message) ? "\n\nAdd RESEND_API_KEY and RESEND_FROM under Supabase → Edge Functions → Secrets." : "")); }
+  b.disabled = false; b.textContent = "Send review requests";
+};
 $("coClose").onclick = () => { $("coSheet").hidden = true; document.body.style.overflow = ""; };
 $("coList").addEventListener("change", (e) => {
   const t = e.target;
