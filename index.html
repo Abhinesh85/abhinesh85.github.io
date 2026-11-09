@@ -1456,13 +1456,13 @@ window.__cardShows = function () {
     const id = decodeURIComponent((a.getAttribute("href") || "").replace(/^#p\//, "")), p = P.find((x) => x.id === id), ph = a.querySelector(".ph");
     if (!p || !ph || !(p.tags || []).includes("custom") || soldOut(p)) return;
     const imgs = [0, 1].map(() => { const i = document.createElement("img"); i.alt = ""; i.className = "cs"; ph.appendChild(i); return i; }), lab = document.createElement("span"); lab.className = "clab"; ph.appendChild(lab);
-    shows.push({ p, ph, imgs, lab, i: -1, front: 1, busy: false, n: 0 });
+    const hv = Math.abs([...p.id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)); shows.push({ p, ph, imgs, lab, i: -1, front: 1, busy: false, n: 0, off: hv % 997, stride: 37 + (hv % 5) * 8 });
   });
   if (!shows.length) return;
   const step = (sh) => {
     if (sh.busy) return; const r = sh.ph.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight || document.hidden) return;
     const list = designList(prodSlug(sh.p)); if (!list.length) return; sh.n = list.length; sh.busy = true;
-    const k = (sh.i + 1) % Math.min(list.length, 10), d = list[k], back = sh.imgs[1 - sh.front];
+    const shared = ["uv-dtf-sticker", "keychain", "keychain-rect", "coaster"].includes(prodSlug(sh.p)), k = (sh.i + 1) % Math.min(list.length, 10), d = shared ? list[(sh.off + k * sh.stride) % list.length] : list[k], back = sh.imgs[1 - sh.front];
     window.__tplReady.then(() => tumblerPreview(d, undefined, tplFor(sh.p))).then((u) => new Promise((ok) => { back.onload = ok; back.onerror = ok; back.src = u; })).then(() => {
       back.classList.add("on"); sh.imgs[sh.front].classList.remove("on"); sh.front = 1 - sh.front; sh.i = k;
       sh.lab.innerHTML = `<b>Pick your design · ${sh.n}</b><small>${esc(d.name)}</small>`;
