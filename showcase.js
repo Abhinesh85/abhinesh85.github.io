@@ -33,6 +33,7 @@ async function blankTumbler(tpl) {
   const photo = await loadImg("tumbler-white.jpg"), { W, H, SY } = TP, K = 2, cv = document.createElement("canvas"); cv.width = W * K; cv.height = H * K;
   const c = cv.getContext("2d"); c.setTransform(K, 0, 0, K, 0, 0); c.drawImage(photo, 0, SY, W, H, 0, 0, W, H); return (blankTp = cv.toDataURL("image/jpeg", .9));
 }
+const fitWhole = (t) => !!t && ["uv-dtf-sticker", "keychain", "keychain-rect", "coaster"].includes(t.slug);   // these print the whole design, never cropped
 function artBoxed(im) {   // art on a white or transparent square (round, arched or cut-out shapes): fit the whole thing instead of cropping it
   if (im.__boxed !== undefined) return im.__boxed;
   try {
@@ -63,7 +64,7 @@ async function printFile(spec, d, tpl) {
     const r = Math.min(g.radius || 0, aw / 2, ah / 2); c.beginPath(); c.moveTo(L + r, T); c.arcTo(R, T, R, B, r); c.arcTo(R, B, L, B, r); c.arcTo(L, B, L, T, r); c.arcTo(L, T, R, T, r); c.closePath(); c.clip();
     if (art) {
       const th = (Number(a.rot) || 0) * Math.PI / 180, cs = Math.abs(Math.cos(th)), sn = Math.abs(Math.sin(th)), iw0 = art.naturalWidth, ih0 = art.naturalHeight;
-      const sc = (artBoxed(art) || (tpl && tpl.slug === "uv-dtf-sticker")) ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), z = (Number(a.s) || 100) / 100;
+      const sc = (artBoxed(art) || fitWhole(tpl)) ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), z = (Number(a.s) || 100) / 100;
       c.save(); c.translate(L + aw / 2 + (Number(a.x) || 0) / 100 * aw, T + ah / 2 + (Number(a.y) || 0) / 100 * ah); c.rotate(th); c.drawImage(art, -iw0 * sc * z / 2, -ih0 * sc * z / 2, iw0 * sc * z, ih0 * sc * z); c.restore();
     }
     if (spec.name) {
@@ -91,7 +92,7 @@ async function flatPreview(d, tpl, opt) {   // a design printed on a flat produc
   const cv = document.createElement("canvas"); cv.width = W; cv.height = H; const c = cv.getContext("2d"); c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H);
   c.save(); const r = Math.min(g.radius || 0, aw / 2, ah / 2); c.beginPath(); c.moveTo(L + r, T); c.arcTo(R, T, R, B, r); c.arcTo(R, B, L, B, r); c.arcTo(L, B, L, T, r); c.arcTo(L, T, R, T, r); c.closePath(); c.clip();
   const rot = (opt && Number(opt.rot)) || 0, th = rot * Math.PI / 180, cs = Math.abs(Math.cos(th)), sn = Math.abs(Math.sin(th)), iw0 = art.naturalWidth, ih0 = art.naturalHeight;
-  const boxed = artBoxed(art) || tpl.slug === "uv-dtf-sticker", sc = boxed ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), dw = iw0 * sc * (((opt && Number(opt.s)) || 100) / 100), dh = ih0 * sc * (((opt && Number(opt.s)) || 100) / 100);
+  const boxed = artBoxed(art) || fitWhole(tpl), sc = boxed ? Math.min(aw / (iw0 * cs + ih0 * sn), ah / (iw0 * sn + ih0 * cs)) * .97 : Math.max((aw * cs + ah * sn) / iw0, (aw * sn + ah * cs) / ih0), dw = iw0 * sc * (((opt && Number(opt.s)) || 100) / 100), dh = ih0 * sc * (((opt && Number(opt.s)) || 100) / 100);
   c.save(); c.translate(L + aw / 2 + (((opt && Number(opt.x)) || 0) / 100) * aw, T + ah / 2 + (((opt && Number(opt.y)) || 0) / 100) * ah); c.rotate(th); c.drawImage(art, -dw / 2, -dh / 2, dw, dh); c.restore();
   if (opt && opt.name) { const nm = nameSprite(opt.name, opt.f, opt.i, aw * .88), yy = "ny" in opt ? opt.ny : opt.y, ny = yy == null || yy === "" ? (g.TY || (T + B) / 2) : T + ah * Math.max(0, Math.min(100, Number(yy))) / 100; const sc = Math.max(.3, Math.min(2, (Number(opt.ns) || 100) / 100)), cx = (L + R) / 2 + (Number(opt.nx) || 0) / 100 * aw, th = (Number(opt.na) || 0) * Math.PI / 180; c.save(); c.translate(cx, ny); c.rotate(th); c.scale(sc, sc); c.drawImage(nm.o, -nm.o.width / 4, -nm.oh / 2, nm.o.width / 2, nm.oh); c.restore(); }
   if (g.overlay) { c.globalCompositeOperation = "multiply"; c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H); c.globalCompositeOperation = "source-over"; }
