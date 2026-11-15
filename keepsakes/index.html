@@ -1181,13 +1181,14 @@ function jerseyArt(name, mode, ink, o = {}) {
     `<path d="M66 150L102 126M334 150L298 126" stroke="${K.c}" stroke-width="20"/><path d="M104 352H296" stroke="${K.c}" stroke-width="12"/><path d="M158 40Q200 66 242 40L236 44Q200 80 164 44Z" fill="${K.c}"/>${txt}</g><path d="${sd}" fill="none" stroke="#0a1220" stroke-opacity=".35" stroke-width="2" stroke-linejoin="round"/></g>` +
     `<path d="${cutD + holeD}" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width=".35" fill-rule="evenodd"/></svg>`;
 }
-let FLAGS = {};
+let FLAGS = {}, FLAGBASE = 'flags/';
 function setFlags(o) { FLAGS = o || {}; }
+function setFlagBase(b) { FLAGBASE = b || 'flags/'; }
 function mapArt(name, mode, ink) {
   const S = SHAPES.countries[name], k = KITSET[name], flat = mode === 'flat', col = ink || '#d9ab4f', d = polyPath(S.pts), id = 'mp' + slug(name).slice(0, 8) + (++RUID);
   if (flat) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S.w} ${S.h}" width="${S.w}mm" height="${S.h}mm" data-art="map-${slug(name)}" data-mode="flat"><title>${name}</title><path d="${d}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
   // the real national flag inside the outline; the file name is the ISO code (flags/xx.svg), or inline data when FLAGS is set (workbench, art/ exports)
-  const href = S.iso ? (FLAGS[S.iso] ? 'data:image/svg+xml;base64,' + FLAGS[S.iso] : 'flags/' + S.iso + '.svg') : null;
+  const href = S.iso ? (FLAGS[S.iso] ? 'data:image/svg+xml;base64,' + FLAGS[S.iso] : FLAGBASE + S.iso + '.svg') : null;
   const fill = href ? `<image href="${href}" x="0" y="0" width="${S.w}" height="${S.h}" preserveAspectRatio="xMidYMid slice"/>` : `<rect width="${S.w}" height="${S.h}" fill="${k ? k.a : '#27406b'}"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S.w} ${S.h}" width="${S.w}mm" height="${S.h}mm" data-art="map-${slug(name)}" data-mode="foil"><title>${name} map in its flag colours</title><defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs><g clip-path="url(#${id})">${fill}</g><path d="${d}" fill="none" stroke="#0a1220" stroke-opacity=".55" stroke-width=".5" stroke-linejoin="round"/></svg>`;
 }
@@ -1234,7 +1235,7 @@ const regionOf = id => { const e = BYID[id]; if (!e || !e.region) return null;
   if (e.deity || cutOf(id)) { const C = cutOf(id); return C && { w: C.w, h: C.h, pts: C.pts, hole: [C.hole.x, C.hole.y], hr: C.hole.r }; }
   const S = (SHAPES[e.region.type] || {})[e.region.key]; return S && { w: S.w, h: S.h, pts: S.pts, hole: S.hole, hr: 2 }; };
 const hasIllus = ab => !!ILLUS[ab];
-return { LIST, BYID, render, regionOf, hasIllus, MONTHS, SIGNS, GEMS, CONS, mix, setShapes, setIllustrations, setCutouts, setFlags, cutOf, cutD, JERSEY, STATE_LM, slug };
+return { LIST, BYID, render, regionOf, hasIllus, MONTHS, SIGNS, GEMS, CONS, mix, setShapes, setIllustrations, setCutouts, setFlags, setFlagBase, cutOf, cutD, JERSEY, STATE_LM, slug };
 })();
 if (typeof module !== 'undefined') module.exports = PrAjoArt;
 </script>
@@ -1247,7 +1248,7 @@ const $=id=>document.getElementById(id);
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const f1=n=>+n.toFixed(2);
-const A=PrAjoArt;
+const A=PrAjoArt;A.setFlagBase('../flags/');
 /* ---------- catalogue ---------- */
 const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SIGN_RANGES={aries:'Mar 21 – Apr 19',taurus:'Apr 20 – May 20',gemini:'May 21 – Jun 20',cancer:'Jun 21 – Jul 22',leo:'Jul 23 – Aug 22',virgo:'Aug 23 – Sep 22',libra:'Sep 23 – Oct 22',scorpio:'Oct 23 – Nov 21',sagittarius:'Nov 22 – Dec 21',capricorn:'Dec 22 – Jan 19',aquarius:'Jan 20 – Feb 18',pisces:'Feb 19 – Mar 20'};
@@ -1462,7 +1463,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794768137417';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794768905371';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1690,7 +1691,7 @@ $('saveRequest').onclick=()=>{
   save(new Blob([JSON.stringify(req,null,2)],{type:'application/json'}),`PrAjo-${slug(state.id)}${state.name?'-'+slug(state.name):''}-request.json`);tell('Design request downloaded.');
 };
 async function inlineFlags(svg){
-  const urls=[...new Set([...svg.matchAll(/href="(flags\/[a-z]{2}\.svg)"/g)].map(m=>m[1]))];
+  const urls=[...new Set([...svg.matchAll(/href="((?:\.\.\/)?flags\/[a-z]{2}\.svg)"/g)].map(m=>m[1]))];
   for(const u of urls){const txt=await fetch(u).then(r=>{if(!r.ok)throw new Error('flag');return r.text();});svg=svg.split('href="'+u+'"').join('href="data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(txt)))+'"');}
   return svg;
 }
