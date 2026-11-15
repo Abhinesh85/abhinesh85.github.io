@@ -1268,16 +1268,37 @@ async function studioDecrypt(buf, pass) {
   let plain; try { plain = await crypto.subtle.decrypt({ name: "AES-CBC", iv: bits.slice(32, 48) }, key, data); } catch { throw new Error("wrong passphrase"); }
   try { return await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); } catch { throw new Error("wrong passphrase"); }
 }
+/* A password box inside the page (the browser's own prompt box is blocked in some browsers, which made the button look dead). */
+function studioAskPass() {
+  return new Promise((done) => {
+    const m = document.createElement("div"); m.id = "wbAsk";
+    m.style.cssText = "position:fixed;inset:0;z-index:400;background:rgba(6,10,20,.72);display:grid;place-items:center;padding:20px";
+    m.innerHTML = `<form style="width:min(420px,100%);background:#0f1b2e;border:1px solid rgba(220,174,82,.4);border-radius:14px;padding:22px;display:grid;gap:12px;color:#f1efea;font:15px/1.5 system-ui" autocomplete="on">
+      <b style="font-size:18px">Production passphrase</b>
+      <span style="color:#a9b3c4">Saved in PRODUCTION-PASSPHRASE.txt. You enter it once on this device.</span>
+      <input type="text" name="username" value="prajo-workbench" autocomplete="username" hidden>
+      <input id="wbPass" type="password" name="passphrase" autocomplete="current-password" placeholder="Passphrase" style="min-height:46px;padding:0 12px;border-radius:8px;border:1px solid rgba(245,236,220,.25);background:#0a1220;color:#f1efea;font:16px system-ui">
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="submit" style="min-height:44px;padding:0 20px;border-radius:8px;border:0;background:#dcae52;color:#1a1204;font:700 15px system-ui;cursor:pointer">Open workbench</button><button type="button" id="wbAskNo" style="min-height:44px;padding:0 16px;border-radius:8px;border:1px solid rgba(245,236,220,.25);background:none;color:#f1efea;font:600 15px system-ui;cursor:pointer">Cancel</button></div></form>`;
+    document.body.append(m);
+    const input = m.querySelector("#wbPass"); setTimeout(() => input.focus(), 50);
+    const finish = (v) => { m.remove(); done(v); };
+    m.querySelector("form").addEventListener("submit", (e) => { e.preventDefault(); finish(input.value.trim()); });
+    m.querySelector("#wbAskNo").onclick = () => finish("");
+  });
+}
 async function dsOpenWorkbench(r) {
-  let pass = ""; try { pass = localStorage.getItem("prajo:studio:key") || ""; } catch { /* no storage */ }
+  // The unlock key comes from the owner-only table studio_keys, so signing in to admin is all that is needed. Falls back to a typed passphrase if the table isn't set up.
+  let pass = "", fromDb = false;
+  try { const { data } = await sb.from("studio_keys").select("secret").eq("id", "workbench").maybeSingle(); if (data?.secret) { pass = data.secret; fromDb = true; } } catch { /* table not set up yet */ }
+  if (!pass) { try { pass = localStorage.getItem("prajo:studio:key") || ""; } catch { /* no storage */ } }
   const fresh = !pass;
-  if (!pass) { pass = (prompt("Production passphrase (saved in PRODUCTION-PASSPHRASE.txt). You only enter it once on this device.") || "").trim(); if (!pass) return; }
+  if (!pass) { pass = await studioAskPass(); if (!pass) return toast("Cancelled. Tap Open in workbench again and enter the passphrase when you're ready."); }
   toast("Opening the workbench… the first time takes a few seconds");
   try {
     const res = await fetch("studio/workbench.enc?" + (window.__studioV || (window.__studioV = Date.now())), { cache: "force-cache" });
     if (!res.ok) throw new Error("workbench file not found on the site");
     const html = await studioDecrypt(await res.arrayBuffer(), pass);
-    if (fresh) { try { localStorage.setItem("prajo:studio:key", pass); } catch { /* optional */ } }
+    if (fresh && !fromDb) { try { localStorage.setItem("prajo:studio:key", pass); } catch { /* optional */ } }
     const old = document.getElementById("wbOverlay"); if (old) old.remove();
     const box = document.createElement("div"); box.id = "wbOverlay";
     box.style.cssText = "position:fixed;inset:0;z-index:300;background:#0a1220;display:flex;flex-direction:column";
@@ -1291,7 +1312,7 @@ async function dsOpenWorkbench(r) {
     frame.src = URL.createObjectURL(new Blob([html], { type: "text/html" }));
   } catch (e) {
     if (/passphrase/.test(e.message)) { try { localStorage.removeItem("prajo:studio:key"); } catch { /* none */ } }
-    toast("Couldn't open the workbench: " + e.message);
+    toast(fromDb && /passphrase/.test(e.message) ? "The key saved in Supabase does not match the workbench file on the site. Re-run studio-key-setup.sql." : "Couldn't open the workbench: " + e.message);
   }
 }
 function dsDownloadReq(r) {
