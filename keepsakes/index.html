@@ -96,6 +96,9 @@ section{padding:clamp(72px,11vw,160px) 0}
 .section-head{display:grid;gap:16px;margin-bottom:clamp(32px,5vw,56px);max-width:760px}
 /* collection */
 .tabs{display:flex;gap:6px 28px;flex-wrap:wrap;margin-bottom:24px}
+.tabbar{position:sticky;top:68px;z-index:40;background:rgba(10,18,32,.92);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);border-bottom:1px solid rgba(245,236,220,.09)}
+.tabbar .tabs{flex-wrap:nowrap;overflow-x:auto;margin:0;gap:0 26px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.tabbar .tabs::-webkit-scrollbar{display:none}.tabbar .tabs button{white-space:nowrap;flex:0 0 auto;padding:14px 0}.tabbar .tabs button::after{bottom:8px}
+#cards{scroll-margin-top:128px}
 .tabs button{font-size:var(--t-b);font-weight:600;color:var(--muted);padding:12px 0;position:relative;transition:color .2s}
 .tabs button::after{content:"";position:absolute;left:0;right:0;bottom:6px;height:2px;background:var(--gold);transform:scaleX(0);transform-origin:left;transition:transform .25s}
 .tabs button[aria-pressed=true]{color:var(--ink)}.tabs button[aria-pressed=true]::after{transform:scaleX(1)}.tabs button:hover{color:var(--ink)}
@@ -205,7 +208,7 @@ dl.sum dt{color:var(--muted)}dl.sum dd{text-align:right;font-weight:700;overflow
 #notice[data-error=true]{background:var(--danger)}
 @media(min-width:760px){#notice{left:auto}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}.rise{opacity:1;transform:none}.glint{display:none}}
-html.embed{--head:0px}html.embed .top,html.embed .sitefoot,html.embed .navsheet{display:none!important}html.embed body{background:var(--bg)}
+html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--head:0px}html.embed .top,html.embed .sitefoot,html.embed .navsheet{display:none!important}html.embed body{background:var(--bg)}
 .hero-copy h1{font-size:clamp(30px,4.6vw,52px);max-width:none}
 
 /* phone-first: designs on the first screen, thumb-sized category chips, steady preview, action bar always in reach */
@@ -248,6 +251,7 @@ html.embed{--head:0px}html.embed .top,html.embed .sitefoot,html.embed .navsheet{
 <noscript><p class="wrap" style="padding-block:40px">This page needs JavaScript to preview your keepsake.</p></noscript>
 <main>
 <div id="homeView">
+<div class="tabbar"><div class="wrap"><div class="tabs" id="tabs" role="group" aria-label="Collections"></div></div></div>
 <section class="hero" id="home" style="padding:0">
 <div class="hero-media" aria-label="Live keepsake preview"><div id="heroStage" class="swap"></div></div>
 <div class="hero-copy">
@@ -261,7 +265,6 @@ html.embed{--head:0px}html.embed .top,html.embed .sitefoot,html.embed .navsheet{
 <section id="collection" aria-labelledby="collH"><div class="wrap">
 <div class="section-head"><h2 id="collH" class="rise">Choose a design</h2><p class="lead rise" style="--i:1">Names, birth flowers and stones, zodiac, US states, country maps and team kits. Enter a birthday to find your flower, stone and star.</p></div>
 <div class="finder rise" style="--i:2"><label for="bday">Find by birthday</label><div class="row"><input id="bday" type="date" aria-describedby="found"></div><div class="found" id="found" aria-live="polite"></div></div>
-<div class="tabs rise" id="tabs" role="group" aria-label="Collections" style="--i:3"></div>
 <div id="cards" class="cards"></div>
 </div></section>
 
@@ -1451,7 +1454,7 @@ function fontFaceCss(key){
 const sizeFor=s=>SIZES[s];
 function pieceFor(id,o={}){const S=SIZES.standard;return keepsake({w:S.w,h:S.h,id,name:'',sample:'Amara',finish:'full',ink:'foil',lettering:isName(id)?'cursive':'signature',photos:o.photos,layout:o.layout,ring:o.ring,glint:o.glint,ghost:o.ghost,label:o.label||''});}
 function drawTabs(){
-  $('tabs').replaceChildren(...FAMILIES.map(f=>{const b=document.createElement('button');b.type='button';b.textContent=f.label;b.setAttribute('aria-pressed',String(f.key===famKey));b.onclick=()=>{famKey=f.key;drawTabs();if(DATA_FAMS.includes(f.key)&&!f.loaded){loadRegions(f);}else drawCards(true);};return b;}));
+  $('tabs').replaceChildren(...FAMILIES.map(f=>{const b=document.createElement('button');b.type='button';b.textContent=f.label;b.setAttribute('aria-pressed',String(f.key===famKey));b.onclick=()=>{famKey=f.key;drawTabs();if(DATA_FAMS.includes(f.key)&&!f.loaded){loadRegions(f);}else drawCards(true);const cs=$('cards');cs&&cs.scrollIntoView({block:'start',behavior:'smooth'});};return b;}));
 }
 const POP={states:['California','New York','Texas','Florida','Washington','Hawaii','Alaska','Colorado','Arizona'],maps:['India','United States of America','United Kingdom','Canada','Australia','Brazil','Italy','France','Germany','Mexico','Spain','Japan','Pakistan','Bangladesh','Nigeria','Philippines'],kits:['Brazil','Argentina','France','England','Germany','Spain','Portugal','United States','Mexico','Italy','Netherlands','India']};
 let regState=0,regQ=[];
@@ -1465,7 +1468,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794786523622';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794786943131';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
