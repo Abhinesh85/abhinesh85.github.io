@@ -1348,7 +1348,7 @@ function nameCharm(o){
   const defs=`<defs><linearGradient id="${uid}F" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${f1(g.W)}" y2="${f1(g.H)}"><stop offset="0" stop-color="#b98a33"/><stop offset=".25" stop-color="#f7e2a0"/><stop offset=".48" stop-color="#dcae52"/><stop offset=".7" stop-color="#9a6d22"/><stop offset=".88" stop-color="#f1cf7a"/><stop offset="1" stop-color="#c7993f"/></linearGradient>${holeMask(uid,-1,-1,g.W+2,g.H+2,g.hx,g.hy)}${(o.noWm||!WM.on)?'':wmDefs(uid)}${o.fontCss?`<style>${o.fontCss}</style>`:''}</defs>`;
   const tab=`<circle cx="${g.hx}" cy="${f1(g.hy)}" r="${g.tabR}" fill="${STOCK}"/><circle cx="${g.hx}" cy="${f1(g.hy)}" r="${f1(g.tabR-g.se)}" fill="${C.band}"/><circle cx="${g.hx}" cy="${f1(g.hy)}" r="${f1(g.tabR-g.se-g.bw)}" fill="${STOCK}"/>`;
   const dbl=o.layers==='double',top=o.topInk?(o.topInk==='foil'?`url(#${uid}F)`:o.topInk):fill;
-  const edge=t(0,'#fff').replace(/fill="#fff"/g,'fill="none"').replace(/stroke="none"/g,'stroke="#fff" stroke-opacity=".45" stroke-width=".22"');
+  const edge=t(0,'#fff').replace(/fill="#fff"/g,'fill="none"').replace(/stroke="none"/g,'stroke="#fff" stroke-opacity=".45"').replace(/stroke-width="0"/g,'stroke-width=".22"');
   const letters=dbl?`<g transform="translate(.45 .7)" opacity=".4">${t(1.2,'#000')}</g>${t(1.2,top)}${edge}`:t(0,fill);
   const body=`<g mask="url(#${uid}M)"${o.ghost&&g.ghost?' opacity=".5"':''}>${tab}${t(2*(g.bw+g.se),STOCK)}${t(2*g.bw,C.band)}${letters}${(o.noWm||!WM.on)?'':t(2*(g.bw+g.se),`url(#${uid}W)`)}</g>`;
   return wrapSvg(o,uid,[-9.5,Math.min(-3,g.hy-9.5),g.W+12.5,Math.max(g.H+6,19+Math.abs(Math.min(-3,g.hy-9.5)))],defs,keyRing(g.hx,g.hy,'left')+body,o.label);
@@ -1463,7 +1463,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794768905371';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794769952171';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1754,7 +1754,7 @@ $('sendShop').onclick=async()=>{
     tell('Sent to PrAjo.');
   }catch(e){
     btn.disabled=false;btn.textContent=old;
-    err.textContent='We could not send it just now. Please try again, or use “Other ways to send it” below.';err.hidden=false;
+    err.textContent='We could not send it just now (code: '+String(e&&e.message||'unknown').slice(0,40)+'). Please try again, or use “Other ways to send it” below.';err.hidden=false;
   }
 };
 const fontsReady2=()=>Promise.all(fontLoads.map(f=>document.fonts.load(f).catch(()=>{})));
