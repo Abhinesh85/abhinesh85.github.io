@@ -1253,10 +1253,15 @@ function renderDesigns() {
   $("dsList").innerHTML = rows.map((r) => `<div class="ds" data-id="${r.id}">
     <div class="ds-top" data-top><span class="ph" data-ph="${esc(r.preview_path || "")}">…</span>
       <div><b><span class="ds-code">${esc(r.code)}</span><span class="ds-badge ${r.status === "new" ? "new" : ""}">${esc((DS_STATUS.find((x) => x[0] === r.status) || [0, r.status])[1])}</span></b>
-      <span>${esc(r.summary)}</span><small>${esc(r.customer_name)} · qty ${r.qty} · ${new Date(r.created_at).toLocaleDateString()}</small></div></div>
+      <span>${esc(r.summary)}</span><small>${esc(r.customer_name)} · qty ${r.qty} · ${new Date(r.created_at).toLocaleDateString()}</small>${r.product === "keepsake" ? `<button class="btn gold" type="button" data-req style="display:block;margin-top:8px;min-height:40px;padding:0 16px">Download design file</button>` : ""}</div></div>
     ${dsOpen === r.id ? `<div class="ds-more" id="dsMore"></div>` : ""}</div>`).join("") || `<div class="empty"><b>No designs here</b><p class="hint">When a customer sends a design from the Design studio it shows up here.</p></div>`;
   $("dsList").querySelectorAll("[data-ph]").forEach(async (el) => { const u = await dsUrl(el.dataset.ph); if (u) el.outerHTML = `<img src="${u}" alt="">`; });
   if (dsOpen) fillDesign(dsRows.find((r) => r.id === dsOpen));
+}
+function dsDownloadReq(r) {
+  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(r.design, null, 2)], { type: "application/json" }));
+  a.download = `PrAjo-${r.code}-request.json`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast("Design file saved. Drag it onto workbench.html to produce it.");
 }
 async function fillDesign(r) {
   const box = $("dsMore"); if (!r || !box) return;
@@ -1299,6 +1304,7 @@ $("dsChips").addEventListener("click", (e) => { const b = e.target.closest("[dat
 $("dsList").addEventListener("click", async (e) => {
   const card = e.target.closest(".ds"); if (!card) return;
   const r = dsRows.find((x) => x.id === card.dataset.id);
+  if (e.target.closest("[data-req]")) { dsDownloadReq(r); return; }
   if (e.target.closest("[data-top]")) { dsOpen = dsOpen === r.id ? null : r.id; renderDesigns(); return; }
   if (e.target.id === "dsSave") {
     const patch = { status: $("dsStatus").value, owner_notes: $("dsNotes").value.trim() || null };
@@ -1307,7 +1313,7 @@ $("dsList").addEventListener("click", async (e) => {
     Object.assign(r, patch); toast("Saved"); renderDesigns();
   }
   if (e.target.id === "dsStudio") dsStudio(r);
-  if (e.target.id === "dsReq") { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(r.design, null, 2)], { type: "application/json" })); a.download = `PrAjo-${r.code}-request.json`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
+  if (e.target.id === "dsReq") dsDownloadReq(r);
   if (e.target.id === "dsDel") {
     if (e.target.dataset.armed !== "1") { e.target.dataset.armed = "1"; e.target.textContent = "Tap again to delete"; return; }
     const paths = [r.preview_path, ...(r.design?.layers || []).filter((l) => l.type === "img").map((l) => String(l.src).replace(/^storage:/, ""))].filter(Boolean);
