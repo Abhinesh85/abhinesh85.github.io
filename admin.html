@@ -1264,12 +1264,12 @@ async function fillDesign(r) {
   const imgs = (r.design?.layers || []).filter((l) => l.type === "img").length;
   box.innerHTML = `${u ? `<img class="big" src="${u}" alt="Design preview">` : ""}
     <dl><dt>Design</dt><dd>${esc(r.summary)}</dd><dt>Customer</dt><dd>${esc(r.customer_name)} · <a href="mailto:${esc(r.customer_email)}?subject=${encodeURIComponent("Your PrAjo design " + r.code)}">${esc(r.customer_email)}</a>${r.customer_phone ? " · " + esc(r.customer_phone) : ""}</dd>
-    <dt>Quantity</dt><dd>${r.qty}${r.needed_by ? ` · needed by ${esc(r.needed_by)}` : ""}</dd>${r.notes ? `<dt>Notes</dt><dd>${esc(r.notes)}</dd>` : ""}
+    ${r.product === "keepsake" && r.design?.product ? `<dt>Size</dt><dd>${esc(r.design.product.width_mm)} × ${esc(r.design.product.height_mm)} mm · design ${esc(r.design.design)}</dd>` : ""}<dt>Quantity</dt><dd>${r.qty}${r.needed_by ? ` · needed by ${esc(r.needed_by)}` : ""}</dd>${r.notes ? `<dt>Notes</dt><dd>${esc(r.notes)}</dd>` : ""}
     ${r.design?.parent ? `<dt>Revises</dt><dd class="ds-code">${esc(r.design.parent)}</dd>` : ""}${imgs ? `<dt>Pictures</dt><dd>${imgs} uploaded by the customer (open in studio to see them)</dd>` : ""}</dl>
     <label class="f"><span>Your private notes</span><textarea class="in" id="dsNotes" style="min-height:80px">${esc(r.owner_notes || "")}</textarea></label>
     <div class="ds-actions"><select class="in" id="dsStatus" aria-label="Status">${DS_STATUS.map(([k, l]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${l}</option>`).join("")}</select>
       <button class="btn gold" type="button" id="dsSave">Save</button>
-      <button class="btn line" type="button" id="dsStudio">Open in studio</button>
+      ${r.product === "keepsake" ? `<button class="btn line" type="button" id="dsReq">Request file (.json)</button>` : `<button class="btn line" type="button" id="dsStudio">Open in studio</button>`}
       ${u ? `<a class="btn line" href="${u}" download="${esc(r.code)}.png" target="_blank" rel="noopener">Preview PNG</a>` : ""}
       <button class="btn danger" type="button" id="dsDel">Delete</button></div>`;
 }
@@ -1307,6 +1307,7 @@ $("dsList").addEventListener("click", async (e) => {
     Object.assign(r, patch); toast("Saved"); renderDesigns();
   }
   if (e.target.id === "dsStudio") dsStudio(r);
+  if (e.target.id === "dsReq") { const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(r.design, null, 2)], { type: "application/json" })); a.download = `PrAjo-${r.code}-request.json`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000); }
   if (e.target.id === "dsDel") {
     if (e.target.dataset.armed !== "1") { e.target.dataset.armed = "1"; e.target.textContent = "Tap again to delete"; return; }
     const paths = [r.preview_path, ...(r.design?.layers || []).filter((l) => l.type === "img").map((l) => String(l.src).replace(/^storage:/, ""))].filter(Boolean);

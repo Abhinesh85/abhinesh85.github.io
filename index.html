@@ -693,6 +693,14 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
 .gal-cap b { font-family: var(--f-display); font-size: clamp(22px, 3vw, 30px); }
 .gal-cap small { color: var(--muted); font-size: 14px; }
 @media (max-width: 600px) { .gal-nav { width: 42px; height: 42px; } .gal { height: 290px; perspective: 1000px; } }
+
+/* Name charms designer opens inside the store (iframe overlay under the header) */
+#kDlg{position:fixed;left:0;right:0;bottom:0;top:calc(68px + env(safe-area-inset-top,0px));z-index:45;background:var(--ink);display:flex;flex-direction:column}
+#kDlg[hidden]{display:none}
+#kDlg .kbar{display:flex;align-items:center;gap:14px;min-height:44px;padding:0 var(--gutter);border-bottom:1px solid var(--line-soft);background:var(--navy)}
+#kDlg .kbar button{min-height:44px;padding:0 4px;color:var(--gold-2);font:700 14px var(--f-body);background:none;border:0;cursor:pointer}
+#kDlg .kbar span{color:var(--muted);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
+#kDlg iframe{flex:1;width:100%;border:0;background:var(--ink)}
 </style>
 </head>
 <body>
@@ -2616,6 +2624,29 @@ route();
   }
   const kick = () => (window.requestIdleCallback ? requestIdleCallback(start, { timeout: 4000 }) : setTimeout(start, 3000));
   if (document.readyState === "complete") setTimeout(kick, 1500); else window.addEventListener("load", () => setTimeout(kick, 1500));
+})();
+</script>
+
+<div id="kDlg" hidden role="dialog" aria-label="Name charms and keepsakes"><div class="kbar"><button type="button" id="kClose">&larr; Back to shop</button><span>Name charms &amp; keepsakes</span></div><iframe id="kFrame" title="Design your keepsake" allow="clipboard-write"></iframe></div>
+<script>
+(function(){
+  var d=document.getElementById('kDlg'),f=document.getElementById('kFrame'),isOpen=false;
+  function openK(push){
+    if(!f.getAttribute('src'))f.setAttribute('src','keepsakes/?embed=1');
+    d.hidden=false;isOpen=true;document.body.style.overflow='hidden';
+    var ns=document.getElementById('navSheet');if(ns)ns.hidden=true;
+    if(push)try{history.pushState({k:1},'','#name-charms');}catch(e){}
+  }
+  function closeK(){d.hidden=true;isOpen=false;document.body.style.overflow='';}
+  document.addEventListener('click',function(e){
+    var a=e.target.closest&&e.target.closest('a[href="keepsakes/"]');
+    if(!a||e.metaKey||e.ctrlKey||e.shiftKey||e.button)return;
+    e.preventDefault();openK(true);
+  });
+  document.getElementById('kClose').addEventListener('click',function(){if(history.state&&history.state.k)history.back();else closeK();});
+  window.addEventListener('popstate',function(){if(location.hash==='#name-charms')openK(false);else if(isOpen)closeK();});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&isOpen)document.getElementById('kClose').click();});
+  if(location.hash==='#name-charms')openK(false);
 })();
 </script>
 </body>
