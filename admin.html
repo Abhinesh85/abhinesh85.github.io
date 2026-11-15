@@ -1253,10 +1253,46 @@ function renderDesigns() {
   $("dsList").innerHTML = rows.map((r) => `<div class="ds" data-id="${r.id}">
     <div class="ds-top" data-top><span class="ph" data-ph="${esc(r.preview_path || "")}">…</span>
       <div><b><span class="ds-code">${esc(r.code)}</span><span class="ds-badge ${r.status === "new" ? "new" : ""}">${esc((DS_STATUS.find((x) => x[0] === r.status) || [0, r.status])[1])}</span></b>
-      <span>${esc(r.summary)}</span><small>${esc(r.customer_name)} · qty ${r.qty} · ${new Date(r.created_at).toLocaleDateString()}</small>${r.product === "keepsake" ? `<button class="btn gold" type="button" data-req style="display:block;margin-top:8px;min-height:40px;padding:0 16px">Download design file</button>` : ""}</div></div>
+      <span>${esc(r.summary)}</span><small>${esc(r.customer_name)} · qty ${r.qty} · ${new Date(r.created_at).toLocaleDateString()}</small>${r.product === "keepsake" ? `<span style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn gold" type="button" data-wb style="min-height:40px;padding:0 16px">Open in workbench</button><button class="btn line" type="button" data-req style="min-height:40px;padding:0 14px">Design file (.json)</button></span>` : ""}</div></div>
     ${dsOpen === r.id ? `<div class="ds-more" id="dsMore"></div>` : ""}</div>`).join("") || `<div class="empty"><b>No designs here</b><p class="hint">When a customer sends a design from the Design studio it shows up here.</p></div>`;
   $("dsList").querySelectorAll("[data-ph]").forEach(async (el) => { const u = await dsUrl(el.dataset.ph); if (u) el.outerHTML = `<img src="${u}" alt="">`; });
   if (dsOpen) fillDesign(dsRows.find((r) => r.id === dsOpen));
+}
+/* Opens the production workbench with this order loaded. The workbench file on the site is encrypted (studio/workbench.enc); the passphrase is kept only on this device. */
+async function studioDecrypt(buf, pass) {
+  const b = new Uint8Array(buf); if (String.fromCharCode(...b.slice(0, 8)) !== "Salted__") throw new Error("not a workbench file");
+  const salt = b.slice(8, 16), data = b.slice(16);
+  const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveBits"]);
+  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 200000, hash: "SHA-256" }, km, 384));
+  const key = await crypto.subtle.importKey("raw", bits.slice(0, 32), "AES-CBC", false, ["decrypt"]);
+  let plain; try { plain = await crypto.subtle.decrypt({ name: "AES-CBC", iv: bits.slice(32, 48) }, key, data); } catch { throw new Error("wrong passphrase"); }
+  try { return await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); } catch { throw new Error("wrong passphrase"); }
+}
+async function dsOpenWorkbench(r) {
+  let pass = ""; try { pass = localStorage.getItem("prajo:studio:key") || ""; } catch { /* no storage */ }
+  const fresh = !pass;
+  if (!pass) { pass = (prompt("Production passphrase (saved in PRODUCTION-PASSPHRASE.txt). You only enter it once on this device.") || "").trim(); if (!pass) return; }
+  toast("Opening the workbench… the first time takes a few seconds");
+  try {
+    const res = await fetch("studio/workbench.enc?" + (window.__studioV || (window.__studioV = Date.now())), { cache: "force-cache" });
+    if (!res.ok) throw new Error("workbench file not found on the site");
+    const html = await studioDecrypt(await res.arrayBuffer(), pass);
+    if (fresh) { try { localStorage.setItem("prajo:studio:key", pass); } catch { /* optional */ } }
+    const old = document.getElementById("wbOverlay"); if (old) old.remove();
+    const box = document.createElement("div"); box.id = "wbOverlay";
+    box.style.cssText = "position:fixed;inset:0;z-index:300;background:#0a1220;display:flex;flex-direction:column";
+    box.innerHTML = `<div style="display:flex;align-items:center;gap:12px;min-height:46px;padding:0 14px;border-bottom:1px solid rgba(245,236,220,.12);background:#0f1b2e;color:#f1efea;font:600 14px system-ui"><button type="button" id="wbClose" style="min-height:40px;padding:0 6px;color:#e8c872;font:700 14px system-ui;background:none;border:0;cursor:pointer">← Back to orders</button><span style="color:#a9b3c4;font-weight:500">Production workbench · order ${esc(r.code)}</span></div><iframe id="wbFrame" title="Production workbench" style="flex:1;width:100%;border:0;background:#0a1220"></iframe>`;
+    document.body.append(box); document.body.style.overflow = "hidden";
+    const frame = box.querySelector("#wbFrame");
+    const close = () => { window.removeEventListener("message", onMsg); try { URL.revokeObjectURL(frame.src); } catch { /* ok */ } box.remove(); document.body.style.overflow = ""; };
+    const onMsg = (e) => { if (e.source === frame.contentWindow && e.data && e.data.type === "prajo-ready") { frame.contentWindow.postMessage({ type: "prajo-order", req: r.design }, location.origin); } };
+    window.addEventListener("message", onMsg);
+    box.querySelector("#wbClose").onclick = close;
+    frame.src = URL.createObjectURL(new Blob([html], { type: "text/html" }));
+  } catch (e) {
+    if (/passphrase/.test(e.message)) { try { localStorage.removeItem("prajo:studio:key"); } catch { /* none */ } }
+    toast("Couldn't open the workbench: " + e.message);
+  }
 }
 function dsDownloadReq(r) {
   const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(r.design, null, 2)], { type: "application/json" }));
@@ -1269,7 +1305,7 @@ async function fillDesign(r) {
   const imgs = (r.design?.layers || []).filter((l) => l.type === "img").length;
   box.innerHTML = `${u ? `<img class="big" src="${u}" alt="Design preview">` : ""}
     <dl><dt>Design</dt><dd>${esc(r.summary)}</dd><dt>Customer</dt><dd>${esc(r.customer_name)} · <a href="mailto:${esc(r.customer_email)}?subject=${encodeURIComponent("Your PrAjo design " + r.code)}">${esc(r.customer_email)}</a>${r.customer_phone ? " · " + esc(r.customer_phone) : ""}</dd>
-    ${r.product === "keepsake" && r.design?.product ? `<dt>Size</dt><dd>${esc(r.design.product.width_mm)} × ${esc(r.design.product.height_mm)} mm · design ${esc(r.design.design)}</dd>` : ""}${r.product === "keepsake" ? `<dt>Production</dt><dd>1. Tap <b>Request file (.json)</b>. 2. On your Mac open <b>workbench.html</b> and drag the file onto it. 3. Tap <b>Export all production files</b>.</dd>` : ""}<dt>Quantity</dt><dd>${r.qty}${r.needed_by ? ` · needed by ${esc(r.needed_by)}` : ""}</dd>${r.notes ? `<dt>Notes</dt><dd>${esc(r.notes)}</dd>` : ""}
+    ${r.product === "keepsake" && r.design?.product ? `<dt>Size</dt><dd>${esc(r.design.product.width_mm)} × ${esc(r.design.product.height_mm)} mm · design ${esc(r.design.design)}</dd>` : ""}${r.product === "keepsake" ? `<dt>Production</dt><dd>1. Tap <b>Open in workbench</b> on the order. 2. In the workbench tap <b>Export all production files</b>.</dd>` : ""}<dt>Quantity</dt><dd>${r.qty}${r.needed_by ? ` · needed by ${esc(r.needed_by)}` : ""}</dd>${r.notes ? `<dt>Notes</dt><dd>${esc(r.notes)}</dd>` : ""}
     ${r.design?.parent ? `<dt>Revises</dt><dd class="ds-code">${esc(r.design.parent)}</dd>` : ""}${imgs ? `<dt>Pictures</dt><dd>${imgs} uploaded by the customer (open in studio to see them)</dd>` : ""}</dl>
     <label class="f"><span>Your private notes</span><textarea class="in" id="dsNotes" style="min-height:80px">${esc(r.owner_notes || "")}</textarea></label>
     <div class="ds-actions"><select class="in" id="dsStatus" aria-label="Status">${DS_STATUS.map(([k, l]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${l}</option>`).join("")}</select>
@@ -1304,6 +1340,7 @@ $("dsChips").addEventListener("click", (e) => { const b = e.target.closest("[dat
 $("dsList").addEventListener("click", async (e) => {
   const card = e.target.closest(".ds"); if (!card) return;
   const r = dsRows.find((x) => x.id === card.dataset.id);
+  if (e.target.closest("[data-wb]")) { dsOpenWorkbench(r); return; }
   if (e.target.closest("[data-req]")) { dsDownloadReq(r); return; }
   if (e.target.closest("[data-top]")) { dsOpen = dsOpen === r.id ? null : r.id; renderDesigns(); return; }
   if (e.target.id === "dsSave") {
