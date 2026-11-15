@@ -1465,7 +1465,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794772170810';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794772775470';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1746,7 +1746,7 @@ $('sendShop').onclick=async()=>{
     const up=await fetch(SB.url+'/storage/v1/object/'+SB.bucket+'/'+path,{method:'POST',headers:sbHead({'Content-Type':'image/png','x-upsert':'false'}),body:proof});
     if(!up.ok)throw new Error('upload');
     const info=itemOf(state.id),summary=(info.item.name+(state.name?' for '+state.name:'')+(state.number?' #'+state.number:'')+' · '+summaryRows().map(([a,b])=>a+': '+b).join(' · ')).slice(0,580);
-    const row={code,product:'keepsake',summary,design:Object.assign(req,{code}),preview_path:path,customer_name:name,customer_email:email,customer_phone:phone||null,qty:state.quantity,needed_by:null,notes:(state.notes||'').trim()||null};
+    const row={code,product:'keepsake',summary,design:Object.assign(req,{code,contact:{name,email,phone:phone||null}}),preview_path:path,customer_name:name,customer_email:email,customer_phone:phone||null,qty:state.quantity,needed_by:null,notes:(state.notes||'').trim()||null};
     const r=await fetch(SB.url+'/rest/v1/custom_designs',{method:'POST',headers:sbHead({'Content-Type':'application/json',Prefer:'return=minimal'}),body:JSON.stringify(row)});
     if(!r.ok)throw new Error('save');
     fetch(SB.url+'/functions/v1/design-notify',{method:'POST',headers:sbHead({'Content-Type':'application/json'}),body:JSON.stringify({code})}).catch(()=>{});
