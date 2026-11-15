@@ -1279,7 +1279,7 @@ const STOCK='#070d19';
 /* ---------- state ---------- */
 const drafts=new Map();
 let view='home',famKey='names',selected={id:'birth-june'},state,framed=0,drag=null,current=null,noticeTimer;
-const makeDraft=(id)=>({id,name:'',number:'',msg:'',size:'standard',shape:'card',lines:'one',layers:id.startsWith('name-')?'double':'single',topInk:null,lettering:id.startsWith('name-')?'cursive':'signature',ink:'foil',finish:'full',layout:id==='portrait'?'single':'grid',photos:[null,null,null,null],quantity:1,notes:''});
+const makeDraft=(id)=>({id,name:'',number:'',msg:'',size:'standard',shape:'card',lines:'one',layers:'single',topInk:null,lettering:id.startsWith('name-')?'cursive':'signature',ink:'foil',finish:'full',layout:id==='portrait'?'single':'grid',photos:[null,null,null,null],quantity:1,notes:''});
 /* ---------- text measuring (for fitting names) ---------- */
 const mc=document.createElement('canvas').getContext('2d');
 function tw(text,L,size){mc.font=`${L.weight} ${size}px ${L.css}`;return mc.measureText(text).width;}
@@ -1376,7 +1376,7 @@ function dieKeepsake(o,R){
   const C=A.cutOf?A.cutOf(o.id):null;
   let art;
   if(C)art=`<image href="data:image/jpeg;base64,${C.b64}" x="0" y="0" width="${R.w}" height="${R.h}" preserveAspectRatio="none"/>`;
-  else art=A.render(o.id,{mode:flat?'flat':'foil',ink:flat?(o.ink==='foil'?'#dcae52':o.ink):undefined,name:o.name,number:o.number}).replace(/^<svg [^>]*>/,`<svg x="0" y="0" width="${R.w}" height="${R.h}" viewBox="0 0 ${R.w} ${R.h}">`);
+  else art=A.render(o.id,{mode:flat?'flat':'foil',ink:flat?(o.ink==='foil'?'#dcae52':o.ink):undefined,name:o.name,number:o.number}).replace(/^<svg [^>]*>/,`<svg x="0" y="0" width="${R.w}" height="${R.h}" viewBox="0 0 ${+(R.w/(R.k||1)).toFixed(2)} ${+(R.h/(R.k||1)).toFixed(2)}" preserveAspectRatio="none">`);
   const wm=(o.noWm||!WM.on)?'':`<rect width="${R.w}" height="${R.h}" fill="url(#${uid}W)"/>`;
   const defs=`<defs><clipPath id="${uid}P"><path clip-rule="evenodd" d="${d}"/></clipPath>${(o.noWm||!WM.on)?'':wmDefs(uid)}</defs>`;
   const ring=o.ring===false?'':keyRing(hx,hy);
@@ -1465,7 +1465,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794772775470';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794786523622';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1542,7 +1542,7 @@ function openEditor(id,preset={}){
   $('photoConfig').hidden=!isP;$('layoutWrap').hidden=id==='portrait';
   if(isP&&id!=='portrait')$('layout').value=state.layout;
   $('finishWrap').hidden=isP||fam.key==='names';
-  drawPicker(fam);drawLettering();drawSwatches();drawShape();drawLines();drawLayers();drawSize();drawSlots();$('linesWrap').hidden=true;$('layersWrap').hidden=fam.key!=='names';$('shapeWrap').hidden=isP||fam.key==='names';syncInk();
+  drawPicker(fam);drawLettering();drawSwatches();drawShape();drawLines();drawLayers();drawSize();drawSlots();$('linesWrap').hidden=true;$('layersWrap').hidden=true;$('shapeWrap').hidden=isP||fam.key==='names';syncInk();
   {const nm=isName(id);state.name=nm?String(state.name||'').replace(/\s+/g,'').slice(0,12):state.name;$('name').maxLength=nm?12:(fam.key==='kits'?14:24);$('name').closest('.field').querySelector('label').innerHTML=nm?'Name <small>one name, up to 12 letters</small>':'Name';}
   $('name').value=state.name;$('message').value=state.msg;
   {const die=A.regionOf?A.regionOf(id):null,kit=fam.key==='kits';if(kit)state.lettering='heavy';for(const k of ['name','message','lettering'])$(k).closest('.field').hidden=!!die&&!(kit&&k==='name');$('numWrap').hidden=!kit;$('jnum').value=state.number||'';if(die)$('inkWrap').hidden=true;}
