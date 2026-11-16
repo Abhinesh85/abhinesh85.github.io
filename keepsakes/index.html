@@ -36,6 +36,8 @@ h1,h2,h3,p,ol,ul,dl,dd,figure{margin:0}ol,ul{padding:0;list-style:none}
 button,input,select,textarea{font:inherit;color:inherit;letter-spacing:inherit}button{cursor:pointer;background:none;border:0;padding:0}
 a{color:inherit}[hidden]{display:none!important}
 :focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.field input:focus-visible,.field select:focus-visible,.field textarea:focus-visible,.namefield input:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){.tile:hover,.tile:focus-visible{transform:none}}
 .wrap{padding-inline:var(--gut);max-width:1440px;margin-inline:auto}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 html{-webkit-tap-highlight-color:transparent}
@@ -242,12 +244,12 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 <body>
 <header class="top"><div class="wrap">
 <a class="brand" href="../" aria-label="PrAjo Custom Studio home"><img src="../logo.png" alt="" width="42" height="42"><span><b>PRAJO</b><small>Custom Studio</small></span></a>
-<nav aria-label="Main"><a href="../#shop">Shop</a><a href="../#how">How it's made</a><a href="../tumbler.html">Design yours</a><a href="#collection" data-go="collection" aria-current="page">Name charms</a><a href="../#custom">Custom orders</a><a href="../#reviews">Reviews</a><a href="../#about">About</a></nav>
+<nav aria-label="Main"><a href="../#shop">Shop</a><a href="../#how">How it's made</a><a href="../#make">Design yours</a><a href="#collection" data-go="collection" aria-current="page">Keychains &amp; charms</a><a href="../#custom">Custom orders</a><a href="../#reviews">Reviews</a><a href="../#about">About</a></nav>
 <div class="top-actions"><button class="btn primary" id="continue" type="button">Personalize</button>
 <button class="nav-btn" type="button" id="navBtn" aria-label="Open menu" aria-expanded="false" aria-controls="navSheet"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button></div>
 </div></header>
 <div class="navsheet" id="navSheet" hidden><nav aria-label="Menu"><button class="nav-x" type="button" id="navX" aria-label="Close menu">&times;</button>
-<a href="../#shop">Shop</a><a class="gold" href="../tumbler.html">🎨 Design yours</a><a class="gold" href="#collection" data-go="collection">✨ Name charms &amp; keepsakes</a><a href="../#custom">Custom &amp; bulk orders</a><a href="../#how">How it's made</a><a href="../#reviews">Reviews</a><a href="../#faq">Shipping, returns &amp; FAQ</a><a href="../#about">About</a></nav></div>
+<a href="../#shop">Shop</a><a class="gold" href="../#make">🎨 Design yours</a><a class="gold" href="#collection" data-go="collection">✨ Keychains &amp; charms</a><a href="../#custom">Custom &amp; bulk orders</a><a href="../#how">How it's made</a><a href="../#reviews">Reviews</a><a href="../#faq">Shipping, returns &amp; FAQ</a><a href="../#about">About</a></nav></div>
 <noscript><p class="wrap" style="padding-block:40px">This page needs JavaScript to preview your keepsake.</p></noscript>
 <main>
 <div id="homeView">
@@ -1193,7 +1195,13 @@ function mapArt(name, mode, ink) {
   if (flat) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S.w} ${S.h}" width="${S.w}mm" height="${S.h}mm" data-art="map-${slug(name)}" data-mode="flat"><title>${name}</title><path d="${d}" fill="none" stroke="${col}" stroke-width="1.5" stroke-linejoin="round"/></svg>`;
   // the real national flag inside the outline; the file name is the ISO code (flags/xx.svg), or inline data when FLAGS is set (workbench, art/ exports)
   const href = S.iso ? (FLAGS[S.iso] ? 'data:image/svg+xml;base64,' + FLAGS[S.iso] : FLAGBASE + S.iso + '.svg') : null;
-  const fill = href ? `<image href="${href}" x="0" y="0" width="${S.w}" height="${S.h}" preserveAspectRatio="xMidYMid slice"/>` : `<rect width="${S.w}" height="${S.h}" fill="${k ? k.a : '#27406b'}"/>`;
+  // the flag keeps its real proportions as far as it can: scaled to cover the outline, then squeezed or stretched by at most 1.3x so the outline still gets a full-looking flag
+  const fr = S.fr || 1.5, W = S.w, H = S.h, K = 1.3; let rw, rh;
+  if (W / H > fr) { rw = W; rh = Math.max(H, (W / fr) / K); } else { rh = H; rw = Math.max(W, (H * fr) / K); }
+  if (rw > W * 1.7 || rh > H * 1.7) { rw = W; rh = H; }   // too narrow or too wide to crop sensibly (Bahrain, Russia, Cuba...): show the whole flag, squeezed, so the colours still read
+  const fx = r1((W - rw) / 2), fy = r1((H - rh) / 2);
+  const back = `<rect width="${S.w}" height="${S.h}" fill="${k ? k.a : '#27406b'}"/>`;   // flags with see-through corners (Nepal) sit on their main colour
+  const fill = href ? back + `<image href="${href}" x="${fx}" y="${fy}" width="${r1(rw)}" height="${r1(rh)}" preserveAspectRatio="none"/>` : `<rect width="${S.w}" height="${S.h}" fill="${k ? k.a : '#27406b'}"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S.w} ${S.h}" width="${S.w}mm" height="${S.h}mm" data-art="map-${slug(name)}" data-mode="foil"><title>${name} map in its flag colours</title><defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs><g clip-path="url(#${id})">${fill}</g><path d="${d}" fill="none" stroke="#0a1220" stroke-opacity=".55" stroke-width=".5" stroke-linejoin="round"/></svg>`;
 }
 function setShapes(shapes, kits) {
@@ -1252,7 +1260,7 @@ const $=id=>document.getElementById(id);
 const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const clamp=(n,a,b)=>Math.max(a,Math.min(b,n));
 const f1=n=>+n.toFixed(2);
-const A=PrAjoArt;A.setFlagBase('../flags/');
+const A=PrAjoArt;A.setFlagBase('flags/');
 /* ---------- catalogue ---------- */
 const MONTH_NAMES=['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SIGN_RANGES={aries:'Mar 21 – Apr 19',taurus:'Apr 20 – May 20',gemini:'May 21 – Jun 20',cancer:'Jun 21 – Jul 22',leo:'Jul 23 – Aug 22',virgo:'Aug 23 – Sep 22',libra:'Sep 23 – Oct 22',scorpio:'Oct 23 – Nov 21',sagittarius:'Nov 22 – Dec 21',capricorn:'Dec 22 – Jan 19',aquarius:'Jan 20 – Feb 18',pisces:'Feb 19 – Mar 20'};
@@ -1468,7 +1476,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794787168983';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794851513348';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1508,6 +1516,9 @@ $('bday').addEventListener('change',()=>{
 const HERO_SEQ=['name-gold','zodiac-aries','name-blush','zodiac-leo','name-midnight','baby-moon','name-lagoon','zodiac-scorpio','name-violet','baby-rainbow','name-sunshine','zodiac-pisces'];
 let heroIdx=0,heroTimer,heroName='';
 function heroRender(){
+  /* collections the owner switched off are skipped, so the rotating picture never errors */
+  for(let k=0;k<HERO_SEQ.length&&!itemOf(HERO_SEQ[heroIdx]);k++)heroIdx=(heroIdx+1)%HERO_SEQ.length;
+  if(!itemOf(HERO_SEQ[heroIdx]))return;
   const id=HERO_SEQ[heroIdx];const S=SIZES.standard;
   $('heroStage').innerHTML=keepsake({w:S.w,h:S.h,id,name:heroName,lettering:isName(id)?'bubble':'signature',ink:'foil',finish:'full',ghost:true,glint:true,label:'Keepsake preview: '+itemOf(id).item.name});
   $('heroTitle').textContent=itemOf(id).fam.label.replace(/s$/,'')+' · '+itemOf(id).item.name+(itemOf(id).item.sub?' · '+itemOf(id).item.sub:'');
@@ -1776,6 +1787,8 @@ const navBtn=$('navBtn'),navSheet=$('navSheet');const setNav=o=>{navSheet.hidden
 document.querySelectorAll('[data-go]').forEach(a=>a.addEventListener('click',e=>{e.preventDefault();navigate('home',a.dataset.go);}));
 let io;function observe(){if(!('IntersectionObserver'in window)||document.documentElement.classList.contains('embed')){document.querySelectorAll('.rise').forEach(e=>e.classList.add('in'));return;}io=io||new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}}),{threshold:.12,rootMargin:'0px 0px -6% 0px'});document.querySelectorAll('.rise:not(.in)').forEach(e=>io.observe(e));}
 history.replaceState({view:'home'},'');
+/* deep link from the store: keepsakes/?c=maps opens that collection (names, flowers, stones, zodiac, states, maps, kits...) */
+try{const c=new URLSearchParams(location.search).get('c'),f=FAMILIES.find(x=>x.key===c);if(f){famKey=c;if(DATA_FAMS.includes(c)&&!f.loaded)setTimeout(()=>loadRegions(f),0);setTimeout(()=>{const cs=$('cards');cs&&cs.scrollIntoView({block:'start'});},400);}}catch(e){}
 heroRender();drawTabs();drawCards(true);drawDiagram();observe();
 /* owner switch: same public site_settings row the store reads; any failure leaves the watermark ON */
 try{fetch('https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/site_settings?id=eq.1&select=data',{headers:{apikey:'sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b',Authorization:'Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b'}}).then(r=>r.ok?r.json():null).then(rows=>{const D=rows&&rows[0]&&rows[0].data;if(D&&D.watermarkOff===true){WM.on=false;rerenderAll();}
