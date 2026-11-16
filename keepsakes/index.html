@@ -278,7 +278,7 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 <div class="visual"><div class="stage" id="stage" aria-label="Live keepsake preview"></div><span class="cap" id="dims"></span><button class="zoom" id="zoom" type="button" aria-pressed="false">Enlarge</button></div>
 <div class="settings">
 <p class="small" id="family"></p><h1 id="editTitle"></h1><p class="desc" id="editDesc"></p>
-<div class="field"><label for="name">Name</label><input id="name" type="text" maxlength="24" placeholder="e.g. Amara" autocomplete="off"><span class="count" id="charCount">0 / 24</span></div>
+<div class="field"><label for="name">Name</label><input id="name" type="text" maxlength="24" placeholder="e.g. Aleesa" autocomplete="off"><span class="count" id="charCount">0 / 24</span></div>
 <div class="field" id="numWrap" hidden><label for="jnum">Shirt number</label><input id="jnum" type="text" maxlength="2" inputmode="numeric" pattern="[0-9]*" placeholder="e.g. 10" autocomplete="off"></div>
 <div class="field" id="pickWrap" hidden><span class="lab" id="pickLab"></span><div class="picker" id="picker" role="group" aria-labelledby="pickLab"></div></div>
 <div id="photoConfig" hidden>
@@ -1460,7 +1460,7 @@ function fontFaceCss(key){
 }
 /* ---------- tiles / home ---------- */
 const sizeFor=s=>SIZES[s];
-function pieceFor(id,o={}){const S=SIZES.standard;return keepsake({w:S.w,h:S.h,id,name:'',sample:'Amara',finish:'full',ink:'foil',lettering:isName(id)?'cursive':'signature',photos:o.photos,layout:o.layout,ring:o.ring,glint:o.glint,ghost:o.ghost,label:o.label||''});}
+function pieceFor(id,o={}){const S=SIZES.standard;return keepsake({w:S.w,h:S.h,id,name:'',sample:'Aleesa',finish:'full',ink:'foil',lettering:isName(id)?'cursive':'signature',photos:o.photos,layout:o.layout,ring:o.ring,glint:o.glint,ghost:o.ghost,label:o.label||''});}
 function drawTabs(){
   $('tabs').replaceChildren(...FAMILIES.map(f=>{const b=document.createElement('button');b.type='button';b.textContent=f.label;b.setAttribute('aria-pressed',String(f.key===famKey));b.onclick=()=>{famKey=f.key;drawTabs();if(DATA_FAMS.includes(f.key)&&!f.loaded){loadRegions(f);}else drawCards(true);const cs=$('cards');cs&&cs.scrollIntoView({block:'start',behavior:'smooth'});};return b;}));
 }
@@ -1476,7 +1476,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794851513348';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794856497921';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
