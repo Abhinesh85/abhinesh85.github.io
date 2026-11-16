@@ -160,7 +160,7 @@ footer{background:var(--bg)}
 .prog{display:flex;gap:18px;font-size:var(--t-s);font-weight:600;color:var(--muted)}.prog [aria-current]{color:var(--ink);text-decoration:underline;text-underline-offset:6px;text-decoration-color:var(--gold);text-decoration-thickness:2px}
 .config{display:grid;gap:0;grid-template-columns:minmax(0,1fr)}
 @media(min-width:900px){.config{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:56px;align-items:start}}
-.two{display:flex;gap:16px;justify-content:center;align-items:flex-start}.two figure{margin:0;flex:1 1 0;max-width:48%;text-align:center}.two figcaption{margin-top:8px;font-size:14px;color:var(--muted)}.visual .stage .two figure>svg{height:auto;width:100%;max-height:48vh}.two .flip>svg{transform:scaleX(-1)}.visual:has(.two){height:auto;position:static;padding-bottom:20px}.visual:has(.two) .cap{position:static;display:block;text-align:center;margin-top:6px}.visual .stage:has(.two){height:auto}.visual .stage .two figure>svg{max-height:none}
+.two{display:flex;gap:16px;justify-content:center;align-items:flex-start}.two figure{margin:0;flex:1 1 0;max-width:48%;text-align:center}.two figcaption{margin-top:8px;font-size:14px;color:var(--muted)}.visual .stage .two figure>svg{height:auto;width:100%;max-height:48vh}.visual:has(.two){height:auto;position:static;padding-bottom:20px}.visual:has(.two) .cap{position:static;display:block;text-align:center;margin-top:6px}.visual .stage:has(.two){height:auto}.visual .stage .two figure>svg{max-height:none}
 .visual{position:sticky;top:var(--head);z-index:10;background:var(--surface);padding:16px 16px 36px;height:min(calc(46 * var(--svh)),520px);margin-inline:calc(var(--gut) * -1);padding-inline:var(--gut)}
 @media(min-width:900px){.visual{margin-inline:0;padding-inline:16px}}
 .visual .stage{height:100%;width:100%;display:block;min-height:0;position:relative}
@@ -291,7 +291,7 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 <div class="field"><label for="message">Short message <small>Optional</small></label><input id="message" type="text" maxlength="28" placeholder="e.g. Always with me" autocomplete="off"></div>
 <div class="field"><span class="lab" id="lettLab">Lettering</span><div class="seg" id="lettering" role="group" aria-labelledby="lettLab"></div></div>
 <div class="field" id="finishWrap"><span class="lab" id="finLab">Print finish</span><div class="seg" id="finish" role="group" aria-labelledby="finLab"><button type="button" data-v="full">Full colour and gold</button><button type="button" data-v="flat">One colour</button></div></div>
-<div class="field" id="sidesWrap"><span class="lab" id="sidesLab">Printed on</span><div class="seg" id="sides" role="group" aria-labelledby="sidesLab"><button type="button" data-v="both">Both sides</button><button type="button" data-v="front">Front only</button></div><p class="hint" id="sidesHint" aria-live="polite"></p></div>
+<div class="field" id="sidesWrap"><span class="lab" id="sidesLab">Printed on</span><div class="seg" id="sides" role="group" aria-labelledby="sidesLab"><button type="button" data-v="both">Both sides, same design</button><button type="button" data-v="front">Front only</button></div><p class="hint" id="sidesHint" aria-live="polite"></p></div>
 <div class="field" id="inkWrap"><span class="lab" id="inkLab">Lettering colour</span><div class="swatches" id="swatches" role="group" aria-labelledby="inkLab"></div></div>
 <div class="field" id="linesWrap" hidden><span class="lab" id="linesLab">Lines</span><div class="seg" id="lines" role="group" aria-labelledby="linesLab"></div></div>
 <div class="field" id="layersWrap" hidden><span class="lab" id="layersLab">Layers</span><div class="seg" id="layers" role="group" aria-labelledby="layersLab"></div><p class="hint">Double layer: raised top letters on a coloured base. Two pieces of acrylic, glued.</p></div>
@@ -1080,14 +1080,20 @@ const cutKey = id => { const k = id.replace(/-/g, '_'); if (CUTS[k]) return k; r
 const cutOf = id => { const k = cutKey(id); return k ? CUTS[k] : null; };
 const cutD = C => 'M' + C.pts.map(p => p[0] + ' ' + p[1]).join('L') + 'Z' + circP(C.hole.x, C.hole.y, C.hole.r);
 // die-cut deity: full-colour artwork cut to the figure's outline with a clear acrylic border, hanging hole
+let BACKFIT = false;
+function setBackFit(v) { BACKFIT = !!v; }
 function deityArt(k, mode, ink, title, aid) {
-  const C = CUTS[k], t = title || (DEITIES[k] || SACRED[k] || [k])[0], flat = mode === 'flat', col = ink || '#d9ab4f', u = k + (++DUID);
+  let C = CUTS[k]; const BF = BACKFIT && C && C.bfit ? C.bfit : null;
+  if (BF) C = { ...C, pts: C.pts.map(p => [r1(C.w - p[0]) , p[1]]), hole: { ...C.hole, x: r1(C.w - C.hole.x) } };   // back of a two-sided piece: the cut outline (and hole) is mirrored
+  const t = title || (DEITIES[k] || SACRED[k] || [k])[0], flat = mode === 'flat', col = ink || '#d9ab4f', u = k + (++DUID);
   if (!C) return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" data-art="${aid || 'sacred-' + k}" data-mode="${mode}"><title>${t}</title></svg>`;
   const d = cutD(C), head = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${C.w} ${C.h}" width="${C.w}mm" height="${C.h}mm" data-art="${aid || 'sacred-' + k}" data-mode="${flat ? 'flat' : 'foil'}" data-diecut="true"><title>${t}</title>`;
   if (flat) return head + `<path d="${d}" fill="none" stroke="${col}" stroke-width=".3" fill-rule="evenodd"/></svg>`;
-  return head + `<defs><clipPath id="dc${u}"><path d="${d}" clip-rule="evenodd"/></clipPath></defs><path d="${d}" fill="#eef2f8" fill-opacity=".16" fill-rule="evenodd"/><g clip-path="url(#dc${u})"><image href="data:image/jpeg;base64,${C.b64}" x="0" y="0" width="${C.w}" height="${C.h}" preserveAspectRatio="none"/></g><path d="${d}" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width=".35" fill-rule="evenodd"/></svg>`;
+  return head + `<defs><clipPath id="dc${u}"><path d="${d}" clip-rule="evenodd"/></clipPath></defs><path d="${d}" fill="#eef2f8" fill-opacity=".16" fill-rule="evenodd"/><g clip-path="url(#dc${u})">${BF ? `<rect width="${C.w}" height="${C.h}" fill="#fff"/><g transform="translate(${BF.dx} ${BF.dy}) translate(${r1(C.w / 2)} ${r1(C.h / 2)}) scale(${BF.s}) translate(${-r1(C.w / 2)} ${-r1(C.h / 2)})">` : ''}<image href="data:image/jpeg;base64,${C.b64}" x="0" y="0" width="${C.w}" height="${C.h}" preserveAspectRatio="none"/>${BF ? '</g>' : ''}</g><path d="${d}" fill="none" stroke="#fff" stroke-opacity=".7" stroke-width=".35" fill-rule="evenodd"/></svg>`;
 }
 
+let MIRIMG = false;   // set while rendering the back of a two-sided piece: the picture is mirrored inside an unchanged outline (the whole file is then flipped, so the outline flips and the picture faces the right way)
+function setMirrorImage(v) { MIRIMG = !!v; }
 // ---------- US states (cut shape + landmark pictogram), country maps and national-team kits ----------
 let RUID = 0;
 let SHAPES = { states: {}, countries: {} }, KITSET = {}, ILLUS = {};
@@ -1153,7 +1159,7 @@ const polyPath = pts => 'M' + pts.map(p => p[0] + ' ' + p[1]).join('L') + 'Z';
 function polyCentroid(pts) { let a = 0, x = 0, y = 0; for (let i = 0; i < pts.length; i++) { const p = pts[i], q = pts[(i + 1) % pts.length], f = p[0] * q[1] - q[0] * p[1]; a += f; x += (p[0] + q[0]) * f; y += (p[1] + q[1]) * f; } return a ? [x / (3 * a), y / (3 * a)] : pts[0]; }
 function illustratedState(abbr) {
   const S = SHAPES.states[abbr], I = ILLUS[abbr], d = polyPath(S.pts), id = 'il' + abbr + (++RUID);
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S.w} ${S.h}" width="${S.w}mm" height="${S.h}mm" data-art="state-${abbr.toLowerCase()}" data-mode="foil" data-illustrated="true"><title>${S.name}</title><defs><clipPath id="${id}"><path d="${d}"/></clipPath><linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8f601b"/><stop offset=".3" stop-color="#f4d98b"/><stop offset=".55" stop-color="#dcae52"/><stop offset=".8" stop-color="#9a6d22"/><stop offset="1" stop-color="#e5bf68"/></linearGradient></defs><g clip-path="url(#${id})"><rect width="${S.w}" height="${S.h}" fill="#0b1426"/><image href="data:image/jpeg;base64,${I.b64}" x="0" y="0" width="${S.w}" height="${S.h}" preserveAspectRatio="xMidYMid slice"/><path d="${d}" fill="none" stroke="#0b1426" stroke-width="4.2" stroke-linejoin="round" opacity=".55"/><path d="${d}" fill="none" stroke="url(#${id}g)" stroke-width="3" stroke-linejoin="round"/></g></svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S.w} ${S.h}" width="${S.w}mm" height="${S.h}mm" data-art="state-${abbr.toLowerCase()}" data-mode="foil" data-illustrated="true"><title>${S.name}</title><defs><clipPath id="${id}"><path d="${d}"/></clipPath><linearGradient id="${id}g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8f601b"/><stop offset=".3" stop-color="#f4d98b"/><stop offset=".55" stop-color="#dcae52"/><stop offset=".8" stop-color="#9a6d22"/><stop offset="1" stop-color="#e5bf68"/></linearGradient></defs><g clip-path="url(#${id})"><rect width="${S.w}" height="${S.h}" fill="#0b1426"/><image href="data:image/jpeg;base64,${I.b64}" x="0" y="0" width="${S.w}" height="${S.h}" preserveAspectRatio="xMidYMid slice"${MIRIMG ? ` transform="translate(${S.w} 0) scale(-1 1)"` : ''}/><path d="${d}" fill="none" stroke="#0b1426" stroke-width="4.2" stroke-linejoin="round" opacity=".55"/><path d="${d}" fill="none" stroke="url(#${id}g)" stroke-width="3" stroke-linejoin="round"/></g></svg>`;
 }
 function stateArt(abbr, mode, ink) {
   if (mode !== 'flat' && ILLUS[abbr]) return illustratedState(abbr);
@@ -1229,7 +1235,7 @@ function mapArt(name, mode, ink) {
   if (rw > W * 1.7 || rh > H * 1.7) { rw = W; rh = H; }   // too narrow or too wide to crop sensibly (Bahrain, Russia, Cuba...): show the whole flag, squeezed, so the colours still read
   const fx = r1((W - rw) / 2), fy = r1((H - rh) / 2);
   const back = `<rect width="${S.w}" height="${S.h}" fill="${k ? k.a : '#27406b'}"/>`;   // flags with see-through corners (Nepal) sit on their main colour
-  const fill = href ? back + `<image href="${href}" x="${fx}" y="${fy}" width="${r1(rw)}" height="${r1(rh)}" preserveAspectRatio="none"/>` : `<rect width="${S.w}" height="${S.h}" fill="${k ? k.a : '#27406b'}"/>`;
+  const fill = href ? back + `<image href="${href}" x="${fx}" y="${fy}" width="${r1(rw)}" height="${r1(rh)}" preserveAspectRatio="none"${MIRIMG ? ` transform="translate(${S.w} 0) scale(-1 1)"` : ''}/>` : `<rect width="${S.w}" height="${S.h}" fill="${k ? k.a : '#27406b'}"/>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${S.w} ${S.h}" width="${S.w}mm" height="${S.h}mm" data-art="map-${slug(name)}" data-mode="foil"><title>${name} map in its flag colours</title><defs><clipPath id="${id}"><path d="${d}"/></clipPath></defs><g clip-path="url(#${id})">${fill}</g><path d="${d}" fill="none" stroke="#0a1220" stroke-opacity=".55" stroke-width=".5" stroke-linejoin="round"/></svg>`;
 }
 function setShapes(shapes, kits) {
@@ -1256,6 +1262,10 @@ const LIST = [
 const BYID = Object.fromEntries(LIST.map(e => [e.id, e]));
 function render(id, opts = {}) {
   const e = BYID[id]; if (!e) throw new Error('unknown art ' + id);
+  setMirrorImage(!!opts.mirrorImage); setBackFit(!!opts.back);
+  try { return render1(id, opts, e); } finally { setMirrorImage(false); setBackFit(false); }
+}
+function render1(id, opts, e) {
   const mode = opts.mode === 'flat' ? 'flat' : 'foil';
   if (e.family === 'states') return stateArt(e.abbr, mode, opts.ink);
   if (e.family === 'maps') return mapArt(e.country, mode, opts.ink);
@@ -1400,7 +1410,7 @@ function badge(o){
   let size=b.bh*.62;const maxW=b.bwid-7;const wd=tw(txt,L,size)+(L.upper?size*.06*txt.length:0);if(wd>maxW)size*=maxW/wd;
   const fillT=o.ink==='foil'?(flat?'#dcae52':`url(#${uid}T)`):o.ink;
   let art='';
-  if(o.id){art=A.render(o.id,{mode:flat?'flat':'foil',ink:flat?(o.ink==='foil'?'#dcae52':o.ink):undefined}).replace(/^<svg [^>]*>/,`<svg x="${f1(b.cx-b.R2)}" y="${f1(b.cy-b.R2)}" width="${f1(b.R2*2)}" height="${f1(b.R2*2)}" viewBox="0 0 400 400" overflow="visible">`);}
+  if(o.id){art=A.render(o.id,{back:!!o.back,mode:flat?'flat':'foil',ink:flat?(o.ink==='foil'?'#dcae52':o.ink):undefined}).replace(/^<svg [^>]*>/,`<svg x="${f1(b.cx-b.R2)}" y="${f1(b.cy-b.R2)}" width="${f1(b.R2*2)}" height="${f1(b.R2*2)}" viewBox="0 0 400 400" overflow="visible">`);}
   const defs=`<defs><linearGradient id="${uid}T" gradientUnits="userSpaceOnUse" x1="0" y1="${f1(b.by)}" x2="${b.W}" y2="${f1(b.by+b.bh)}"><stop offset="0" stop-color="#b98a33"/><stop offset=".25" stop-color="#f4d98b"/><stop offset=".5" stop-color="#dcae52"/><stop offset=".72" stop-color="#8f6420"/><stop offset="1" stop-color="#e5bf68"/></linearGradient>${holeMask(uid,-1,-1,b.W+2,b.H+2,b.hx,b.hy)}${(o.noWm||!WM.on)?'':wmDefs(uid)}${o.fontCss?`<style>${o.fontCss}</style>`:''}</defs>`;
   const body=`<g mask="url(#${uid}M)"><circle cx="${f1(b.cx)}" cy="${f1(b.tr)}" r="${b.tr}" fill="${STOCK}"/><circle cx="${f1(b.cx)}" cy="${f1(b.tr)}" r="${f1(b.tr-b.se)}" fill="none" stroke="#f1efea" stroke-width=".9"/>
   <circle cx="${f1(b.cx)}" cy="${f1(b.cy)}" r="${f1(b.R)}" fill="${STOCK}"/><circle cx="${f1(b.cx)}" cy="${f1(b.cy)}" r="${f1(b.R-b.se)}" fill="#f1efea"/><circle cx="${f1(b.cx)}" cy="${f1(b.cy)}" r="${f1(b.R2)}" fill="#0b1322"/>${art}
@@ -1415,7 +1425,7 @@ function dieKeepsake(o,R){
   const C=A.cutOf?A.cutOf(o.id):null;
   let art;
   if(C)art=`<image href="data:image/jpeg;base64,${C.b64}" x="0" y="0" width="${R.w}" height="${R.h}" preserveAspectRatio="none"/>`;
-  else art=A.render(o.id,{mode:flat?'flat':'foil',ink:flat?(o.ink==='foil'?'#dcae52':o.ink):undefined,name:o.name,number:o.number}).replace(/^<svg [^>]*>/,`<svg x="0" y="0" width="${R.w}" height="${R.h}" viewBox="0 0 ${+(R.w/(R.k||1)).toFixed(2)} ${+(R.h/(R.k||1)).toFixed(2)}" preserveAspectRatio="none">`);
+  else art=A.render(o.id,{back:!!o.back,mode:flat?'flat':'foil',ink:flat?(o.ink==='foil'?'#dcae52':o.ink):undefined,name:o.name,number:o.number}).replace(/^<svg [^>]*>/,`<svg x="0" y="0" width="${R.w}" height="${R.h}" viewBox="0 0 ${+(R.w/(R.k||1)).toFixed(2)} ${+(R.h/(R.k||1)).toFixed(2)}" preserveAspectRatio="none">`);
   const wm=(o.noWm||!WM.on)?'':`<rect width="${R.w}" height="${R.h}" fill="url(#${uid}W)"/>`;
   const defs=`<defs><clipPath id="${uid}P"><path clip-rule="evenodd" d="${d}"/></clipPath>${(o.noWm||!WM.on)?'':wmDefs(uid)}</defs>`;
   const ring=o.ring===false?'':keyRing(hx,hy);
@@ -1445,7 +1455,7 @@ function keepsake(o){
     const boxH=h-13-(hasText?(msg?26:20):6);
     body+=collageMarkup(o.photos||[],o.id==='portrait'?'single':o.layout||'grid',4,13,w-8,Math.max(10,boxH),uid);
   } else if(o.id){
-    let svg=A.render(o.id,{mode:flat?'flat':'foil',ink:flat?(o.ink==='foil'?'#dcae52':o.ink):undefined});
+    let svg=A.render(o.id,{back:!!o.back,mode:flat?'flat':'foil',ink:flat?(o.ink==='foil'?'#dcae52':o.ink):undefined});
     const ratio=hasText?.95:1.12; const aS=artSize*ratio, aY=hasText?artTop:artTop+(h-artTop-aS-6)/2;
     svg=svg.replace(/^<svg [^>]*>/,m=>`<svg x="${f1((w-aS)/2)}" y="${f1(aY)}" width="${f1(aS)}" height="${f1(aS)}" viewBox="0 0 400 400" overflow="visible">`);
     body+=svg;
@@ -1504,7 +1514,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794859359319';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794862939229';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1630,7 +1640,8 @@ function drawSwatches(){
   }
   $('swatches').replaceChildren(...COLORS.map(([n,c])=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',n);b.title=n;b.style.background=c==='foil'?'linear-gradient(135deg,#8f601b,#f4d98b 40%,#dcae52 60%,#8f601b)':c;/* taste-skill-ignore: swatch shows the foil colour */b.setAttribute('aria-pressed',String(state.ink===c));b.onclick=()=>{state.ink=c;drawSwatches();render();};return b;}));
   [...$('finish').children].forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.v===state.finish));b.onclick=()=>{state.finish=b.dataset.v;drawSwatches();render();};});
-  const sideHint=()=>{const txt=state.name||state.number||state.msg||isName(state.id);$('sidesHint').textContent=state.sides==='both'?(txt?'The back prints as the mirror image of the front, lined up on the same cut shape, so lettering reads backwards on the back. Choose Front only for a plain back.':'The back prints as the mirror image of the front, lined up exactly on the same cut shape.'):'Only the front is printed. The back stays plain acrylic.';};
+  const SIDEHINT={identical:'The back shows the same design. The shape is symmetrical, so front and back line up exactly.',region:'The back shows the same picture facing the right way, fitted into the flipped outline.',fit:'The back shows the same figure facing the right way, moved and sized to sit as well as it can inside the flipped outline. A few edge details may be trimmed.',mirror:'This piece is cut around the letters of your name, so the back can only be a mirror image (letters face the other way). Choose Front only for a plain back.'};
+  const sideHint=()=>{$('sidesHint').textContent=state.sides==='both'?SIDEHINT[backMode()]:'Only the front is printed. The back stays plain acrylic.';};
   [...$('sides').children].forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.v===state.sides));b.onclick=()=>{state.sides=b.dataset.v;[...$('sides').children].forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===state.sides)));sideHint();};});sideHint();
 }
 function productOpts(){
@@ -1696,7 +1707,7 @@ function summaryRows(){
   if(state.name)rows.push(['Name',state.name]);if(state.number)rows.push(['Shirt number',state.number]);if(state.msg)rows.push(['Message',state.msg]);
   rows.push(['Lettering',LETTERING[state.lettering].label]);if(isName(state.id))rows.push(['Layers',state.layers==='double'?'Double layer (3D)'+(state.topInk?', custom top colour':''):'Single layer']);
   if(info.fam.key!=='photos')rows.push(['Print',state.finish==='flat'?'One colour':'Full colour and gold']);
-  rows.push(['Printed on',state.sides==='both'?'Both sides (back is the mirror image, aligned on the same cut)':'Front only']);
+  rows.push(['Printed on',state.sides==='both'?BACKLAB[backMode()].replace('Back','Both sides, back:').replace('(','(').trim():'Front only']);
   if(info.fam.key==='photos')rows.push(['Photos',String(state.id==='portrait'?1:COLLAGE[state.layout].length)]);
   return rows;
 }
@@ -1709,7 +1720,7 @@ function mailto(){
 }
 $('review').onclick=()=>{
   if($('review').disabled)return;
-  {const mk=()=>keepsake({...current,ghost:false,label:'Your design proof'});$('reviewStage').innerHTML=state.sides==='both'?'<div class="two"><figure>'+mk()+'<figcaption>Front</figcaption></figure><figure class="flip">'+mk()+'<figcaption>Back (mirror image)</figcaption></figure></div>':mk();}
+  {const po={...current,ghost:false,label:'Your design proof'},mk=()=>keepsake(po);$('reviewStage').innerHTML=state.sides==='both'?'<div class="two"><figure>'+mk()+'<figcaption>Front</figcaption></figure><figure>'+backSvgFor(po)+'<figcaption>'+BACKLAB[backMode()]+'</figcaption></figure></div>':mk();}
   $('proofSize').textContent=$('dims').textContent;$('quantity').value=state.quantity;$('notes').value=state.notes;
   $('orderSummary').replaceChildren(...summaryRows().map(([t,v])=>{const d=document.createElement('div');const a=document.createElement('dt'),b=document.createElement('dd');a.textContent=t;b.textContent=v;d.append(a,b);return d;}));
   $('mail').href=mailto();navigate('review');
@@ -1740,7 +1751,7 @@ function buildRequest(){
     art:(info.fam.key==='photos'||info.fam.key==='names')?null:{foil:`art/${dirs[info.fam.key]}/${state.id}.svg`},
     product:{shape:isName(state.id)?'name-contour':state.shape==='badge'?'round-badge':'card',width_mm:DM.w,height_mm:DM.h,thickness_mm:3,hole:{diameter_mm:4,x_mm:DM.hx,y_mm:DM.hy}},
     production:{cut:'xTool S1 40W laser: export Cut SVG (real mm) from the PrAjo workbench',print:'Omni o1 UV printer: export UV PNG from the PrAjo workbench',material:'3 mm dark opaque cast acrylic',steps:['Open this file in the workbench with Open customer request','Compare the preview with the customer proof PNG','Export Cut SVG and UV PNG (and top layer files if double layer)']},
-    sides:{mode:state.sides,back:state.sides==='both'?'mirror-of-front':null,note:state.sides==='both'?'Cut once. Print the front file, flip the piece left to right around its vertical axis, then print the Back file (the front flipped horizontally in the same frame). In the workbench use Print both sides.':'Front only.'},
+    sides:{mode:state.sides,back:state.sides==='both'?BACKREQ[backMode()]:null,note:state.sides==='both'?'Cut once. Print the front file, flip the piece left to right around its vertical axis, then print the Back file. In the workbench tick Print both sides.':'Front only.'},
     workbench:wbBlock(),
     shape:state.shape,layers:state.layers,top_colour:state.topInk,text:{name:state.name,number:state.number,message:state.msg,lettering:state.lettering,ink:state.ink,finish:state.finish},layout:state.layout,
     collage:state.photos,request:{title:info.item.name,quantity:state.quantity,notes:state.notes}};
@@ -1754,16 +1765,33 @@ async function inlineFlags(svg){
   for(const u of urls){const txt=await fetch(u).then(r=>{if(!r.ok)throw new Error('flag');return r.text();});svg=svg.split('href="'+u+'"').join('href="data:image/svg+xml;base64,'+btoa(unescape(encodeURIComponent(txt)))+'"');}
   return svg;
 }
+/* The back of a two-sided piece. The cut piece is flipped left to right, so the outline (and hanging hole) is mirrored, but the picture is the SAME picture facing the right way. Pictures and text are counter-flipped inside the mirrored outline. Name charms are cut around their letters, so for them the back can only be a true mirror image. */
+const backMode=()=>{const f=itemOf(state.id).fam.key;if(isName(state.id)||f==='names')return 'mirror';if(['gods','flowers','stones','sacred'].includes(f))return 'identical';   /* die-cut figures are cut to a symmetrical outline, so the back is the same file */if(f==='states'||f==='maps')return 'region';return 'identical';};
+const BACKLAB={identical:'Back (same design, flip the piece over)',region:'Back (same picture, fitted to the flipped outline)',fit:'Back (same figure, fitted to the flipped outline)',mirror:'Back (mirror image)'};
+const BACKREQ={identical:'identical',region:'same-design',fit:'fit-figure',mirror:'mirror-of-front'};
+function backSvgFor(po){const m=backMode();if(m==='fit')return keepsake({...po,back:true});const svg=keepsake(po);if(m==='identical')return svg;return backSvg(svg,m==='region');}
+function backSvg(svg,counter){
+  const doc=new DOMParser().parseFromString(svg,'image/svg+xml'),art=doc.querySelector('svg[data-art]')||doc.documentElement,vb=(art.getAttribute('viewBox')||'0 0 100 100').split(/[\s,]+/).map(Number),c2=2*vb[0]+vb[2],NS='http://www.w3.org/2000/svg',flip=`translate(${c2} 0) scale(-1 1)`;
+  const g=doc.createElementNS(NS,'g');g.setAttribute('transform',flip);g.setAttribute('data-back','flipped-outline');
+  [...art.childNodes].forEach(n=>{if(!(n.nodeType===1&&n.localName==='defs'))g.appendChild(n);});
+  if(counter)[...g.querySelectorAll('image,text')].forEach(el=>{const w=doc.createElementNS(NS,'g');w.setAttribute('transform',flip);el.replaceWith(w);w.appendChild(el);});
+  art.appendChild(g);return new XMLSerializer().serializeToString(doc.documentElement);
+}
+async function svgCanvas(svg,px){
+  const vbn=svg.match(/viewBox="([^"]+)"/)[1].split(' ').map(Number),ph=Math.round(px*vbn[3]/vbn[2]);
+  const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
+  const img=await decode(url);const c=document.createElement('canvas');c.width=px;c.height=ph;const g=c.getContext('2d');g.drawImage(img,0,0,c.width,c.height);await new Promise(r=>setTimeout(r,250));g.clearRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);return c;
+}
 async function makeProof(){
   await fontsReady2();
   const px=1400;
-  let svg=keepsake({...current,ghost:false,bg:'#0a1220',pad:10,fontCss:fontFaceCss(state.lettering),width:px});
+  const po={...current,ghost:false,bg:'#0a1220',pad:10,fontCss:fontFaceCss(state.lettering),width:px};
+  let svg=keepsake(po);
   svg=await inlineFlags(svg);
-  const vbn=svg.match(/viewBox="([^"]+)"/)[1].split(' ').map(Number),ph=Math.round(px*vbn[3]/vbn[2]);
-  const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
-  const img=await decode(url);const c=document.createElement('canvas');c.width=px;c.height=ph;const g=c.getContext('2d');g.drawImage(img,0,0,c.width,c.height);await new Promise(r=>setTimeout(r,250));g.clearRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);/* second draw: Safari paints embedded SVG fonts one frame late */
-  let out=c;
-  if(state.sides==='both'){const gap=60,top=70;out=document.createElement('canvas');out.width=px*2+gap;out.height=ph+top;const o=out.getContext('2d');o.fillStyle='#0a1220';o.fillRect(0,0,out.width,out.height);o.drawImage(c,0,top);o.save();o.translate(out.width,top);o.scale(-1,1);o.drawImage(c,0,0);o.restore();o.fillStyle='#d9ab4f';o.font='600 38px sans-serif';o.textAlign='center';o.fillText('FRONT',px/2,46);o.fillText('BACK (mirror image)',px+gap+px/2,46);}
+  const c=await svgCanvas(svg,px),ph=c.height;let out=c;
+  if(state.sides==='both'){
+    const b=await svgCanvas(await inlineFlags(backSvgFor(po)),px),gap=60,top=70;out=document.createElement('canvas');out.width=px*2+gap;out.height=ph+top;const o=out.getContext('2d');o.fillStyle='#0a1220';o.fillRect(0,0,out.width,out.height);o.drawImage(c,0,top);o.drawImage(b,px+gap,top);o.fillStyle='#d9ab4f';o.font='600 38px sans-serif';o.textAlign='center';o.fillText('FRONT',px/2,46);o.fillText(BACKLAB[backMode()].toUpperCase(),px+gap+px/2,46);
+  }
   const blob=await new Promise(r=>out.toBlob(r,'image/png'));if(!blob)throw new Error('The proof could not be saved.');
   return blob;
 }
