@@ -349,7 +349,9 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <div class="swrow" id="studioRow"><div class="swtxt"><b>🔤 Design studio on the store</b><small id="studioState">Checking…</small></div>
           <button type="button" class="tg" role="switch" aria-checked="false" id="studioToggle" aria-label="Design studio on the store"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
           <div class="swask" id="studioAsk" hidden><span id="studioAskT"></span><button type="button" class="btn gold" id="studioYes">Confirm</button><button type="button" class="btn line" id="studioNo">Cancel</button></div></div>
-        <button type="button" role="menuitem" id="kcBtn">✨ Name charm categories<small id="kcState">Switch Birth flowers, Sacred symbols and others on or off</small></button>
+        <div class="swrow" id="charmsRow"><div class="swtxt"><b>✨ Keychains &amp; charms in the shop</b><small id="charmsState">Checking…</small></div>
+          <button type="button" class="tg" role="switch" aria-checked="false" id="charmsToggle" aria-label="Keychains and charms in the shop"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
+          <div class="swask" id="charmsAsk" hidden><span id="charmsAskT"></span><button type="button" class="btn gold" id="charmsYes">Confirm</button><button type="button" class="btn line" id="charmsNo">Cancel</button></div></div>
         <button type="button" role="menuitem" id="ptBtn">🧩 Products to design<small id="ptState">Tumbler, mug, coaster, badge and more</small></button>
         <button type="button" role="menuitem" id="scBtn">🏠 Home page showcase<small id="scState">The three tumblers at the top of your home page</small></button>
         <button type="button" role="menuitem" id="snBtn">🎄 Seasonal effects<small id="snState">Falling snow, hearts, ghosts and more on holidays</small></button>
@@ -600,16 +602,6 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     </div>
   </div>
 </div>
-<div class="sheet" id="kcSheet" hidden role="dialog" aria-modal="true" aria-labelledby="kcTitle">
-  <div class="panel">
-    <div class="panel-head"><h2 id="kcTitle">Name charm categories</h2><button class="x" type="button" id="kcClose" aria-label="Close">×</button></div>
-    <div class="panel-body">
-      <p class="hint" style="margin:0 0 12px">Choose which categories customers see on the Name charms &amp; keepsakes page. Switch one off while you polish it, then back on when it's ready. Changes save and go live straight away.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px"><button class="btn gold" type="button" id="kcAllOn">All on</button><button class="btn line" type="button" id="kcAllOff">All off</button><span class="hint" id="kcMsg" role="status"></span></div>
-      <div class="co-list" id="kcList"><p class="hint">Loading…</p></div>
-    </div>
-  </div>
-</div>
 <div class="sheet" id="helpSheet" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
   <div class="panel">
     <div class="panel-head"><h2 id="helpTitle">How to update your site</h2><button class="x" type="button" id="helpClose" aria-label="Close">×</button></div>
@@ -785,7 +777,7 @@ async function boot() {
   $("appView").hidden = false; $("newBtn").hidden = false; $("menuWrap").hidden = false;
   let resetting = false; try { resetting = sessionStorage.getItem("prajo:setpw") === "1"; } catch {}
   if (resetting) openPw(true);
-  await Promise.all([loadRows(), loadPrices(), paintVac(), paintStudio(), dsCount()]);
+  await Promise.all([loadRows(), loadPrices(), paintVac(), paintStudio(), paintCharms(), dsCount()]);
   deepLink();
 }
 /* ---------- vacation mode: one tap from the menu (full text in Site settings) ---------- */
@@ -818,6 +810,10 @@ const paintStudio = bindSwitch("studioOn", { row: "studioRow", btn: "studioToggl
   onState: "ON: customers can design name tiles", offState: "Off: hidden from the store",
   askOn: "Show the Design studio to customers?", askOff: "Hide the Design studio from the store?",
   doneOn: "Design studio is ON. Customers can see it", doneOff: "Design studio is OFF. Hidden from the store" });
+const paintCharms = bindSwitch("charmsOn", { row: "charmsRow", btn: "charmsToggle", state: "charmsState", ask: "charmsAsk", yes: "charmsYes", no: "charmsNo" }, {
+  onState: "ON: the Keychains & charms group shows in the shop", offState: "Off: hidden from the shop grid (turn on once prices are set)",
+  askOn: "Show Keychains & charms in the shop grid?", askOff: "Hide Keychains & charms from the shop grid?",
+  doneOn: "Keychains & charms are showing in the shop", doneOff: "Keychains & charms are hidden from the shop grid" });
 $("outBtn").onclick = async () => { await sb.auth.signOut({ scope: "local" }).catch(() => {}); location.reload(); };   // this device only
 // Settings menu: everything that isn't a listing lives here.
 const setMenu = (open) => { $("menu").hidden = !open; $("menuBtn").setAttribute("aria-expanded", open); };
@@ -1264,72 +1260,10 @@ function renderDesigns() {
   $("dsList").innerHTML = rows.map((r) => `<div class="ds" data-id="${r.id}">
     <div class="ds-top" data-top><span class="ph" data-ph="${esc(r.preview_path || "")}">…</span>
       <div><b><span class="ds-code">${esc(r.code)}</span><span class="ds-badge ${r.status === "new" ? "new" : ""}">${esc((DS_STATUS.find((x) => x[0] === r.status) || [0, r.status])[1])}</span></b>
-      <span>${esc(r.summary)}</span><small>${esc(r.customer_name)} · ${esc(r.customer_email || "")} · qty ${r.qty} · ordered ${new Date(r.created_at).toLocaleString([], {dateStyle:"medium", timeStyle:"short"})}</small>${r.product === "keepsake" ? `<span style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px"><button class="btn gold" type="button" data-wb style="min-height:40px;padding:0 16px">Open in workbench</button><button class="btn line" type="button" data-req style="min-height:40px;padding:0 14px">Design file (.json)</button></span>` : ""}</div></div>
+      <span>${esc(r.summary)}</span><small>${esc(r.customer_name)} · qty ${r.qty} · ${new Date(r.created_at).toLocaleDateString()}</small></div></div>
     ${dsOpen === r.id ? `<div class="ds-more" id="dsMore"></div>` : ""}</div>`).join("") || `<div class="empty"><b>No designs here</b><p class="hint">When a customer sends a design from the Design studio it shows up here.</p></div>`;
   $("dsList").querySelectorAll("[data-ph]").forEach(async (el) => { const u = await dsUrl(el.dataset.ph); if (u) el.outerHTML = `<img src="${u}" alt="">`; });
   if (dsOpen) fillDesign(dsRows.find((r) => r.id === dsOpen));
-}
-/* Opens the production workbench with this order loaded. The workbench file on the site is encrypted (studio/workbench.enc); the passphrase is kept only on this device. */
-async function studioDecrypt(buf, pass) {
-  const b = new Uint8Array(buf); if (String.fromCharCode(...b.slice(0, 8)) !== "Salted__") throw new Error("not a workbench file");
-  const salt = b.slice(8, 16), data = b.slice(16);
-  const km = await crypto.subtle.importKey("raw", new TextEncoder().encode(pass), "PBKDF2", false, ["deriveBits"]);
-  const bits = new Uint8Array(await crypto.subtle.deriveBits({ name: "PBKDF2", salt, iterations: 200000, hash: "SHA-256" }, km, 384));
-  const key = await crypto.subtle.importKey("raw", bits.slice(0, 32), "AES-CBC", false, ["decrypt"]);
-  let plain; try { plain = await crypto.subtle.decrypt({ name: "AES-CBC", iv: bits.slice(32, 48) }, key, data); } catch { throw new Error("wrong passphrase"); }
-  try { return await new Response(new Blob([plain]).stream().pipeThrough(new DecompressionStream("gzip"))).text(); } catch { throw new Error("wrong passphrase"); }
-}
-/* A password box inside the page (the browser's own prompt box is blocked in some browsers, which made the button look dead). */
-function studioAskPass() {
-  return new Promise((done) => {
-    const m = document.createElement("div"); m.id = "wbAsk";
-    m.style.cssText = "position:fixed;inset:0;z-index:400;background:rgba(6,10,20,.72);display:grid;place-items:center;padding:20px";
-    m.innerHTML = `<form style="width:min(420px,100%);background:#0f1b2e;border:1px solid rgba(220,174,82,.4);border-radius:14px;padding:22px;display:grid;gap:12px;color:#f1efea;font:15px/1.5 system-ui" autocomplete="on">
-      <b style="font-size:18px">Production passphrase</b>
-      <span style="color:#a9b3c4">Saved in PRODUCTION-PASSPHRASE.txt. You enter it once on this device.</span>
-      <input type="text" name="username" value="prajo-workbench" autocomplete="username" hidden>
-      <input id="wbPass" type="password" name="passphrase" autocomplete="current-password" placeholder="Passphrase" style="min-height:46px;padding:0 12px;border-radius:8px;border:1px solid rgba(245,236,220,.25);background:#0a1220;color:#f1efea;font:16px system-ui">
-      <div style="display:flex;gap:10px;flex-wrap:wrap"><button type="submit" style="min-height:44px;padding:0 20px;border-radius:8px;border:0;background:#dcae52;color:#1a1204;font:700 15px system-ui;cursor:pointer">Open workbench</button><button type="button" id="wbAskNo" style="min-height:44px;padding:0 16px;border-radius:8px;border:1px solid rgba(245,236,220,.25);background:none;color:#f1efea;font:600 15px system-ui;cursor:pointer">Cancel</button></div></form>`;
-    document.body.append(m);
-    const input = m.querySelector("#wbPass"); setTimeout(() => input.focus(), 50);
-    const finish = (v) => { m.remove(); done(v); };
-    m.querySelector("form").addEventListener("submit", (e) => { e.preventDefault(); finish(input.value.trim()); });
-    m.querySelector("#wbAskNo").onclick = () => finish("");
-  });
-}
-async function dsOpenWorkbench(r) {
-  // The unlock key comes from the owner-only table studio_keys, so signing in to admin is all that is needed. Falls back to a typed passphrase if the table isn't set up.
-  let pass = "", fromDb = false;
-  try { const { data } = await sb.from("studio_keys").select("secret").eq("id", "workbench").maybeSingle(); if (data?.secret) { pass = data.secret; fromDb = true; } } catch { /* table not set up yet */ }
-  if (!pass) { try { pass = localStorage.getItem("prajo:studio:key") || ""; } catch { /* no storage */ } }
-  const fresh = !pass;
-  if (!pass) { pass = await studioAskPass(); if (!pass) return toast("Cancelled. Tap Open in workbench again and enter the passphrase when you're ready."); }
-  toast("Opening the workbench… the first time takes a few seconds");
-  try {
-    const res = await fetch("studio/workbench.enc?" + (window.__studioV || (window.__studioV = Date.now())), { cache: "force-cache" });
-    if (!res.ok) throw new Error("workbench file not found on the site");
-    const html = await studioDecrypt(await res.arrayBuffer(), pass);
-    if (fresh && !fromDb) { try { localStorage.setItem("prajo:studio:key", pass); } catch { /* optional */ } }
-    const old = document.getElementById("wbOverlay"); if (old) old.remove();
-    const box = document.createElement("div"); box.id = "wbOverlay";
-    box.style.cssText = "position:fixed;inset:0;z-index:300;background:#0a1220;display:flex;flex-direction:column";
-    box.innerHTML = `<div style="display:flex;align-items:center;gap:12px;min-height:46px;padding:0 14px;border-bottom:1px solid rgba(245,236,220,.12);background:#0f1b2e;color:#f1efea;font:600 14px system-ui"><button type="button" id="wbClose" style="min-height:40px;padding:0 6px;color:#e8c872;font:700 14px system-ui;background:none;border:0;cursor:pointer">← Back to orders</button><span style="color:#a9b3c4;font-weight:500">Production workbench · order ${esc(r.code)}</span></div><iframe id="wbFrame" title="Production workbench" style="flex:1;width:100%;border:0;background:#0a1220"></iframe>`;
-    document.body.append(box); document.body.style.overflow = "hidden";
-    const frame = box.querySelector("#wbFrame");
-    const close = () => { window.removeEventListener("message", onMsg); try { URL.revokeObjectURL(frame.src); } catch { /* ok */ } box.remove(); document.body.style.overflow = ""; };
-    const onMsg = (e) => { if (e.source === frame.contentWindow && e.data && e.data.type === "prajo-ready") { frame.contentWindow.postMessage({ type: "prajo-order", req: r.design }, location.origin); } };
-    window.addEventListener("message", onMsg);
-    box.querySelector("#wbClose").onclick = close;
-    frame.src = URL.createObjectURL(new Blob([html], { type: "text/html" }));
-  } catch (e) {
-    if (/passphrase/.test(e.message)) { try { localStorage.removeItem("prajo:studio:key"); } catch { /* none */ } }
-    toast(fromDb && /passphrase/.test(e.message) ? "The key saved in Supabase does not match the workbench file on the site. Re-run studio-key-setup.sql." : "Couldn't open the workbench: " + e.message);
-  }
-}
-function dsDownloadReq(r) {
-  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([JSON.stringify(r.design, null, 2)], { type: "application/json" }));
-  a.download = `PrAjo-${r.code}-request.json`; document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(a.href), 4000);
-  toast("Design file saved. Drag it onto workbench.html to produce it.");
 }
 async function fillDesign(r) {
   const box = $("dsMore"); if (!r || !box) return;
@@ -1337,12 +1271,12 @@ async function fillDesign(r) {
   const imgs = (r.design?.layers || []).filter((l) => l.type === "img").length;
   box.innerHTML = `${u ? `<img class="big" src="${u}" alt="Design preview">` : ""}
     <dl><dt>Design</dt><dd>${esc(r.summary)}</dd><dt>Customer</dt><dd>${esc(r.customer_name)} · <a href="mailto:${esc(r.customer_email)}?subject=${encodeURIComponent("Your PrAjo design " + r.code)}">${esc(r.customer_email)}</a>${r.customer_phone ? " · " + esc(r.customer_phone) : ""}</dd>
-    ${r.product === "keepsake" && r.design?.product ? `<dt>Size</dt><dd>${esc(r.design.product.width_mm)} × ${esc(r.design.product.height_mm)} mm · design ${esc(r.design.design)}</dd>` : ""}${r.product === "keepsake" ? `<dt>Production</dt><dd>1. Tap <b>Open in workbench</b> on the order. 2. In the workbench tap <b>Download production files (.zip)</b>, then open the zip.</dd>` : ""}<dt>Quantity</dt><dd>${r.qty}${r.needed_by ? ` · needed by ${esc(r.needed_by)}` : ""}</dd>${r.notes ? `<dt>Notes</dt><dd>${esc(r.notes)}</dd>` : ""}
+    <dt>Quantity</dt><dd>${r.qty}${r.needed_by ? ` · needed by ${esc(r.needed_by)}` : ""}</dd>${r.notes ? `<dt>Notes</dt><dd>${esc(r.notes)}</dd>` : ""}
     ${r.design?.parent ? `<dt>Revises</dt><dd class="ds-code">${esc(r.design.parent)}</dd>` : ""}${imgs ? `<dt>Pictures</dt><dd>${imgs} uploaded by the customer (open in studio to see them)</dd>` : ""}</dl>
     <label class="f"><span>Your private notes</span><textarea class="in" id="dsNotes" style="min-height:80px">${esc(r.owner_notes || "")}</textarea></label>
     <div class="ds-actions"><select class="in" id="dsStatus" aria-label="Status">${DS_STATUS.map(([k, l]) => `<option value="${k}" ${k === r.status ? "selected" : ""}>${l}</option>`).join("")}</select>
       <button class="btn gold" type="button" id="dsSave">Save</button>
-      ${r.product === "keepsake" ? `<button class="btn line" type="button" id="dsReq">Request file (.json)</button>` : `<button class="btn line" type="button" id="dsStudio">Open in studio</button>`}
+      <button class="btn line" type="button" id="dsStudio">Open in studio</button>
       ${u ? `<a class="btn line" href="${u}" download="${esc(r.code)}.png" target="_blank" rel="noopener">Preview PNG</a>` : ""}
       <button class="btn danger" type="button" id="dsDel">Delete</button></div>`;
 }
@@ -1372,8 +1306,6 @@ $("dsChips").addEventListener("click", (e) => { const b = e.target.closest("[dat
 $("dsList").addEventListener("click", async (e) => {
   const card = e.target.closest(".ds"); if (!card) return;
   const r = dsRows.find((x) => x.id === card.dataset.id);
-  if (e.target.closest("[data-wb]")) { dsOpenWorkbench(r); return; }
-  if (e.target.closest("[data-req]")) { dsDownloadReq(r); return; }
   if (e.target.closest("[data-top]")) { dsOpen = dsOpen === r.id ? null : r.id; renderDesigns(); return; }
   if (e.target.id === "dsSave") {
     const patch = { status: $("dsStatus").value, owner_notes: $("dsNotes").value.trim() || null };
@@ -1382,7 +1314,6 @@ $("dsList").addEventListener("click", async (e) => {
     Object.assign(r, patch); toast("Saved"); renderDesigns();
   }
   if (e.target.id === "dsStudio") dsStudio(r);
-  if (e.target.id === "dsReq") dsDownloadReq(r);
   if (e.target.id === "dsDel") {
     if (e.target.dataset.armed !== "1") { e.target.dataset.armed = "1"; e.target.textContent = "Tap again to delete"; return; }
     const paths = [r.preview_path, ...(r.design?.layers || []).filter((l) => l.type === "img").map((l) => String(l.src).replace(/^storage:/, ""))].filter(Boolean);
@@ -1572,6 +1503,8 @@ const SITE_FIELDS = [
     ["vacationMsg", "Message (optional)", "area", "We're on a short break, back Nov 12. Made-to-order items are paused. Printables are still available instantly!"] ] },
   { g: "Design studio", d: "Lets customers design name tiles on the store. Also in the menu for a quick switch.", f: [
     ["studioOn", "Design studio is ON", "switch"] ] },
+  { g: "Keychains & charms in the shop", d: "Shows the Keychains & charms group (country maps, states, team shirts, names) in the shop grid. Leave it off until the prices are set. The keepsakes page and its quote form keep working either way. Also in the menu for a quick switch.", f: [
+    ["charmsOn", "Keychains & charms are shown in the shop grid", "switch"] ] },
   { g: "Watermark on previews", d: "Design previews on the keepsakes page carry a PRAJO PREVIEW watermark. Turn it off only when you want previews shown clean (for example during a sale).", f: [
     ["watermarkOff", "Watermark is turned OFF (previews show without it)", "switch"] ] },
   { g: "Shipping, returns & FAQ", d: "The questions and answers on your store. Edit, add or delete them here", f: [
@@ -1983,34 +1916,6 @@ $("snSave").onclick = async () => {
   if (error) return toast("Couldn't save: " + error.message); toast(v === "auto" ? "Automatic: follows the calendar" : v === "off" ? "Seasonal effects are off" : `Showing ${snLabel(v)} on the store`);
   site = next; $("snMsg").textContent = "Saved. It shows on the store right away.";
 };
-/* ---------- name charm categories: site_settings.data.keepsakeOff = ["flowers", ...]; the keepsakes page hides those tabs ---------- */
-const KC = [["names","Names","Cursive and signature name charms"],["zodiac","Zodiac","Twelve star-sign charms"],["states","US states","Die-cut state shapes with a landmark"],["gods","Gods","Hindu deities, die-cut"],["maps","Country maps","Countries cut to shape"],["kits","National kits","Team shirts with name and number"],["flowers","Birth flowers","The flower for each month"],["stones","Birthstones","The stone for each month"],["sacred","Sacred symbols","Om, Hamsa, Nazar, lotus and more"],["baby","Baby","New-arrival designs"],["photos","Photos","Customer photo collage or single photo"]];
-let kcOff = [];
-function kcRender() {
-  const on = KC.length - kcOff.length;
-  $("kcState").textContent = on === KC.length ? "All categories are showing" : `${on} of ${KC.length} showing`;
-  $("kcList").innerHTML = KC.map(([k, t, d]) => `<div class="co-row ${kcOff.includes(k) ? "off" : ""}"><div class="co-top"><div><b>${esc(t)}</b><small>${esc(d)}${kcOff.includes(k) ? " · hidden from customers" : ""}</small></div><label class="switch"><input type="checkbox" data-kc="${k}" ${kcOff.includes(k) ? "" : "checked"} aria-label="${esc(t)} on the store"></label></div></div>`).join("");
-}
-async function kcSave(list, msg) {
-  const cur = await readSiteRow(), next = { ...cur };
-  if (list.length) next.keepsakeOff = list; else delete next.keepsakeOff;
-  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
-  if (error) { toast("Couldn't save: " + error.message); return false; }
-  kcOff = list; site = next; kcRender(); $("kcMsg").textContent = msg || "Saved. Live on the store now."; return true;
-}
-async function kcOpen() {
-  $("kcSheet").hidden = false; document.body.style.overflow = "hidden"; $("kcMsg").textContent = "";
-  const row = await readSiteRow(); kcOff = Array.isArray(row.keepsakeOff) ? row.keepsakeOff.filter((k) => KC.some((x) => x[0] === k)) : []; kcRender();
-}
-$("kcBtn").onclick = kcOpen;
-$("kcClose").onclick = () => { $("kcSheet").hidden = true; document.body.style.overflow = ""; };
-$("kcAllOn").onclick = () => kcSave([], "All categories are showing.");
-$("kcAllOff").onclick = () => kcSave(KC.map((x) => x[0]), "All categories are hidden. Customers see a 'coming soon' note.");
-$("kcList").addEventListener("change", (e) => {
-  const k = e.target.dataset.kc; if (!k) return;
-  const list = e.target.checked ? kcOff.filter((x) => x !== k) : [...new Set([...kcOff, k])];
-  kcSave(list).then((ok) => { if (!ok) kcRender(); });
-});
 async function tdOpen() { $("tdSheet").hidden = false; document.body.style.overflow = "hidden"; await tdLoad(); }
 $("tdBtn").onclick = tdOpen;
 $("tdClose").onclick = () => { $("tdSheet").hidden = true; document.body.style.overflow = ""; };

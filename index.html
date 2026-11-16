@@ -1171,7 +1171,7 @@ let P = window.PRAJO_PRODUCTS || [];   // built-in copy; replaced by the live li
 const SHARE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4M12 2v14"/></svg>`;
 let SHOP = "https://www.etsy.com/shop/PrAjoCustomStudio";
 /* ---------- site settings (edited in admin: ⚙ Settings → Site settings). Empty fields keep the text in this page. ---------- */
-let SITE = {}, shopReady = false;
+let SITE = {}, shopReady = false, charmsShown = false;
 const vacationOn = () => !!SITE.vacationOn;
 const vacationText = () => SITE.vacationMsg || `We're on a short break${SITE.vacationBack ? `, back ${SITE.vacationBack}` : ""}. Made-to-order items are paused. Printables are still available instantly!`;
 const newDays = () => Number(SITE.newDays) > 0 ? Number(SITE.newDays) : 14;
@@ -1257,6 +1257,7 @@ fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/site_settings?id=eq.1&se
     SITE = rows[0]?.data || {}; siteFresh = true;
     try { localStorage.setItem("prajo:site", JSON.stringify(SITE)); } catch {}
     applySite();
+    if (typeof setFilter === "function" && typeof P !== "undefined" && P.length && !!SITE.charmsOn !== charmsShown) setFilter(filter);   // the charms switch changed since the grid was drawn
     if (window.__season) window.__season(SITE.season);
   }).catch(() => { scShow(); });
 const CATS = [
@@ -1363,7 +1364,7 @@ function renderWho() {
 function setFilter(f) {
   filter = f;
   $("filters").innerHTML = [{ id: "all", label: "All" }, ...CATS].filter((c) => c.id === "all" || byCat(c.id).length)
-    .map((c) => `<button type="button" data-f="${c.id}"${c.id === filter ? ' aria-current="true"' : ""}>${esc(c.label)}</button>`).join("") + (filter === "all" ? `<button type="button" data-f="keepsakes">Charms</button>` : "") + (favs.count() ? `<button type="button" data-f="saved"${filter === "saved" ? ' aria-current="true"' : ""}>♥ Saved (${favs.count()})</button>` : "");
+    .map((c) => `<button type="button" data-f="${c.id}"${c.id === filter ? ' aria-current="true"' : ""}>${esc(c.label)}</button>`).join("") + (filter === "all" && SITE.charmsOn ? `<button type="button" data-f="keepsakes">Charms</button>` : "") + (favs.count() ? `<button type="button" data-f="saved"${filter === "saved" ? ' aria-current="true"' : ""}>♥ Saved (${favs.count()})</button>` : "");
   let list = filter === "all" ? P : filter === "saved" ? P.filter((p) => favs.has("p", p.id)) : byCat(filter);
   const total = list.length;
   if (occ) { const re = new RegExp(occ, "i"); list = list.filter((p) => re.test(`${p.name} ${(p.tags || []).join(" ")} ${p.description || ""}`)); }
@@ -1385,8 +1386,9 @@ function setFilter(f) {
       <span class="pr">${priceHtml(p)}</span></a>`;
   };
   const KEEP = [["Country map charms", "kp-maps.jpg", "maps"], ["US state charms", "kp-states.jpg", "states"], ["Team shirt keychains", "kp-kits.jpg", "kits"], ["Name charms", "kp-names.jpg", "names"]];
+  charmsShown = !!SITE.charmsOn;
   const keepHtml = () => `<h3 class="grp" id="grp-keepsakes" data-g="keepsakes">Keychains &amp; charms <small>made to order</small></h3>` + KEEP.map(([n, im, c]) => `<a class="card" href="keepsakes/?c=${c}"><span class="ph"><img src="${im}" alt="${n}" loading="lazy" width="320" height="240"></span><span class="nm">${n}</span><span class="pr kp">Made to order</span></a>`).join("");
-  const groupsHtml = () => CATS.filter((c) => list.some((p) => p.category === c.id)).map((c) => { const g = list.filter((p) => p.category === c.id); return (c.id === "printables" ? keepHtml() : "") + `<h3 class="grp" id="grp-${c.id}" data-g="${c.id}">${esc(c.label)} <small>${g.length}</small></h3>` + g.map(cardHtml).join(""); }).join("") + (list.some((p) => !CATS.some((c) => c.id === p.category)) ? (() => { const o = list.filter((p) => !CATS.some((c) => c.id === p.category)); return `<h3 class="grp" id="grp-more" data-g="more">Custom &amp; more <small>${o.length}</small></h3>` + o.map(cardHtml).join(""); })() : "");
+  const groupsHtml = () => CATS.filter((c) => list.some((p) => p.category === c.id)).map((c) => { const g = list.filter((p) => p.category === c.id); return (c.id === "printables" && SITE.charmsOn ? keepHtml() : "") + `<h3 class="grp" id="grp-${c.id}" data-g="${c.id}">${esc(c.label)} <small>${g.length}</small></h3>` + g.map(cardHtml).join(""); }).join("") + (list.some((p) => !CATS.some((c) => c.id === p.category)) ? (() => { const o = list.filter((p) => !CATS.some((c) => c.id === p.category)); return `<h3 class="grp" id="grp-more" data-g="more">Custom &amp; more <small>${o.length}</small></h3>` + o.map(cardHtml).join(""); })() : "");
   $("grid").classList.toggle("grouped", grouped);
   $("grid").innerHTML = (grouped ? groupsHtml() : list.map(cardHtml).join("")) + (more ? `<button class="card seeall" type="button" data-f="printables"><span class="ph"><b>See all ${more} printables</b><small>Workbooks &amp; coloring books, instant download →</small></span></button>` : "");
   if (window.__cardShows) window.__cardShows();
