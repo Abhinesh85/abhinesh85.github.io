@@ -160,7 +160,7 @@ footer{background:var(--bg)}
 .prog{display:flex;gap:18px;font-size:var(--t-s);font-weight:600;color:var(--muted)}.prog [aria-current]{color:var(--ink);text-decoration:underline;text-underline-offset:6px;text-decoration-color:var(--gold);text-decoration-thickness:2px}
 .config{display:grid;gap:0;grid-template-columns:minmax(0,1fr)}
 @media(min-width:900px){.config{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:56px;align-items:start}}
-.two{display:flex;gap:16px;justify-content:center;align-items:flex-start}.two figure{margin:0;flex:1 1 0;max-width:48%;text-align:center}.two figcaption{margin-top:8px;font-size:14px;color:var(--muted)}.visual .stage .two figure>svg{height:auto;width:100%;max-height:48vh}.visual:has(.two){height:auto;position:static;padding-bottom:20px}.visual:has(.two) .cap{position:static;display:block;text-align:center;margin-top:6px}.visual .stage:has(.two){height:auto}.visual .stage .two figure>svg{max-height:none}
+.two{display:flex;gap:16px;justify-content:center;align-items:flex-start}.two figure{margin:0;flex:1 1 0;max-width:48%;text-align:center}.two figcaption{margin-top:8px;font-size:14px;color:var(--muted)}.visual .stage .two figure>svg{height:auto;width:100%;max-height:48vh}.visual:has(#reviewStage .two){height:auto;position:static;padding-bottom:20px}.visual:has(.two) .cap{position:static;display:block;text-align:center;margin-top:6px}.visual #reviewStage:has(.two){height:auto}#stage .two{height:100%;align-items:stretch}#stage .two figure{display:flex;flex-direction:column;height:100%;min-height:0}#stage .two figure>svg{flex:1 1 auto;min-height:0;height:auto;width:100%;max-height:none}#stage .two figcaption{flex:none;font-size:12px;margin-top:4px}.visual .stage .two figure>svg{max-height:none}
 .visual{position:sticky;top:var(--head);z-index:10;background:var(--surface);padding:16px 16px 36px;height:min(calc(46 * var(--svh)),520px);margin-inline:calc(var(--gut) * -1);padding-inline:var(--gut)}
 @media(min-width:900px){.visual{margin-inline:0;padding-inline:16px}}
 .visual .stage{height:100%;width:100%;display:block;min-height:0;position:relative}
@@ -1514,7 +1514,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794862939229';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794863632734';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1640,9 +1640,9 @@ function drawSwatches(){
   }
   $('swatches').replaceChildren(...COLORS.map(([n,c])=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',n);b.title=n;b.style.background=c==='foil'?'linear-gradient(135deg,#8f601b,#f4d98b 40%,#dcae52 60%,#8f601b)':c;/* taste-skill-ignore: swatch shows the foil colour */b.setAttribute('aria-pressed',String(state.ink===c));b.onclick=()=>{state.ink=c;drawSwatches();render();};return b;}));
   [...$('finish').children].forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.v===state.finish));b.onclick=()=>{state.finish=b.dataset.v;drawSwatches();render();};});
-  const SIDEHINT={identical:'The back shows the same design. The shape is symmetrical, so front and back line up exactly.',region:'The back shows the same picture facing the right way, fitted into the flipped outline.',fit:'The back shows the same figure facing the right way, moved and sized to sit as well as it can inside the flipped outline. A few edge details may be trimmed.',mirror:'This piece is cut around the letters of your name, so the back can only be a mirror image (letters face the other way). Choose Front only for a plain back.'};
+  const SIDEHINT={identical:'The back shows the same design. The shape is symmetrical, so front and back line up exactly.',region:'The back shows the same picture facing the right way, fitted into the flipped outline.',fit:'The back shows the same figure facing the right way, moved and sized to sit as well as it can inside the flipped outline. A few edge details may be trimmed.',mirror:'This piece is cut around the letters of your name, so the back can only be a mirror image (letters face the other way). Choose Front only for a plain back.',mirrorfig:'This figure has a lopsided shape, so the back is its mirror image (left and right swap) and it lines up perfectly. Choose Front only for a plain back.'};
   const sideHint=()=>{$('sidesHint').textContent=state.sides==='both'?SIDEHINT[backMode()]:'Only the front is printed. The back stays plain acrylic.';};
-  [...$('sides').children].forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.v===state.sides));b.onclick=()=>{state.sides=b.dataset.v;[...$('sides').children].forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===state.sides)));sideHint();};});sideHint();
+  [...$('sides').children].forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.v===state.sides));b.onclick=()=>{state.sides=b.dataset.v;render();[...$('sides').children].forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===state.sides)));sideHint();};});sideHint();
 }
 function productOpts(){
   const S=SIZES[state.size];
@@ -1652,7 +1652,7 @@ function missingPhotos(){if(!(state.id==='collage'||state.id==='portrait'))retur
 function render(){
   if(!state)return;
   current=productOpts();
-  $('stage').innerHTML=keepsake(current);
+  {const po={...current};const both=state.sides==='both'&&state.id!=='collage'&&state.id!=='portrait'&&itemOf(state.id).fam.key!=='photos';$('stage').innerHTML=both?sidesFig(po):keepsake(current);$('stage').classList.toggle('sides2',both);}
   const DM=dimsOf(current);$('dims').textContent=`${DM.w} × ${DM.h} mm`;
   $('charCount').textContent=state.name.length+' / '+(isName(state.id)?12:state.id.startsWith('kit-')?14:24);
   const miss=missingPhotos();$('review').disabled=miss;$('reviewHint').textContent=miss?'Add a photo in each slot to review this layout.':'';
@@ -1766,10 +1766,11 @@ async function inlineFlags(svg){
   return svg;
 }
 /* The back of a two-sided piece. The cut piece is flipped left to right, so the outline (and hanging hole) is mirrored, but the picture is the SAME picture facing the right way. Pictures and text are counter-flipped inside the mirrored outline. Name charms are cut around their letters, so for them the back can only be a true mirror image. */
-const backMode=()=>{const f=itemOf(state.id).fam.key;if(isName(state.id)||f==='names')return 'mirror';if(['gods','flowers','stones','sacred'].includes(f))return 'identical';   /* die-cut figures are cut to a symmetrical outline, so the back is the same file */if(f==='states'||f==='maps')return 'region';return 'identical';};
-const BACKLAB={identical:'Back (same design, flip the piece over)',region:'Back (same picture, fitted to the flipped outline)',fit:'Back (same figure, fitted to the flipped outline)',mirror:'Back (mirror image)'};
-const BACKREQ={identical:'identical',region:'same-design',fit:'fit-figure',mirror:'mirror-of-front'};
+const backMode=()=>{const f=itemOf(state.id).fam.key;if(isName(state.id)||f==='names')return 'mirror';if(['gods','flowers','stones','sacred'].includes(f)){const C=A.cutOf&&A.cutOf(state.id);return (C&&C.sym===false)?'mirrorfig':'identical';}   /* nearly symmetrical figures are cut to a symmetrical outline, so the back is the same file; lopsided ones keep their own outline and the back is the mirror image */if(f==='states'||f==='maps')return 'region';return 'identical';};
+const BACKLAB={identical:'Back (same design, flip the piece over)',region:'Back (same picture, fitted to the flipped outline)',fit:'Back (same figure, fitted to the flipped outline)',mirror:'Back (mirror image)',mirrorfig:'Back (mirror image)'};
+const BACKREQ={identical:'identical',region:'same-design',fit:'fit-figure',mirror:'mirror-of-front',mirrorfig:'mirror-of-front'};
 function backSvgFor(po){const m=backMode();if(m==='fit')return keepsake({...po,back:true});const svg=keepsake(po);if(m==='identical')return svg;return backSvg(svg,m==='region');}
+function sidesFig(po,sticky){const b=backMode(),cap=BACKLAB[b];return '<div class="two"><figure>'+keepsake(po)+'<figcaption>Front</figcaption></figure><figure>'+backSvgFor(po)+'<figcaption>'+cap+'</figcaption></figure></div>';}
 function backSvg(svg,counter){
   const doc=new DOMParser().parseFromString(svg,'image/svg+xml'),art=doc.querySelector('svg[data-art]')||doc.documentElement,vb=(art.getAttribute('viewBox')||'0 0 100 100').split(/[\s,]+/).map(Number),c2=2*vb[0]+vb[2],NS='http://www.w3.org/2000/svg',flip=`translate(${c2} 0) scale(-1 1)`;
   const g=doc.createElementNS(NS,'g');g.setAttribute('transform',flip);g.setAttribute('data-back','flipped-outline');
