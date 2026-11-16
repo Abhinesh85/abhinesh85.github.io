@@ -1067,7 +1067,10 @@ const SACRED = {
   }]
 };
 
-const DEITIES = { ganeshaclassic: ['Ganesha', 'Remover of obstacles'], ganesha: ['Ganesha (playful)', 'Fun biker style'], shiva: ['Shiva', 'The auspicious one'], krishna: ['Krishna', 'Flute and peacock feather'], lakshmi: ['Lakshmi', 'Prosperity and light'], hanuman: ['Hanuman', 'Strength and devotion'], durga: ['Durga', 'Courage and protection'], saraswati: ['Saraswati', 'Knowledge and music'] };
+const DEITIES = { ganeshaclassic: ['Ganesha', 'Remover of obstacles'], ganesha: ['Ganesha (playful)', 'Fun biker style'], shiva: ['Shiva', 'The auspicious one'], krishna: ['Krishna', 'Flute and peacock feather'], lakshmi: ['Lakshmi', 'Prosperity and light'], hanuman: ['Hanuman', 'Strength and devotion'], durga: ['Durga', 'Courage and protection'], saraswati: ['Saraswati', 'Knowledge and music'],
+  jesus: ['Jesus', 'Blessing with open hands', 'Christian'], mary: ['Virgin Mary', 'Our Lady in prayer', 'Christian'], michael: ['Archangel Michael', 'Protector', 'Christian'],
+  buddha: ['Buddha', 'Peace and meditation', 'Buddhist'], guanyin: ['Guanyin', 'Compassion', 'Buddhist'], tara: ['Green Tara', 'Swift compassion', 'Buddhist'],
+  zeus: ['Zeus', 'King of the Greek gods', 'Greek'], athena: ['Athena', 'Wisdom and strategy', 'Greek'], thor: ['Thor', 'Norse god of thunder', 'Norse'], anubis: ['Anubis', 'Guide of the afterlife', 'Egyptian'] };
 let DUID = 0, CUTS = {};
 function setCutouts(o) { CUTS = o || {}; }
 const cutKey = id => { const k = id.replace(/-/g, '_'); if (CUTS[k]) return k; return id.indexOf('sacred-') === 0 && CUTS[id.slice(7)] ? id.slice(7) : null; };
@@ -1245,7 +1248,7 @@ const LIST = [
   ...SIGNS.map(s => ({ id: 'zodiac-' + s, family: 'zodiac', title: CONS[s].name })),
   ...Object.keys(BABY).map(b => ({ id: 'baby-' + b, family: 'baby', title: BABY[b] })),
   ...Object.keys(SACRED).map(s => ({ id: 'sacred-' + s, family: 'sacred', title: SACRED[s][0], tradition: SACRED[s][1], region: { type: 'cutouts', key: s } })),
-  ...Object.keys(DEITIES).map(s => ({ id: 'sacred-' + s, family: 'sacred', title: DEITIES[s][0], tradition: 'Hindu deity · ' + DEITIES[s][1], deity: s, region: { type: 'cutouts', key: s } }))
+  ...Object.keys(DEITIES).map(s => ({ id: 'sacred-' + s, family: 'sacred', title: DEITIES[s][0], tradition: (DEITIES[s][2] || 'Hindu') + ' · ' + DEITIES[s][1], deity: s, region: { type: 'cutouts', key: s } }))
 ];
 const BYID = Object.fromEntries(LIST.map(e => [e.id, e]));
 function render(id, opts = {}) {
@@ -1292,7 +1295,7 @@ const FAMILIES=[
  {key:'names',label:'Names',pick:'Colour',desc:'Your name, cut out in its own shape and printed in colour and gold.',items:Object.keys(CW).map(k=>({id:'name-'+k,name:cap(k),sub:'Name charm, cut to the letters',short:cap(k)}))},
  {key:'zodiac',label:'Zodiac',pick:'Sign',desc:'Your sign as a constellation of gold stars.',items:A.LIST.filter(e=>e.family==='zodiac').map(e=>({id:e.id,name:e.title,sub:SIGN_RANGES[e.id.slice(7)],short:e.title.slice(0,3)}))},
  {key:'states',label:'US states',pick:'State',desc:'Cut to the shape of the state, with a landmark illustrated inside.',items:[],lazy:true},
- {key:'gods',label:'Gods & faiths',pick:'Deity or symbol',desc:'Hindu gods and goddesses in their traditional form, plus sacred symbols and calligraphy from Islam, Sikhism, Judaism, Christianity and Buddhism. Die-cut and printed in colour or gold. Made with respect: best as a car, bag or pendant charm.',items:(()=>{const D=['ganeshaclassic','ganesha','krishna','shiva','lakshmi','hanuman','durga','saraswati'],S=['allah','crescent','ikonkar','khanda','hexagram','menorah','cross','dharma'];return [...D.map(k=>A.LIST.find(e=>e.family==='sacred'&&e.deity===k)),...S.map(k=>A.LIST.find(e=>e.id==='sacred-'+k))].filter(Boolean).map(e=>({id:e.id,name:e.title,sub:e.tradition,short:e.title}));})()},
+ {key:'gods',label:'Gods & faiths',pick:'Deity or symbol',desc:'Gods and holy figures from Hindu, Christian, Buddhist, Greek, Norse and Egyptian traditions, plus sacred symbols and calligraphy from Islam, Sikhism and Judaism. Die-cut and printed in colour or gold. Made with respect: best as a car, bag or pendant charm.',items:(()=>{const D=['ganeshaclassic','ganesha','krishna','shiva','lakshmi','hanuman','durga','saraswati','jesus','mary','michael','buddha','guanyin','tara','zeus','athena','thor','anubis'],S=['allah','crescent','ikonkar','khanda','hexagram','menorah','cross','dharma'];return [...D.map(k=>A.LIST.find(e=>e.family==='sacred'&&e.deity===k)),...S.map(k=>A.LIST.find(e=>e.id==='sacred-'+k))].filter(Boolean).map(e=>({id:e.id,name:e.title,sub:e.tradition,short:e.title}));})()},
  {key:'maps',label:'Country maps',pick:'Country',desc:'Cut to the shape of the country.',items:[],lazy:true},
  {key:'kits',label:'National kits',pick:'Team',desc:'A national team shirt in its colours. Colours are approximate, no crests.',items:[],lazy:true},
  {key:'flowers',label:'Birth flowers',pick:'Month',desc:'The flower for the month, drawn in gold and colour.',items:A.LIST.filter(e=>e.family==='flowers').map(e=>({id:e.id,name:cap(e.month),sub:e.title,short:cap(e.month).slice(0,3)}))},
@@ -1498,7 +1501,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794857434614';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794858285681';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
