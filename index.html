@@ -574,7 +574,10 @@ html.still *, html.still *::before, html.still *::after { animation: none !impor
 .make-grid img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; background: var(--panel); }
 .make-grid .t { font-size: 17px; font-weight: 600; line-height: 1.25; }
 .make-grid small { color: var(--muted); font-size: 14px; line-height: 1.35; }
-.make-grid a:hover img, .make-grid a:focus-visible img { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+.make-grid a { border-radius: 14px; }
+.make-grid img { transition: filter .2s; }
+.make-grid a:hover img { filter: brightness(1.08); }
+.make-grid a:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 4px; }
 @media (max-width: 700px) { .make-grid { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; } .make-grid small { display: none; } .make-grid img { aspect-ratio: 1 / 1; } .make-grid .t { font-size: 16px; line-height: 1.25; } .make-grid:has(#makeTiles:not([hidden])) { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row; } .make-grid:has(#makeTiles:not([hidden])) img { aspect-ratio: 16 / 10; } .make h2 { font-size: 21px; } main#top > #make { order: 1; } }
 .chips button[aria-current="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
 #filters button[aria-current="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
