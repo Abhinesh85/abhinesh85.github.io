@@ -160,6 +160,7 @@ footer{background:var(--bg)}
 .prog{display:flex;gap:18px;font-size:var(--t-s);font-weight:600;color:var(--muted)}.prog [aria-current]{color:var(--ink);text-decoration:underline;text-underline-offset:6px;text-decoration-color:var(--gold);text-decoration-thickness:2px}
 .config{display:grid;gap:0;grid-template-columns:minmax(0,1fr)}
 @media(min-width:900px){.config{grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:56px;align-items:start}}
+.two{display:flex;gap:16px;justify-content:center;align-items:flex-start}.two figure{margin:0;flex:1 1 0;max-width:48%;text-align:center}.two figcaption{margin-top:8px;font-size:14px;color:var(--muted)}.visual .stage .two figure>svg{height:auto;width:100%;max-height:48vh}.two .flip>svg{transform:scaleX(-1)}.visual:has(.two){height:auto;position:static;padding-bottom:20px}.visual:has(.two) .cap{position:static;display:block;text-align:center;margin-top:6px}.visual .stage:has(.two){height:auto}.visual .stage .two figure>svg{max-height:none}
 .visual{position:sticky;top:var(--head);z-index:10;background:var(--surface);padding:16px 16px 36px;height:min(calc(46 * var(--svh)),520px);margin-inline:calc(var(--gut) * -1);padding-inline:var(--gut)}
 @media(min-width:900px){.visual{margin-inline:0;padding-inline:16px}}
 .visual .stage{height:100%;width:100%;display:block;min-height:0;position:relative}
@@ -266,7 +267,8 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 
 <section id="collection" aria-labelledby="collH"><div class="wrap">
 <div class="section-head"><h2 id="collH" class="rise">Choose a design</h2><p class="lead rise" style="--i:1">Names, birth flowers and stones, zodiac, US states, country maps and team kits. Enter a birthday to find your flower, stone and star.</p></div>
-<div class="finder rise" style="--i:2"><label for="bday">Find by birthday</label><div class="row"><input id="bday" type="date" aria-describedby="found"></div><div class="found" id="found" aria-live="polite"></div></div>
+<div class="finder rise" id="bdayFind" style="--i:2"><label for="bday">Find by birthday</label><div class="row"><input id="bday" type="date" aria-describedby="found"></div><div class="found" id="found" aria-live="polite"></div></div>
+<div class="finder" id="famFind" hidden><label for="famQ" id="famQL">Search</label><div class="row"><input id="famQ" type="search" autocomplete="off" spellcheck="false" enterkeyhint="search"></div></div>
 <div id="cards" class="cards"></div>
 </div></section>
 
@@ -289,6 +291,7 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 <div class="field"><label for="message">Short message <small>Optional</small></label><input id="message" type="text" maxlength="28" placeholder="e.g. Always with me" autocomplete="off"></div>
 <div class="field"><span class="lab" id="lettLab">Lettering</span><div class="seg" id="lettering" role="group" aria-labelledby="lettLab"></div></div>
 <div class="field" id="finishWrap"><span class="lab" id="finLab">Print finish</span><div class="seg" id="finish" role="group" aria-labelledby="finLab"><button type="button" data-v="full">Full colour and gold</button><button type="button" data-v="flat">One colour</button></div></div>
+<div class="field" id="sidesWrap"><span class="lab" id="sidesLab">Printed on</span><div class="seg" id="sides" role="group" aria-labelledby="sidesLab"><button type="button" data-v="both">Both sides</button><button type="button" data-v="front">Front only</button></div><p class="hint" id="sidesHint" aria-live="polite"></p></div>
 <div class="field" id="inkWrap"><span class="lab" id="inkLab">Lettering colour</span><div class="swatches" id="swatches" role="group" aria-labelledby="inkLab"></div></div>
 <div class="field" id="linesWrap" hidden><span class="lab" id="linesLab">Lines</span><div class="seg" id="lines" role="group" aria-labelledby="linesLab"></div></div>
 <div class="field" id="layersWrap" hidden><span class="lab" id="layersLab">Layers</span><div class="seg" id="layers" role="group" aria-labelledby="layersLab"></div><p class="hint">Double layer: raised top letters on a coloured base. Two pieces of acrylic, glued.</p></div>
@@ -1315,7 +1318,7 @@ const STOCK='#070d19';
 /* ---------- state ---------- */
 const drafts=new Map();
 let view='home',famKey='names',selected={id:'birth-june'},state,framed=0,drag=null,current=null,noticeTimer;
-const makeDraft=(id)=>({id,name:'',number:'',msg:'',size:'standard',shape:'card',lines:'one',layers:'single',topInk:null,lettering:id.startsWith('name-')?'cursive':'signature',ink:'foil',finish:'full',layout:id==='portrait'?'single':'grid',photos:[null,null,null,null],quantity:1,notes:''});
+const makeDraft=(id)=>({id,name:'',number:'',msg:'',size:'standard',shape:'card',lines:'one',layers:'single',topInk:null,lettering:id.startsWith('name-')?'cursive':'signature',ink:'foil',finish:'full',sides:'both',layout:id==='portrait'?'single':'grid',photos:[null,null,null,null],quantity:1,notes:''});
 /* ---------- text measuring (for fitting names) ---------- */
 const mc=document.createElement('canvas').getContext('2d');
 function tw(text,L,size){mc.font=`${L.weight} ${size}px ${L.css}`;return mc.measureText(text).width;}
@@ -1501,7 +1504,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794858285681';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794859359319';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1511,9 +1514,19 @@ function loadRegions(f){
   ensureData(()=>{if(famKey===f.key)drawCards(true);});
 }
 let birth=null;
+const BIRTHFAMS=['flowers','stones','zodiac','baby'],SEARCHLAB={states:['Find a state','e.g. Texas'],maps:['Find a country','e.g. Brazil'],kits:['Find a team','e.g. Argentina'],gods:['Find a god or symbol','e.g. Ganesha, Buddha, Menorah'],sacred:['Find a symbol','e.g. Om, Lotus']};
+function syncFinders(){
+  const bd=BIRTHFAMS.includes(famKey),sl=SEARCHLAB[famKey];
+  $('bdayFind').hidden=!bd;$('famFind').hidden=!sl;
+  if(sl){$('famQL').textContent=sl[0];$('famQ').placeholder=sl[1];const f=FAMILIES.find(x=>x.key===famKey);if($('famQ').value!==(f&&f.q||''))$('famQ').value=f&&f.q||'';}
+}
+$('famQ').addEventListener('input',()=>{const f=FAMILIES.find(x=>x.key===famKey);if(f){f.q=$('famQ').value.trim();drawCards(false);}});
 function drawCards(animate){
+  syncFinders();
   const fam=FAMILIES.find(f=>f.key===famKey);
-  const LIM=matchMedia('(min-width:760px)').matches?8:6,more=!fam.expanded&&fam.items.length>LIM+1,shown=more?fam.items.slice(0,LIM):fam.items;
+  const q=(fam.q||'').toLowerCase(),pool=q?fam.items.filter(it=>(it.name+' '+(it.sub||'')).toLowerCase().includes(q)):fam.items;
+  const LIM=matchMedia('(min-width:760px)').matches?8:6,more=!q&&!fam.expanded&&pool.length>LIM+1,shown=more?pool.slice(0,LIM):pool;
+  if(q&&!pool.length){$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'No match for "'+fam.q+'". Check the spelling, or message us and we will make it.'}));return;}
   $('cards').replaceChildren(...shown.map((it,i)=>{
     const b=document.createElement('button');b.type='button';b.className='tile'+(animate?' rise':'');b.dataset.id=it.id;
     b.setAttribute('aria-label','Personalize '+it.name+' '+it.sub);
@@ -1617,6 +1630,8 @@ function drawSwatches(){
   }
   $('swatches').replaceChildren(...COLORS.map(([n,c])=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',n);b.title=n;b.style.background=c==='foil'?'linear-gradient(135deg,#8f601b,#f4d98b 40%,#dcae52 60%,#8f601b)':c;/* taste-skill-ignore: swatch shows the foil colour */b.setAttribute('aria-pressed',String(state.ink===c));b.onclick=()=>{state.ink=c;drawSwatches();render();};return b;}));
   [...$('finish').children].forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.v===state.finish));b.onclick=()=>{state.finish=b.dataset.v;drawSwatches();render();};});
+  const sideHint=()=>{const txt=state.name||state.number||state.msg||isName(state.id);$('sidesHint').textContent=state.sides==='both'?(txt?'The back prints as the mirror image of the front, lined up on the same cut shape, so lettering reads backwards on the back. Choose Front only for a plain back.':'The back prints as the mirror image of the front, lined up exactly on the same cut shape.'):'Only the front is printed. The back stays plain acrylic.';};
+  [...$('sides').children].forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.v===state.sides));b.onclick=()=>{state.sides=b.dataset.v;[...$('sides').children].forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===state.sides)));sideHint();};});sideHint();
 }
 function productOpts(){
   const S=SIZES[state.size];
@@ -1681,6 +1696,7 @@ function summaryRows(){
   if(state.name)rows.push(['Name',state.name]);if(state.number)rows.push(['Shirt number',state.number]);if(state.msg)rows.push(['Message',state.msg]);
   rows.push(['Lettering',LETTERING[state.lettering].label]);if(isName(state.id))rows.push(['Layers',state.layers==='double'?'Double layer (3D)'+(state.topInk?', custom top colour':''):'Single layer']);
   if(info.fam.key!=='photos')rows.push(['Print',state.finish==='flat'?'One colour':'Full colour and gold']);
+  rows.push(['Printed on',state.sides==='both'?'Both sides (back is the mirror image, aligned on the same cut)':'Front only']);
   if(info.fam.key==='photos')rows.push(['Photos',String(state.id==='portrait'?1:COLLAGE[state.layout].length)]);
   return rows;
 }
@@ -1693,7 +1709,7 @@ function mailto(){
 }
 $('review').onclick=()=>{
   if($('review').disabled)return;
-  $('reviewStage').innerHTML=keepsake({...current,ghost:false,label:'Your design proof'});
+  {const mk=()=>keepsake({...current,ghost:false,label:'Your design proof'});$('reviewStage').innerHTML=state.sides==='both'?'<div class="two"><figure>'+mk()+'<figcaption>Front</figcaption></figure><figure class="flip">'+mk()+'<figcaption>Back (mirror image)</figcaption></figure></div>':mk();}
   $('proofSize').textContent=$('dims').textContent;$('quantity').value=state.quantity;$('notes').value=state.notes;
   $('orderSummary').replaceChildren(...summaryRows().map(([t,v])=>{const d=document.createElement('div');const a=document.createElement('dt'),b=document.createElement('dd');a.textContent=t;b.textContent=v;d.append(a,b);return d;}));
   $('mail').href=mailto();navigate('review');
@@ -1724,6 +1740,7 @@ function buildRequest(){
     art:(info.fam.key==='photos'||info.fam.key==='names')?null:{foil:`art/${dirs[info.fam.key]}/${state.id}.svg`},
     product:{shape:isName(state.id)?'name-contour':state.shape==='badge'?'round-badge':'card',width_mm:DM.w,height_mm:DM.h,thickness_mm:3,hole:{diameter_mm:4,x_mm:DM.hx,y_mm:DM.hy}},
     production:{cut:'xTool S1 40W laser: export Cut SVG (real mm) from the PrAjo workbench',print:'Omni o1 UV printer: export UV PNG from the PrAjo workbench',material:'3 mm dark opaque cast acrylic',steps:['Open this file in the workbench with Open customer request','Compare the preview with the customer proof PNG','Export Cut SVG and UV PNG (and top layer files if double layer)']},
+    sides:{mode:state.sides,back:state.sides==='both'?'mirror-of-front':null,note:state.sides==='both'?'Cut once. Print the front file, flip the piece left to right around its vertical axis, then print the Back file (the front flipped horizontally in the same frame). In the workbench use Print both sides.':'Front only.'},
     workbench:wbBlock(),
     shape:state.shape,layers:state.layers,top_colour:state.topInk,text:{name:state.name,number:state.number,message:state.msg,lettering:state.lettering,ink:state.ink,finish:state.finish},layout:state.layout,
     collage:state.photos,request:{title:info.item.name,quantity:state.quantity,notes:state.notes}};
@@ -1745,7 +1762,9 @@ async function makeProof(){
   const vbn=svg.match(/viewBox="([^"]+)"/)[1].split(' ').map(Number),ph=Math.round(px*vbn[3]/vbn[2]);
   const url=URL.createObjectURL(new Blob([svg],{type:'image/svg+xml;charset=utf-8'}));
   const img=await decode(url);const c=document.createElement('canvas');c.width=px;c.height=ph;const g=c.getContext('2d');g.drawImage(img,0,0,c.width,c.height);await new Promise(r=>setTimeout(r,250));g.clearRect(0,0,c.width,c.height);g.drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(url);/* second draw: Safari paints embedded SVG fonts one frame late */
-  const blob=await new Promise(r=>c.toBlob(r,'image/png'));if(!blob)throw new Error('The proof could not be saved.');
+  let out=c;
+  if(state.sides==='both'){const gap=60,top=70;out=document.createElement('canvas');out.width=px*2+gap;out.height=ph+top;const o=out.getContext('2d');o.fillStyle='#0a1220';o.fillRect(0,0,out.width,out.height);o.drawImage(c,0,top);o.save();o.translate(out.width,top);o.scale(-1,1);o.drawImage(c,0,0);o.restore();o.fillStyle='#d9ab4f';o.font='600 38px sans-serif';o.textAlign='center';o.fillText('FRONT',px/2,46);o.fillText('BACK (mirror image)',px+gap+px/2,46);}
+  const blob=await new Promise(r=>out.toBlob(r,'image/png'));if(!blob)throw new Error('The proof could not be saved.');
   return blob;
 }
 const baseName=()=>`PrAjo-${slug(state.id)}${state.name?'-'+slug(state.name):''}`;
