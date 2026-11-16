@@ -223,7 +223,7 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 .card .ph img.cs.on { opacity: 1; }
 .card .clab { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: grid; gap: 2px; padding: 26px 12px 10px; background: linear-gradient(transparent, rgba(8, 12, 22, .82)); color: #fff; pointer-events: none; }
 .card .clab:empty { display: none; }
-.card .clab b { font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-2); }
+.card .clab b { font-size: 13px; letter-spacing: .02em; text-transform: none; color: var(--gold-2); }
 .card .clab small { font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: opacity .4s; }
 @media (hover: hover) {
   .card:hover .ph { border-color: var(--gold); box-shadow: 0 18px 50px rgba(0, 0, 0, .45), 0 0 0 1px var(--gold), 0 0 40px rgba(217, 171, 79, .18); transform: translateY(-4px); }
@@ -548,12 +548,64 @@ html.still *, html.still *::before, html.still *::after { animation: none !impor
 .card .badge { font-size: 10.5px; padding: 4px 9px; }
 
 
+
+/* ---- shop at a glance: every product on one scroll, labelled groups, one-row sticky filters ---- */
+.grid .grp { grid-column: 1 / -1; margin: 18px 0 -4px; font: 600 22px/1.2 var(--f-display); display: flex; align-items: baseline; gap: 8px; scroll-margin-top: 150px; }
+.grid .grp:first-child { margin-top: 0; }
+.grid .grp small { font: 600 13px var(--f-body); color: var(--muted); }
+@media (max-width: 700px) {
+  #shop .head { display: block; }
+  #filters { position: sticky; top: calc(68px + env(safe-area-inset-top, 0px)); z-index: 40; flex-wrap: nowrap; overflow-x: auto; margin: 8px calc(var(--gutter) * -1) 6px; padding: 8px var(--gutter); background: rgba(10, 18, 32, .94); scrollbar-width: none; }
+  #filters::-webkit-scrollbar { display: none; }
+  #filters button { flex: none; white-space: nowrap; min-height: 40px; padding: 0 14px; }
+  .shopbar { flex-wrap: nowrap; gap: 8px; }
+  .shopbar input[type=search] { flex: 1 1 auto; }
+  #occSel { display: none; }
+  .shopbar select { flex: none; max-width: 150px; }
+  .shopbar .count { display: none; }
+  .grid .grp { font-size: 20px; scroll-margin-top: 130px; }
+}
+
+/* ---- make your own: one clear place to start designing ---- */
+.make { padding: 14px 0 6px; scroll-margin-top: 90px; }
+.make h2 { font: 600 24px/1.2 var(--f-display); margin: 0 0 10px; }
+.make-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 230px)); gap: 14px; }
+.make-grid a { display: grid; gap: 4px; align-content: start; text-decoration: none; color: inherit; min-height: 44px; }
+.make-grid img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; background: var(--panel); }
+.make-grid .t { font-size: 17px; font-weight: 600; line-height: 1.25; }
+.make-grid small { color: var(--muted); font-size: 14px; line-height: 1.35; }
+.make-grid a:hover img, .make-grid a:focus-visible img { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+@media (max-width: 700px) { .make-grid { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); gap: 8px; } .make-grid small { display: none; } .make-grid img { aspect-ratio: 1 / 1; } .make-grid .t { font-size: 16px; line-height: 1.25; } .make-grid:has(#makeTiles:not([hidden])) { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-auto-flow: row; } .make-grid:has(#makeTiles:not([hidden])) img { aspect-ratio: 16 / 10; } .make h2 { font-size: 21px; } main#top > #make { order: 1; } }
+.chips button[aria-current="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+#filters button[aria-current="true"] { background: var(--cream); color: var(--ink); border-color: var(--cream); }
+.card .pr.kp { font: 600 14px var(--f-body); color: var(--muted); }
+.card:has(.pr.kp) .ph { aspect-ratio: 4 / 3; }
+.card:has(.pr.kp) .ph img { object-fit: contain; background: radial-gradient(circle at 50% 40%, #1b2c4a, #0a1220); }
+
+/* ---- polish: calmer type, solid colour headline, nothing under 13px ---- */
+.hero h1 { font-size: clamp(38px, 5.6vw, 68px); }
+.hero h1 em { background: none; -webkit-background-clip: border-box; background-clip: border-box; -webkit-text-fill-color: currentColor; color: var(--gold-2); animation: none; }
+.eyebrow { display: none; }
+.badge, .marquee .track span, .marquee .track b, .sbar small { text-transform: none; letter-spacing: .02em; }
+.badge { font-size: 13px; }
+.stv svg { width: 1em; height: 1em; fill: currentColor; vertical-align: -.12em; }
+.stv { display: inline-flex; gap: 1px; align-items: center; }
+.stars { display: inline-block; width: 5.4em; height: 1em; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z'/%3E%3C/svg%3E") repeat-x 0 0 / 1.08em 1em; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z'/%3E%3C/svg%3E") repeat-x 0 0 / 1.08em 1em; vertical-align: -.12em; }
+.card .badge, .badge.low, .badge.new { font-size: 13px; }
+small, .blurb, .trust span, .card small, .collections small { font-size: max(13px, .8em); }
+#how .step h3 { font-size: 20px; line-height: 1.2; }
+.make { padding-bottom: 26px; }
+.pr small, .trust span, .trust .rv span, .rv > span, .blurb { font-size: 13px !important; }
+.step > svg { display: none; }
+.step p { font-size: 14px; }
+@media (max-width: 700px) { .make { padding-bottom: 44px; } }
+.brand small, header .brand small, footer .brand small { font-size: 13px !important; letter-spacing: .12em; }
 /* ---- phone tab bar ---- */
 #deadlineX { min-width: 44px; min-height: 44px; }
 .tabbar { display: none; }
 @media (max-width: 700px) {
   .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: grid; grid-template-columns: repeat(5, 1fr); background: rgba(10, 18, 32, .96); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
-  .tabbar a, .tabbar button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; padding: 6px 2px; background: none; border: 0; color: var(--muted); font: 600 11.5px/1.1 var(--f-body); text-decoration: none; -webkit-tap-highlight-color: transparent; }
+  .tabbar a, .tabbar button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; padding: 6px 2px; background: none; border: 0; color: var(--muted); font: 600 13px/1.1 var(--f-body); text-decoration: none; -webkit-tap-highlight-color: transparent; }
   .tabbar svg { width: 22px; height: 22px; }
   .tabbar .on { color: var(--gold-2); }
   .tabbar .tn { position: absolute; top: 5px; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--saffron); color: #1b1305; font-size: 11px; font-weight: 800; display: grid; place-items: center; }
@@ -719,7 +771,7 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
 
 <nav class="tabbar" id="tabbar" aria-label="Quick links">
   <a href="#shop" id="tbShop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1-5h16l1 5M4 9v11h16V9M9 20v-6h6v6"/></svg>Shop</a>
-  <a href="tumbler.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>Design</a>
+  <a href="#make"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>Design</a>
   <button type="button" id="tbCart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Cart<span class="tn" id="tbN" hidden>0</span></button>
   <button type="button" id="tbTrack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7M12 11v10"/></svg>Track</button>
   <button type="button" id="tbMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
@@ -733,8 +785,8 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
     <nav class="links" aria-label="Main">
       <a href="#shop">Shop</a>
       <a href="#how">How it's made</a>
-      <a href="tumbler.html">Design yours</a>
-      <a href="keepsakes/">Name charms</a>
+      <a href="#make">Design yours</a>
+      <a href="keepsakes/">Keychains &amp; charms</a>
       <a href="#custom">Custom orders</a>
       <a href="#reviews">Reviews</a>
       <a href="#about">About</a>
@@ -751,8 +803,8 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
   <nav aria-label="Menu">
     <button class="nav-x" type="button" id="navX" aria-label="Close menu">×</button>
     <a href="#shop">Shop</a>
-    <a class="gold" href="tumbler.html">🎨 Design yours</a>
-    <a href="keepsakes/">✨ Name charms &amp; keepsakes</a>
+    <a class="gold" href="#make">🎨 Design yours</a>
+    <a href="keepsakes/">✨ Keychains &amp; charms</a>
     <a href="design.html" id="studioNav2" hidden>🔤 Name tiles</a>
     <a href="#custom">Custom &amp; bulk orders</a>
     <a href="#bulk" data-bulk>Bulk &amp; team orders</a>
@@ -773,10 +825,10 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
         <p class="lede" data-s="heroIntro">Custom tumblers, mugs and keepsakes, UV printed in full color or laser engraved for life. Every piece is made by hand, one order at a time.</p>
         <div class="hero-cta">
           <a class="btn btn-gold" href="#shop">Shop the collection</a>
-          <a class="btn btn-line" href="tumbler.html">Design yours</a>
+          <a class="btn btn-line" href="#make">Design yours</a>
         </div>
         <div class="proof">
-          <span><span class="stars">★★★★★</span> <span data-s="proof1"><b>5.0</b> on Etsy</span></span>
+          <span><span class="stars" role="img" aria-label="5 out of 5 stars"></span> <span data-s="proof1"><b>5.0</b> on Etsy</span></span>
           <span data-s="proof2"><b>Local pickup</b> in Sacramento</span>
           <span data-s="proof3"><b>Personalized</b> just for you</span>
         </div>
@@ -805,12 +857,24 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
   </section>
   <div class="deadline" id="deadline" hidden><span id="deadlineTxt"></span><button type="button" id="deadlineX" aria-label="Hide this message">×</button></div>
 
+  <section class="make" id="make" aria-labelledby="makeT">
+    <div class="wrap">
+      <h2 id="makeT">Make your own</h2>
+      <ul class="make-grid">
+        <li><a href="tumbler.html"><img src="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-0.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Tumbler or mug</span><small>Pick a design, add a name</small></a></li>
+        <li><a href="keepsakes/"><img src="kp-maps.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Keychain or charm</span><small>Maps, states, flowers, names</small></a></li>
+        <li id="makeTiles" hidden><a href="design.html"><img src="keychain-1-card.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Name tiles</span><small>Type a name, see it live</small></a></li>
+        <li><a href="#custom" data-bulk><img src="coaster-1-card.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Something else</span><small>Photos, logos, bulk, teams</small></a></li>
+      </ul>
+    </div>
+  </section>
+
   <div class="marquee" aria-hidden="true"><div class="track" id="track"></div></div>
 
   <section class="band ownpic" id="ownpic" aria-labelledby="ownTitle" style="padding-block:34px 10px">
     <div class="wrap">
       <div class="ownbox">
-        <div class="ownico" aria-hidden="true">📷</div>
+        <div class="ownico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" width="34" height="34"><path d="M4 8h3l1.6-2h6.8L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13.5" r="3.6"/></svg></div>
         <div class="owntxt"><h2 id="ownTitle">Have your own picture? We can print it.</h2>
           <p>Send us a photo, a drawing, a logo or your own artwork and we'll put it on a tumbler, luggage tag, mug and more. A pet, a family photo, a team crest, a child's drawing. Just message us the picture and we'll sort out the rest.</p></div>
         <button class="btn btn-gold" type="button" data-chat>Send us your picture</button>
@@ -849,11 +913,11 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
     <div class="wrap">
       <div class="head">
         <div><div class="eyebrow" data-s="shopEyebrow">The shop</div><h2 data-s="shopTitle">Find your piece</h2></div>
-        <div class="chips" role="group" aria-label="Filter products" id="filters"></div>
       </div>
+      <div class="chips" role="group" aria-label="Jump to a product group" id="filters"></div>
       <div class="who" id="who" role="group" aria-label="Shop by person or occasion"></div>
       <div class="shopbar">
-        <input id="shopQ" type="search" placeholder="Search designs and products…" aria-label="Search designs and products" autocomplete="off">
+        <input id="shopQ" type="search" placeholder="Search products…" aria-label="Search designs and products" autocomplete="off">
         <select id="sortSel" aria-label="Sort products"><option value="">Sort: Featured</option><option value="new">Newest</option><option value="lo">Price: low to high</option><option value="hi">Price: high to low</option></select>
         <select id="occSel" aria-label="Shop by occasion"><option value="">All occasions</option><option value="mother">Mother's Day</option><option value="graduat">Graduation</option><option value="christmas|reindeer|santa|holiday">Christmas</option><option value="nurse|medical">Nurses</option><option value="firefight">Firefighters</option><option value="teacher|classroom|school">Teachers</option><option value="wedding|bridal">Weddings</option><option value="birthday">Birthdays</option><option value="flag|heritage|eagle|jeepney|aztec">Heritage pride</option><option value="kids|preschool|coloring|learning">Kids &amp; learning</option></select>
         <span class="count" id="shopCount" aria-live="polite"></span>
@@ -870,17 +934,14 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
       </div>
       <div class="steps">
         <div class="step">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
           <h3 data-s="step1Title">You share your story</h3>
           <p data-s="step1Text">A name, a date, a photo or a logo. Pick a design or send us your own idea and we'll lay it out for you.</p>
         </div>
         <div class="step">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/><circle cx="12" cy="12" r="3"/></svg>
           <h3 data-s="step2Title">We print or engrave it</h3>
           <p data-s="step2Text">Durable full-color UV printing, or laser engraving that's etched into the surface.</p>
         </div>
         <div class="step">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7ZM12 7h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7Z"/></svg>
           <h3 data-s="step3Title">Finished by hand</h3>
           <p data-s="step3Text">Every piece is checked, gift-ready packed and shipped with tracking, or ready for local pickup in Sacramento.</p>
         </div>
@@ -892,7 +953,7 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
     <div class="wrap">
       <div class="head">
         <div><div class="eyebrow" data-s="revEyebrow">Reviews</div><h2 data-s="revTitle">Loved by our customers</h2></div>
-        <p class="lede"><span class="stars">★★★★★</span> <span data-s="revLine">A few reviews from our Etsy buyers</span> <a href="https://www.etsy.com/shop/PrAjoCustomStudio#reviews" target="_blank" rel="noopener">Read all reviews on Etsy ↗</a></p>
+        <p class="lede"><span class="stars" role="img" aria-label="5 out of 5 stars"></span> <span data-s="revLine">A few reviews from our Etsy buyers</span> <a href="https://www.etsy.com/shop/PrAjoCustomStudio#reviews" target="_blank" rel="noopener">Read all reviews on Etsy ↗</a></p>
       </div>
       <div class="reviews" id="revs"></div>
     </div>
@@ -1143,7 +1204,7 @@ function applySite() {
   if (S.email) social.push(`<a href="mailto:${esc(S.email)}">${esc(S.email)}</a>`);
   if (S.phone) social.push(`<a href="tel:${esc(S.phone.replace(/[^\d+]/g, ""))}">${esc(S.phone)}</a>`);
   $("social").innerHTML = social.join("");
-  $("studioNav2").hidden = $("studioBtn").hidden = !S.studioOn;
+  $("studioNav2").hidden = $("studioBtn").hidden = !S.studioOn; if ($("makeTiles")) $("makeTiles").hidden = !S.studioOn;
   $("vacation").hidden = !vacationOn();
   if (vacationOn()) $("vacText").textContent = vacationText();
   { const x = S.sale, live = !!(x && x.on && (x.all ? salePct({ id: "" }) : (x.ids || []).some((i) => salePct({ id: i }))));
@@ -1225,7 +1286,7 @@ const REVIEWS = [
   { name: "Verified Etsy buyer", date: "March 2026", text: "Awesome product from an awesome vendor!" },
 ];
 $("revs").innerHTML = REVIEWS.map((r) => `
-  <figure class="review"><span class="stars" aria-label="5 out of 5 stars">★★★★★</span>
+  <figure class="review"><span class="stars" role="img" aria-label="5 out of 5 stars"></span>
     <blockquote>“${esc(r.text)}”</blockquote>
     <figcaption><b>${esc(r.name)}</b> · ${esc(r.date)}</figcaption></figure>`).join("");
 
@@ -1302,7 +1363,7 @@ function renderWho() {
 function setFilter(f) {
   filter = f;
   $("filters").innerHTML = [{ id: "all", label: "All" }, ...CATS].filter((c) => c.id === "all" || byCat(c.id).length)
-    .map((c) => `<button type="button" data-f="${c.id}" aria-pressed="${c.id === filter}">${esc(c.label)}</button>`).join("") + (favs.count() ? `<button type="button" data-f="saved" aria-pressed="${filter === "saved"}">♥ Saved (${favs.count()})</button>` : "");
+    .map((c) => `<button type="button" data-f="${c.id}"${c.id === filter ? ' aria-current="true"' : ""}>${esc(c.label)}</button>`).join("") + (filter === "all" ? `<button type="button" data-f="keepsakes">Charms</button>` : "") + (favs.count() ? `<button type="button" data-f="saved"${filter === "saved" ? ' aria-current="true"' : ""}>♥ Saved (${favs.count()})</button>` : "");
   let list = filter === "all" ? P : filter === "saved" ? P.filter((p) => favs.has("p", p.id)) : byCat(filter);
   const total = list.length;
   if (occ) { const re = new RegExp(occ, "i"); list = list.filter((p) => re.test(`${p.name} ${(p.tags || []).join(" ")} ${p.description || ""}`)); }
@@ -1311,11 +1372,10 @@ function setFilter(f) {
   if (sortBy === "lo") list = [...list].sort((a, b) => a.price - b.price);
   else if (sortBy === "hi") list = [...list].sort((a, b) => b.price - a.price);
   else if (sortBy === "new") list = [...list].sort((a, b) => (b.created || 0) - (a.created || 0));
-  let more = 0;   // the "All" view leads with the made-to-order pieces; the digital printables sit behind one tile at the end
-  if (filter === "all" && !occ && !sortBy && !sq) { const pr = list.filter((p) => p.category === "printables"); if (pr.length > 4) { more = pr.length; const keep = new Set(pr.slice(0, 4)); list = list.filter((p) => p.category !== "printables" || keep.has(p)); } }
+  const more = 0, grouped = filter === "all" && !occ && !sortBy && !sq;   // the "All" view shows every product at once, in labelled groups: nothing is hidden behind a tab or a "see all" tile
   $("shopCount").textContent = list.length === total || more ? `${total} ${total === 1 ? "design" : "designs"}` : `Showing ${list.length} of ${total}`;
   if (!list.length) { $("grid").innerHTML = `<div class="empty-shop"><b>${filter === "saved" ? "Nothing saved yet." : sq ? (!$("dhits").hidden ? "No product is named “" + esc(sq) + "”." : "No product matches “" + esc(sq) + "”.") : "Nothing matches that yet."}</b><br>${sq && !$("dhits").hidden ? "Tap a design above to see it on a product." : "Try another word or occasion, or ask us for a custom piece."}<br><button class="btn btn-line" type="button" id="clearOcc">Show everything</button></div>`; return; }
-  $("grid").innerHTML = list.map((p) => {
+  const cardHtml = (p) => {
     const badge = soldOut(p) ? `<span class="badge out">Sold out</span>`
       : p.stock > 0 && p.stock <= lowAt() && !p.digital ? `<span class="badge low">Only ${p.stock} left</span>`
       : (p.tags || []).some((t) => /^best ?seller$/i.test(t)) ? `<span class="badge best">Best seller</span>` : "";
@@ -1323,8 +1383,14 @@ function setFilter(f) {
       <span class="ph"><button type="button" class="fav" data-fav-p="${esc(p.id)}" aria-pressed="${favs.has("p", p.id)}" aria-label="Save ${esc(p.name)}">${HEART(favs.has("p", p.id))}</button>${badge}${isNew(p) && !soldOut(p) ? `<span class="badge new">New</span>` : ""}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy" onload="window.__cardFit&&__cardFit(this)" onerror="this.closest('.ph').classList.add('ld')">${p.images[1] ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
       <span class="nm">${esc(p.name)}</span>${rvLine(p.id)}
       <span class="pr">${priceHtml(p)}</span></a>`;
-  }).join("") + (more ? `<button class="card seeall" type="button" data-f="printables"><span class="ph"><b>See all ${more} printables</b><small>Workbooks &amp; coloring books, instant download →</small></span></button>` : "");
+  };
+  const KEEP = [["Country map charms", "kp-maps.jpg", "maps"], ["US state charms", "kp-states.jpg", "states"], ["Team shirt keychains", "kp-kits.jpg", "kits"], ["Name charms", "kp-names.jpg", "names"]];
+  const keepHtml = () => `<h3 class="grp" id="grp-keepsakes" data-g="keepsakes">Keychains &amp; charms <small>made to order</small></h3>` + KEEP.map(([n, im, c]) => `<a class="card" href="keepsakes/?c=${c}"><span class="ph"><img src="${im}" alt="${n}" loading="lazy" width="320" height="240"></span><span class="nm">${n}</span><span class="pr kp">Made to order</span></a>`).join("");
+  const groupsHtml = () => CATS.filter((c) => list.some((p) => p.category === c.id)).map((c) => { const g = list.filter((p) => p.category === c.id); return (c.id === "printables" ? keepHtml() : "") + `<h3 class="grp" id="grp-${c.id}" data-g="${c.id}">${esc(c.label)} <small>${g.length}</small></h3>` + g.map(cardHtml).join(""); }).join("") + (list.some((p) => !CATS.some((c) => c.id === p.category)) ? (() => { const o = list.filter((p) => !CATS.some((c) => c.id === p.category)); return `<h3 class="grp" id="grp-more" data-g="more">Custom &amp; more <small>${o.length}</small></h3>` + o.map(cardHtml).join(""); })() : "");
+  $("grid").classList.toggle("grouped", grouped);
+  $("grid").innerHTML = (grouped ? groupsHtml() : list.map(cardHtml).join("")) + (more ? `<button class="card seeall" type="button" data-f="printables"><span class="ph"><b>See all ${more} printables</b><small>Workbooks &amp; coloring books, instant download →</small></span></button>` : "");
   if (window.__cardShows) window.__cardShows();
+  watchGroups();
 }
 // Typing in the shop search also lists matching designs (from every custom product) as pictures; tapping one opens that product with the design already chosen.
 function designHits() {
@@ -1345,7 +1411,22 @@ function designHits() {
 let sqT = 0;
 $("shopQ").addEventListener("input", () => { clearTimeout(sqT); sqT = setTimeout(() => { sq = $("shopQ").value.trim(); setFilter(filter); }, 180); });
 $("dhits").addEventListener("click", (e) => { const a = e.target.closest("a[data-pd]"); if (!a) return; e.preventDefault(); const u = new URL(location.href); u.searchParams.set("pd", a.dataset.pd); history.replaceState(null, "", u.pathname + u.search + a.getAttribute("href")); window.dispatchEvent(new HashChangeEvent("hashchange")); setTimeout(() => { const v = new URL(location.href); v.searchParams.delete("pd"); history.replaceState(null, "", v.pathname + v.search + v.hash); }, 1500); });
-$("filters").addEventListener("click", (e) => { const b = e.target.closest("button"); if (b) setFilter(b.dataset.f); });
+$("filters").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.f === "keepsakes" && filter !== "all") setFilter("all");
+  const g = filter === "all" && b.dataset.f !== "all" && b.dataset.f !== "saved" ? document.getElementById("grp-" + b.dataset.f) : null;
+  if (g) { g.scrollIntoView({ behavior: "smooth", block: "start" }); markJump(b.dataset.f); return; }   // already on the page: just scroll to it
+  if (b.dataset.f === "all" && filter === "all") { $("grid").scrollIntoView({ behavior: "smooth", block: "start" }); return; }
+  setFilter(b.dataset.f);
+});
+function markJump(id) { document.querySelectorAll("#filters button[data-f]").forEach((x) => { const on = filter === "all" ? (id ? x.dataset.f === id : x.dataset.f === "all") : x.dataset.f === filter; if (on) x.setAttribute("aria-current", "true"); else x.removeAttribute("aria-current"); }); }
+// the chip row follows the group you are looking at
+let spyOn = false, spyTick = 0;
+function watchGroups() {
+  if (spyOn) return; spyOn = true;
+  const run = () => { spyTick = 0; if (filter !== "all") return; const hs = [...document.querySelectorAll("#grid .grp")]; if (!hs.length) return; let cur = null; for (const h of hs) { if (h.getBoundingClientRect().top <= 170) cur = h; else break; } const id = cur ? cur.dataset.g : null; const now = document.querySelector('#filters [aria-current="true"]'); if ((now && now.dataset.f) === (id || "all")) return; markJump(id); const on = document.querySelector('#filters [aria-current="true"]'); if (on && on.scrollIntoView) on.scrollIntoView({ block: "nearest", inline: "center" }); };
+  window.addEventListener("scroll", () => { if (!spyTick) spyTick = setTimeout(run, 60); }, { passive: true });
+}
 $("sortSel").onchange = () => { sortBy = $("sortSel").value; setFilter(filter); };
 $("occSel").onchange = () => { occ = $("occSel").value; setFilter(filter); };
 $("who").addEventListener("click", (e) => { const b = e.target.closest("button[data-w]"); if (!b) return; occ = occ === b.dataset.w ? "" : b.dataset.w; $("occSel").value = ""; setFilter(filter); });
@@ -1401,7 +1482,8 @@ function fromRow(r) {
     stock: r.stock, sort: r.sort, created: r.created_at ? Date.parse(r.created_at) : 0, bundleIds: r.bundle_ids || [], digital: r.digital, hasFile: (r.files || []).length > 0, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
 }
 /* ---------- customer reviews: one quiet fetch of the published ones; nothing shows (and nothing breaks) if the table isn't there ---------- */
-const starsHtml = (n) => `<span class="stv" aria-hidden="true">${"★".repeat(Math.round(n))}<i>${"★".repeat(5 - Math.round(n))}</i></span>`;
+const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>';
+const starsHtml = (n) => `<span class="stv" aria-hidden="true">${STAR_SVG.repeat(Math.round(n))}<i>${STAR_SVG.repeat(5 - Math.round(n))}</i></span>`;
 function rvLine(id, page) {
   const r = RV[id]; if (!r) return "";
   const t = `${r.avg.toFixed(1)} · ${r.n} review${r.n === 1 ? "" : "s"}`;
@@ -1595,7 +1677,7 @@ function mountDesignPicker(p) {
   lab.insertAdjacentHTML("beforebegin", `<div class="designpick opt"><span>Design</span><select id="pDesign" data-prod="${esc(prodSlug(p))}"><option value="">Choose a design…</option>${list.map((d) => `<option value="${esc(d.id)}"${pre && pre.id === d.id ? " selected" : ""}>${esc(d.name)}</option>`).join("")}</select>
     <div id="pRotRow" style="display:none;gap:8px 14px;margin:0 0 10px;flex-wrap:wrap;align-items:center"><button type="button" class="btn btn-line" id="pRot">↻ Turn 90°</button><button type="button" class="btn btn-line" id="pAdjReset">Reset</button>
       <label class="adj"><span>Angle</span><input type="range" id="pRotRange" min="-180" max="180" step="1" value="0"><output id="pRotRangeOut">0°</output></label><label class="adj"><span>Size</span><input type="range" id="pSzRange" min="30" max="200" step="1" value="100"><output id="pSzRangeOut">100%</output></label><label class="adj"><span>Left / right</span><input type="range" id="pXRange" min="-50" max="50" step="1" value="0"><output id="pXRangeOut">0%</output></label><label class="adj"><span>Up / down</span><input type="range" id="pYRange" min="-50" max="50" step="1" value="0"><output id="pYRangeOut">0%</output></label></div>
-    <p class="hint" style="margin:2px 2px 10px;font-size:13px;opacity:.85">📷 Want your own picture instead? <button type="button" data-chat style="background:none;border:0;padding:0;color:var(--gold-2);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer">Send it to us</button> and we'll print it.</p>
+    <p class="hint" style="margin:2px 2px 10px;font-size:13px;opacity:.85">Want your own picture instead? <button type="button" data-chat style="background:none;border:0;padding:0;color:var(--gold-2);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer">Send it to us</button> and we'll print it.</p>
     <div class="yourdesign" id="pDesignCard" hidden><img alt="Design preview"><div><b></b><small></small><a class="etsy-link" id="pDesignLink" href="#">See it with your name in the designer</a>
       <div class="favline" style="margin-top:8px"><button type="button" class="btn btn-line" id="pDesFav" aria-pressed="false">♡ Save design</button><button type="button" class="btn btn-line" id="pDesShare">Share this design</button></div></div></div>
     <div class="namefx" id="pNameFx" hidden><b>Name style</b><img id="pFxPrev" class="fxprev" alt="Preview of your name on the design"><p class="hint" style="margin:0 0 8px;font-size:13px;opacity:.85" id="pFxHint">Type your name in the box below to see it on the design.</p>
@@ -1718,7 +1800,7 @@ function mountBackPicker(p) {
   if (!both || !inp) return;
   const list = (p.tags || []).includes("custom") ? designList(prodSlug(p)) : [];
   inp.closest("label").insertAdjacentHTML("beforebegin", `<div class="backpick opt" style="display:none"><span>Back side</span>${list.length ? `<select id="pDesignBack"><option value="">Choose a design for the back…</option>${list.map((d) => `<option value="${esc(d.id)}">${esc(d.name)}</option>`).join("")}</select>` : ""}
-    <p class="hint" style="margin:6px 2px 10px;font-size:13px;opacity:.85">📷 ${list.length ? "Or send" : "Send"} us the picture or text for the back: <button type="button" data-chat style="background:none;border:0;padding:0;color:var(--gold-2);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer">Send it to us</button>. Mention “back” so we print it on the right side.</p></div>`);
+    <p class="hint" style="margin:6px 2px 10px;font-size:13px;opacity:.85">${list.length ? "Or send" : "Send"} us the picture or text for the back: <button type="button" data-chat style="background:none;border:0;padding:0;color:var(--gold-2);font:inherit;font-weight:700;text-decoration:underline;cursor:pointer">Send it to us</button>. Mention “back” so we print it on the right side.</p></div>`);
   const wrap = document.querySelector("#info .backpick"), sel = $("pDesignBack");
   const sync = () => { const on = Object.values(chosenOptions()).some((v) => /both sides/i.test(v)); wrap.style.display = on ? "" : "none"; const d = on && sel ? list.find((x) => x.id === sel.value) : null; window.__backNote = d ? `Back: ${d.name}` : ""; };
   designFilter(sel, list, "Choose a design for the back…", p);
@@ -1968,7 +2050,7 @@ function renderChat() {
       <label>Email<input id="cEmail" type="email" autocomplete="email" inputmode="email" maxlength="160" required></label>
       <label>Message<textarea id="cMsg" maxlength="4000" placeholder="${a ? "What would you like to know?" : "Tell us your idea: names, colors, quantity, dates…"}"></textarea></label>
       <div class="photostrip" id="startStrip" aria-label="Photos to send"></div>
-      <button class="photobtn" type="button" id="startPhoto">📷 Add or take a photo</button>
+      <button class="photobtn" type="button" id="startPhoto">Add or take a photo</button>
       <input class="hp" id="cSite" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p class="chat-err" id="chatErr" hidden></p>
       <button class="btn btn-gold" type="submit" id="cGo">Send message</button>
@@ -2149,7 +2231,7 @@ function renderDeadline() {
   else if (CO.shipping) parts.push("Mailing for Christmas has closed");
   if ((CO.delivery || CO.pickup) && day0 <= loc) parts.push(`local delivery and pickup until ${etaDate(loc)}`);
   if (!parts.length || (parts.length === 1 && /closed/.test(parts[0]))) { el.hidden = true; return; }
-  $("deadlineTxt").textContent = "🎄 " + parts.join(" · ") + ".";
+  $("deadlineTxt").textContent = "Christmas: " + parts.join(" · ") + ".";
   el.hidden = false;
 }
 $("deadlineX") && ($("deadlineX").onclick = () => { try { localStorage.setItem("prajo:dl", "1"); } catch { /* private mode */ } $("deadline").hidden = true; });
