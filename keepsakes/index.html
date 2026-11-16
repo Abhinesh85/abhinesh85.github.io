@@ -970,6 +970,10 @@ const cap2 = (cx, y0, y1, w) => `M${r1(cx - w / 2)} ${y1}V${r1(y0 + w / 2)}A${w 
 const circP = (x, y, r) => `M${r1(x - r)} ${r1(y)}a${r} ${r} 0 1 0 ${r1(2 * r)} 0a${r} ${r} 0 1 0 ${r1(-2 * r)} 0Z`; // counter-clockwise
 const circCW = (x, y, r) => `M${r1(x - r)} ${r1(y)}a${r} ${r} 0 1 1 ${r1(2 * r)} 0a${r} ${r} 0 1 1 ${r1(-2 * r)} 0Z`;
 const star = (cx, cy, R, r, n, rot = -90) => { let d = ''; for (let i = 0; i < n * 2; i++) { const a = rad(rot + i * 180 / n), rr = i % 2 ? r : R; d += (i ? 'L' : 'M') + r1(cx + rr * Math.cos(a)) + ' ' + r1(cy + rr * Math.sin(a)); } return d + 'Z'; };
+// Allah (U+FDF2) from Amiri and Ik Onkar (U+0A74) from Noto Sans Gurmukhi, both SIL Open Font License
+const ALLAH_D = 'M361 106Q375 106 381 80Q387 54 381 28Q375 2 362 1Q276 -8 256 96Q255 99 255 102Q222 53 205 50Q117 34 71 66Q54 78 63 103Q81 161 131 202Q182 244 238 257L236 306Q236 314 253 350Q262 367 267.0 377.5Q272 388 273 390Q284 408 286 377Q286 371 286.5 353.0Q287 335 288 304Q289 273 290.5 244.5Q292 216 295 188Q301 133 327 115Q339 106 361 106ZM240 209Q230 207 216.0 201.5Q202 196 184 187Q148 169 138 150Q154 138 208 140Q235 142 246 154Q245 159 243.5 173.0Q242 187 240 209ZM340 1083Q345 1098 358 1082Q453 976 423 814Q422 805 413 803Q405 802 403 814Q389 919 326 997Q318 1006 321 1019ZM516 768Q519 791 531 789Q546 787 545 768Q542 716 525 679Q505 636 469 633Q446 632 425 657Q418 644 408.0 635.0Q398 626 387 620Q362 607 338 617Q280 641 325 757Q330 768 337 770Q341 771 346 769Q357 764 353 747Q336 688 367 684Q405 680 427 765Q432 782 443 779Q456 776 453 764Q447 729 460 718Q467 713 477 713Q510 713 516 768ZM596 115Q614 112 620 84Q626 56 620 29Q614 1 605 1Q564 0 534 26Q507 50 479 103Q464 68 451.0 46.5Q438 25 426 18Q400 3 363 2Q340 0 328 28Q316 55 323 80Q331 106 362 106Q434 106 456 156Q456 156 454.5 167.0Q453 178 449 200L427 313Q420 348 416.0 371.5Q412 395 410 408Q407 434 414 444L443 490Q453 504 459 478Q461 472 464.0 453.5Q467 435 471 405Q503 201 527 161Q551 121 596 115ZM612 477 663 242Q668 216 671.5 198.0Q675 180 676 169Q677 159 677.0 147.0Q677 135 675 121Q663 1 605 1Q574 1 554.5 43.0Q535 85 551 103Q568 122 590 116Q614 110 631 118Q630 130 623.5 162.0Q617 194 605 245Q581 345 569 415Q565 442 596 487Q606 503 612 477ZM828 670Q849 719 855 672L878 427Q916 96 869 7Q862 -5 858 1Q854 6 854 18Q856 102 842 207Q842 211 821 397L799 578Q797 598 803 612Z';
+const IKONKAR_D = 'M843 0Q754 0 688.0 44.0Q622 88 585.5 181.0Q549 274 549 421Q549 469 551.5 506.0Q554 543 560 576L563 595Q585 695 630.5 751.5Q676 808 736.0 831.5Q796 855 860 855Q946 855 1007.5 812.5Q1069 770 1090 690L1041 733Q1082 807 1144.0 844.5Q1206 882 1287 882Q1363 882 1413.5 853.0Q1464 824 1493.0 777.0Q1522 730 1532 676L1452 667Q1436 735 1392.5 772.0Q1349 809 1281 809Q1210 809 1165.0 770.5Q1120 732 1091 673L1023 667Q999 729 955.5 755.5Q912 782 854 782Q805 782 763.0 762.0Q721 742 690.5 698.5Q660 655 644 584L642 571Q636 537 633.5 501.5Q631 466 631 424Q631 315 649.0 246.0Q667 177 697.0 139.5Q727 102 763.5 87.5Q800 73 838 73Q905 73 934.5 98.5Q964 124 964 176Q964 204 952.0 226.0Q940 248 920 261Q904 271 885.5 277.5Q867 284 835.5 287.5Q804 291 748 291H613L603 362H764Q816 362 850.5 365.0Q885 368 909.0 374.5Q933 381 952 391Q997 415 1014.0 452.0Q1031 489 1031 556V570L1112 584V566Q1112 482 1083.5 428.0Q1055 374 1007.0 345.5Q959 317 901 309L914 331Q965 318 993.5 292.0Q1022 266 1034.0 235.0Q1046 204 1046 175Q1046 120 1023.5 81.0Q1001 42 956.0 21.0Q911 0 843 0ZM510 551V622H1159V551ZM500 0Q459 0 432.0 11.0Q405 22 389 40Q367 66 361.0 98.0Q355 130 355 164V445Q355 479 346.5 502.0Q338 525 320 538Q306 549 286.0 554.5Q266 560 243 560Q193 560 167.0 534.0Q141 508 141 464Q141 419 166.5 394.5Q192 370 236 370Q283 370 312.0 383.5Q341 397 363 418L377 342Q345 320 312.5 309.0Q280 298 236 298Q185 298 145.0 317.0Q105 336 82.5 373.0Q60 410 60 464Q60 510 82.0 548.0Q104 586 146.0 609.0Q188 632 247 632Q289 632 322.0 621.5Q355 611 380 591Q401 574 413.5 552.5Q426 531 431.0 506.0Q436 481 436 451V165Q436 130 441.5 110.0Q447 90 463.0 81.5Q479 73 510 73Z';
+const ALLAH_T = [0.2347, 87.9, 327.8], IKONKAR_T = [0.13995, 88.6, 261.7];
 const SACRED = {
   om: ['Om', 'Hindu', c => { halo(c); c.glow(200, 200, 150, '#ffe9a6', .3); c.solid(tpath(OM_D, .3, 49, 330)); c.spark(78, 92, 9).spark(322, 96, 7).spark(330, 306, 8).spark(72, 300, 6); }],
   hamsa: ['Hamsa', 'Universal', c => {
@@ -1017,6 +1021,24 @@ const SACRED = {
     const R = 120, r = R / Math.sqrt(3); let d = ''; for (let i = 0; i < 12; i++) { const a = rad(-90 + i * 30), rr = i % 2 ? r : R; d += (i ? 'L' : 'M') + r1(200 + rr * Math.cos(a)) + ' ' + r1(200 + rr * Math.sin(a)); }
     c.solid(c.plain ? d + 'Z' : d + 'Z ' + 'M' + [0, 1, 2, 3, 4, 5].map(i => { const a = rad(-60 - i * 60); return r1(200 + 46 * Math.cos(a)) + ' ' + r1(200 + 46 * Math.sin(a)); }).join('L') + 'Z');
     c.line('M200 80L200 120M200 320L200 280', 1.2, { opt: true }); c.spark(70, 90, 8).spark(334, 312, 7);
+  }],
+  allah: ['Allah (calligraphy)', 'Islamic', c => {
+    halo(c); c.glow(200, 200, 150, '#ffe9a6', .3);
+    if (!c.plain) c.ring(200, 200, 140, 1.4, { opt: true });
+    c.solid(tpath(ALLAH_D, ALLAH_T[0], ALLAH_T[1], ALLAH_T[2])); c.spark(92, 96, 7).spark(314, 318, 7);
+  }],
+  ikonkar: ['Ik Onkar', 'Sikh', c => {
+    halo(c); c.glow(200, 200, 150, '#ffe9a6', .3);
+    if (!c.plain) c.ring(200, 200, 140, 1.4, { opt: true });
+    c.solid(tpath(IKONKAR_D, IKONKAR_T[0], IKONKAR_T[1], IKONKAR_T[2])); c.spark(92, 96, 7).spark(314, 318, 7);
+  }],
+  menorah: ['Menorah', 'Jewish', c => {
+    halo(c); c.glow(200, 200, 150, '#ffe9a6', .3);
+    const arm = R => { const t = 9, o = R + t / 2, i = R - t / 2, yc = 214, yt = 122; return `M${200 - o} ${yt}V${yc}A${o} ${o} 0 0 0 ${200 + o} ${yc}V${yt}H${200 + i}V${yc}A${i} ${i} 0 0 1 ${200 - i} ${yc}V${yt}Z`; };
+    const xs = [-90, -60, -30, 0, 30, 60, 90];
+    c.solid([30, 60, 90].map(arm).join('') + 'M195 120H205V310H195Z' + 'M146 336H254L240 306H160Z' + xs.map(x => `M${200 + x - 8} 112H${200 + x + 8}V124H${200 + x - 8}Z`).join(''));
+    for (const x of xs) c.fill(`M${200 + x} 70Q${200 + x + 11} 92 ${200 + x} 108Q${200 + x - 11} 92 ${200 + x} 70Z`, { f: { r: ['#fff3b0', '#ff9a1f'], cx: .5, cy: .65 }, sw: 1 });
+    c.spark(84, 100, 7).spark(318, 330, 7);
   }],
   dharma: ['Dharma wheel', 'Buddhist', c => {
     halo(c); c.glow(200, 200, 150, '#ffe9a6', .25);
@@ -1270,7 +1292,7 @@ const FAMILIES=[
  {key:'names',label:'Names',pick:'Colour',desc:'Your name, cut out in its own shape and printed in colour and gold.',items:Object.keys(CW).map(k=>({id:'name-'+k,name:cap(k),sub:'Name charm, cut to the letters',short:cap(k)}))},
  {key:'zodiac',label:'Zodiac',pick:'Sign',desc:'Your sign as a constellation of gold stars.',items:A.LIST.filter(e=>e.family==='zodiac').map(e=>({id:e.id,name:e.title,sub:SIGN_RANGES[e.id.slice(7)],short:e.title.slice(0,3)}))},
  {key:'states',label:'US states',pick:'State',desc:'Cut to the shape of the state, with a landmark illustrated inside.',items:[],lazy:true},
- {key:'gods',label:'Gods',pick:'Deity',desc:'Hindu gods and goddesses in their traditional form, die-cut and printed in full colour. Made with respect: best as a car, bag or pendant charm.',items:A.LIST.filter(e=>e.family==='sacred'&&e.deity).sort((a,b)=>['ganeshaclassic','ganesha','krishna','shiva','lakshmi','hanuman','durga','saraswati'].indexOf(a.deity)-['ganeshaclassic','ganesha','krishna','shiva','lakshmi','hanuman','durga','saraswati'].indexOf(b.deity)).map(e=>({id:e.id,name:e.title,sub:e.tradition,short:e.title}))},
+ {key:'gods',label:'Gods & faiths',pick:'Deity or symbol',desc:'Hindu gods and goddesses in their traditional form, plus sacred symbols and calligraphy from Islam, Sikhism, Judaism, Christianity and Buddhism. Die-cut and printed in colour or gold. Made with respect: best as a car, bag or pendant charm.',items:(()=>{const D=['ganeshaclassic','ganesha','krishna','shiva','lakshmi','hanuman','durga','saraswati'],S=['allah','crescent','ikonkar','khanda','hexagram','menorah','cross','dharma'];return [...D.map(k=>A.LIST.find(e=>e.family==='sacred'&&e.deity===k)),...S.map(k=>A.LIST.find(e=>e.id==='sacred-'+k))].filter(Boolean).map(e=>({id:e.id,name:e.title,sub:e.tradition,short:e.title}));})()},
  {key:'maps',label:'Country maps',pick:'Country',desc:'Cut to the shape of the country.',items:[],lazy:true},
  {key:'kits',label:'National kits',pick:'Team',desc:'A national team shirt in its colours. Colours are approximate, no crests.',items:[],lazy:true},
  {key:'flowers',label:'Birth flowers',pick:'Month',desc:'The flower for the month, drawn in gold and colour.',items:A.LIST.filter(e=>e.family==='flowers').map(e=>({id:e.id,name:cap(e.month),sub:e.title,short:cap(e.month).slice(0,3)}))},
@@ -1476,7 +1498,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794856497921';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794857434614';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
