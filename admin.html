@@ -349,6 +349,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <div class="swrow" id="studioRow"><div class="swtxt"><b>🔤 Design studio on the store</b><small id="studioState">Checking…</small></div>
           <button type="button" class="tg" role="switch" aria-checked="false" id="studioToggle" aria-label="Design studio on the store"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
           <div class="swask" id="studioAsk" hidden><span id="studioAskT"></span><button type="button" class="btn gold" id="studioYes">Confirm</button><button type="button" class="btn line" id="studioNo">Cancel</button></div></div>
+        <button type="button" role="menuitem" id="kcBtn">✨ Name charm categories<small id="kcState">Switch Birth flowers, Sacred symbols and others on or off</small></button>
         <button type="button" role="menuitem" id="ptBtn">🧩 Products to design<small id="ptState">Tumbler, mug, coaster, badge and more</small></button>
         <button type="button" role="menuitem" id="scBtn">🏠 Home page showcase<small id="scState">The three tumblers at the top of your home page</small></button>
         <button type="button" role="menuitem" id="snBtn">🎄 Seasonal effects<small id="snState">Falling snow, hearts, ghosts and more on holidays</small></button>
@@ -596,6 +597,16 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       <label class="td-prod">Show <select id="snSel" aria-label="Which seasonal effect to show"></select></label>
       <p class="hint" id="snNow" style="margin:0 0 12px"></p>
       <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="snSave">Save</button><a class="btn" id="snPrev" href="./" target="_blank" rel="noopener">Preview on the store ↗</a><span class="hint" id="snMsg" style="margin:0"></span></div>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="kcSheet" hidden role="dialog" aria-modal="true" aria-labelledby="kcTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="kcTitle">Name charm categories</h2><button class="x" type="button" id="kcClose" aria-label="Close">×</button></div>
+    <div class="panel-body">
+      <p class="hint" style="margin:0 0 12px">Choose which categories customers see on the Name charms &amp; keepsakes page. Switch one off while you polish it, then back on when it's ready. Changes save and go live straight away.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin:0 0 12px"><button class="btn gold" type="button" id="kcAllOn">All on</button><button class="btn line" type="button" id="kcAllOff">All off</button><span class="hint" id="kcMsg" role="status"></span></div>
+      <div class="co-list" id="kcList"><p class="hint">Loading…</p></div>
     </div>
   </div>
 </div>
@@ -1972,6 +1983,34 @@ $("snSave").onclick = async () => {
   if (error) return toast("Couldn't save: " + error.message); toast(v === "auto" ? "Automatic: follows the calendar" : v === "off" ? "Seasonal effects are off" : `Showing ${snLabel(v)} on the store`);
   site = next; $("snMsg").textContent = "Saved. It shows on the store right away.";
 };
+/* ---------- name charm categories: site_settings.data.keepsakeOff = ["flowers", ...]; the keepsakes page hides those tabs ---------- */
+const KC = [["names","Names","Cursive and signature name charms"],["zodiac","Zodiac","Twelve star-sign charms"],["states","US states","Die-cut state shapes with a landmark"],["gods","Gods","Hindu deities, die-cut"],["maps","Country maps","Countries cut to shape"],["kits","National kits","Team shirts with name and number"],["flowers","Birth flowers","The flower for each month"],["stones","Birthstones","The stone for each month"],["sacred","Sacred symbols","Om, Hamsa, Nazar, lotus and more"],["baby","Baby","New-arrival designs"],["photos","Photos","Customer photo collage or single photo"]];
+let kcOff = [];
+function kcRender() {
+  const on = KC.length - kcOff.length;
+  $("kcState").textContent = on === KC.length ? "All categories are showing" : `${on} of ${KC.length} showing`;
+  $("kcList").innerHTML = KC.map(([k, t, d]) => `<div class="co-row ${kcOff.includes(k) ? "off" : ""}"><div class="co-top"><div><b>${esc(t)}</b><small>${esc(d)}${kcOff.includes(k) ? " · hidden from customers" : ""}</small></div><label class="switch"><input type="checkbox" data-kc="${k}" ${kcOff.includes(k) ? "" : "checked"} aria-label="${esc(t)} on the store"></label></div></div>`).join("");
+}
+async function kcSave(list, msg) {
+  const cur = await readSiteRow(), next = { ...cur };
+  if (list.length) next.keepsakeOff = list; else delete next.keepsakeOff;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+  if (error) { toast("Couldn't save: " + error.message); return false; }
+  kcOff = list; site = next; kcRender(); $("kcMsg").textContent = msg || "Saved. Live on the store now."; return true;
+}
+async function kcOpen() {
+  $("kcSheet").hidden = false; document.body.style.overflow = "hidden"; $("kcMsg").textContent = "";
+  const row = await readSiteRow(); kcOff = Array.isArray(row.keepsakeOff) ? row.keepsakeOff.filter((k) => KC.some((x) => x[0] === k)) : []; kcRender();
+}
+$("kcBtn").onclick = kcOpen;
+$("kcClose").onclick = () => { $("kcSheet").hidden = true; document.body.style.overflow = ""; };
+$("kcAllOn").onclick = () => kcSave([], "All categories are showing.");
+$("kcAllOff").onclick = () => kcSave(KC.map((x) => x[0]), "All categories are hidden. Customers see a 'coming soon' note.");
+$("kcList").addEventListener("change", (e) => {
+  const k = e.target.dataset.kc; if (!k) return;
+  const list = e.target.checked ? kcOff.filter((x) => x !== k) : [...new Set([...kcOff, k])];
+  kcSave(list).then((ok) => { if (!ok) kcRender(); });
+});
 async function tdOpen() { $("tdSheet").hidden = false; document.body.style.overflow = "hidden"; await tdLoad(); }
 $("tdBtn").onclick = tdOpen;
 $("tdClose").onclick = () => { $("tdSheet").hidden = true; document.body.style.overflow = ""; };

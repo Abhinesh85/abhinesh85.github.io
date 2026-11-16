@@ -1468,7 +1468,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794786943131';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794787168983';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1778,7 +1778,10 @@ let io;function observe(){if(!('IntersectionObserver'in window)||document.docume
 history.replaceState({view:'home'},'');
 heroRender();drawTabs();drawCards(true);drawDiagram();observe();
 /* owner switch: same public site_settings row the store reads; any failure leaves the watermark ON */
-try{fetch('https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/site_settings?id=eq.1&select=data',{headers:{apikey:'sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b',Authorization:'Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b'}}).then(r=>r.ok?r.json():null).then(rows=>{if(rows&&rows[0]&&rows[0].data&&rows[0].data.watermarkOff===true){WM.on=false;rerenderAll();}}).catch(()=>{});}catch(e){}
+try{fetch('https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/site_settings?id=eq.1&select=data',{headers:{apikey:'sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b',Authorization:'Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b'}}).then(r=>r.ok?r.json():null).then(rows=>{const D=rows&&rows[0]&&rows[0].data;if(D&&D.watermarkOff===true){WM.on=false;rerenderAll();}
+const off=D&&Array.isArray(D.keepsakeOff)?D.keepsakeOff:[];if(off.length){for(let i=FAMILIES.length-1;i>=0;i--)if(off.includes(FAMILIES[i].key))FAMILIES.splice(i,1);
+if(!FAMILIES.length){const t=$('tabs');t.replaceChildren();$('cards').innerHTML='<p class="lead" style="padding:24px 0">New designs are coming soon. Check back shortly, or message us for a custom order.</p>';}
+else{if(!FAMILIES.some(f=>f.key===famKey))famKey=FAMILIES[0].key;drawTabs();drawCards(true);}}}).catch(()=>{});}catch(e){}
 heroTimer=setInterval(heroCycle,5200);
 fontsReady();
 </script>
