@@ -20,6 +20,7 @@
 <link rel="canonical" href="https://prajocustomstudio.com/">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"Store","name":"PrAjo Custom Studio","url":"https://prajocustomstudio.com/","logo":"https://prajocustomstudio.com/logo.png","image":"https://prajocustomstudio.com/share-card.jpg","description":"Custom engraved and UV printed tumblers, mugs and keepsakes, made by hand in Sacramento, CA.","address":{"@type":"PostalAddress","addressLocality":"Sacramento","addressRegion":"CA","addressCountry":"US"},"sameAs":["https://www.etsy.com/shop/PrAjoCustomStudio"]}</script>
 <link rel="apple-touch-icon" href="icon-180.png">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="preconnect" href="https://mrnnrmyvjkyjcjnfomna.supabase.co" crossorigin>
 <link rel="preload" as="image" href="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-0.jpg" fetchpriority="high">
 <link rel="preload" as="image" href="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-1.jpg" fetchpriority="high">
@@ -517,7 +518,7 @@ nav.links a { padding: 12px 4px; }
 .dhits a { flex: 0 0 112px; text-decoration: none; color: inherit; border-radius: 12px; background: rgba(255,255,255,.06); padding: 5px; display: flex; flex-direction: column; gap: 4px; }
 .dhits img { width: 100%; aspect-ratio: 2 / 3; object-fit: contain; border-radius: 8px; background: #efefef; }
 .dhits span { font-size: 11.5px; line-height: 1.25; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } .dhits small { font-size: 10.5px; opacity: .7; }
-.fav { position: absolute; top: 10px; right: 10px; z-index: 3; width: 38px; height: 38px; border-radius: 50%; border: 0; display: grid; place-items: center; background: rgba(13, 21, 38, .55); color: #fff; cursor: pointer; backdrop-filter: blur(6px); }
+.fav { position: absolute; top: 10px; right: 10px; z-index: 3; width: 44px; height: 44px; border-radius: 50%; border: 0; display: grid; place-items: center; background: rgba(13, 21, 38, .55); color: #fff; cursor: pointer; backdrop-filter: blur(6px); }
 .fav[aria-pressed="true"] { color: #ff6f8e; } .fav:focus-visible { outline: 2px solid var(--gold-2, #e9c46a); }
 .favline { display: flex; gap: 8px; flex-wrap: wrap; margin: 0 0 10px; } .favline .btn { padding: 9px 14px; font-size: 14px; }
 .favline .btn[aria-pressed="true"] { color: #ff6f8e; border-color: #ff6f8e; }
@@ -546,6 +547,21 @@ html.still *, html.still *::before, html.still *::after { animation: none !impor
 .empty-shop button { margin-top: 12px; }
 .card .badge { font-size: 10.5px; padding: 4px 9px; }
 
+
+/* ---- phone tab bar ---- */
+#deadlineX { min-width: 44px; min-height: 44px; }
+.tabbar { display: none; }
+@media (max-width: 700px) {
+  .tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 60; display: grid; grid-template-columns: repeat(5, 1fr); background: rgba(10, 18, 32, .96); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .tabbar a, .tabbar button { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; min-height: 56px; padding: 6px 2px; background: none; border: 0; color: var(--muted); font: 600 11.5px/1.1 var(--f-body); text-decoration: none; -webkit-tap-highlight-color: transparent; }
+  .tabbar svg { width: 22px; height: 22px; }
+  .tabbar .on { color: var(--gold-2); }
+  .tabbar .tn { position: absolute; top: 5px; left: calc(50% + 6px); min-width: 18px; height: 18px; padding: 0 5px; border-radius: 9px; background: var(--saffron); color: #1b1305; font-size: 11px; font-weight: 800; display: grid; place-items: center; }
+  .tabbar .tn[hidden] { display: none; }
+  body { padding-bottom: calc(56px + env(safe-area-inset-bottom, 0px)); }
+  body.has-sbar .tabbar { display: none; }
+  .chat-fab { bottom: calc(68px + env(safe-area-inset-bottom, 0px)); }
+}
 /* ---- upgrade: sticky buy bar on the product page ---- */
 .sbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 130; display: none; align-items: center; gap: 14px; padding: 12px max(16px, env(safe-area-inset-right, 0px)) calc(12px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: rgba(10, 18, 32, .94); backdrop-filter: blur(14px); border-top: 1px solid rgba(245, 236, 220, .14); }
 .sbar.on { display: flex; }
@@ -693,14 +709,6 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
 .gal-cap b { font-family: var(--f-display); font-size: clamp(22px, 3vw, 30px); }
 .gal-cap small { color: var(--muted); font-size: 14px; }
 @media (max-width: 600px) { .gal-nav { width: 42px; height: 42px; } .gal { height: 290px; perspective: 1000px; } }
-
-/* Name charms designer opens inside the store (iframe overlay under the header) */
-#kDlg{position:fixed;left:0;right:0;bottom:0;top:calc(68px + env(safe-area-inset-top,0px));z-index:45;background:var(--ink);display:flex;flex-direction:column}
-#kDlg[hidden]{display:none}
-#kDlg .kbar{display:flex;align-items:center;gap:14px;min-height:44px;padding:0 var(--gutter);border-bottom:1px solid var(--line-soft);background:var(--navy)}
-#kDlg .kbar button{min-height:44px;padding:0 4px;color:var(--gold-2);font:700 14px var(--f-body);background:none;border:0;cursor:pointer}
-#kDlg .kbar span{color:var(--muted);font-size:13px;letter-spacing:.08em;text-transform:uppercase}
-#kDlg iframe{flex:1;width:100%;border:0;background:var(--ink)}
 </style>
 </head>
 <body>
@@ -709,6 +717,13 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
 <div class="salebar" id="salebar" hidden>🏷 <span id="saleTxt"></span></div>
 <div class="vacation" id="vacation" hidden>🌴 <span id="vacText"></span></div>
 
+<nav class="tabbar" id="tabbar" aria-label="Quick links">
+  <a href="#shop" id="tbShop"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 9l1-5h16l1 5M4 9v11h16V9M9 20v-6h6v6"/></svg>Shop</a>
+  <a href="tumbler.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l2.5 5.5L20 9l-4 4 1 6-5-3-5 3 1-6-4-4 5.5-.5z"/></svg>Design</a>
+  <button type="button" id="tbCart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18M16 10a4 4 0 0 1-8 0"/></svg>Cart<span class="tn" id="tbN" hidden>0</span></button>
+  <button type="button" id="tbTrack"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4-9 4-9-4zM3 7v10l9 4 9-4V7M12 11v10"/></svg>Track</button>
+  <button type="button" id="tbMenu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>Menu</button>
+</nav>
 <header class="top">
   <div class="wrap">
     <a class="brand" href="#top" aria-label="PrAjo Custom Studio home">
@@ -2625,28 +2640,15 @@ route();
   const kick = () => (window.requestIdleCallback ? requestIdleCallback(start, { timeout: 4000 }) : setTimeout(start, 3000));
   if (document.readyState === "complete") setTimeout(kick, 1500); else window.addEventListener("load", () => setTimeout(kick, 1500));
 })();
-</script>
-
-<div id="kDlg" hidden role="dialog" aria-label="Name charms and keepsakes"><div class="kbar"><button type="button" id="kClose">&larr; Back to shop</button><span>Name charms &amp; keepsakes</span></div><iframe id="kFrame" title="Design your keepsake" allow="clipboard-write"></iframe></div>
-<script>
-(function(){
-  var d=document.getElementById('kDlg'),f=document.getElementById('kFrame'),isOpen=false;
-  function openK(push){
-    if(!f.getAttribute('src'))f.setAttribute('src','keepsakes/?embed=1');
-    d.hidden=false;isOpen=true;document.body.style.overflow='hidden';
-    var ns=document.getElementById('navSheet');if(ns)ns.hidden=true;
-    if(push)try{history.pushState({k:1},'','#name-charms');}catch(e){}
-  }
-  function closeK(){d.hidden=true;isOpen=false;document.body.style.overflow='';}
-  document.addEventListener('click',function(e){
-    var a=e.target.closest&&e.target.closest('a[href="keepsakes/"]');
-    if(!a||e.metaKey||e.ctrlKey||e.shiftKey||e.button)return;
-    e.preventDefault();openK(true);
-  });
-  document.getElementById('kClose').addEventListener('click',function(){if(history.state&&history.state.k)history.back();else closeK();});
-  window.addEventListener('popstate',function(){if(location.hash==='#name-charms')openK(false);else if(isOpen)closeK();});
-  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&isOpen)document.getElementById('kClose').click();});
-  if(location.hash==='#name-charms')openK(false);
+// phone tab bar: reuses the existing cart, track and menu handlers
+(() => {
+  const g = (id) => document.getElementById(id);
+  g("tbCart").addEventListener("click", () => g("cartBtn").click());
+  g("tbMenu").addEventListener("click", () => g("navBtn").click());
+  g("tbTrack").addEventListener("click", () => { try { openTrack(); } catch (e) {} });
+  const n = g("cartN"), t = g("tbN");
+  const sync = () => { t.textContent = n.textContent; t.hidden = n.hidden; };
+  new MutationObserver(sync).observe(n, { childList: true, characterData: true, subtree: true, attributes: true }); sync();
 })();
 </script>
 </body>
