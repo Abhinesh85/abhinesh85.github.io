@@ -1514,7 +1514,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794863632734';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794864155443';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1640,7 +1640,7 @@ function drawSwatches(){
   }
   $('swatches').replaceChildren(...COLORS.map(([n,c])=>{const b=document.createElement('button');b.type='button';b.setAttribute('aria-label',n);b.title=n;b.style.background=c==='foil'?'linear-gradient(135deg,#8f601b,#f4d98b 40%,#dcae52 60%,#8f601b)':c;/* taste-skill-ignore: swatch shows the foil colour */b.setAttribute('aria-pressed',String(state.ink===c));b.onclick=()=>{state.ink=c;drawSwatches();render();};return b;}));
   [...$('finish').children].forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.v===state.finish));b.onclick=()=>{state.finish=b.dataset.v;drawSwatches();render();};});
-  const SIDEHINT={identical:'The back shows the same design. The shape is symmetrical, so front and back line up exactly.',region:'The back shows the same picture facing the right way, fitted into the flipped outline.',fit:'The back shows the same figure facing the right way, moved and sized to sit as well as it can inside the flipped outline. A few edge details may be trimmed.',mirror:'This piece is cut around the letters of your name, so the back can only be a mirror image (letters face the other way). Choose Front only for a plain back.',mirrorfig:'This figure has a lopsided shape, so the back is its mirror image (left and right swap) and it lines up perfectly. Choose Front only for a plain back.'};
+  const SIDEHINT={identical:'The back shows the same design. The shape is symmetrical, so front and back line up exactly.',region:'The back shows the same picture facing the right way, fitted into the flipped outline.',fit:'The back shows the same figure facing the right way, moved and sized to sit as well as it can inside the flipped outline. A few edge details may be trimmed.',mirror:'This piece is cut around the letters of your name, so the back can only be a mirror image (letters face the other way). Choose Front only for a plain back.',mirrorfig:'The back is the mirror image of the front, so the design fits the flipped cut shape exactly (left and right swap). Choose Front only for a plain back.'};
   const sideHint=()=>{$('sidesHint').textContent=state.sides==='both'?SIDEHINT[backMode()]:'Only the front is printed. The back stays plain acrylic.';};
   [...$('sides').children].forEach(b=>{b.setAttribute('aria-pressed',String(b.dataset.v===state.sides));b.onclick=()=>{state.sides=b.dataset.v;render();[...$('sides').children].forEach(x=>x.setAttribute('aria-pressed',String(x.dataset.v===state.sides)));sideHint();};});sideHint();
 }
