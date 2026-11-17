@@ -760,7 +760,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
     <div class="panel-body" id="ddBody"></div></div>
 </div>
 <div class="sheet" id="inSheet" hidden role="dialog" aria-modal="true" aria-labelledby="inSheetT">
-  <div class="panel inb"><div class="panel-head"><h2 id="inSheetT">Inbox</h2><button class="btn line" type="button" id="inNew" style="min-height:40px;padding:0 14px">✎ New email</button><button class="btn line" type="button" id="inTplBtn" style="min-height:40px;padding:0 14px">Templates</button><button class="x" type="button" id="inClose" aria-label="Close">×</button></div>
+  <div class="panel inb"><div class="panel-head"><h2 id="inSheetT">Inbox</h2><button class="btn line" type="button" id="inNew" style="min-height:40px;padding:0 14px">✎ New email</button><button class="btn line" type="button" id="inFwdBtn" style="min-height:40px;padding:0 14px">Forwarding</button><button class="btn line" type="button" id="inTplBtn" style="min-height:40px;padding:0 14px">Templates</button><button class="x" type="button" id="inClose" aria-label="Close">×</button></div>
     <div class="panel-body"><div class="in-grid" id="inGrid" data-view="list"><div class="in-left"><div class="in-bar" id="inBar"></div><div class="in-list" id="inList"></div></div><div class="in-thread" id="inThread"></div></div></div></div>
 </div>
 <div class="sheet" id="helpSheet" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
@@ -3296,6 +3296,40 @@ document.addEventListener("click", async (e) => {
 
 /* open from the Telegram link (admin.html#inbox) once signed in */
 { const w = $("menuWrap"); if (w) new MutationObserver(() => { if (!w.hidden && location.hash === "#inbox") { history.replaceState(null, "", location.pathname); $("inBtn").click(); } }).observe(w, { attributes: true, attributeFilter: ["hidden"] }); }
+/* ---- Inbox: where incoming mail is forwarded, and who gets a copy of your replies ---- */
+const CF_DEST = "https://dash.cloudflare.com/da17497fbb90d768f23cb373a48b3f45/email-service/routing/a77ac634e40078d740d50433e0f6b8e2/destination-addresses";
+const mailOk = (x) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(x);
+const splitMails = (v) => [...new Set(String(v || "").split(/[,;\s]+/).map((x) => x.trim().toLowerCase()).filter(Boolean))];
+async function inForwarding() {
+  const row = await readSiteRow(), f = row.mailForward || {}, bcc = row.mailBcc;
+  const join = (a) => (Array.isArray(a) ? a.join(", ") : "");
+  ddOpen("Forwarding & copies", `<p class="hint">Every email is always saved in this Inbox. Here you choose which of your own mailboxes also receive a copy, and who gets a copy of the replies you send.</p>
+    <section class="ks-sec"><h3>Forward incoming mail to</h3>
+      <label class="f"><span>All addresses (default)</span><input class="in" id="fwDef" inputmode="email" autocomplete="off" spellcheck="false" placeholder="you@gmail.com, partner@gmail.com" value="${esc(join(f.default) || "abhi.prasad85@gmail.com")}"></label>
+      <p class="hint">Different place for one address? Fill it in below. Leave blank to use the default above. Type <b>none</b> to keep that address in the Inbox only.</p>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">${MAIL_BOXES.concat(["other"]).map((b) => `<label class="f"><span>${b === "other" ? "Any other address (catch-all)" : b + "@prajocustomstudio.com"}</span><input class="in" data-fwb="${b === "other" ? "other" : b}" autocomplete="off" spellcheck="false" placeholder="uses default" value="${esc(Array.isArray(f[b]) ? (f[b].length ? f[b].join(", ") : "none") : "")}"></label>`).join("")}</div></section>
+    <section class="ks-sec"><h3>Copies of your replies</h3><label class="f"><span>Send a copy of every reply to</span><input class="in" id="fwBcc" autocomplete="off" spellcheck="false" placeholder="you@gmail.com (or type none)" value="${esc(bcc === "off" || bcc === false ? "none" : Array.isArray(bcc) ? bcc.join(", ") : "abhi.prasad85@gmail.com")}"></label></section>
+    <section class="ks-sec"><h3>Important</h3><p class="hint">Cloudflare only forwards to addresses it has <b>verified</b>. When you add a new address here, also add it in Cloudflare (Destination addresses → Add) and click the verification link it emails to that address. Until then, forwarding to it is skipped, but the mail is still saved here.</p>
+      <a class="btn line" href="${CF_DEST}" target="_blank" rel="noopener">Open Cloudflare destination addresses ↗</a>
+      <p class="hint">Mail forwarded to Gmail can land in Spam. In Gmail: Settings → Filters → Create a filter with <b>To: hello@prajocustomstudio.com</b> → tick <b>Never send it to Spam</b> (repeat for orders@, support@, proofs@).</p></section>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><button class="btn gold" type="button" id="fwSave">Save</button><span class="hint" id="fwMsg" role="status"></span></div>`);
+  $("fwSave").onclick = async () => {
+    const parse = (v, allowNone) => { const t = String(v || "").trim().toLowerCase(); if (!t) return null; if (allowNone && /^(none|off|no)$/.test(t)) return []; const l = splitMails(t); return l.every(mailOk) ? l : false; };
+    const def = parse($("fwDef").value, false);
+    if (!def || !def.length) return ($("fwMsg").textContent = "Please enter at least one valid default email address.");
+    const out = { default: def };
+    for (const el of document.querySelectorAll("[data-fwb]")) { const v = parse(el.value, true); if (v === false) return ($("fwMsg").textContent = "Check the email address for " + el.dataset.fwb + "."); if (v !== null) out[el.dataset.fwb] = v; }
+    const b = parse($("fwBcc").value, true); if (b === false) return ($("fwMsg").textContent = "Check the reply-copy email address.");
+    const ok = await saveSite((n) => {
+      const same = out.default.length === 1 && out.default[0] === "abhi.prasad85@gmail.com" && Object.keys(out).length === 1;
+      if (same) delete n.mailForward; else n.mailForward = out;
+      if (b === null || (Array.isArray(b) && b.length === 1 && b[0] === "abhi.prasad85@gmail.com")) delete n.mailBcc; else n.mailBcc = b.length ? b : "off";
+    });
+    $("fwMsg").textContent = ok ? "Saved. Applies to the next email." : "";
+    if (ok) toast("Forwarding saved");
+  };
+}
+$("inFwdBtn").onclick = inForwarding;
 </script>
 </body>
 </html>
