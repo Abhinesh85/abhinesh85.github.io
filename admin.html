@@ -328,6 +328,68 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .mfa-go { min-height: 50px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #ecc876, #c99a3f); color: #1b1305; font-weight: 800; font-size: 16px; cursor: pointer; }
 .mfa-go[disabled] { opacity: .6; }
 .mfa-out { background: none; border: 0; color: #9a978f; text-decoration: underline; cursor: pointer; font-size: 14px; justify-self: center; }
+/* keepsake options + settings hub */
+.ks-sec { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--line-soft); border-radius: 16px; background: var(--panel); }
+.ks-sec > h3 { font-size: 17px; margin: 0; }
+.ks-opts { display: grid; gap: 8px; }
+.ks-opt { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: start; padding: 12px 14px; border: 1px solid var(--line-soft); border-radius: 12px; cursor: pointer; }
+.ks-opt:has(input:checked) { border-color: var(--gold); background: rgba(217, 171, 79, .08); }
+.ks-opt input { margin-top: 3px; accent-color: #d9ab4f; width: 18px; height: 18px; }
+.ks-opt b { font-size: 15px; } .ks-opt small { grid-column: 2; color: var(--muted); font-size: 13px; }
+.ks-fam { border: 1px solid var(--line-soft); border-radius: 14px; background: var(--ink); }
+.ks-fam > summary { list-style: none; display: grid; grid-template-columns: 1fr auto; gap: 8px 12px; align-items: center; padding: 12px 14px; cursor: pointer; }
+.ks-fam > summary::-webkit-details-marker { display: none; }
+.ks-fam > summary b { font-size: 15px; } .ks-fam > summary small { display: block; color: var(--muted); font-size: 12.5px; margin-top: 2px; }
+.ks-fam[open] > summary { border-bottom: 1px solid var(--line-soft); }
+.ks-famctl { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.ks-famctl select, .ks-row select { min-height: 38px; border-radius: 10px; border: 1px solid var(--line-soft); background: var(--navy); color: inherit; font-size: 14px; padding: 0 8px; }
+.ks-fambody { padding: 10px 12px 14px; display: grid; gap: 8px; }
+.ks-bulk { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.ks-bulk .btn { min-height: 36px; padding: 0 14px; font-size: 13px; }
+.ks-row { display: grid; grid-template-columns: 1fr auto auto; gap: 10px; align-items: center; padding: 8px 10px; border-radius: 10px; background: var(--panel); }
+.ks-row.off { opacity: .55; } .ks-row small { color: var(--muted); display: block; font-size: 11.5px; }
+.ks-row .nm { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; font-size: 14px; }
+.ks-dirty { color: var(--gold-2); font-size: 13px; font-weight: 700; align-self: center; }
+@media (max-width: 520px) { .ks-row { grid-template-columns: 1fr auto; } .ks-row select { grid-column: 1 / -1; } }
+.hub .panel { width: min(980px, 100%); }
+.hub-search { position: sticky; top: 0; z-index: 2; background: var(--navy); padding-bottom: 8px; }
+.hub-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px; }
+.hub-card { display: grid; gap: 4px; text-align: left; padding: 14px; border-radius: 14px; border: 1px solid var(--line-soft); background: var(--panel); color: inherit; font: inherit; cursor: pointer; min-height: 78px; text-decoration: none; }
+.hub-card:hover, .hub-card:focus-visible { border-color: var(--gold); background: var(--panel-2); outline: none; }
+.hub-card b { font-size: 15px; } .hub-card small { color: var(--muted); font-size: 12.5px; line-height: 1.35; }
+.hub-grp > h3 { margin: 0 0 8px; font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--gold-2); }
+.hubsw.menu { position: static; width: auto; max-height: none; box-shadow: none; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); padding: 4px; display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); overflow: visible; }
+.hubsw.menu::before { display: none; }
+.hubsw.menu .swrow { padding: 10px 12px; } .hubsw.menu .swtxt { font-size: 14.5px; }
+
+/* reports, history, schedule */
+.panel.wide { width: min(1080px, 100%); }
+.an-bar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.an-bar select { min-height: 40px; border-radius: 10px; border: 1px solid var(--line-soft); background: var(--panel); color: inherit; padding: 0 10px; font-size: 14px; }
+.an-tabs { display: flex; gap: 4px; flex-wrap: wrap; background: var(--ink); border-radius: 999px; padding: 4px; }
+.an-tabs button { border: 0; background: none; color: var(--muted); font: inherit; font-weight: 700; font-size: 13.5px; padding: 8px 14px; border-radius: 999px; cursor: pointer; }
+.an-tabs button[aria-selected="true"] { background: var(--gold); color: #1a1204; }
+.an-kpis { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+.an-k { display: grid; gap: 2px; padding: 14px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); }
+.an-k small { color: var(--muted); font-size: 12.5px; } .an-k b { font-size: 26px; font-family: var(--f-display, inherit); color: var(--gold-2); } .an-k em { font-style: normal; color: var(--muted); font-size: 12px; }
+.an-h { margin: 6px 0 -4px; font-size: 14px; letter-spacing: .12em; text-transform: uppercase; color: var(--gold-2); }
+.an-chart { display: flex; align-items: flex-end; gap: 4px; height: 190px; padding: 8px 6px 0; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); overflow-x: auto; }
+.an-col { flex: 1 0 22px; min-width: 22px; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; }
+.an-col i { display: block; width: 100%; max-width: 38px; background: linear-gradient(180deg, var(--gold-2), var(--gold)); border-radius: 5px 5px 0 0; }
+.an-col small { font-size: 9.5px; color: var(--muted); white-space: nowrap; transform: rotate(-35deg); transform-origin: top right; height: 34px; }
+.an-tw { overflow-x: auto; border: 1px solid var(--line-soft); border-radius: 14px; }
+.an-t { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.an-t th, .an-t td { text-align: left; padding: 9px 12px; border-bottom: 1px solid var(--line-soft); vertical-align: top; }
+.an-t th { color: var(--muted); font-weight: 700; font-size: 12px; white-space: nowrap; background: var(--panel); position: sticky; top: 0; }
+.an-t td:not(:first-child) { white-space: nowrap; }
+.an-minis { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.an-mini { border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); padding: 12px 14px; display: grid; gap: 6px; align-content: start; }
+.an-mini h4 { margin: 0; font-size: 13px; color: var(--gold-2); } .an-mini div { display: flex; justify-content: space-between; gap: 10px; font-size: 13.5px; } .an-mini span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hs-row { display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: start; padding: 12px 14px; border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); }
+.hs-chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; } .hs-chips span { font-size: 12px; background: var(--ink); border: 1px solid var(--line-soft); border-radius: 999px; padding: 3px 10px; }
+.hs-d { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); word-break: break-word; }
+.sd-st { font-size: 11.5px; font-weight: 800; padding: 2px 9px; border-radius: 999px; background: var(--ink); color: var(--muted); margin-left: 6px; } .sd-st.on { background: var(--leaf); color: #06210f; }
+.tl-list { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
 </style>
 </head>
 <body>
@@ -349,6 +411,13 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <div class="swrow" id="studioRow"><div class="swtxt"><b>🔤 Design studio on the store</b><small id="studioState">Checking…</small></div>
           <button type="button" class="tg" role="switch" aria-checked="false" id="studioToggle" aria-label="Design studio on the store"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
           <div class="swask" id="studioAsk" hidden><span id="studioAskT"></span><button type="button" class="btn gold" id="studioYes">Confirm</button><button type="button" class="btn line" id="studioNo">Cancel</button></div></div>
+        <button type="button" role="menuitem" id="anBtn">📊 Reports<small>Visitors by day, week, month; top products</small></button>
+        <button type="button" role="menuitem" id="caBtn">🛒 Carts &amp; discounts<small>What people are holding, send them an offer</small></button>
+        <button type="button" role="menuitem" id="sdBtn">🗓 Schedule<small>Plan notices, pauses and hidden designs by date</small></button>
+        <button type="button" role="menuitem" id="hsBtn">🕘 Change history<small>See and undo recent changes</small></button>
+        <button type="button" role="menuitem" id="apBtn">🎨 Appearance<small>Colours, sections, cart message</small></button>
+        <button type="button" role="menuitem" id="tlBtn">🩺 Health check &amp; backup<small>Find gaps, download or restore settings</small></button>
+        <button type="button" role="menuitem" id="ksBtn">🔑 Keepsake options<small id="ksState">Front/back printing, sizes, and every design on or off</small></button>
         <button type="button" role="menuitem" id="kcBtn">✨ Name charm categories<small id="kcState">Switch Birth flowers, Sacred symbols and others on or off</small></button>
         <div class="swrow" id="charmsRow"><div class="swtxt"><b>✨ Keychains &amp; charms in the shop</b><small id="charmsState">Checking…</small></div>
           <button type="button" class="tg" role="switch" aria-checked="false" id="charmsToggle" aria-label="Keychains and charms in the shop"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
@@ -612,6 +681,44 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       <div class="co-list" id="kcList"><p class="hint">Loading…</p></div>
     </div>
   </div>
+</div>
+<div class="sheet" id="ksSheet" hidden role="dialog" aria-modal="true" aria-labelledby="ksTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="ksTitle">Keepsake options</h2><button class="x" type="button" id="ksClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="ksBody"><p class="hint">Loading…</p></div>
+    <div class="panel-foot"><button class="btn gold" type="button" id="ksSave">Save changes</button><button class="btn line" type="button" id="ksReset">Discard changes</button><span class="ks-dirty" id="ksDirty" role="status" aria-live="polite"></span></div>
+  </div>
+</div>
+<div class="sheet hub" id="hubSheet" hidden role="dialog" aria-modal="true" aria-labelledby="hubTitle">
+  <div class="panel">
+    <div class="panel-head"><h2 id="hubTitle">Settings</h2><button class="x" type="button" id="hubClose" aria-label="Close">×</button></div>
+    <div class="panel-body">
+      <div class="hub-search"><input class="in" id="hubQ" type="search" placeholder="Search settings… e.g. sale, front only, password" aria-label="Search settings" autocomplete="off"></div>
+      <div class="hub-grp" id="hubQuick"><h3>Quick switches</h3><div class="menu hubsw" id="hubSw"></div></div>
+      <div id="hubGroups"></div>
+      <p class="hint" id="hubNone" hidden>Nothing matches that search.</p>
+    </div>
+  </div>
+</div>
+<div class="sheet" id="anSheet" hidden role="dialog" aria-modal="true" aria-labelledby="anSheetT">
+  <div class="panel wide"><div class="panel-head"><h2 id="anSheetT">Reports</h2><button class="x" type="button" id="anClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="anBody"><p class="hint">Loading…</p></div></div>
+</div>
+<div class="sheet" id="hsSheet" hidden role="dialog" aria-modal="true" aria-labelledby="hsSheetT">
+  <div class="panel wide"><div class="panel-head"><h2 id="hsSheetT">Change history</h2><button class="x" type="button" id="hsClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="hsBody"><p class="hint">Loading…</p></div></div>
+</div>
+<div class="sheet" id="sdSheet" hidden role="dialog" aria-modal="true" aria-labelledby="sdSheetT">
+  <div class="panel wide"><div class="panel-head"><h2 id="sdSheetT">Schedule</h2><button class="x" type="button" id="sdClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="sdBody"><p class="hint">Loading…</p></div></div>
+</div>
+<div class="sheet" id="apSheet" hidden role="dialog" aria-modal="true" aria-labelledby="apSheetT">
+  <div class="panel wide"><div class="panel-head"><h2 id="apSheetT">Appearance</h2><button class="x" type="button" id="apClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="apBody"><p class="hint">Loading…</p></div></div>
+</div>
+<div class="sheet" id="tlSheet" hidden role="dialog" aria-modal="true" aria-labelledby="tlSheetT">
+  <div class="panel wide"><div class="panel-head"><h2 id="tlSheetT">Health check & backup</h2><button class="x" type="button" id="tlClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="tlBody"><p class="hint">Loading…</p></div></div>
 </div>
 <div class="sheet" id="helpSheet" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
   <div class="panel">
@@ -2284,6 +2391,502 @@ $("ptSave").onclick = async () => {
   } catch (x) { fail("Couldn't save: " + (x.message || x)); }
   $("ptSave").disabled = false; $("ptMsg").textContent = "";
 };
+const KS_FAMS = [["names","Names",[["name-blush","Blush"],["name-violet","Violet"],["name-lagoon","Lagoon"],["name-sunshine","Sunshine"],["name-gold","Gold"],["name-midnight","Midnight"],["name-noir","Noir"],["name-sky","Sky"]]],["zodiac","Zodiac",[["zodiac-aries","Aries"],["zodiac-taurus","Taurus"],["zodiac-gemini","Gemini"],["zodiac-cancer","Cancer"],["zodiac-leo","Leo"],["zodiac-virgo","Virgo"],["zodiac-libra","Libra"],["zodiac-scorpio","Scorpio"],["zodiac-sagittarius","Sagittarius"],["zodiac-capricorn","Capricorn"],["zodiac-aquarius","Aquarius"],["zodiac-pisces","Pisces"]]],["states","US states",[["state-ca","California"],["state-ny","New York"],["state-tx","Texas"],["state-fl","Florida"],["state-wa","Washington"],["state-hi","Hawaii"],["state-ak","Alaska"],["state-co","Colorado"],["state-az","Arizona"],["state-al","Alabama"],["state-ar","Arkansas"],["state-ct","Connecticut"],["state-de","Delaware"],["state-dc","District of Columbia"]]],["gods","Gods & faiths",[["sacred-ganeshaclassic","Ganesha"],["sacred-ganesha","Ganesha (playful)"],["sacred-krishna","Krishna"],["sacred-shiva","Shiva"],["sacred-lakshmi","Lakshmi"],["sacred-hanuman","Hanuman"],["sacred-durga","Durga"],["sacred-saraswati","Saraswati"],["sacred-jesus","Jesus"],["sacred-mary","Virgin Mary"],["sacred-michael","Archangel Michael"],["sacred-buddha","Buddha"],["sacred-guanyin","Guanyin"],["sacred-tara","Green Tara"],["sacred-zeus","Zeus"],["sacred-athena","Athena"],["sacred-thor","Thor"],["sacred-anubis","Anubis"],["sacred-allah","Allah (calligraphy)"],["sacred-crescent","Crescent and star"],["sacred-ikonkar","Ik Onkar"],["sacred-khanda","Khanda"],["sacred-hexagram","Star of David"],["sacred-menorah","Menorah"],["sacred-cross","Cross"],["sacred-dharma","Dharma wheel"]]],["maps","Country maps",[["map-india","India"],["map-united-states-of-america","United States of America"],["map-canada","Canada"],["map-australia","Australia"],["map-brazil","Brazil"],["map-italy","Italy"],["map-france","France"],["map-germany","Germany"],["map-mexico","Mexico"],["map-spain","Spain"],["map-japan","Japan"],["map-pakistan","Pakistan"],["map-bangladesh","Bangladesh"],["map-nigeria","Nigeria"],["map-philippines","Philippines"],["map-afghanistan","Afghanistan"],["map-albania","Albania"],["map-algeria","Algeria"],["map-angola","Angola"],["map-argentina","Argentina"],["map-armenia","Armenia"],["map-austria","Austria"],["map-bahrain","Bahrain"],["map-belarus","Belarus"],["map-belgium","Belgium"],["map-benin","Benin"],["map-bolivia","Bolivia"],["map-bosnia-and-herz","Bosnia and Herz."],["map-bulgaria","Bulgaria"],["map-burkina-faso","Burkina Faso"],["map-cabo-verde","Cabo Verde"],["map-cambodia","Cambodia"],["map-cameroon","Cameroon"],["map-china","China"],["map-colombia","Colombia"],["map-costa-rica","Costa Rica"],["map-cote-d-ivoire","Côte d'Ivoire"],["map-croatia","Croatia"],["map-cuba","Cuba"],["map-czechia","Czechia"],["map-dem-rep-congo","Dem. Rep. Congo"],["map-denmark","Denmark"],["map-dominican-rep","Dominican Rep."],["map-ecuador","Ecuador"],["map-egypt","Egypt"],["map-el-salvador","El Salvador"],["map-estonia","Estonia"],["map-ethiopia","Ethiopia"],["map-finland","Finland"],["map-gabon","Gabon"],["map-georgia","Georgia"],["map-ghana","Ghana"],["map-greece","Greece"],["map-guatemala","Guatemala"],["map-guinea","Guinea"],["map-haiti","Haiti"],["map-honduras","Honduras"],["map-hungary","Hungary"],["map-iceland","Iceland"],["map-indonesia","Indonesia"],["map-iran","Iran"],["map-iraq","Iraq"],["map-ireland","Ireland"],["map-israel","Israel"],["map-jamaica","Jamaica"],["map-jordan","Jordan"],["map-kazakhstan","Kazakhstan"],["map-kenya","Kenya"],["map-kuwait","Kuwait"],["map-kyrgyzstan","Kyrgyzstan"],["map-laos","Laos"],["map-latvia","Latvia"],["map-lebanon","Lebanon"],["map-libya","Libya"],["map-lithuania","Lithuania"],["map-luxembourg","Luxembourg"],["map-madagascar","Madagascar"],["map-malaysia","Malaysia"],["map-mali","Mali"],["map-mauritania","Mauritania"],["map-mongolia","Mongolia"],["map-montenegro","Montenegro"],["map-morocco","Morocco"],["map-mozambique","Mozambique"],["map-myanmar","Myanmar"],["map-namibia","Namibia"],["map-nepal","Nepal"],["map-netherlands","Netherlands"],["map-new-zealand","New Zealand"],["map-north-korea","North Korea"],["map-north-macedonia","North Macedonia"],["map-norway","Norway"],["map-oman","Oman"],["map-palestine","Palestine"],["map-panama","Panama"],["map-papua-new-guinea","Papua New Guinea"],["map-paraguay","Paraguay"],["map-peru","Peru"],["map-poland","Poland"],["map-portugal","Portugal"],["map-qatar","Qatar"],["map-romania","Romania"],["map-saudi-arabia","Saudi Arabia"],["map-senegal","Senegal"],["map-serbia","Serbia"],["map-singapore","Singapore"],["map-slovakia","Slovakia"],["map-slovenia","Slovenia"],["map-south-africa","South Africa"],["map-south-korea","South Korea"],["map-sri-lanka","Sri Lanka"],["map-sweden","Sweden"],["map-switzerland","Switzerland"],["map-syria","Syria"],["map-tajikistan","Tajikistan"],["map-tanzania","Tanzania"],["map-thailand","Thailand"],["map-togo","Togo"],["map-tunisia","Tunisia"],["map-turkey","Turkey"],["map-turkmenistan","Turkmenistan"],["map-uganda","Uganda"],["map-ukraine","Ukraine"],["map-united-arab-emirates","United Arab Emirates"],["map-uruguay","Uruguay"],["map-uzbekistan","Uzbekistan"],["map-venezuela","Venezuela"],["map-vietnam","Vietnam"],["map-yemen","Yemen"],["map-zambia","Zambia"],["map-zimbabwe","Zimbabwe"]]],["kits","National kits",[["kit-brazil","Brazil"],["kit-argentina","Argentina"],["kit-france","France"],["kit-england","England"],["kit-germany","Germany"],["kit-spain","Spain"],["kit-portugal","Portugal"],["kit-mexico","Mexico"],["kit-italy","Italy"],["kit-netherlands","Netherlands"],["kit-india","India"],["kit-afghanistan","Afghanistan"],["kit-albania","Albania"],["kit-algeria","Algeria"],["kit-angola","Angola"],["kit-armenia","Armenia"],["kit-australia","Australia"],["kit-austria","Austria"],["kit-bahrain","Bahrain"],["kit-bangladesh","Bangladesh"],["kit-belarus","Belarus"],["kit-belgium","Belgium"],["kit-benin","Benin"],["kit-bolivia","Bolivia"],["kit-bosnia-and-herz","Bosnia and Herz."],["kit-bulgaria","Bulgaria"],["kit-burkina-faso","Burkina Faso"],["kit-cabo-verde","Cabo Verde"],["kit-cambodia","Cambodia"],["kit-cameroon","Cameroon"],["kit-canada","Canada"],["kit-china","China"],["kit-colombia","Colombia"],["kit-costa-rica","Costa Rica"],["kit-cote-d-ivoire","Côte d'Ivoire"],["kit-croatia","Croatia"],["kit-cuba","Cuba"],["kit-czechia","Czechia"],["kit-dem-rep-congo","Dem. Rep. Congo"],["kit-denmark","Denmark"],["kit-dominican-rep","Dominican Rep."],["kit-ecuador","Ecuador"],["kit-egypt","Egypt"],["kit-el-salvador","El Salvador"],["kit-estonia","Estonia"],["kit-ethiopia","Ethiopia"],["kit-finland","Finland"],["kit-gabon","Gabon"],["kit-georgia","Georgia"],["kit-ghana","Ghana"],["kit-greece","Greece"],["kit-guatemala","Guatemala"],["kit-guinea","Guinea"],["kit-haiti","Haiti"],["kit-honduras","Honduras"],["kit-hungary","Hungary"],["kit-iceland","Iceland"],["kit-indonesia","Indonesia"],["kit-iran","Iran"],["kit-iraq","Iraq"],["kit-ireland","Ireland"],["kit-israel","Israel"],["kit-jamaica","Jamaica"],["kit-japan","Japan"],["kit-jordan","Jordan"],["kit-kazakhstan","Kazakhstan"],["kit-kenya","Kenya"],["kit-kuwait","Kuwait"],["kit-kyrgyzstan","Kyrgyzstan"],["kit-laos","Laos"],["kit-latvia","Latvia"],["kit-lebanon","Lebanon"],["kit-libya","Libya"],["kit-lithuania","Lithuania"],["kit-luxembourg","Luxembourg"],["kit-madagascar","Madagascar"],["kit-malaysia","Malaysia"],["kit-mali","Mali"],["kit-mauritania","Mauritania"],["kit-mongolia","Mongolia"],["kit-montenegro","Montenegro"],["kit-morocco","Morocco"],["kit-mozambique","Mozambique"],["kit-myanmar","Myanmar"],["kit-namibia","Namibia"],["kit-nepal","Nepal"],["kit-new-zealand","New Zealand"],["kit-nigeria","Nigeria"],["kit-north-korea","North Korea"],["kit-north-macedonia","North Macedonia"],["kit-northern-ireland","Northern Ireland"],["kit-norway","Norway"],["kit-oman","Oman"],["kit-pakistan","Pakistan"],["kit-palestine","Palestine"],["kit-panama","Panama"],["kit-papua-new-guinea","Papua New Guinea"],["kit-paraguay","Paraguay"],["kit-peru","Peru"],["kit-philippines","Philippines"],["kit-poland","Poland"],["kit-qatar","Qatar"],["kit-romania","Romania"],["kit-russia","Russia"],["kit-saudi-arabia","Saudi Arabia"],["kit-scotland","Scotland"],["kit-senegal","Senegal"],["kit-serbia","Serbia"],["kit-singapore","Singapore"],["kit-slovakia","Slovakia"],["kit-slovenia","Slovenia"],["kit-south-africa","South Africa"],["kit-south-korea","South Korea"],["kit-sri-lanka","Sri Lanka"],["kit-sweden","Sweden"],["kit-switzerland","Switzerland"],["kit-syria","Syria"],["kit-tajikistan","Tajikistan"],["kit-tanzania","Tanzania"],["kit-thailand","Thailand"],["kit-togo","Togo"],["kit-tunisia","Tunisia"],["kit-turkey","Turkey"],["kit-turkmenistan","Turkmenistan"],["kit-uganda","Uganda"],["kit-ukraine","Ukraine"],["kit-united-arab-emirates","United Arab Emirates"],["kit-united-states-of-america","United States of America"],["kit-uruguay","Uruguay"],["kit-uzbekistan","Uzbekistan"],["kit-venezuela","Venezuela"],["kit-vietnam","Vietnam"],["kit-wales","Wales"],["kit-yemen","Yemen"],["kit-zambia","Zambia"],["kit-zimbabwe","Zimbabwe"]]],["photos","Photos",[["collage","Photo collage"],["portrait","Single photo"]]]];
+/* ---------- Keepsake options: front/back printing, sizes, notice, and every single design on/off ----------
+   Saved in site_settings.data: ksSidesMode ("both"|"front"), ksSidesDefault ("front"), ksLargeOff, ksNotice,
+   ksFamSides {family: "both"|"front"}, ksItemSides {id: "both"|"front"}, ksItemOff [ids], keepsakeOff [families]. */
+let ks = null, ksDirty = false, ksOrig = "", ksShown = {}, ksEdit = "";
+const KS_LETTER = [["bubble","Bubble"],["signature","Signature"],["serif","Serif"],["headline","Headline"],["round","Round"],["block","Block"],["marker","Marker"],["notebook","Notebook"],["kids","Kids"],["royal","Royal"],["heavy","Heavy"],["wide","Wide"],["condensed","Condensed"],["cursive","Cursive"]], KS_INK = ["Gold foil","Ivory","White","Rose","Silver"];
+const ksMetaForm = (id, n) => { const m = ks.meta[id] || {}, pr = m.price || {}; return `<div class="ks-edit" style="grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;padding:6px 0">
+  <label class="f"><small>Display name</small><input class="in" data-ksm="${esc(id)}" data-f="name" maxlength="40" placeholder="${esc(n)}" value="${esc(m.name || "")}"></label>
+  <label class="f"><small>Badge</small><input class="in" data-ksm="${esc(id)}" data-f="badge" maxlength="14" placeholder="New, Popular…" value="${esc(m.badge || "")}"></label>
+  <label class="f"><small>Show at position (1 = first)</small><input class="in" type="number" min="1" max="500" data-ksm="${esc(id)}" data-f="pos" value="${esc(m.pos || "")}"></label>
+  <label class="f"><small>Price Standard ($)</small><input class="in" type="number" min="0" step="0.5" data-ksm="${esc(id)}" data-f="p-standard" placeholder="as category" value="${esc(pr.standard || "")}"></label>
+  <label class="f"><small>Price Large ($)</small><input class="in" type="number" min="0" step="0.5" data-ksm="${esc(id)}" data-f="p-large" placeholder="as category" value="${esc(pr.large || "")}"></label></div>`; };
+const ksSnap = () => JSON.stringify(ks);
+const ksMark = () => { ksDirty = ksSnap() !== ksOrig; $("ksDirty").textContent = ksDirty ? "Unsaved changes" : ""; };
+function ksLoad(row) {
+  const v = (k) => (row[k] && typeof row[k] === "object" ? row[k] : null);
+  ks = {
+    mode: row.ksSidesMode === "both" || row.ksSidesMode === "front" ? row.ksSidesMode : "",
+    dflt: row.ksSidesDefault === "front" ? "front" : "both",
+    largeOff: !!row.ksLargeOff, notice: String(row.ksNotice || ""),
+    famSides: { ...(v("ksFamSides") || {}) }, itemSides: { ...(v("ksItemSides") || {}) },
+    itemOff: Array.isArray(row.ksItemOff) ? [...row.ksItemOff] : [], famOff: Array.isArray(row.keepsakeOff) ? [...row.keepsakeOff] : [],
+    pause: row.ksPause === true, pauseMsg: String(row.ksPauseMsg || ""), lead: String(row.ksLead || ""), nameMax: Number(row.ksNameMax) || 12,
+    price: JSON.parse(JSON.stringify(v("ksPrice") || {})), letteringOff: Array.isArray(row.ksLetteringOff) ? [...row.ksLetteringOff] : [], inkOff: Array.isArray(row.ksInkOff) ? [...row.ksInkOff] : [],
+    meta: JSON.parse(JSON.stringify(v("ksItemMeta") || {})),
+  };
+  ksOrig = ksSnap(); ksDirty = false; ksShown = {};
+}
+const ksSidesSel = (cur, cls, attr, noneLbl) => `<select ${attr} aria-label="Printing sides">${[["", noneLbl], ["both", "Both sides"], ["front", "Front only"]].map(([v, l]) => `<option value="${v}"${(cur || "") === v ? " selected" : ""}>${l}</option>`).join("")}</select>`;
+function ksRowsFor(fi, q) {
+  const [key, , items] = KS_FAMS[fi], lim = ksShown[key] || 40;
+  const list = items.filter(([id, n]) => !q || (n + " " + id).toLowerCase().includes(q));
+  const rows = list.slice(0, lim).map(([id, n]) => {
+    const off = ks.itemOff.includes(id), noSides = key === "photos";
+    return `<div class="ks-row ${off ? "off" : ""}"><div class="nm" title="${esc(n)}">${esc(n)}<small>${off ? "Hidden from customers" : "Showing"}</small></div>
+      <label class="switch"><input type="checkbox" data-ksi="${esc(id)}" ${off ? "" : "checked"} aria-label="Show ${esc(n)}"></label>
+      ${noSides ? "<span></span>" : ksSidesSel(ks.itemSides[id], "", `data-kss="${esc(id)}"`, "Sides: as category")}
+      <button class="btn line" type="button" data-ksed="${esc(id)}" style="min-height:34px;padding:0 12px;font-size:12.5px;grid-column:1/-1;justify-self:start">${ksEdit === id ? "Close details" : (ks.meta[id] && Object.keys(ks.meta[id]).length ? "Edit details ●" : "Edit details")}</button>
+      ${ksEdit === id ? ksMetaForm(id, n) : ""}</div>`;
+  }).join("");
+  return { rows: rows || `<p class="hint">No designs match.</p>`, more: list.length > lim ? list.length - lim : 0, n: list.length };
+}
+function ksRender() {
+  const q = ($("ksQ") ? $("ksQ").value : "").trim().toLowerCase(), keepQ = document.activeElement && document.activeElement.id === "ksQ";
+  const open = new Set([...document.querySelectorAll("#ksBody .ks-fam[open]")].map((d) => d.dataset.fam));
+  const total = KS_FAMS.reduce((t, f) => t + f[2].length, 0), hidden = ks.itemOff.length;
+  $("ksBody").innerHTML = `
+  <p class="hint">Everything here controls the Name charms &amp; keepsakes page. Change what you like, then press <b>Save changes</b>. It goes live straight away.</p>
+  <section class="ks-sec"><h3>Front &amp; back printing</h3>
+    <div class="ks-opts" role="radiogroup" aria-label="Printing sides">
+      ${[["", "Customer chooses", "They see “Both sides” and “Front only” and pick one."], ["both", "Always both sides", "The choice is hidden. Every order prints front and back."], ["front", "Always front only", "The choice is hidden. Every order prints the front; the back stays plain."]]
+        .map(([v, t, d]) => `<label class="ks-opt"><input type="radio" name="ksMode" value="${v}" ${ks.mode === v ? "checked" : ""}><b>${t}</b><small>${d}</small></label>`).join("")}
+    </div>
+    <label class="f" style="display:grid;gap:6px"><span>When the customer chooses, start on</span><select class="in" id="ksDflt" style="max-width:260px"><option value="both"${ks.dflt === "both" ? " selected" : ""}>Both sides</option><option value="front"${ks.dflt === "front" ? " selected" : ""}>Front only</option></select></label>
+    <p class="hint">Each category and each design below can override this. Photo keepsakes are always front only.</p>
+  </section>
+  <section class="ks-sec"><h3>Sizes &amp; notice</h3>
+    <label class="ssw"><span class="switch"><input type="checkbox" id="ksLarge" ${ks.largeOff ? "" : "checked"}></span>Offer the Large size (6.5 in)</label>
+    <label class="f" style="display:grid;gap:6px"><span>Notice at the top of the keepsakes page (optional)</span><input class="in" id="ksNotice" maxlength="200" placeholder="e.g. Holiday orders close Dec 15" value="${esc(ks.notice)}"></label>
+  </section>
+  <section class="ks-sec"><h3>Orders &amp; pricing</h3>
+    <label class="ssw"><span class="switch"><input type="checkbox" id="ksPause" ${ks.pause ? "checked" : ""}></span>Pause new keepsake orders</label>
+    ${ks.pause ? `<label class="f" style="display:grid;gap:6px"><span>Message customers see</span><input class="in" id="ksPauseMsg" maxlength="160" placeholder="We're on a short break. Back soon!" value="${esc(ks.pauseMsg)}"></label>` : ""}
+    <label class="f" style="display:grid;gap:6px"><span>Lead time shown on the review page (optional)</span><input class="in" id="ksLead" maxlength="80" placeholder="e.g. 5 to 7 days after you approve the proof" value="${esc(ks.lead)}"></label>
+    <p class="hint">Prices below show customers an “Estimated price” (leave blank to show none). Add details to a single design to override its price.</p>
+    <div style="display:grid;gap:6px">${KS_FAMS.filter((f) => f[0] !== "photos" || true).map(([key, label]) => { const b = (ks.price.base || {})[key] || {}; return `<div class="ks-row" style="grid-template-columns:1fr 110px 110px"><div class="nm">${esc(label)}</div><label class="f"><small>Standard $</small><input class="in" type="number" min="0" step="0.5" data-ksp="${key}|standard" value="${esc(b.standard || "")}"></label><label class="f"><small>Large $</small><input class="in" type="number" min="0" step="0.5" data-ksp="${key}|large" value="${esc(b.large || "")}"></label></div>`; }).join("")}
+      <div class="ks-row" style="grid-template-columns:1fr 110px 110px"><div class="nm">Extras per piece</div><label class="f"><small>Both sides +$</small><input class="in" type="number" min="0" step="0.5" data-ksp="x|both" value="${esc(ks.price.both || "")}"></label><label class="f"><small>Double layer +$</small><input class="in" type="number" min="0" step="0.5" data-ksp="x|double" value="${esc(ks.price.double || "")}"></label></div></div>
+  </section>
+  <section class="ks-sec"><h3>Lettering &amp; colours</h3>
+    <label class="f" style="display:grid;gap:6px"><span>Longest name allowed (letters)</span><select class="in" id="ksNameMax" style="max-width:160px">${[3,4,5,6,7,8,9,10,11,12].map((n) => `<option${ks.nameMax === n ? " selected" : ""}>${n}</option>`).join("")}</select></label>
+    <div><span class="hint">Lettering styles offered (untick to hide)</span><div style="display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px">${KS_LETTER.map(([k, l]) => `<label class="ssw"><span class="switch"><input type="checkbox" data-ksl="${k}" ${ks.letteringOff.includes(k) ? "" : "checked"}></span>${l}</label>`).join("")}</div></div>
+    <div><span class="hint">Lettering colours offered</span><div style="display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:8px">${KS_INK.map((k) => `<label class="ssw"><span class="switch"><input type="checkbox" data-ksk="${esc(k)}" ${ks.inkOff.includes(k) ? "" : "checked"}></span>${k}</label>`).join("")}</div></div>
+  </section>
+  <section class="ks-sec"><h3>Categories &amp; designs <small class="hint" style="font-weight:500">· ${total - hidden} of ${total} designs showing</small></h3>
+    <input class="in" id="ksQ" type="search" placeholder="Search all designs… e.g. California, Ganesha" aria-label="Search designs" value="${esc(q)}" autocomplete="off">
+    <div id="ksFams" style="display:grid;gap:8px">${KS_FAMS.map(([key, label, items], fi) => {
+      const r = ksRowsFor(fi, q), famOn = !ks.famOff.includes(key), off = items.filter(([id]) => ks.itemOff.includes(id)).length;
+      if (q && !r.n) return "";
+      return `<details class="ks-fam" data-fam="${key}" data-fi="${fi}" ${open.has(key) || q ? "open" : ""}>
+        <summary><span><b>${esc(label)}</b><small>${famOn ? `${items.length - off} of ${items.length} showing` : "Whole category hidden"}</small></span>
+          <span class="ks-famctl" onclick="event.stopPropagation()"><label class="switch" title="Show this category"><input type="checkbox" data-ksf="${key}" ${famOn ? "checked" : ""} aria-label="Show ${esc(label)}"></label>
+          ${key === "photos" ? "" : ksSidesSel(ks.famSides[key], "", `data-ksfs="${key}"`, "Sides: store default")}</span></summary>
+        <div class="ks-fambody"><div class="ks-bulk"><button class="btn line" type="button" data-ksall="1" data-fi="${fi}">Show all</button><button class="btn line" type="button" data-ksall="0" data-fi="${fi}">Hide all${q ? " matching" : ""}</button></div>
+        ${r.rows}${r.more ? `<button class="btn line" type="button" data-ksmore="${fi}">Show ${Math.min(r.more, 100)} more (${r.more} left)</button>` : ""}</div></details>`;
+    }).join("")}</div>
+  </section>`;
+  if (keepQ) { const e = $("ksQ"); e.focus(); e.setSelectionRange(e.value.length, e.value.length); }
+  ksMark();
+}
+async function ksOpen() {
+  $("ksSheet").hidden = false; document.body.style.overflow = "hidden"; $("ksBody").innerHTML = `<p class="hint">Loading…</p>`;
+  try { ksLoad(await readSiteRow()); ksRender(); } catch (e) { $("ksBody").innerHTML = `<p class="hint">Couldn't load settings. ${esc(e.message || "")}</p>`; }
+}
+function ksClose() {
+  if (ksDirty && !confirm("You have unsaved changes. Close without saving?")) return;
+  $("ksSheet").hidden = true; document.body.style.overflow = "";
+}
+$("ksBtn").onclick = ksOpen; $("ksClose").onclick = ksClose;
+$("ksReset").onclick = async () => { if (!ksDirty) return; ksLoad(await readSiteRow()); ksRender(); };
+$("ksBody").addEventListener("change", (e) => {
+  const t = e.target;
+  if (t.name === "ksMode") ks.mode = t.value;
+  else if (t.id === "ksDflt") ks.dflt = t.value;
+  else if (t.id === "ksLarge") ks.largeOff = !t.checked;
+  else if (t.dataset.ksf) ks.famOff = t.checked ? ks.famOff.filter((x) => x !== t.dataset.ksf) : [...new Set([...ks.famOff, t.dataset.ksf])];
+  else if (t.dataset.ksfs !== undefined) { if (t.value) ks.famSides[t.dataset.ksfs] = t.value; else delete ks.famSides[t.dataset.ksfs]; }
+  else if (t.dataset.ksi) ks.itemOff = t.checked ? ks.itemOff.filter((x) => x !== t.dataset.ksi) : [...new Set([...ks.itemOff, t.dataset.ksi])];
+  else if (t.dataset.kss !== undefined) { if (t.value) ks.itemSides[t.dataset.kss] = t.value; else delete ks.itemSides[t.dataset.kss]; }
+  else if (t.id === "ksPause") ks.pause = t.checked;
+  else if (t.id === "ksNameMax") ks.nameMax = +t.value;
+  else if (t.dataset.ksl) ks.letteringOff = t.checked ? ks.letteringOff.filter((x) => x !== t.dataset.ksl) : [...new Set([...ks.letteringOff, t.dataset.ksl])];
+  else if (t.dataset.ksk) ks.inkOff = t.checked ? ks.inkOff.filter((x) => x !== t.dataset.ksk) : [...new Set([...ks.inkOff, t.dataset.ksk])];
+  else return;
+  ksRender();
+});
+$("ksBody").addEventListener("input", (e) => {
+  const t = e.target, num = (v) => (v === "" ? "" : Math.max(0, Number(v) || 0));
+  if (t.id === "ksNotice") { ks.notice = t.value; ksMark(); }
+  else if (t.id === "ksPauseMsg") { ks.pauseMsg = t.value; ksMark(); }
+  else if (t.id === "ksLead") { ks.lead = t.value; ksMark(); }
+  else if (t.dataset.ksp) { const [a, b] = t.dataset.ksp.split("|"), v = num(t.value);
+    if (a === "x") { if (v) ks.price[b] = v; else delete ks.price[b]; }
+    else { ks.price.base = ks.price.base || {}; const o = (ks.price.base[a] = ks.price.base[a] || {}); if (v) o[b] = v; else delete o[b]; if (!Object.keys(o).length) delete ks.price.base[a]; }
+    ksMark(); }
+  else if (t.dataset.ksm) { const id = t.dataset.ksm, f = t.dataset.f, m = (ks.meta[id] = ks.meta[id] || {});
+    if (f.startsWith("p-")) { const v = num(t.value); m.price = m.price || {}; if (v) m.price[f.slice(2)] = v; else delete m.price[f.slice(2)]; if (!Object.keys(m.price).length) delete m.price; }
+    else if (f === "pos") { const v = Math.round(num(t.value)); if (v) m.pos = v; else delete m.pos; }
+    else { const v = t.value.trim(); if (v) m[f] = v; else delete m[f]; }
+    if (!Object.keys(m).length) delete ks.meta[id]; ksMark(); }
+  else if (e.target.id === "ksQ") ksRender();
+});
+$("ksBody").addEventListener("click", (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  const q = ($("ksQ").value || "").trim().toLowerCase();
+  if (b.dataset.ksed !== undefined) { ksEdit = ksEdit === b.dataset.ksed ? "" : b.dataset.ksed; ksRender(); }
+  else if (b.dataset.ksmore) { const k = KS_FAMS[+b.dataset.ksmore][0]; ksShown[k] = (ksShown[k] || 40) + 100; ksRender(); }
+  else if (b.dataset.ksall !== undefined) {
+    const ids = KS_FAMS[+b.dataset.fi][2].filter(([id, n]) => !q || (n + " " + id).toLowerCase().includes(q)).map((x) => x[0]);
+    ks.itemOff = b.dataset.ksall === "1" ? ks.itemOff.filter((x) => !ids.includes(x)) : [...new Set([...ks.itemOff, ...ids])]; ksRender();
+  }
+});
+$("ksSave").onclick = async () => {
+  $("ksSave").disabled = true;
+  try {
+    const next = { ...(await readSiteRow()) }, set = (k, v, empty) => { if (empty) delete next[k]; else next[k] = v; };
+    set("ksSidesMode", ks.mode, !ks.mode); set("ksSidesDefault", "front", ks.dflt !== "front"); set("ksLargeOff", true, !ks.largeOff);
+    set("ksNotice", ks.notice.trim(), !ks.notice.trim());
+    set("ksFamSides", ks.famSides, !Object.keys(ks.famSides).length); set("ksItemSides", ks.itemSides, !Object.keys(ks.itemSides).length);
+    set("ksItemOff", ks.itemOff, !ks.itemOff.length); set("keepsakeOff", ks.famOff, !ks.famOff.length);
+    set("ksPause", true, !ks.pause); set("ksPauseMsg", ks.pauseMsg.trim(), !ks.pause || !ks.pauseMsg.trim()); set("ksLead", ks.lead.trim(), !ks.lead.trim());
+    set("ksNameMax", ks.nameMax, ks.nameMax >= 12); set("ksPrice", ks.price, !(ks.price.both || ks.price.double || Object.keys(ks.price.base || {}).length));
+    set("ksLetteringOff", ks.letteringOff, !ks.letteringOff.length); set("ksInkOff", ks.inkOff, !ks.inkOff.length); set("ksItemMeta", ks.meta, !Object.keys(ks.meta).length);
+    const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+    if (error) throw error;
+    site = next; ksOrig = ksSnap(); ksMark(); toast("Saved. Live on the keepsakes page now");
+  } catch (e) { toast("Couldn't save: " + (e.message || e)); }
+  $("ksSave").disabled = false;
+};
+
+/* ---------- Settings hub: every admin tool on one searchable page ---------- */
+const HUB_GROUPS = [
+  ["Reports & customers", ["anBtn", "caBtn", "lvBtn", "rvBtn"]],
+  ["Keepsakes", ["ksBtn", "kcBtn", "dsBtn"]],
+  ["Store content & look", ["siteBtn", "apBtn", "scBtn", "ptBtn", "tdBtn", "snBtn", "bulkBtn"]],
+  ["Sales & orders", ["slBtn", "coBtn", "sdBtn"]],
+  ["Safety & tools", ["hsBtn", "tlBtn", "dpBtn", "helpBtn"]],
+  ["Links & account", ["pwBtn", "outBtn"]],
+];
+const HUB_EXTRA = { anBtn: "traffic analytics visitors daily weekly monthly most viewed products add to cart", caBtn: "abandoned cart discount email reminder", sdBtn: "schedule plan date holiday timer", hsBtn: "undo restore history audit log", apBtn: "theme colour color brand sections cart message", tlBtn: "backup export import health check missing price photo", ksBtn: "front only, both sides, hide a design, large size, notice", siteBtn: "text headline faq footer contact announcement", slBtn: "discount percent off", coBtn: "delivery pickup shipping fees pause", pwBtn: "login security" };
+function hubText(el) { const s = el.querySelector("small"); const t = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(" ").trim(); return [t || el.textContent.replace(s ? s.textContent : "", "").trim(), s ? s.textContent.trim() : ""]; }
+let hubRows = [];
+function hubOpen() {
+  setMenu(false);
+  const sw = $("hubSw"); hubRows = ["vacRow", "studioRow", "charmsRow"].map((id) => $(id)).filter(Boolean);
+  hubRows.forEach((r) => sw.append(r));
+  const used = new Set(), cards = [];
+  const mk = (el, id) => { const [t, d] = hubText(el); used.add(el); return `<button class="hub-card" type="button" data-hid="${el.id || ""}" data-hi="${cards.push(el) - 1}" data-s="${esc((t + " " + d + " " + (HUB_EXTRA[id] || "")).toLowerCase())}"><b>${esc(t)}</b><small>${esc(d)}</small></button>`; };
+  $("hubGroups").innerHTML = HUB_GROUPS.map(([g, ids]) => {
+    const els = ids.map((i) => $(i)).filter(Boolean);
+    return els.length ? `<section class="hub-grp" data-g><h3>${g}</h3><div class="hub-grid">${els.map((el) => mk(el, el.id)).join("")}</div></section>` : "";
+  }).join("") + (() => {
+    const rest = [...document.querySelectorAll("#menu [role=menuitem]")].filter((el) => !used.has(el) && el.tagName !== "A");
+    return rest.length ? `<section class="hub-grp" data-g><h3>More</h3><div class="hub-grid">${rest.map((el) => mk(el, el.id)).join("")}</div></section>` : "";
+  })() + `<section class="hub-grp" data-g><h3>Open</h3><div class="hub-grid">${[...document.querySelectorAll("#menu a[role=menuitem]")].map((a) => { const [t, d] = hubText(a); return `<a class="hub-card" href="${esc(a.getAttribute("href"))}" target="_blank" rel="noopener" data-s="${esc((t + " " + d).toLowerCase())}"><b>${esc(t)}</b><small>${esc(d)}</small></a>`; }).join("")}</div></section>`;
+  $("hubGroups")._cards = cards;
+  $("hubQ").value = ""; $("hubNone").hidden = true; $("hubQuick").hidden = false;
+  $("hubSheet").hidden = false; document.body.style.overflow = "hidden"; $("hubQ").focus();
+}
+function hubClose() {
+  $("hubSheet").hidden = true; document.body.style.overflow = "";
+  const menu = $("menu"), first = menu.querySelector("[role=menuitem]"); hubRows.forEach((r) => menu.insertBefore(r, first));
+}
+$("menuBtn").onclick = (e) => { e.stopPropagation(); hubOpen(); };
+$("hubClose").onclick = hubClose;
+$("hubGroups").addEventListener("click", (e) => {
+  const c = e.target.closest("button.hub-card"); if (!c) return;
+  const el = $("hubGroups")._cards[+c.dataset.hi]; hubClose(); el.click();
+});
+$("hubQ").addEventListener("input", () => {
+  const q = $("hubQ").value.trim().toLowerCase(); let any = false;
+  document.querySelectorAll("#hubGroups .hub-card").forEach((c) => { const m = !q || c.dataset.s.includes(q); c.hidden = !m; if (m) any = true; });
+  document.querySelectorAll("#hubGroups [data-g]").forEach((g) => { g.hidden = ![...g.querySelectorAll(".hub-card")].some((c) => !c.hidden); });
+  $("hubQuick").hidden = !!q; $("hubNone").hidden = any || !q;
+});
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("hubSheet").hidden) hubClose(); });
+/* ================= Reports, carts, history, schedule, appearance, tools ================= */
+try { localStorage.setItem("prajo:noTrack", "1"); } catch { /* fine */ }   // the owner's own visits are not counted
+const fmtN = (n) => Number(n || 0).toLocaleString("en-US");
+const usd2 = (n) => "$" + Number(n || 0).toLocaleString("en-US", { minimumFractionDigits: Number(n || 0) % 1 ? 2 : 0, maximumFractionDigits: 2 });
+const ago = (iso) => { const m = Math.max(0, (Date.now() - new Date(iso).getTime()) / 60000); return m < 60 ? Math.round(m) + " min" : m < 1440 ? Math.round(m / 60) + " h" : Math.round(m / 1440) + " d"; };
+const when = (iso) => new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
+const sheetOpen = (id) => { $(id).hidden = false; document.body.style.overflow = "hidden"; };
+const sheetShut = (id) => { $(id).hidden = true; document.body.style.overflow = ""; };
+const NAMES = {}; for (const [fk, fl, items] of KS_FAMS) for (const [id, n] of items) NAMES[id] = n + " (" + fl + ")";
+let listNames = null;
+async function loadNames() {
+  if (listNames) return listNames; listNames = {};
+  try { const { data } = await sb.from("listings").select("id,name"); for (const r of data || []) listNames[r.id] = r.name; } catch { /* names fall back to ids */ }
+  return listNames;
+}
+const pname = (id) => (listNames && listNames[id]) || NAMES[id] || id;
+
+/* ---------- Reports ---------- */
+let an = { tab: "over", range: "7", bucket: "", data: null, carts: null, orders: null, sort: "views", cartAge: "7" };
+const RANGES = [["today", "Today"], ["7", "Last 7 days"], ["30", "Last 30 days"], ["90", "Last 90 days"], ["365", "Last 12 months"]];
+function anWindow() {
+  const to = new Date(Date.now() + 60000); let from;
+  if (an.range === "today") { from = new Date(); from.setHours(0, 0, 0, 0); } else from = new Date(Date.now() - Number(an.range) * 864e5);
+  const auto = an.range === "today" ? "hour" : Number(an.range) > 100 ? "month" : Number(an.range) > 60 ? "week" : "day";
+  return { from, to, bucket: an.bucket || auto };
+}
+const lbl = (t, b) => { const d = new Date(t + "Z"); const o = b === "hour" ? { hour: "numeric", timeZone: "UTC" } : b === "month" ? { month: "short", year: "2-digit", timeZone: "UTC" } : { month: "short", day: "numeric", timeZone: "UTC" }; return (b === "week" ? "Wk " : "") + d.toLocaleString("en-US", o); };
+const pct = (a, b) => (b ? Math.round((a / b) * 1000) / 10 + "%" : "–");
+async function anLoad() {
+  const w = anWindow(); await loadNames();
+  $("anBody").innerHTML = '<p class="hint">Loading…</p>';
+  try {
+    if (an.tab === "over" || an.tab === "prod") {
+      const { data, error } = await sb.rpc("site_analytics", { p_from: w.from.toISOString(), p_to: w.to.toISOString(), p_bucket: w.bucket });
+      if (error) throw error; an.data = data;
+    } else if (an.tab === "cart") {
+      const { data, error } = await sb.from("carts_live").select("*").order("updated_at", { ascending: false }).limit(500);
+      if (error) throw error; an.carts = data || [];
+    } else {
+      const { data, error } = await sb.from("custom_designs").select("created_at,qty,status,design:design->>design,sides:design->sides->>mode,price:design->pricing->>estimate_each").gte("created_at", w.from.toISOString()).order("created_at", { ascending: false }).limit(1000);
+      if (error) throw error; an.orders = data || [];
+    }
+    anPaint();
+  } catch (e) {
+    $("anBody").innerHTML = `<div class="empty"><b>Reports aren't set up yet</b><p class="hint">Run <b>analytics-setup.sql</b> once in Supabase → SQL Editor, then reopen this page. (${esc(e.message || e)})</p></div>`;
+  }
+}
+const kpi = (t, v, s) => `<div class="an-k"><small>${t}</small><b>${v}</b>${s ? `<em>${s}</em>` : ""}</div>`;
+const table = (head, rows, cls) => `<div class="an-tw"><table class="an-t ${cls || ""}"><thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("") || `<tr><td colspan="${head.length}" class="hint">Nothing yet.</td></tr>`}</tbody></table></div>`;
+const mini = (title, rows, key) => `<div class="an-mini"><h4>${title}</h4>${rows.length ? rows.map((r) => `<div><span>${esc(r.name)}</span><b>${fmtN(r.n)}</b></div>`).join("") : '<p class="hint">Nothing yet.</p>'}</div>`;
+function anPaint() {
+  const w = anWindow(), tabs = [["over", "Traffic"], ["prod", "Products"], ["cart", "Carts"], ["ord", "Keepsake orders"]];
+  let h = `<div class="an-bar"><div class="an-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" aria-selected="${an.tab === k}" data-antab="${k}">${l}</button>`).join("")}</div>
+    <select id="anRange" aria-label="Time range">${RANGES.map(([v, l]) => `<option value="${v}"${an.range === v ? " selected" : ""}>${l}</option>`).join("")}</select>
+    ${an.tab === "over" ? `<select id="anBucket" aria-label="Group by">${[["", "Group: auto"], ["hour", "By hour"], ["day", "By day"], ["week", "By week"], ["month", "By month"]].map(([v, l]) => `<option value="${v}"${an.bucket === v ? " selected" : ""}>${l}</option>`).join("")}</select>` : ""}</div>`;
+  const D = an.data;
+  if (an.tab === "over" && D) {
+    const T = D.totals || {}, S = D.series || [], mx = Math.max(1, ...S.map((x) => x.visitors));
+    h += `<div class="an-kpis">${kpi("Visitors", fmtN(T.visitors), fmtN(T.returning) + " came back")}${kpi("Page views", fmtN(T.views))}${kpi("Product views", fmtN(T.product_views))}${kpi("Added to cart", fmtN(T.adds), pct(T.adds, T.product_views) + " of product views")}${kpi("Checkouts started", fmtN(T.checkouts))}${kpi("Orders & requests", fmtN(T.orders), pct(T.orders, T.visitors) + " of visitors")}</div>
+    <h3 class="an-h">Visitors by ${w.bucket}</h3>
+    <div class="an-chart" role="img" aria-label="Visitors by ${w.bucket}">${S.map((x) => `<div class="an-col" title="${lbl(x.t, w.bucket)}: ${fmtN(x.visitors)} visitors, ${fmtN(x.views)} views, ${fmtN(x.adds)} added to cart"><i style="height:${Math.max(2, Math.round((x.visitors / mx) * 100))}%"></i><small>${lbl(x.t, w.bucket)}</small></div>`).join("") || '<p class="hint">No visits recorded in this period yet.</p>'}</div>
+    ${table([w.bucket[0].toUpperCase() + w.bucket.slice(1), "Visitors", "Views", "Product views", "Added to cart", "Checkouts", "Orders"], [...S].reverse().map((x) => `<tr><td>${lbl(x.t, w.bucket)}</td><td>${fmtN(x.visitors)}</td><td>${fmtN(x.views)}</td><td>${fmtN(x.product_views)}</td><td>${fmtN(x.adds)}</td><td>${fmtN(x.checkouts)}</td><td>${fmtN(x.orders)}</td></tr>`))}
+    <div class="an-minis">${mini("Where visitors come from", D.sources || [])}${mini("Devices", D.devices || [])}${mini("Pages", D.pages || [])}${mini("Places (time zone)", D.places || [])}</div>`;
+  } else if (an.tab === "prod" && D) {
+    const P = [...(D.products || [])].sort((a, b) => (an.sort === "adds" ? b.adds - a.adds || b.views - a.views : b.views - a.views));
+    h += `<div class="an-bar"><span class="hint">Sort by</span><div class="an-tabs">${[["views", "Most viewed"], ["adds", "Most added to cart"]].map(([k, l]) => `<button type="button" aria-selected="${an.sort === k}" data-ansort="${k}">${l}</button>`).join("")}</div></div>
+    ${table(["Product / design", "Views", "People", "Added to cart", "Add rate", "Orders"], P.map((p) => `<tr><td>${esc(pname(p.id))}</td><td>${fmtN(p.views)}</td><td>${fmtN(p.viewers)}</td><td>${fmtN(p.adds)}</td><td>${pct(p.adders, p.viewers)}</td><td>${fmtN(p.orders)}</td></tr>`))}
+    <p class="hint">Add rate = people who added it ÷ people who viewed it. Designs on the keepsakes page count as views and requests.</p>`;
+  } else if (an.tab === "cart" && an.carts) {
+    const cut = Date.now() - Number(an.cartAge) * 864e5, C = an.carts.filter((c) => new Date(c.updated_at).getTime() >= cut), withMail = C.filter((c) => c.email);
+    const held = {}; for (const c of C) for (const i of c.items || []) { const r = (held[i.id] = held[i.id] || { id: i.id, n: i.n, carts: 0, qty: 0 }); r.carts++; r.qty += i.q; }
+    h += `<div class="an-kpis">${kpi("Carts open", fmtN(C.length), "updated in the last " + (an.cartAge === "1" ? "24 hours" : an.cartAge + " days"))}${kpi("Items inside", fmtN(C.reduce((t, c) => t + c.item_count, 0)))}${kpi("Value waiting", usd2(C.reduce((t, c) => t + Number(c.total), 0)))}${kpi("Left an email", fmtN(withMail.length), "you can reach these")}</div>
+    <div class="an-bar"><select id="anCartAge" aria-label="Cart age">${[["1", "Last 24 hours"], ["7", "Last 7 days"], ["30", "Last 30 days"], ["365", "Everything"]].map(([v, l]) => `<option value="${v}"${an.cartAge === v ? " selected" : ""}>${l}</option>`).join("")}</select></div>
+    <section class="ks-sec"><h3>Send people a discount</h3><p class="hint">“Run a sale” puts a percentage off on exactly the products sitting in these carts. The store shows the new price and checkout charges it. Email the people who left an address to tell them.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end"><label class="f"><small>Percent off</small><input class="in" id="anPct" type="number" min="1" max="90" value="10" style="width:100px"></label><label class="f"><small>Ends (date)</small><input class="in" id="anEnds" type="date" style="width:170px"></label>
+      <button class="btn gold" type="button" id="anSale" ${Object.keys(held).length ? "" : "disabled"}>Run a sale on ${Object.keys(held).length} product${Object.keys(held).length === 1 ? "" : "s"}</button>
+      <button class="btn line" type="button" id="anMail" ${withMail.length ? "" : "disabled"}>Email ${withMail.length} customer${withMail.length === 1 ? "" : "s"}</button><button class="btn line" type="button" id="anCopy" ${withMail.length ? "" : "disabled"}>Copy emails</button></div><p class="hint" id="anMsg" role="status"></p></section>
+    <h3 class="an-h">Most held in carts</h3>
+    ${table(["Product", "In carts", "Units"], Object.values(held).sort((a, b) => b.carts - a.carts).slice(0, 30).map((r) => `<tr><td>${esc(pname(r.id) === r.id ? r.n : pname(r.id))}</td><td>${r.carts}</td><td>${r.qty}</td></tr>`))}
+    <h3 class="an-h">Each cart</h3>
+    ${table(["Updated", "Items", "Total", "Email", "Device", ""], C.map((c) => `<tr><td>${ago(c.updated_at)} ago</td><td>${(c.items || []).map((i) => `${esc(i.n)} ×${i.q}`).join("<br>")}</td><td>${usd2(c.total)}</td><td>${c.email ? esc(c.email) + (c.contacted ? "<br><small>emailed " + ago(c.contacted) + " ago</small>" : "") : "–"}</td><td>${esc(c.device || "")}</td><td>${c.email ? `<button class="btn line" type="button" data-cdone="${esc(c.sid)}" style="min-height:32px;padding:0 10px;font-size:12px">Mark emailed</button>` : ""}</td></tr>`))}`;
+  } else if (an.tab === "ord" && an.orders) {
+    const O = an.orders, by = (f) => { const m = {}; for (const o of O) { const k = f(o) || "unknown"; m[k] = (m[k] || 0) + 1; } return Object.entries(m).sort((a, b) => b[1] - a[1]).map(([name, n]) => ({ name, n })); };
+    const front = O.filter((o) => o.sides === "front").length, both = O.filter((o) => o.sides === "both").length;
+    h += `<div class="an-kpis">${kpi("Requests", fmtN(O.length), "from the keepsakes page")}${kpi("Both sides", fmtN(both), pct(both, O.length))}${kpi("Front only", fmtN(front), pct(front, O.length))}${kpi("Pieces", fmtN(O.reduce((t, o) => t + (o.qty || 1), 0)))}</div>
+    <div class="an-minis">${mini("Most requested designs", by((o) => pname(o.design)).slice(0, 12))}${mini("By status", by((o) => o.status))}</div>`;
+  }
+  $("anBody").innerHTML = h;
+}
+$("anBtn").onclick = () => { an.tab = "over"; sheetOpen("anSheet"); anLoad(); };
+$("caBtn").onclick = () => { an.tab = "cart"; sheetOpen("anSheet"); anLoad(); };
+$("anClose").onclick = () => sheetShut("anSheet");
+$("anBody").addEventListener("click", async (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.antab) { an.tab = b.dataset.antab; anLoad(); }
+  else if (b.dataset.ansort) { an.sort = b.dataset.ansort; anPaint(); }
+  else if (b.dataset.cdone) { await sb.from("carts_live").update({ contacted: new Date().toISOString() }).eq("sid", b.dataset.cdone); anLoad(); }
+  else if (b.id === "anCopy" || b.id === "anMail") {
+    const mails = [...new Set(an.carts.filter((c) => new Date(c.updated_at).getTime() >= Date.now() - Number(an.cartAge) * 864e5 && c.email).map((c) => c.email))];
+    if (b.id === "anCopy") { try { await navigator.clipboard.writeText(mails.join(", ")); $("anMsg").textContent = mails.length + " emails copied."; } catch { $("anMsg").textContent = mails.join(", "); } }
+    else location.href = "mailto:?bcc=" + encodeURIComponent(mails.slice(0, 40).join(",")) + "&subject=" + encodeURIComponent("You left something in your PrAjo cart") + "&body=" + encodeURIComponent("Hi!\n\nYou left a few things in your cart at PrAjo Custom Studio. As a thank-you, they are now on sale. Visit prajocustomstudio.com to finish your order.\n\nPrAjo Custom Studio");
+  } else if (b.id === "anSale") {
+    const p = Math.round(+$("anPct").value);
+    if (!(p >= 1 && p <= 90)) return ($("anMsg").textContent = "Pick a percentage from 1 to 90.");
+    const cut = Date.now() - Number(an.cartAge) * 864e5, ids = [...new Set(an.carts.filter((c) => new Date(c.updated_at).getTime() >= cut).flatMap((c) => (c.items || []).map((i) => i.id)))].filter((id) => !NAMES[id]);
+    if (!ids.length) return ($("anMsg").textContent = "No store products in these carts.");
+    const cur = await readSiteRow(), old = cur.sale;
+    if (old && old.on && !confirm("A sale is already running. Replace it with this one?")) return;
+    if (!confirm(`Put ${p}% off ${ids.length} product(s)${$("anEnds").value ? " until " + $("anEnds").value : ""}? Customers see it straight away.`)) return;
+    const next = { ...cur, sale: { on: true, pct: p, all: false, ids, ends: $("anEnds").value || "", label: "Thanks for waiting" } };
+    const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+    $("anMsg").textContent = error ? "Couldn't save: " + error.message : `Sale is live: ${p}% off ${ids.length} product(s). You can change it in Run a sale.`;
+  }
+});
+$("anBody").addEventListener("change", (e) => {
+  if (e.target.id === "anRange") { an.range = e.target.value; anLoad(); }
+  else if (e.target.id === "anBucket") { an.bucket = e.target.value; anLoad(); }
+  else if (e.target.id === "anCartAge") { an.cartAge = e.target.value; anPaint(); }
+});
+
+/* ---------- History ---------- */
+const FRIENDLY = { ksSidesMode: "Front/back printing", ksSidesDefault: "Default sides", ksLargeOff: "Large size", ksNotice: "Keepsakes notice", ksFamSides: "Category sides", ksItemSides: "Design sides", ksItemOff: "Hidden designs", keepsakeOff: "Hidden categories", ksPause: "Pause orders", ksPauseMsg: "Pause message", ksLead: "Lead time", ksNameMax: "Name length", ksPrice: "Keepsake prices", ksLetteringOff: "Lettering styles", ksInkOff: "Lettering colours", ksItemMeta: "Design details", sale: "Sale", sched: "Schedule", theme: "Theme colours", hideSections: "Hidden sections", cartMsg: "Cart message", remindOff: "Cart reminder box", announceOn: "Announcement bar", announceText: "Announcement text", vacationOn: "Vacation mode", vacationMsg: "Vacation message", charmsOn: "Keychains in shop", studioOn: "Design studio", watermarkOff: "Watermark", season: "Seasonal effects", showcase: "Home showcase", faq: "FAQ", tumblerColors: "Tumbler colours", heroTitle1: "Headline", heroTitle2: "Headline line 2", heroIntro: "Intro text" };
+const fk = (k) => FRIENDLY[k] || k;
+const brief = (v) => { const s = v === undefined ? "(not set)" : typeof v === "string" ? v : JSON.stringify(v); return s.length > 140 ? s.slice(0, 140) + "…" : s; };
+let hist = [];
+async function hsOpen() {
+  sheetOpen("hsSheet"); $("hsBody").innerHTML = '<p class="hint">Loading…</p>';
+  const { data, error } = await sb.from("site_settings_history").select("*").order("id", { ascending: false }).limit(100);
+  if (error) { $("hsBody").innerHTML = `<div class="empty"><b>History isn't set up yet</b><p class="hint">Run <b>analytics-setup.sql</b> once in Supabase → SQL Editor. (${esc(error.message)})</p></div>`; return; }
+  hist = data || []; const cur = await readSiteRow();
+  $("hsBody").innerHTML = `<p class="hint">Every save keeps what it replaced. “Undo” puts those settings back and leaves your later changes alone. The undo is itself saved here, so you can undo the undo.</p>` +
+    (hist.length ? hist.map((h, i) => `<div class="hs-row"><div><b>${when(h.at)}</b> <small>${esc(h.by_email || "")}</small><div class="hs-chips">${(h.changed || []).map((k) => `<span>${esc(fk(k))}</span>`).join("") || "<span>no visible change</span>"}</div>
+      <details><summary>Show what changed</summary>${(h.changed || []).map((k) => `<p class="hs-d"><b>${esc(fk(k))}</b><br><s>was: ${esc(brief(h.old[k]))}</s><br>now: ${esc(brief(cur[k]))}</p>`).join("")}</details></div>
+      <button class="btn line" type="button" data-hundo="${i}">Undo this change</button></div>`).join("") : '<p class="hint">No changes saved yet. They will appear here from now on.</p>');
+}
+$("hsBtn").onclick = hsOpen; $("hsClose").onclick = () => sheetShut("hsSheet");
+$("hsBody").addEventListener("click", async (e) => {
+  const b = e.target.closest("[data-hundo]"); if (!b) return;
+  const h = hist[+b.dataset.hundo]; if (!h || !confirm(`Undo ${h.changed.map(fk).join(", ")} from ${when(h.at)}?`)) return;
+  const cur = await readSiteRow(), next = { ...cur };
+  for (const k of h.changed) { if (h.old[k] === undefined) delete next[k]; else next[k] = h.old[k]; }
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+  if (error) return toast("Couldn't undo: " + error.message);
+  site = next; toast("Undone. Live now"); hsOpen();
+});
+
+/* ---------- Schedule ---------- */
+const SCH = [
+  ["ksNotice", "Keepsakes page notice", [["ksNotice", "text", "Message"]], (v) => ({ ksNotice: v.ksNotice })],
+  ["ann", "Store announcement bar", [["announceText", "text", "Message"], ["announceLink", "url", "Link (optional, https://…)"]], (v) => ({ announceOn: true, announceText: v.announceText, ...(v.announceLink ? { announceLink: v.announceLink } : {}) })],
+  ["vac", "Vacation mode", [["vacationMsg", "text", "Message (optional)"]], (v) => ({ vacationOn: true, ...(v.vacationMsg ? { vacationMsg: v.vacationMsg } : {}) })],
+  ["pause", "Pause keepsake orders", [["ksPauseMsg", "text", "Message (optional)"]], (v) => ({ ksPause: true, ...(v.ksPauseMsg ? { ksPauseMsg: v.ksPauseMsg } : {}) })],
+  ["large", "Hide the Large size", [], () => ({ ksLargeOff: true })],
+  ["sides", "Force printing sides", [["ksSidesMode", "sel:both=Always both sides,front=Always front only", "Sides"]], (v) => ({ ksSidesMode: v.ksSidesMode || "both" })],
+  ["cartMsg", "Message in the cart", [["cartMsg", "text", "Message, e.g. Order today for a free gift"]], (v) => ({ cartMsg: v.cartMsg })],
+  ["fams", "Hide keepsake categories", [["keepsakeOff", "multi:" + KS_FAMS.map((f) => f[0] + "=" + f[1]).join(","), "Categories to hide"]], (v) => ({ keepsakeOff: v.keepsakeOff || [] })],
+  ["secs", "Hide store sections", [["hideSections", "multi:reviews=Reviews,custom=Custom orders,about=About,faq=FAQ,how=How it's made,gallery=Gallery,collections=Collections", "Sections to hide"]], (v) => ({ hideSections: v.hideSections || [] })],
+  ["des", "Hide designs", [["ksItemOff", "designs", "Designs to hide"]], (v) => ({ ksItemOff: v.ksItemOff || [] })],
+];
+let schedRules = [], schedNew = null;
+const sstatus = (r) => { const n = Date.now(), a = r.from ? Date.parse(r.from) : -1, b = r.to ? Date.parse(r.to) : Infinity; return r.off ? "Off" : n < a ? "Upcoming" : n >= b ? "Ended" : "Active now"; };
+const fld = (k, type, label, val) => {
+  if (type === "text" || type === "url") return `<label class="f"><span>${label}</span><input class="in" data-sf="${k}" maxlength="200" value="${esc(val || "")}"></label>`;
+  if (type.startsWith("sel:")) return `<label class="f"><span>${label}</span><select class="in" data-sf="${k}">${type.slice(4).split(",").map((o) => { const [v, l] = o.split("="); return `<option value="${v}">${l}</option>`; }).join("")}</select></label>`;
+  if (type.startsWith("multi:")) return `<div class="f"><span>${label}</span><div style="display:flex;flex-wrap:wrap;gap:8px 14px">${type.slice(6).split(",").map((o) => { const [v, l] = o.split("="); return `<label class="ssw"><span class="switch"><input type="checkbox" data-sm="${k}" value="${v}"></span>${l}</label>`; }).join("")}</div></div>`;
+  if (type === "designs") return `<div class="f"><span>${label}</span><input class="in" id="schQ" placeholder="Search a design, then tick it…" autocomplete="off"><div id="schList" style="max-height:180px;overflow:auto;display:grid;gap:4px;margin-top:6px"></div><div id="schPicked" class="hs-chips"></div></div>`;
+  return "";
+};
+function schPaintDesigns() {
+  const q = ($("schQ").value || "").trim().toLowerCase(), sel = schedNew.picked || (schedNew.picked = []);
+  const all = KS_FAMS.flatMap(([fk2, fl, items]) => items.map(([id, n]) => [id, n + " · " + fl])).filter(([id, n]) => !q || n.toLowerCase().includes(q)).slice(0, 40);
+  $("schList").innerHTML = all.map(([id, n]) => `<label class="ssw"><span class="switch"><input type="checkbox" data-sd="${esc(id)}" ${sel.includes(id) ? "checked" : ""}></span>${esc(n)}</label>`).join("") || '<p class="hint">No match.</p>';
+  $("schPicked").innerHTML = sel.map((id) => `<span>${esc(NAMES[id] || id)}</span>`).join("");
+}
+function sdPaint() {
+  const list = schedRules.map((r, i) => { const st = sstatus(r); return `<div class="hs-row"><div><b>${esc(r.label)}</b> <span class="sd-st ${st === "Active now" ? "on" : ""}">${st}</span><div class="hint">${r.from ? "From " + when(r.from) : "Starts now"} · ${r.to ? "until " + when(r.to) : "no end date"}</div><div class="hs-chips">${Object.entries(r.set).map(([k, v]) => `<span>${esc(fk(k))}: ${esc(brief(v))}</span>`).join("")}</div></div>
+      <div style="display:grid;gap:6px"><button class="btn line" type="button" data-sdoff="${i}">${r.off ? "Turn on" : "Turn off"}</button><button class="btn line" type="button" data-sddel="${i}">Delete</button></div></div>`; }).join("");
+  const n = schedNew;
+  const form = n ? `<section class="ks-sec"><h3>New schedule</h3>
+    <label class="f"><span>What should change?</span><select class="in" id="schKind">${SCH.map(([k, l]) => `<option value="${k}"${n.kind === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+    ${SCH.find((x) => x[0] === n.kind)[2].map(([k, t, l]) => fld(k, t, l)).join("")}
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px"><label class="f"><span>Starts (blank = now)</span><input class="in" type="datetime-local" id="schFrom"></label><label class="f"><span>Ends (blank = never)</span><input class="in" type="datetime-local" id="schTo"></label></div>
+    <p class="hint">Times are in this computer's time zone. When it ends, the store goes back to your normal settings by itself.</p>
+    <div style="display:flex;gap:10px"><button class="btn gold" type="button" id="schSave">Save schedule</button><button class="btn line" type="button" id="schCancel">Cancel</button></div></section>` : `<button class="btn gold" type="button" id="schAdd">+ New schedule</button>`;
+  $("sdBody").innerHTML = `<p class="hint">Plan changes ahead: show a holiday notice, pause orders, hide a design for a while. They switch on and off at the times you set, on the store and the keepsakes page.</p>${form}<h3 class="an-h">Your schedules</h3>${list || '<p class="hint">None yet.</p>'}`;
+  if (n && n.kind === "des") schPaintDesigns();
+}
+async function sdSave(rules) {
+  const cur = await readSiteRow(), next = { ...cur }; if (rules.length) next.sched = rules; else delete next.sched;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+  if (error) { toast("Couldn't save: " + error.message); return false; } site = next; schedRules = rules; return true;
+}
+$("sdBtn").onclick = async () => { sheetOpen("sdSheet"); schedNew = null; try { const r = await readSiteRow(); schedRules = Array.isArray(r.sched) ? r.sched : []; } catch { schedRules = []; } sdPaint(); };
+$("sdClose").onclick = () => sheetShut("sdSheet");
+$("sdBody").addEventListener("click", async (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id === "schAdd") { schedNew = { kind: "ksNotice" }; sdPaint(); }
+  else if (b.id === "schCancel") { schedNew = null; sdPaint(); }
+  else if (b.dataset.sdoff !== undefined) { const r = schedRules.map((x, i) => (i === +b.dataset.sdoff ? { ...x, off: !x.off } : x)); if (await sdSave(r)) { toast("Saved"); sdPaint(); } }
+  else if (b.dataset.sddel !== undefined) { if (!confirm("Delete this schedule?")) return; if (await sdSave(schedRules.filter((_, i) => i !== +b.dataset.sddel))) { toast("Deleted"); sdPaint(); } }
+  else if (b.id === "schSave") {
+    const def = SCH.find((x) => x[0] === schedNew.kind), v = {};
+    document.querySelectorAll("#sdBody [data-sf]").forEach((el) => { v[el.dataset.sf] = el.value.trim(); });
+    document.querySelectorAll("#sdBody [data-sm]").forEach((el) => { if (el.checked) (v[el.dataset.sm] = v[el.dataset.sm] || []).push(el.value); });
+    if (schedNew.kind === "des") v.ksItemOff = schedNew.picked || [];
+    for (const [k, t] of def[2]) { if ((t === "text") && !v[k] && ["ksNotice", "announceText", "cartMsg"].includes(k)) return toast("Please type the message."); if (t.startsWith("multi:") && !(v[k] || []).length) return toast("Tick at least one."); }
+    if (schedNew.kind === "des" && !v.ksItemOff.length) return toast("Tick at least one design.");
+    if (v.announceLink && !/^https:\/\//.test(v.announceLink)) return toast("Links need to start with https://");
+    const from = $("schFrom").value ? new Date($("schFrom").value).toISOString() : "", to = $("schTo").value ? new Date($("schTo").value).toISOString() : "";
+    if (to && from && to <= from) return toast("The end must be after the start.");
+    const rule = { id: Math.random().toString(36).slice(2, 9), label: def[1], set: def[3](v), from, to, off: false };
+    if (await sdSave([...schedRules, rule])) { schedNew = null; toast("Schedule saved. It runs on its own"); sdPaint(); }
+  }
+});
+$("sdBody").addEventListener("change", (e) => {
+  if (e.target.id === "schKind") { schedNew = { kind: e.target.value }; sdPaint(); }
+  else if (e.target.dataset.sd) { const s = schedNew.picked || (schedNew.picked = []), id = e.target.dataset.sd; schedNew.picked = e.target.checked ? [...new Set([...s, id])] : s.filter((x) => x !== id); schPaintDesigns(); }
+});
+$("sdBody").addEventListener("input", (e) => { if (e.target.id === "schQ") schPaintDesigns(); });
+
+/* ---------- Appearance: theme colours, hidden sections, cart message ---------- */
+const THEME = [["gold", "Main accent (gold)", "#d9ab4f"], ["gold2", "Light accent", "#f3d48a"], ["saffron", "Warm accent", "#f28a24"], ["navy", "Page background", "#0f1b2e"], ["ink", "Deep background", "#0a1220"], ["panel", "Cards", "#13213a"]];
+const PRESETS = [["Classic navy & gold", {}], ["Midnight rose", { gold: "#e29aa8", gold2: "#f6cdd5", saffron: "#f28a8a", navy: "#1a1226", ink: "#110b1a", panel: "#241a35" }], ["Forest & brass", { gold: "#c9a24d", gold2: "#e8d18e", saffron: "#e08a3c", navy: "#0f2a22", ink: "#091c16", panel: "#143629" }], ["Charcoal & copper", { gold: "#d98a5a", gold2: "#f0bd98", saffron: "#f2a24a", navy: "#1c1f26", ink: "#13151a", panel: "#262a33" }]];
+const SECS = [["trust", "Why shop with us"], ["make", "How you design it"], ["ownpic", "Your own picture"], ["gallery", "Gallery"], ["collections", "Collections"], ["how", "How it's made"], ["reviews", "Reviews"], ["custom", "Custom & bulk orders"], ["faq", "FAQ"], ["about", "Our studio"]];
+let ap = null;
+function apPaint() {
+  $("apBody").innerHTML = `<p class="hint">Changes the store (the shop page). Press Save to publish. Pick colours that keep text easy to read.</p>
+  <section class="ks-sec"><h3>Colours</h3><div style="display:flex;gap:8px;flex-wrap:wrap">${PRESETS.map(([n], i) => `<button class="btn line" type="button" data-appre="${i}">${n}</button>`).join("")}</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">${THEME.map(([k, l, d]) => `<label class="f"><span>${l}</span><div style="display:flex;gap:8px;align-items:center"><input type="color" data-apc="${k}" value="${ap.theme[k] || d}" style="width:52px;height:40px;padding:0;border:0;background:none"><button class="btn line" type="button" data-apr="${k}" style="min-height:34px;padding:0 10px;font-size:12px">Reset</button></div></label>`).join("")}</div></section>
+  <section class="ks-sec"><h3>Sections on the store page</h3><div style="display:flex;flex-wrap:wrap;gap:8px 16px">${SECS.map(([k, l]) => `<label class="ssw"><span class="switch"><input type="checkbox" data-aps="${k}" ${ap.hide.includes(k) ? "" : "checked"}></span>${l}</label>`).join("")}</div></section>
+  <section class="ks-sec"><h3>Cart</h3><label class="f"><span>Message at the bottom of the cart (optional)</span><input class="in" id="apCart" maxlength="160" placeholder="e.g. Order by Friday for delivery before the holiday" value="${esc(ap.cartMsg)}"></label>
+    <label class="ssw"><span class="switch"><input type="checkbox" id="apRem" ${ap.remindOff ? "" : "checked"}></span>Ask for an email to save the cart (lets you send reminders and discounts)</label></section>
+  <div style="display:flex;gap:10px"><button class="btn gold" type="button" id="apSave">Save appearance</button><span class="ks-dirty" id="apDirty"></span></div>`;
+}
+$("apBtn").onclick = async () => { sheetOpen("apSheet"); const r = await readSiteRow(); ap = { theme: { ...(r.theme || {}) }, hide: Array.isArray(r.hideSections) ? [...r.hideSections] : [], cartMsg: String(r.cartMsg || ""), remindOff: r.remindOff === true }; apPaint(); };
+$("apClose").onclick = () => sheetShut("apSheet");
+$("apBody").addEventListener("input", (e) => { const t = e.target; if (t.dataset.apc) ap.theme[t.dataset.apc] = t.value; else if (t.id === "apCart") ap.cartMsg = t.value; $("apDirty").textContent = "Unsaved changes"; });
+$("apBody").addEventListener("change", (e) => { const t = e.target; if (t.dataset.aps) ap.hide = t.checked ? ap.hide.filter((x) => x !== t.dataset.aps) : [...new Set([...ap.hide, t.dataset.aps])]; else if (t.id === "apRem") ap.remindOff = !t.checked; else return; $("apDirty").textContent = "Unsaved changes"; });
+$("apBody").addEventListener("click", async (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.appre) { ap.theme = { ...PRESETS[+b.dataset.appre][1] }; apPaint(); $("apDirty").textContent = "Unsaved changes"; }
+  else if (b.dataset.apr) { delete ap.theme[b.dataset.apr]; apPaint(); $("apDirty").textContent = "Unsaved changes"; }
+  else if (b.id === "apSave") {
+    const cur = await readSiteRow(), next = { ...cur }, set = (k, v, empty) => { if (empty) delete next[k]; else next[k] = v; };
+    set("theme", ap.theme, !Object.keys(ap.theme).length); set("hideSections", ap.hide, !ap.hide.length); set("cartMsg", ap.cartMsg.trim(), !ap.cartMsg.trim()); set("remindOff", true, !ap.remindOff);
+    const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+    if (error) return toast("Couldn't save: " + error.message); site = next; $("apDirty").textContent = ""; toast("Saved. Live on the store now");
+  }
+});
+
+/* ---------- Tools: health check, backup, restore ---------- */
+async function tlOpen() {
+  sheetOpen("tlSheet");
+  $("tlBody").innerHTML = `<section class="ks-sec"><h3>Health check</h3><p class="hint">Finds things that quietly hurt sales: products with no photo, no price or no description, and keepsake categories with no price.</p><button class="btn gold" type="button" id="tlScan">Run health check</button><div id="tlOut"></div></section>
+  <section class="ks-sec"><h3>Back up &amp; restore settings</h3><p class="hint">Download every setting as a file, or load one back. Restoring replaces the current settings (the old ones stay in History).</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn line" type="button" id="tlExp">Download settings backup</button><button class="btn line" type="button" id="tlImp">Restore from a backup file…</button><input type="file" id="tlFile" accept="application/json,.json" hidden></div><p class="hint" id="tlMsg" role="status"></p></section>
+  <section class="ks-sec"><h3>Visitor data</h3><p class="hint">Your own visits from this browser are never counted. Clear counts older than 400 days to keep things light.</p><button class="btn line" type="button" id="tlPurge">Clear data older than 400 days</button></section>`;
+}
+$("tlBtn").onclick = tlOpen; $("tlClose").onclick = () => sheetShut("tlSheet");
+$("tlBody").addEventListener("click", async (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.id === "tlScan") {
+    b.disabled = true; $("tlOut").innerHTML = '<p class="hint">Checking…</p>';
+    const { data, error } = await sb.from("listings").select("*"); const row = await readSiteRow(); b.disabled = false;
+    if (error) return ($("tlOut").innerHTML = `<p class="hint">${esc(error.message)}</p>`);
+    const L = data || [], issues = [];
+    const imgs = (l) => (Array.isArray(l.images) ? l.images.length : l.image ? 1 : 0);
+    for (const l of L) { const p = []; if (!(Number(l.price) > 0)) p.push("no price"); if (!imgs(l)) p.push("no photo"); if (!String(l.description || l.desc || "").trim()) p.push("no description"); if (p.length) issues.push(`<li><b>${esc(l.name || l.id)}</b>: ${p.join(", ")}</li>`); }
+    const pr = (row.ksPrice && row.ksPrice.base) || {}, off = row.keepsakeOff || [];
+    for (const [k, lab] of KS_FAMS) if (!off.includes(k) && !pr[k] && k !== "photos") issues.push(`<li><b>${esc(lab)}</b> (keepsakes): no price set</li>`);
+    $("tlOut").innerHTML = issues.length ? `<p class="hint">${issues.length} thing${issues.length === 1 ? "" : "s"} to look at (of ${L.length} products):</p><ul class="tl-list">${issues.join("")}</ul>` : `<p class="hint">All ${L.length} products look complete.</p>`;
+  } else if (b.id === "tlExp") {
+    const row = await readSiteRow(), blob = new Blob([JSON.stringify(row, null, 2)], { type: "application/json" }), a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "prajo-settings-" + new Date().toISOString().slice(0, 10) + ".json"; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  } else if (b.id === "tlImp") $("tlFile").click();
+  else if (b.id === "tlPurge") {
+    if (!confirm("Permanently delete visitor counts older than 400 days? This can't be undone.")) return;
+    const { error } = await sb.from("site_events").delete().lt("at", new Date(Date.now() - 400 * 864e5).toISOString());
+    $("tlMsg").textContent = error ? "Couldn't clear: " + error.message : "Old counts cleared.";
+  }
+});
+$("tlBody").addEventListener("change", async (e) => {
+  if (e.target.id !== "tlFile" || !e.target.files[0]) return;
+  try {
+    const obj = JSON.parse(await e.target.files[0].text()); e.target.value = "";
+    if (!obj || typeof obj !== "object" || Array.isArray(obj)) throw new Error("not a settings file");
+    if (!confirm(`Replace ALL current settings with this backup (${Object.keys(obj).length} items)? You can undo it from History.`)) return;
+    const { error } = await sb.from("site_settings").upsert({ id: 1, data: obj, updated_at: new Date().toISOString() });
+    if (error) throw error; site = obj; $("tlMsg").textContent = "Restored. Live now.";
+  } catch (err) { $("tlMsg").textContent = "Couldn't restore: " + (err.message || err); }
+});
 </script>
 </body>
 </html>
