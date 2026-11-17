@@ -1787,6 +1787,7 @@ const SITE_FIELDS = [
     ["instagram", "Instagram link", "url", "https://instagram.com/…"], ["facebook", "Facebook link", "url", "https://facebook.com/…"],
     ["tiktok", "TikTok link", "url", "https://tiktok.com/@…"], ["pinterest", "Pinterest link", "url", "https://pinterest.com/…"],
     ["email", "Email", "email", "hello@prajocustomstudio.com"], ["phone", "Phone", "tel", "(916) 555-0100"],
+    ["bizAddress", "Business mailing address (required in marketing emails)", "text", "123 Main St, Sacramento, CA 95814"],
     ["footerLine", "Footer line", "text", "Custom gifts & personalized moments · Sacramento, CA"], ["footerCopy", "Copyright line", "text", "© 2026 PrAjo Custom Studio"] ] },
   { g: "Messages", d: "The “Message us” chat", f: [
     ["chatWelcome", "Welcome text before a customer writes", "area", "Questions, custom designs, bulk orders or local pickup: send us a message and we'll reply here."],
@@ -2605,7 +2606,7 @@ const HUB_GROUPS = [
   ["Safety & tools", ["hsBtn", "tlBtn", "dpBtn", "helpBtn"]],
   ["Links & account", ["pwBtn", "outBtn"]],
 ];
-const HUB_EXTRA = { inBtn: "email mail hello orders support proofs reply template telegram", anBtn: "traffic analytics visitors daily weekly monthly most viewed products add to cart", caBtn: "abandoned cart discount email reminder", sdBtn: "schedule plan date holiday timer", hsBtn: "undo restore history audit log", apBtn: "theme colour color brand sections cart message", tlBtn: "backup export import health check missing price photo", ksBtn: "front only, both sides, hide a design, large size, notice", siteBtn: "text headline faq footer contact announcement", slBtn: "discount percent off", coBtn: "delivery pickup shipping fees pause", pwBtn: "login security" };
+const HUB_EXTRA = { inBtn: "email mail hello orders support proofs reply template telegram", anBtn: "traffic analytics visitors daily weekly monthly most viewed products add to cart", caBtn: "abandoned cart discount email reminder", sdBtn: "schedule plan date holiday timer", hsBtn: "undo restore history audit log", apBtn: "theme colour color brand sections cart message", tlBtn: "backup export import health check missing price photo privacy delete my data request gdpr ccpa", ksBtn: "front only, both sides, hide a design, large size, notice", siteBtn: "text headline faq footer contact announcement", slBtn: "discount percent off", coBtn: "delivery pickup shipping fees pause", pwBtn: "login security" };
 function hubText(el) { const s = el.querySelector("small"); const t = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(" ").trim(); return [t || el.textContent.replace(s ? s.textContent : "", "").trim(), s ? s.textContent.trim() : ""]; }
 let hubRows = [];
 function hubOpen() {
@@ -2743,7 +2744,7 @@ $("anBody").addEventListener("click", async (e) => {
   else if (b.id === "anCopy" || b.id === "anMail") {
     const mails = [...new Set(an.carts.filter((c) => new Date(c.updated_at).getTime() >= Date.now() - Number(an.cartAge) * 864e5 && c.email).map((c) => c.email))];
     if (b.id === "anCopy") { try { await navigator.clipboard.writeText(mails.join(", ")); $("anMsg").textContent = mails.length + " emails copied."; } catch { $("anMsg").textContent = mails.join(", "); } }
-    else location.href = "mailto:?bcc=" + encodeURIComponent(mails.slice(0, 40).join(",")) + "&subject=" + encodeURIComponent("You left something in your PrAjo cart") + "&body=" + encodeURIComponent("Hi!\n\nYou left a few things in your cart at PrAjo Custom Studio. As a thank-you, they are now on sale. Visit prajocustomstudio.com to finish your order.\n\nPrAjo Custom Studio");
+    else { const BA = ((await readSiteRow()).bizAddress || ""); if (!BA && !confirm("Marketing emails need your business mailing address (US CAN-SPAM law). Add it in Site settings → Contact & links first. Open the email anyway?")) return; location.href = "mailto:?bcc=" + encodeURIComponent(mails.slice(0, 40).join(",")) + "&subject=" + encodeURIComponent("You left something in your PrAjo cart") + "&body=" + encodeURIComponent("Hi!\n\nYou left a few things in your cart at PrAjo Custom Studio. As a thank-you, they are now on sale. Visit prajocustomstudio.com to finish your order.\n\nPrAjo Custom Studio" + (BA ? "\n" + BA : "") + "\n\nDon't want these emails? Just reply STOP and we won't send any more."); }
   } else if (b.id === "anSale") {
     const p = Math.round(+$("anPct").value);
     if (!(p >= 1 && p <= 90)) return ($("anMsg").textContent = "Pick a percentage from 1 to 90.");
@@ -3041,11 +3042,12 @@ async function drillFam(key) {
 }
 
 /* ---- one cart ---- */
-function drillCart(sid) {
+async function drillCart(sid) {
+  const BA = ((await readSiteRow().catch(() => ({}))).bizAddress || "");
   const c = (an.carts || []).find((x) => x.sid === sid); if (!c) return;
   ddOpen("Cart", `<div class="an-kpis">${kpi("Items", fmtN(c.item_count))}${kpi("Value", usd2(c.total))}${kpi("Last changed", ago(c.updated_at) + " ago", "started " + when(c.created_at))}${kpi("Device", esc(c.device || "?"), esc((c.tz || "").split("/").pop().replace(/_/g, " ")))}</div>
     ${table(["Item", "Qty", "Price", ""], (c.items || []).map((i) => `<tr class="clk" data-ddp="${esc(i.id)}"><td>${esc(i.n)}${i.o ? `<br><small>${esc(i.o)}</small>` : ""}</td><td>${i.q}</td><td>${usd2(i.u * i.q)}</td><td>Open ›</td></tr>`))}
-    <section class="ks-sec"><h3>Reach this customer</h3>${c.email ? `<p>${esc(c.email)} ${c.contacted ? `<span class="hint">· emailed ${ago(c.contacted)} ago</span>` : ""}</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn gold" href="mailto:${esc(c.email)}?subject=${encodeURIComponent("You left something in your PrAjo cart")}&body=${encodeURIComponent("Hi!\n\nYou left a few things in your cart at PrAjo Custom Studio. Visit prajocustomstudio.com to finish your order.\n\nPrAjo Custom Studio")}" id="dcMail">Email them</a><button class="btn line" type="button" id="dcDone">Mark emailed</button></div>` : '<p class="hint">They did not leave an email, so this cart can only be helped with a sale on the products inside it.</p>'}
+    <section class="ks-sec"><h3>Reach this customer</h3>${c.email ? `<p>${esc(c.email)} ${c.contacted ? `<span class="hint">· emailed ${ago(c.contacted)} ago</span>` : ""}</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn gold" href="mailto:${esc(c.email)}?subject=${encodeURIComponent("You left something in your PrAjo cart")}&body=${encodeURIComponent("Hi!\n\nYou left a few things in your cart at PrAjo Custom Studio. Visit prajocustomstudio.com to finish your order.\n\nPrAjo Custom Studio" + (BA ? "\n" + BA : "") + "\n\nDon't want these emails? Just reply STOP.")}" id="dcMail">Email them</a><button class="btn line" type="button" id="dcDone">Mark emailed</button></div>` : '<p class="hint">They did not leave an email, so this cart can only be helped with a sale on the products inside it.</p>'}
     <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">${delBtn("dcDel", "Delete this cart")}</div><p class="hint" id="dcMsg" role="status"></p></section>`, () => anLoad());
   if ($("dcDone")) $("dcDone").onclick = async () => { await sb.from("carts_live").update({ contacted: new Date().toISOString() }).eq("sid", sid); $("dcMsg").textContent = "Marked as emailed."; };
   $("dcDel").onclick = (e) => armDelete(e.target, async () => { const { error } = await sb.from("carts_live").delete().eq("sid", sid); if (error) return ($("dcMsg").textContent = error.message); toast("Cart deleted"); ddShut(); });
@@ -3333,6 +3335,41 @@ async function inForwarding() {
   };
 }
 $("inFwdBtn").onclick = inForwarding;
+/* ---- Privacy requests: find and delete what we hold about one email address ---- */
+$("tlBtn").onclick = (function (prev) {
+  return async function () {
+    await prev();
+    $("tlBody").insertAdjacentHTML("beforeend", `<section class="ks-sec"><h3>Privacy requests</h3><p class="hint">When someone emails “Delete my data”, type their address here to see what we hold, then delete it. Payment and order records are kept where tax law requires, and card details live only in Stripe.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><input class="in" id="prEmail" type="email" inputmode="email" autocomplete="off" spellcheck="false" placeholder="customer@example.com" style="max-width:320px"><button class="btn gold" type="button" id="prFind">Find</button></div><div id="prOut"></div></section>`);
+  };
+})($("tlBtn").onclick);
+async function prFind() {
+  const em = $("prEmail").value.trim().toLowerCase(); if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(em)) return ($("prOut").innerHTML = '<p class="hint">Enter a valid email address.</p>');
+  $("prOut").innerHTML = '<p class="hint">Looking…</p>';
+  const [c, m, d] = await Promise.all([
+    sb.from("carts_live").select("sid,updated_at,item_count,total").ilike("email", em),
+    sb.from("inbox_messages").select("id,at,dir,subject").ilike("peer_email", em).order("id", { ascending: false }),
+    sb.from("custom_designs").select("id,code,created_at,status,summary").ilike("customer_email", em).order("created_at", { ascending: false }),
+  ]);
+  const C = c.data || [], M = m.data || [], D = d.data || [];
+  const row = (label, n, key, detail) => `<div class="hc-r"><div><b>${label}: ${n}</b><small>${esc(detail)}</small></div>${n ? `<button class="btn line" type="button" data-prdel="${key}" style="border-color:#c0504d;color:#ff9a96;min-height:36px;padding:0 12px">Delete</button>` : "<span>none</span>"}</div>`;
+  $("prOut").innerHTML = `<p class="hint">Results for ${esc(em)}:</p><div class="hc-b" style="padding:0">
+    ${row("Saved carts", C.length, "carts", C.map((x) => `${x.item_count} items, ${usd2(x.total)}`).join(" · ") || "")}
+    ${row("Inbox emails", M.length, "inbox", M.slice(0, 3).map((x) => (x.subject || "(no subject)")).join(" · ") || "")}
+    ${row("Keepsake requests", D.length, "designs", D.slice(0, 3).map((x) => x.code).join(", ") || "")}</div>
+    <p class="hint">Store orders and payments are in Stripe and your pricing app. Delete or anonymise those there if the person asks and the law allows.</p>`;
+  $("prOut")._em = em;
+}
+$("tlBody").addEventListener("click", async (e) => {
+  if (e.target.id === "prFind") return prFind();
+  const b = e.target.closest("[data-prdel]"); if (!b) return;
+  const em = $("prOut")._em, k = b.dataset.prdel;
+  if (b.dataset.arm !== "1") { b.dataset.arm = "1"; const t = b.textContent; b.textContent = "Tap again to delete for good"; setTimeout(() => { b.dataset.arm = "0"; b.textContent = t; }, 4000); return; }
+  const tbl = k === "carts" ? ["carts_live", "email"] : k === "inbox" ? ["inbox_messages", "peer_email"] : ["custom_designs", "customer_email"];
+  const { error } = await sb.from(tbl[0]).delete().ilike(tbl[1], em);
+  toast(error ? "Couldn't delete: " + error.message : "Deleted"); prFind();
+});
+$("tlBody").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.id === "prEmail") { e.preventDefault(); prFind(); } });
 </script>
 </body>
 </html>
