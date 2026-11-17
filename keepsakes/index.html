@@ -1320,8 +1320,9 @@ const FAMILIES=[
 const itemOf=id=>{for(const f of FAMILIES){const it=f.items.find(i=>i.id===id);if(it)return {fam:f,item:it};}return null;};
 const SIZES={standard:{label:'Standard',w:54,h:76},large:{label:'Large',w:81,h:114}};
 const inF=mm=>String(Math.round(mm/25.4*100)/100),mmIn=(w,h)=>`${w} × ${h} mm (${inF(w)} × ${inF(h)} in)`;
+const LONG={standard:72,large:108};/* every die-cut keychain: longest side 72 mm Standard, 108 mm Large (the black and coloured California) */
 const DIEK={standard:1,large:1.5};/* die-cut pieces (states, maps, gods) scale by this; the 4 mm hole stays 4 mm */
-function scaleRegion(R,size){const k=DIEK[size]||1;return k===1?R:{w:+(R.w*k).toFixed(2),h:+(R.h*k).toFixed(2),pts:R.pts.map(p=>[+(p[0]*k).toFixed(2),+(p[1]*k).toFixed(2)]),hole:[+(R.hole[0]*k).toFixed(2),+(R.hole[1]*k).toFixed(2)],hr:R.hr,k};}
+function scaleRegion(R,size){const k=(size==='large'?LONG.large:LONG.standard)/Math.max(R.w,R.h);return k===1?R:{w:+(R.w*k).toFixed(2),h:+(R.h*k).toFixed(2),pts:R.pts.map(p=>[+(p[0]*k).toFixed(2),+(p[1]*k).toFixed(2)]),hole:[+(R.hole[0]*k).toFixed(2),+(R.hole[1]*k).toFixed(2)],hr:R.hr,k};}
 const LETTERING={bubble:{label:'Bubble',css:'"PrAjo Bubble",cursive',weight:400,upper:true,k:.1,max:.12},signature:{label:'Signature',css:'"PrAjo Signature",cursive',weight:400,upper:false,k:.15,max:.2},serif:{label:'Serif',css:'"PrAjo Serif",serif',weight:400,upper:false,k:.12,max:.15},headline:{label:'Headline',css:'"PrAjo Headline",sans-serif',weight:400,upper:true,k:.1,max:.12},round:{label:'Round',css:'"PrAjo Round",sans-serif',weight:400,upper:false,k:.12,max:.14},block:{label:'Block',css:'"PrAjo Block",sans-serif',weight:400,upper:true,k:.1,max:.11},marker:{label:'Marker',css:'"PrAjo Marker",cursive',weight:400,upper:false,k:.15,max:.17},notebook:{label:'Notebook',css:'"PrAjo Notebook",cursive',weight:400,upper:false,k:0.14,max:0.17},kids:{label:'Kids',css:'"PrAjo Kids",cursive',weight:400,upper:false,k:0.12,max:0.15},royal:{label:'Royal',css:'"PrAjo Royal",serif',weight:400,upper:true,k:0.1,max:0.1,ov:0.16,vov:0.12},heavy:{label:'Heavy',css:'"PrAjo Heavy",sans-serif',weight:400,upper:true,k:0.1,max:0.11},wide:{label:'Wide',css:'"PrAjo Wide",sans-serif',weight:400,upper:true,k:0.09,max:0.09},condensed:{label:'Condensed',css:'"PrAjo Condensed",sans-serif',weight:400,upper:true,k:0.1,max:0.14},cursive:{label:'Cursive',css:'"Great Vibes",cursive',weight:400,upper:false,k:0.15,max:0.2,ov:0.1,vov:0.08,namesOnly:true},clean:{label:'Clean',css:'Manrope,sans-serif',weight:700,upper:true,k:.1,max:.1}};
 const COLORS=[['Gold foil','foil'],['Ivory','#f6efe1'],['White','#ffffff'],['Rose','#f3b6bd'],['Silver','#cfd6e0']];
 const FLAT_INK={foil:'#dcae52'};
@@ -1361,38 +1362,39 @@ const wmDefs=uid=>`<pattern id="${uid}W" width="40" height="24" patternUnits="us
 const isName=id=>String(id||'').startsWith('name-');
 const isPhotoId=id=>id==='collage'||id==='portrait';
 function nameLayout(o){
-  if((o.size||'standard')!=='large') return nameLayout0(o);
+  if((o.size||'standard')!=='large'){let mw=76,b=nameLayout0({...o,_mw:mw});for(let i=0;i<4&&b.W>LONG.standard+.01;i++){mw-=b.W-LONG.standard;b=nameLayout0({...o,_mw:mw});}return b;}
   /* Large = the Standard layout scaled exactly 1.5x (letters, margins, overall width and height); only the ring and its hole keep their size */
-  const b=nameLayout0({...o,size:'standard'}),k=1.5;
-  return {...b,lines:b.lines.map(r=>({...r,x:r.x*k,base:r.base*k})),fs:b.fs*k,ls:b.ls*k,x0:b.x0*k,W:b.W*k,H:b.H*k,width:b.width*k,ovx:b.ovx*k,bw:b.bw*k,se:b.se*k,p:b.p*k,hy:b.H*k/2};
+  let mw=76,b=nameLayout0({...o,size:'standard',_mw:mw});for(let i=0;i<4&&b.W>LONG.standard+.01;i++){mw-=b.W-LONG.standard;b=nameLayout0({...o,size:'standard',_mw:mw});}const k=LONG.large/LONG.standard;
+  return {...b,lines:b.lines.map(r=>({...r,x:r.x*k,base:r.base*k})),fs:b.fs*k,ls:b.ls*k,x0:b.x0*k,W:b.W*k,H:b.H*k,width:b.width*k,ovx:b.ovx*k,Ht:b.Ht*k,bw:b.bw*k,se:b.se*k,p:b.p*k,hy:b.H*k/2};
 }
 function nameLayout0(o){
   const L=LETTERING[o.lettering||'bubble'];
   let raw=(o.name||'').trim().replace(/\s+/g,' ');const ghost=!raw;if(ghost)raw=o.sample||'Your name';
   const text=L.upper?raw.toUpperCase():raw;
-  const sz=o.size||'standard',capmm={small:13,standard:17,large:25.5}[sz],maxW={small:58,standard:76,large:114}[sz];
+  const sz=o.size||'standard',capmm={small:13,standard:22,large:22}[sz],maxW=o._mw||{small:58,standard:76,large:76}[sz];
   const ls0=-.02,nat=(s,str)=>tw(str,L,s)+s*ls0*(str.length-1);
-  const fs1=Math.min(capmm/.72,capmm/.72*maxW/Math.max(1,nat(capmm/.72,text)));
+  const fs1=Math.min(capmm/.72,maxW/Math.max(.01,nat(1,text)));
   const words=text.split(' ');let two=false;
   if(words.length>1&&o.lines!=='one'&&!ghost) two=o.lines==='two'||fs1<capmm/.72*.78;
   let lines=[text],fs=fs1;
   if(two){ // balanced split on a space
     let best=null;for(let k=1;k<words.length;k++){const a=words.slice(0,k).join(' '),b=words.slice(k).join(' '),m=Math.max(nat(10,a),nat(10,b));if(!best||m<best.m)best={a,b,m};}
-    lines=[best.a,best.b];fs=Math.min(capmm/.72*.92,capmm/.72*.92*maxW/Math.max(1,Math.max(nat(capmm/.72*.92,best.a),nat(capmm/.72*.92,best.b))));
+    lines=[best.a,best.b];fs=Math.min(capmm/.72*.92,maxW/Math.max(.01,Math.max(nat(1,best.a),nat(1,best.b))));
   }
   const capH=fs*.72,bw=Math.max(.9,Math.min(1.7,fs*.055))*(o.layers==='double'?2:1),se=1.1,p=bw+se,desc=L.upper?0:fs*.24,tabR=5.2,gap=fs*.2;
   const widths=lines.map(s=>nat(fs,s)),width=Math.max(...widths);
   const ovx=(L.ov||0)*fs,ovy=(L.vov||0)*fs; /* swash overhang some fonts have beyond their letter widths */
   const x0=tabR+3.2+p+ovx,W=x0+width+p+ovx;let H=lines.length*capH+(lines.length-1)*gap+desc+2*p+2*ovy;const yoff=H<tabR*2?(tabR*2-H)/2:0;if(H<tabR*2)H=tabR*2;
-  const rows=lines.map((s,n)=>({text:s,x:x0+(width-widths[n])/2,base:p+ovy+capH+yoff+n*(capH+gap)}));
-  return {text,lines:rows,ghost,fs,ls:fs*ls0,x0,W,H,bw,se,p,tabR,L,hx:tabR,hy:H/2,two,width,ovx};
+  const Hf=Math.max(H,W*.58),dy=(Hf-H)/2; /* frame proportioned like the approved 76 x 44 mm name tag; text and ring stay centred, the cut still hugs the letters */
+  const rows=lines.map((s,n)=>({text:s,x:x0+(width-widths[n])/2,base:p+ovy+capH+yoff+n*(capH+gap)+dy}));
+  return {text,lines:rows,ghost,fs,ls:fs*ls0,x0,W,H:Hf,bw,se,p,tabR,L,hx:tabR,hy:Hf/2,two,width,ovx,Ht:H};
 }
 function badgeLayout(o){
   const D={small:46,standard:56,large:84}[o.size||'standard'],se=1.1,ringW=1.5,tr=5.2,R=D/2,cx=R,cy=tr*2-2+R,R2=R-se-ringW,bh=9.5,bwid=D*.98;
   const by=cy+R2*.62;return {D,se,ringW,tr,R,cx,cy,R2,bh,bwid,by,bx:cx-bwid/2,W:D,H:by+bh+se,hx:cx,hy:tr};
 }
 function dimsOf(o){
-  if(isName(o.id)){const g=nameLayout(o);return {w:f1(g.W),h:f1(g.H),hx:f1(g.hx),hy:f1(g.hy)};}
+  if(isName(o.id)){const g=nameLayout(o);return {w:f1(g.W),h:f1(g.Ht),hx:f1(g.hx),hy:f1(g.hy)};}
   if(o.shape==='badge'&&!isPhotoId(o.id)){const b=badgeLayout(o);return {w:f1(b.W),h:f1(b.H),hx:f1(b.hx),hy:f1(b.hy)};}
   {const R0=o.id&&A.regionOf?A.regionOf(o.id):null;if(R0){const R=scaleRegion(R0,o.size);return {w:R.w,h:R.h,hx:R.hole[0],hy:R.hole[1]};}}
   const S=SIZES[o.size||'standard'];return {w:S.w,h:S.h,hx:S.w/2,hy:7};
@@ -1521,7 +1523,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794884105729';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794884468968';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1633,7 +1635,7 @@ function seg(el,items,get,set){el.replaceChildren(...items.map(([v,label,sub])=>
 function drawLettering(){seg($('lettering'),Object.entries(LETTERING).filter(([k,L])=>k!=='clean'&&(!L.namesOnly||isName(state.id))).map(([k,L])=>[k,`<span style="font-family:${L.css.replace(/"/g,"'")};font-weight:${L.weight};font-size:${['signature','marker'].includes(k)?22:k==='cursive'?28:17}px;line-height:1.1">${L.label}</span>`]),()=>state.lettering,v=>state.lettering=v);}
 function drawSize(){
   const nm=isName(state.id),bd=state.shape==='badge'&&!isPhotoId(state.id),R0=A.regionOf?A.regionOf(state.id):null;
-  seg($('size'),Object.entries(SIZES).map(([k,s])=>[k,s.label,nm?({standard:'17 mm ('+inF(17)+' in) letters',large:'25 mm ('+inF(25.5)+' in) letters'})[k]:R0?(()=>{const q=scaleRegion(R0,k);return mmIn(q.w,q.h);})():bd?'Ø '+badgeLayout({size:k}).D+' mm ('+inF(badgeLayout({size:k}).D)+' in)':mmIn(s.w,s.h)]),()=>state.size,v=>state.size=v);
+  seg($('size'),Object.entries(SIZES).map(([k,s])=>[k,s.label,nm?({standard:'up to 72 mm ('+inF(72)+' in) long',large:'up to 108 mm ('+inF(108)+' in) long'})[k]:R0?(()=>{const q=scaleRegion(R0,k);return mmIn(q.w,q.h);})():bd?'Ø '+badgeLayout({size:k}).D+' mm ('+inF(badgeLayout({size:k}).D)+' in)':mmIn(s.w,s.h)]),()=>state.size,v=>state.size=v);
 }
 function drawLayers(){seg($('layers'),[['single','Single layer'],['double','Double layer (3D)']],()=>state.layers,v=>{state.layers=v;syncInk();});}
 function syncInk(){const nm=isName(state.id);$('inkWrap').hidden=nm&&state.layers!=='double'||false;$('inkLab').textContent=nm?'Raised letter colour':'Lettering colour';drawSwatches();}
@@ -1742,7 +1744,9 @@ function wbBlock(){
   const id=state.id,fam=itemOf(id).fam.key,S=SIZES[state.size]||SIZES.standard,L=LETTERING[state.lettering];
   const fontName=L.css.split(',')[0].replace(/["']/g,'');
   if(isName(id)){const c=NAMECOL[id.slice(5)]||NAMECOL.blush;
-    return {entry:'acrylic-bubble',scale:state.size==='large'?1.5:1,values:{name:state.name||'',showText:true,fontName,...c,nameLines:(state.name&&nameLayout(productOpts()).two)?'two':(state.name&&(state.name.trim().split(/\s+/).length>1)?'one':(state.lines||'auto')),doubleLayer:state.layers==='double',artInk:state.finish==='flat'?'flat':undefined},note:'Name charm. Colours are the workbench preset closest to the customer colour; compare with the customer proof PNG before printing.'};}
+    const LY=nameLayout(productOpts()),DMN=dimsOf(productOpts()),lastBase=LY.lines[LY.lines.length-1].base,mg=2;
+    const place={margin:mg,textSize:100,artScale:Math.round(LY.width/((LY.W-2*mg)*.8)*10000)/100,artX:Math.round((LY.x0+LY.width/2-LY.W/2)*100)/100,artY:0,textY:Math.round((lastBase-LY.H*(LY.two?.80:.68))*100)/100};
+    return {entry:'acrylic-bubble',scale:state.size==='large'?1.5:1,dims:{w:DMN.w,h:Math.round(LY.H*100)/100,hx:DMN.hx,hy:Math.round(LY.hy*100)/100,fs:Math.round(LY.fs*100)/100},values:{...place,name:state.name||'',showText:true,fontName,...c,nameLines:(state.name&&nameLayout(productOpts()).two)?'two':(state.name&&(state.name.trim().split(/\s+/).length>1)?'one':(state.lines||'auto')),doubleLayer:state.layers==='double',artInk:state.finish==='flat'?'flat':undefined},note:'Name charm. Colours are the workbench preset closest to the customer colour; compare with the customer proof PNG before printing.'};}
   if(fam==='photos')return {entry:id==='portrait'?'acrylic-photo':'collage',values:{width:S.w,height:S.h,holeX:S.w/2,holeY:7},note:'Photos are not inside this file: load the customer photos by hand and match the proof PNG.'};
   if(fam==='kits'){const R=scaleRegion(A.regionOf(id),state.size);return {entry:id,artSvg:A.render(id,{mode:'foil',name:state.name,number:state.number}),values:{width:R.w,height:R.h,holeX:R.hole[0],holeY:R.hole[1]},note:'Football shirt cut to its outline. The workbench shows the shirt with the customer name and number already on it.'};}
   const region=['states','maps','gods','sacred','flowers','stones'].includes(fam);
