@@ -1433,7 +1433,7 @@ function markJump(id) { document.querySelectorAll("#filters button[data-f]").for
 let spyOn = false, spyTick = 0;
 function watchGroups() {
   if (spyOn) return; spyOn = true;
-  const run = () => { spyTick = 0; if (filter !== "all") return; const hs = [...document.querySelectorAll("#grid .grp")]; if (!hs.length) return; let cur = null; for (const h of hs) { if (h.getBoundingClientRect().top <= 170) cur = h; else break; } const id = cur ? cur.dataset.g : null; const now = document.querySelector('#filters [aria-current="true"]'); if ((now && now.dataset.f) === (id || "all")) return; markJump(id); const on = document.querySelector('#filters [aria-current="true"]'); if (on && on.scrollIntoView) on.scrollIntoView({ block: "nearest", inline: "center" }); };
+  const run = () => { spyTick = 0; if (filter !== "all") return; const hs = [...document.querySelectorAll("#grid .grp")]; if (!hs.length) return; let cur = null; for (const h of hs) { if (h.getBoundingClientRect().top <= 170) cur = h; else break; } const id = cur ? cur.dataset.g : null; const now = document.querySelector('#filters [aria-current="true"]'); if ((now && now.dataset.f) === (id || "all")) return; markJump(id); const on = document.querySelector('#filters [aria-current="true"]'); if (on && on.parentElement) { const pr = on.parentElement; if (pr.scrollWidth > pr.clientWidth) pr.scrollLeft += on.getBoundingClientRect().left - pr.getBoundingClientRect().left - (pr.clientWidth - on.offsetWidth) / 2; } };   // slide the pill row sideways only; scrollIntoView here dragged the whole page back up
   window.addEventListener("scroll", () => { if (!spyTick) spyTick = setTimeout(run, 60); }, { passive: true });
 }
 $("sortSel").onchange = () => { sortBy = $("sortSel").value; setFilter(filter); };
