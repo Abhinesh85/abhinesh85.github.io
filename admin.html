@@ -1313,9 +1313,12 @@ async function dsOpenWorkbench(r) {
   if (!pass) { pass = await studioAskPass(); if (!pass) return toast("Cancelled. Tap Open in workbench again and enter the passphrase when you're ready."); }
   toast("Opening the workbench… the first time takes a few seconds");
   try {
-    const res = await fetch("studio/workbench.enc?" + (window.__studioV || (window.__studioV = Date.now())), { cache: "force-cache" });
-    if (!res.ok) throw new Error("workbench file not found on the site");
-    const html = await studioDecrypt(await res.arrayBuffer(), pass);
+    // The sealed workbench is stored in two parts (the file is over 10 MB); the old single file is the fallback.
+    const v = window.__studioV || (window.__studioV = Date.now());
+    let buf = null;
+    try { const ps = await Promise.all(["studio/wb.1", "studio/wb.2"].map((u) => fetch(u + "?" + v, { cache: "force-cache" }))); if (ps.every((x) => x.ok)) { const bs = await Promise.all(ps.map((x) => x.arrayBuffer())); const all = new Uint8Array(bs[0].byteLength + bs[1].byteLength); all.set(new Uint8Array(bs[0]), 0); all.set(new Uint8Array(bs[1]), bs[0].byteLength); buf = all.buffer; } } catch { /* fall back */ }
+    if (!buf) { const res = await fetch("studio/workbench.enc?" + v, { cache: "force-cache" }); if (!res.ok) throw new Error("workbench file not found on the site"); buf = await res.arrayBuffer(); }
+    const html = await studioDecrypt(buf, pass);
     if (fresh && !fromDb) { try { localStorage.setItem("prajo:studio:key", pass); } catch { /* optional */ } }
     const old = document.getElementById("wbOverlay"); if (old) old.remove();
     const box = document.createElement("div"); box.id = "wbOverlay";
