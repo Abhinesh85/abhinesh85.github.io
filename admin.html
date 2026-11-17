@@ -1847,6 +1847,9 @@ $("siteSave").onclick = async () => {
   const data = readSite();
   for (const k of ["announceLink", "etsyUrl", "instagram", "facebook", "tiktok", "pinterest"]) if (data[k] && !/^https:\/\//.test(data[k])) return toast("Links need to start with https://");
   $("siteSave").disabled = true;
+  // Keep every setting this form doesn't edit (keepsake prices, sale, schedules, templates…): saving used to replace the whole record.
+  try { const cur = await readSiteRow(), formKeys = new Set([...SITE_FIELDS.flatMap((g) => g.f.map((x) => x[0])), "tumblerColors", "faq"]); for (const k of Object.keys(cur)) if (!formKeys.has(k) && !(k in data)) data[k] = cur[k]; }
+  catch (e) { $("siteSave").disabled = false; return toast("Couldn't read the current settings, so nothing was saved. Try again."); }
   const { error } = await sb.from("site_settings").upsert({ id: 1, data, updated_at: new Date().toISOString() });
   $("siteSave").disabled = false;
   if (error) return toast("Couldn't save: " + error.message);
