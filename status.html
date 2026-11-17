@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track your PrAjo keepsake request</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="favicon.ico">
+<style>
+:root { --ink: #0a1220; --navy: #0f1b2e; --panel: #13213a; --gold: #d9ab4f; --gold-2: #f3d48a; --leaf: #3bb35a; --muted: #a9b3c4; --line: rgba(217,171,79,.25); }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--ink); color: #f5ecdc; font: 16px/1.5 system-ui, -apple-system, "Segoe UI", sans-serif; min-height: 100vh; display: grid; place-items: start center; padding: 24px 16px 60px; }
+main { width: min(560px, 100%); display: grid; gap: 18px; }
+a.brand { color: var(--gold-2); font: 800 15px/1 system-ui; letter-spacing: .24em; text-decoration: none; }
+h1 { margin: 0; font: 700 28px/1.2 Georgia, "Times New Roman", serif; }
+p { margin: 0; color: var(--muted); }
+form { display: flex; gap: 10px; flex-wrap: wrap; }
+input { flex: 1 1 200px; min-height: 48px; border-radius: 12px; border: 1px solid var(--line); background: var(--navy); color: inherit; padding: 0 14px; font-size: 18px; letter-spacing: .08em; text-transform: uppercase; }
+button { min-height: 48px; padding: 0 22px; border: 0; border-radius: 999px; background: linear-gradient(180deg, #f1d98f, #d9b45c); color: #1a1405; font-weight: 800; font-size: 16px; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; display: grid; gap: 14px; }
+ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; align-items: center; color: var(--muted); }
+li i { width: 28px; height: 28px; border-radius: 50%; border: 2px solid #34425c; display: grid; place-items: center; font-style: normal; font-size: 14px; }
+li.done { color: #f5ecdc; } li.done i { background: var(--leaf); border-color: var(--leaf); color: #06210f; font-weight: 800; }
+li.now { color: var(--gold-2); font-weight: 700; } li.now i { border-color: var(--gold); box-shadow: 0 0 0 4px rgba(217,171,79,.2); }
+.err { color: #ff9a96; }
+small { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <a class="brand" href="/">PRAJO</a>
+  <h1>Where is my keepsake?</h1>
+  <p>Enter the reference code from your confirmation (it looks like <b>D-AB12CD</b>).</p>
+  <form id="f"><label for="code" hidden>Reference code</label><input id="code" name="code" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="D-AB12CD" required><button type="submit">Check status</button></form>
+  <div id="out" aria-live="polite"></div>
+  <p><small>Questions? Reply to the email we sent you, or message us on the store.</small></p>
+</main>
+<script>
+const DB = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" };
+const STEPS = [["new", "Request received"], ["reviewing", "We're reviewing your design"], ["quoted", "Price and proof sent to you"], ["approved", "You approved it"], ["in_production", "Being made"], ["done", "Finished, on its way or ready for pickup"]];
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+async function check(code) {
+  const out = document.getElementById("out"); out.innerHTML = "<p>Checking…</p>";
+  try {
+    const r = await fetch(DB.url + "/rest/v1/rpc/design_status", { method: "POST", headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: "Bearer " + DB.key }, body: JSON.stringify({ p_code: code }) });
+    const d = r.ok ? await r.json() : null;
+    if (!d) { out.innerHTML = '<p class="err">We couldn\'t find that code. Please check it and try again.</p>'; return; }
+    const day = (t) => new Date(t).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" });
+    if (d.status === "cancelled") { out.innerHTML = `<div class="card"><b>This request was cancelled.</b><p>${esc(d.summary || "")}</p><small>Received ${day(d.created_at)}. Message us if that's a surprise.</small></div>`; return; }
+    const at = Math.max(0, STEPS.findIndex((s) => s[0] === d.status));
+    out.innerHTML = `<div class="card"><div><b>${esc(code.toUpperCase())}</b><br><small>${esc(d.summary || "")}</small></div><ol>${STEPS.map(([k, l], i) => `<li class="${i < at ? "done" : i === at ? "now" : ""}"><i>${i < at ? "✓" : i === at ? "●" : ""}</i><span>${l}</span></li>`).join("")}</ol><small>Received ${day(d.created_at)} · last update ${day(d.updated_at)}</small></div>`;
+  } catch { out.innerHTML = '<p class="err">Something went wrong. Please try again in a moment.</p>'; }
+}
+document.getElementById("f").addEventListener("submit", (e) => { e.preventDefault(); const c = document.getElementById("code").value.trim(); if (c) { history.replaceState(null, "", "?code=" + encodeURIComponent(c)); check(c); } });
+const q = new URLSearchParams(location.search).get("code"); if (q) { document.getElementById("code").value = q; check(q); }
+</script>
+</body>
+</html>

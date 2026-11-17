@@ -390,6 +390,40 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .hs-d { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); word-break: break-word; }
 .sd-st { font-size: 11.5px; font-weight: 800; padding: 2px 9px; border-radius: 999px; background: var(--ink); color: var(--muted); margin-left: 6px; } .sd-st.on { background: var(--leaf); color: #06210f; }
 .tl-list { margin: 8px 0 0; padding-left: 18px; display: grid; gap: 4px; font-size: 14px; }
+
+/* drill-down */
+.clk { cursor: pointer; } .an-t tr.clk:hover td, .hc-r.clk:hover { background: var(--panel-2); }
+.hc-g { border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); margin-top: 8px; }
+.hc-g > summary { list-style: none; cursor: pointer; padding: 12px 14px; display: flex; gap: 10px; align-items: center; }
+.hc-g > summary::-webkit-details-marker { display: none; }
+.hc-n { font-size: 12px; font-weight: 800; padding: 2px 10px; border-radius: 999px; background: var(--ink); } .hc-n.warn { background: #e8a33d; color: #1a1204; } .hc-n.ok { background: var(--leaf); color: #06210f; }
+.hc-b { padding: 0 8px 10px; display: grid; gap: 6px; }
+.hc-r { display: flex; justify-content: space-between; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 10px; background: var(--ink); }
+.hc-r small { display: block; color: var(--muted); font-size: 12.5px; } .hc-r > span { color: var(--gold-2); font-weight: 700; font-size: 13px; white-space: nowrap; }
+.hc-r:focus-visible { outline: 2px solid var(--gold-2); }
+
+/* inbox */
+.in-grid { display: grid; grid-template-columns: 340px 1fr; gap: 0; height: 100%; min-height: 0; flex: 1; }
+.in-left { border-right: 1px solid var(--line-soft); display: flex; flex-direction: column; min-height: 0; }
+.in-bar { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px; align-items: center; border-bottom: 1px solid var(--line-soft); }
+.in-bar select { min-height: 40px; border-radius: 10px; border: 1px solid var(--line-soft); background: var(--panel); color: inherit; padding: 0 8px; }
+.in-list { overflow-y: auto; flex: 1; }
+.in-row { display: grid; grid-template-columns: 12px 1fr auto; gap: 10px; width: 100%; text-align: left; padding: 12px 12px; border: 0; border-bottom: 1px solid var(--line-soft); background: none; color: inherit; font: inherit; cursor: pointer; align-items: start; }
+.in-row:hover, .in-row.sel { background: var(--panel-2); } .in-row b { display: block; font-size: 14.5px; } .in-row.unread b { color: var(--gold-2); }
+.in-sub { display: block; font-size: 13px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .in-row small { display: block; color: var(--muted); font-size: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 230px; }
+.in-dot { width: 9px; height: 9px; border-radius: 50%; margin-top: 6px; } .in-row.unread .in-dot { background: var(--gold); }
+.in-meta { font-size: 11.5px; color: var(--muted); text-align: right; white-space: nowrap; } .in-meta em { font-style: normal; color: var(--gold-2); }
+.in-thread { overflow-y: auto; padding: 14px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.in-top { display: flex; gap: 10px; align-items: center; } .in-back { display: none; min-height: 38px; padding: 0 12px; }
+.in-acts { display: flex; gap: 8px; flex-wrap: wrap; } .in-acts .btn { min-height: 38px; padding: 0 14px; font-size: 13px; }
+.in-msgs { display: grid; gap: 10px; }
+.in-m { max-width: 92%; padding: 10px 14px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line-soft); font-size: 14.5px; line-height: 1.5; word-break: break-word; }
+.in-m small { display: block; color: var(--muted); font-size: 11.5px; margin-bottom: 4px; } .in-m.out { margin-left: auto; background: rgba(217,171,79,.12); border-color: var(--line); }
+.in-reply { border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); padding: 14px; display: grid; gap: 10px; } .in-reply h4 { margin: 0; font-size: 13px; color: var(--gold-2); }
+.in-row2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; } .in-row2 select { min-height: 44px; border-radius: 12px; border: 1px solid var(--line-soft); background: var(--ink); color: inherit; padding: 0 10px; font-size: 14.5px; }
+.in-blanks { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; padding: 8px; border: 1px dashed var(--gold); border-radius: 12px; } .in-blanks small { grid-column: 1 / -1; color: var(--gold-2); } .in-blanks label span { font-size: 12px; color: var(--muted); text-transform: capitalize; }
+@media (max-width: 860px) { .in-grid { grid-template-columns: 1fr; } .in-grid[data-view="list"] .in-thread { display: none; } .in-grid[data-view="thread"] .in-left { display: none; } .in-back { display: inline-flex; } }
+.panel.inb { width: min(1180px, 100%); } .panel.inb .panel-body { padding: 0; gap: 0; overflow: hidden; display: flex; }
 </style>
 </head>
 <body>
@@ -411,6 +445,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <div class="swrow" id="studioRow"><div class="swtxt"><b>🔤 Design studio on the store</b><small id="studioState">Checking…</small></div>
           <button type="button" class="tg" role="switch" aria-checked="false" id="studioToggle" aria-label="Design studio on the store"><i></i><span class="on">ON</span><span class="off">OFF</span></button>
           <div class="swask" id="studioAsk" hidden><span id="studioAskT"></span><button type="button" class="btn gold" id="studioYes">Confirm</button><button type="button" class="btn line" id="studioNo">Cancel</button></div></div>
+        <button type="button" role="menuitem" id="inBtn">📥 Inbox<small id="inState">Read and reply to mail sent to hello@, orders@ and more</small></button>
         <button type="button" role="menuitem" id="anBtn">📊 Reports<small>Visitors by day, week, month; top products</small></button>
         <button type="button" role="menuitem" id="caBtn">🛒 Carts &amp; discounts<small>What people are holding, send them an offer</small></button>
         <button type="button" role="menuitem" id="sdBtn">🗓 Schedule<small>Plan notices, pauses and hidden designs by date</small></button>
@@ -719,6 +754,14 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 <div class="sheet" id="tlSheet" hidden role="dialog" aria-modal="true" aria-labelledby="tlSheetT">
   <div class="panel wide"><div class="panel-head"><h2 id="tlSheetT">Health check & backup</h2><button class="x" type="button" id="tlClose" aria-label="Close">×</button></div>
     <div class="panel-body" id="tlBody"><p class="hint">Loading…</p></div></div>
+</div>
+<div class="sheet" id="ddSheet" hidden role="dialog" aria-modal="true" aria-labelledby="ddT" style="z-index:95">
+  <div class="panel wide"><div class="panel-head"><button class="x" type="button" id="ddClose" aria-label="Back" style="font-size:18px">‹</button><h2 id="ddT">Details</h2></div>
+    <div class="panel-body" id="ddBody"></div></div>
+</div>
+<div class="sheet" id="inSheet" hidden role="dialog" aria-modal="true" aria-labelledby="inSheetT">
+  <div class="panel inb"><div class="panel-head"><h2 id="inSheetT">Inbox</h2><button class="btn line" type="button" id="inNew" style="min-height:40px;padding:0 14px">✎ New email</button><button class="btn line" type="button" id="inTplBtn" style="min-height:40px;padding:0 14px">Templates</button><button class="x" type="button" id="inClose" aria-label="Close">×</button></div>
+    <div class="panel-body"><div class="in-grid" id="inGrid" data-view="list"><div class="in-left"><div class="in-bar" id="inBar"></div><div class="in-list" id="inList"></div></div><div class="in-thread" id="inThread"></div></div></div></div>
 </div>
 <div class="sheet" id="helpSheet" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
   <div class="panel">
@@ -2552,14 +2595,14 @@ $("ksSave").onclick = async () => {
 
 /* ---------- Settings hub: every admin tool on one searchable page ---------- */
 const HUB_GROUPS = [
-  ["Reports & customers", ["anBtn", "caBtn", "lvBtn", "rvBtn"]],
+  ["Reports & customers", ["inBtn", "anBtn", "caBtn", "lvBtn", "rvBtn"]],
   ["Keepsakes", ["ksBtn", "kcBtn", "dsBtn"]],
   ["Store content & look", ["siteBtn", "apBtn", "scBtn", "ptBtn", "tdBtn", "snBtn", "bulkBtn"]],
   ["Sales & orders", ["slBtn", "coBtn", "sdBtn"]],
   ["Safety & tools", ["hsBtn", "tlBtn", "dpBtn", "helpBtn"]],
   ["Links & account", ["pwBtn", "outBtn"]],
 ];
-const HUB_EXTRA = { anBtn: "traffic analytics visitors daily weekly monthly most viewed products add to cart", caBtn: "abandoned cart discount email reminder", sdBtn: "schedule plan date holiday timer", hsBtn: "undo restore history audit log", apBtn: "theme colour color brand sections cart message", tlBtn: "backup export import health check missing price photo", ksBtn: "front only, both sides, hide a design, large size, notice", siteBtn: "text headline faq footer contact announcement", slBtn: "discount percent off", coBtn: "delivery pickup shipping fees pause", pwBtn: "login security" };
+const HUB_EXTRA = { inBtn: "email mail hello orders support proofs reply template telegram", anBtn: "traffic analytics visitors daily weekly monthly most viewed products add to cart", caBtn: "abandoned cart discount email reminder", sdBtn: "schedule plan date holiday timer", hsBtn: "undo restore history audit log", apBtn: "theme colour color brand sections cart message", tlBtn: "backup export import health check missing price photo", ksBtn: "front only, both sides, hide a design, large size, notice", siteBtn: "text headline faq footer contact announcement", slBtn: "discount percent off", coBtn: "delivery pickup shipping fees pause", pwBtn: "login security" };
 function hubText(el) { const s = el.querySelector("small"); const t = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(" ").trim(); return [t || el.textContent.replace(s ? s.textContent : "", "").trim(), s ? s.textContent.trim() : ""]; }
 let hubRows = [];
 function hubOpen() {
@@ -2635,7 +2678,7 @@ async function anLoad() {
       const { data, error } = await sb.from("carts_live").select("*").order("updated_at", { ascending: false }).limit(500);
       if (error) throw error; an.carts = data || [];
     } else {
-      const { data, error } = await sb.from("custom_designs").select("created_at,qty,status,design:design->>design,sides:design->sides->>mode,price:design->pricing->>estimate_each").gte("created_at", w.from.toISOString()).order("created_at", { ascending: false }).limit(1000);
+      const { data, error } = await sb.from("custom_designs").select("id,code,created_at,qty,status,customer_name,customer_email,customer_phone,summary,owner_notes,design:design->>design,sides:design->sides->>mode,price:design->pricing->>estimate_each").gte("created_at", w.from.toISOString()).order("created_at", { ascending: false }).limit(1000);
       if (error) throw error; an.orders = data || [];
     }
     anPaint();
@@ -2655,14 +2698,14 @@ function anPaint() {
   if (an.tab === "over" && D) {
     const T = D.totals || {}, S = D.series || [], mx = Math.max(1, ...S.map((x) => x.visitors));
     h += `<div class="an-kpis">${kpi("Visitors", fmtN(T.visitors), fmtN(T.returning) + " came back")}${kpi("Page views", fmtN(T.views))}${kpi("Product views", fmtN(T.product_views))}${kpi("Added to cart", fmtN(T.adds), pct(T.adds, T.product_views) + " of product views")}${kpi("Checkouts started", fmtN(T.checkouts))}${kpi("Orders & requests", fmtN(T.orders), pct(T.orders, T.visitors) + " of visitors")}</div>
-    <h3 class="an-h">Visitors by ${w.bucket}</h3>
-    <div class="an-chart" role="img" aria-label="Visitors by ${w.bucket}">${S.map((x) => `<div class="an-col" title="${lbl(x.t, w.bucket)}: ${fmtN(x.visitors)} visitors, ${fmtN(x.views)} views, ${fmtN(x.adds)} added to cart"><i style="height:${Math.max(2, Math.round((x.visitors / mx) * 100))}%"></i><small>${lbl(x.t, w.bucket)}</small></div>`).join("") || '<p class="hint">No visits recorded in this period yet.</p>'}</div>
-    ${table([w.bucket[0].toUpperCase() + w.bucket.slice(1), "Visitors", "Views", "Product views", "Added to cart", "Checkouts", "Orders"], [...S].reverse().map((x) => `<tr><td>${lbl(x.t, w.bucket)}</td><td>${fmtN(x.visitors)}</td><td>${fmtN(x.views)}</td><td>${fmtN(x.product_views)}</td><td>${fmtN(x.adds)}</td><td>${fmtN(x.checkouts)}</td><td>${fmtN(x.orders)}</td></tr>`))}
+    <h3 class="an-h">Visitors by ${w.bucket} <small style="text-transform:none;letter-spacing:0;color:var(--muted)">· tap a bar or row to drill in</small></h3>
+    <div class="an-chart" role="img" aria-label="Visitors by ${w.bucket}">${S.map((x) => `<div class="an-col clk" data-ddt="${x.t}" data-ddb="${w.bucket}" title="${lbl(x.t, w.bucket)}: ${fmtN(x.visitors)} visitors, ${fmtN(x.views)} views, ${fmtN(x.adds)} added to cart"><i style="height:${Math.max(2, Math.round((x.visitors / mx) * 100))}%"></i><small>${lbl(x.t, w.bucket)}</small></div>`).join("") || '<p class="hint">No visits recorded in this period yet.</p>'}</div>
+    ${table([w.bucket[0].toUpperCase() + w.bucket.slice(1), "Visitors", "Views", "Product views", "Added to cart", "Checkouts", "Orders"], [...S].reverse().map((x) => `<tr class="clk" data-ddt="${x.t}" data-ddb="${w.bucket}"><td>${lbl(x.t, w.bucket)}</td><td>${fmtN(x.visitors)}</td><td>${fmtN(x.views)}</td><td>${fmtN(x.product_views)}</td><td>${fmtN(x.adds)}</td><td>${fmtN(x.checkouts)}</td><td>${fmtN(x.orders)}</td></tr>`))}
     <div class="an-minis">${mini("Where visitors come from", D.sources || [])}${mini("Devices", D.devices || [])}${mini("Pages", D.pages || [])}${mini("Places (time zone)", D.places || [])}</div>`;
   } else if (an.tab === "prod" && D) {
     const P = [...(D.products || [])].sort((a, b) => (an.sort === "adds" ? b.adds - a.adds || b.views - a.views : b.views - a.views));
     h += `<div class="an-bar"><span class="hint">Sort by</span><div class="an-tabs">${[["views", "Most viewed"], ["adds", "Most added to cart"]].map(([k, l]) => `<button type="button" aria-selected="${an.sort === k}" data-ansort="${k}">${l}</button>`).join("")}</div></div>
-    ${table(["Product / design", "Views", "People", "Added to cart", "Add rate", "Orders"], P.map((p) => `<tr><td>${esc(pname(p.id))}</td><td>${fmtN(p.views)}</td><td>${fmtN(p.viewers)}</td><td>${fmtN(p.adds)}</td><td>${pct(p.adders, p.viewers)}</td><td>${fmtN(p.orders)}</td></tr>`))}
+    ${table(["Product / design", "Views", "People", "Added to cart", "Add rate", "Orders"], P.map((p) => `<tr class="clk" data-ddp="${esc(p.id)}"><td>${esc(pname(p.id))}</td><td>${fmtN(p.views)}</td><td>${fmtN(p.viewers)}</td><td>${fmtN(p.adds)}</td><td>${pct(p.adders, p.viewers)}</td><td>${fmtN(p.orders)}</td></tr>`))}
     <p class="hint">Add rate = people who added it ÷ people who viewed it. Designs on the keepsakes page count as views and requests.</p>`;
   } else if (an.tab === "cart" && an.carts) {
     const cut = Date.now() - Number(an.cartAge) * 864e5, C = an.carts.filter((c) => new Date(c.updated_at).getTime() >= cut), withMail = C.filter((c) => c.email);
@@ -2674,14 +2717,15 @@ function anPaint() {
       <button class="btn gold" type="button" id="anSale" ${Object.keys(held).length ? "" : "disabled"}>Run a sale on ${Object.keys(held).length} product${Object.keys(held).length === 1 ? "" : "s"}</button>
       <button class="btn line" type="button" id="anMail" ${withMail.length ? "" : "disabled"}>Email ${withMail.length} customer${withMail.length === 1 ? "" : "s"}</button><button class="btn line" type="button" id="anCopy" ${withMail.length ? "" : "disabled"}>Copy emails</button></div><p class="hint" id="anMsg" role="status"></p></section>
     <h3 class="an-h">Most held in carts</h3>
-    ${table(["Product", "In carts", "Units"], Object.values(held).sort((a, b) => b.carts - a.carts).slice(0, 30).map((r) => `<tr><td>${esc(pname(r.id) === r.id ? r.n : pname(r.id))}</td><td>${r.carts}</td><td>${r.qty}</td></tr>`))}
+    ${table(["Product", "In carts", "Units"], Object.values(held).sort((a, b) => b.carts - a.carts).slice(0, 30).map((r) => `<tr class="clk" data-ddp="${esc(r.id)}"><td>${esc(pname(r.id) === r.id ? r.n : pname(r.id))}</td><td>${r.carts}</td><td>${r.qty}</td></tr>`))}
     <h3 class="an-h">Each cart</h3>
-    ${table(["Updated", "Items", "Total", "Email", "Device", ""], C.map((c) => `<tr><td>${ago(c.updated_at)} ago</td><td>${(c.items || []).map((i) => `${esc(i.n)} ×${i.q}`).join("<br>")}</td><td>${usd2(c.total)}</td><td>${c.email ? esc(c.email) + (c.contacted ? "<br><small>emailed " + ago(c.contacted) + " ago</small>" : "") : "–"}</td><td>${esc(c.device || "")}</td><td>${c.email ? `<button class="btn line" type="button" data-cdone="${esc(c.sid)}" style="min-height:32px;padding:0 10px;font-size:12px">Mark emailed</button>` : ""}</td></tr>`))}`;
+    ${table(["Updated", "Items", "Total", "Email", "Device", ""], C.map((c) => `<tr class="clk" data-ddc="${esc(c.sid)}"><td>${ago(c.updated_at)} ago</td><td>${(c.items || []).map((i) => `${esc(i.n)} ×${i.q}`).join("<br>")}</td><td>${usd2(c.total)}</td><td>${c.email ? esc(c.email) + (c.contacted ? "<br><small>emailed " + ago(c.contacted) + " ago</small>" : "") : "–"}</td><td>${esc(c.device || "")}</td><td>${c.email ? `<button class="btn line" type="button" data-cdone="${esc(c.sid)}" style="min-height:32px;padding:0 10px;font-size:12px">Mark emailed</button>` : ""}</td></tr>`))}`;
   } else if (an.tab === "ord" && an.orders) {
     const O = an.orders, by = (f) => { const m = {}; for (const o of O) { const k = f(o) || "unknown"; m[k] = (m[k] || 0) + 1; } return Object.entries(m).sort((a, b) => b[1] - a[1]).map(([name, n]) => ({ name, n })); };
     const front = O.filter((o) => o.sides === "front").length, both = O.filter((o) => o.sides === "both").length;
     h += `<div class="an-kpis">${kpi("Requests", fmtN(O.length), "from the keepsakes page")}${kpi("Both sides", fmtN(both), pct(both, O.length))}${kpi("Front only", fmtN(front), pct(front, O.length))}${kpi("Pieces", fmtN(O.reduce((t, o) => t + (o.qty || 1), 0)))}</div>
-    <div class="an-minis">${mini("Most requested designs", by((o) => pname(o.design)).slice(0, 12))}${mini("By status", by((o) => o.status))}</div>`;
+    <div class="an-minis">${mini("Most requested designs", by((o) => pname(o.design)).slice(0, 12))}${mini("By status", by((o) => o.status))}</div>
+    <h3 class="an-h">Requests (tap one to open it)</h3>${table(["Received", "Design", "Customer", "Status", "Sides", "Pieces"], O.map((o, i) => `<tr class="clk" data-ddo="${i}"><td>${when(o.created_at)}</td><td>${esc(pname(o.design))}</td><td>${esc(o.customer_name || "")}</td><td>${esc(o.status)}</td><td>${o.sides === "front" ? "Front" : o.sides === "both" ? "Both" : ""}</td><td>${o.qty}</td></tr>`))}`;
   }
   $("anBody").innerHTML = h;
 }
@@ -2755,7 +2799,8 @@ const SCH = [
   ["secs", "Hide store sections", [["hideSections", "multi:reviews=Reviews,custom=Custom orders,about=About,faq=FAQ,how=How it's made,gallery=Gallery,collections=Collections", "Sections to hide"]], (v) => ({ hideSections: v.hideSections || [] })],
   ["des", "Hide designs", [["ksItemOff", "designs", "Designs to hide"]], (v) => ({ ksItemOff: v.ksItemOff || [] })],
 ];
-let schedRules = [], schedNew = null;
+let schedRules = [], schedNew = null, schedEdit = -1;
+const toLocalInput = (iso) => { const d = new Date(iso), p = (n) => String(n).padStart(2, "0"); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`; };
 const sstatus = (r) => { const n = Date.now(), a = r.from ? Date.parse(r.from) : -1, b = r.to ? Date.parse(r.to) : Infinity; return r.off ? "Off" : n < a ? "Upcoming" : n >= b ? "Ended" : "Active now"; };
 const fld = (k, type, label, val) => {
   if (type === "text" || type === "url") return `<label class="f"><span>${label}</span><input class="in" data-sf="${k}" maxlength="200" value="${esc(val || "")}"></label>`;
@@ -2772,7 +2817,8 @@ function schPaintDesigns() {
 }
 function sdPaint() {
   const list = schedRules.map((r, i) => { const st = sstatus(r); return `<div class="hs-row"><div><b>${esc(r.label)}</b> <span class="sd-st ${st === "Active now" ? "on" : ""}">${st}</span><div class="hint">${r.from ? "From " + when(r.from) : "Starts now"} · ${r.to ? "until " + when(r.to) : "no end date"}</div><div class="hs-chips">${Object.entries(r.set).map(([k, v]) => `<span>${esc(fk(k))}: ${esc(brief(v))}</span>`).join("")}</div></div>
-      <div style="display:grid;gap:6px"><button class="btn line" type="button" data-sdoff="${i}">${r.off ? "Turn on" : "Turn off"}</button><button class="btn line" type="button" data-sddel="${i}">Delete</button></div></div>`; }).join("");
+      <div style="display:grid;gap:6px"><button class="btn line" type="button" data-sdoff="${i}">${r.off ? "Turn on" : "Turn off"}</button><button class="btn line" type="button" data-sdedit="${i}">Edit dates</button><button class="btn line" type="button" data-sddel="${i}">Delete</button></div>
+      ${schedEdit === i ? `<div style="grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px;align-items:end"><label class="f"><span>Starts</span><input class="in" type="datetime-local" id="seFrom" value="${r.from ? toLocalInput(r.from) : ""}"></label><label class="f"><span>Ends</span><input class="in" type="datetime-local" id="seTo" value="${r.to ? toLocalInput(r.to) : ""}"></label><button class="btn gold" type="button" data-sdsave="${i}">Save dates</button></div>` : ""}</div>`; }).join("");
   const n = schedNew;
   const form = n ? `<section class="ks-sec"><h3>New schedule</h3>
     <label class="f"><span>What should change?</span><select class="in" id="schKind">${SCH.map(([k, l]) => `<option value="${k}"${n.kind === k ? " selected" : ""}>${l}</option>`).join("")}</select></label>
@@ -2792,7 +2838,9 @@ $("sdBtn").onclick = async () => { sheetOpen("sdSheet"); schedNew = null; try { 
 $("sdClose").onclick = () => sheetShut("sdSheet");
 $("sdBody").addEventListener("click", async (e) => {
   const b = e.target.closest("button"); if (!b) return;
-  if (b.id === "schAdd") { schedNew = { kind: "ksNotice" }; sdPaint(); }
+  if (b.dataset.sdedit !== undefined) { schedEdit = schedEdit === +b.dataset.sdedit ? -1 : +b.dataset.sdedit; sdPaint(); }
+  else if (b.dataset.sdsave !== undefined) { const from = $("seFrom").value ? new Date($("seFrom").value).toISOString() : "", to = $("seTo").value ? new Date($("seTo").value).toISOString() : ""; if (to && from && to <= from) return toast("The end must be after the start."); const r = schedRules.map((x, i) => (i === +b.dataset.sdsave ? { ...x, from, to } : x)); if (await sdSave(r)) { schedEdit = -1; toast("Dates saved"); sdPaint(); } }
+  else if (b.id === "schAdd") { schedNew = { kind: "ksNotice" }; sdPaint(); }
   else if (b.id === "schCancel") { schedNew = null; sdPaint(); }
   else if (b.dataset.sdoff !== undefined) { const r = schedRules.map((x, i) => (i === +b.dataset.sdoff ? { ...x, off: !x.off } : x)); if (await sdSave(r)) { toast("Saved"); sdPaint(); } }
   else if (b.dataset.sddel !== undefined) { if (!confirm("Delete this schedule?")) return; if (await sdSave(schedRules.filter((_, i) => i !== +b.dataset.sddel))) { toast("Deleted"); sdPaint(); } }
@@ -2849,7 +2897,7 @@ $("apBody").addEventListener("click", async (e) => {
 /* ---------- Tools: health check, backup, restore ---------- */
 async function tlOpen() {
   sheetOpen("tlSheet");
-  $("tlBody").innerHTML = `<section class="ks-sec"><h3>Health check</h3><p class="hint">Finds things that quietly hurt sales: products with no photo, no price or no description, and keepsake categories with no price.</p><button class="btn gold" type="button" id="tlScan">Run health check</button><div id="tlOut"></div></section>
+  $("tlBody").innerHTML = `<section class="ks-sec"><h3>Health check</h3><p class="hint">Finds things that quietly hurt sales. Tap any result to view it, fix it, or delete it.</p><button class="btn gold" type="button" id="tlScan">Run health check</button><div id="tlOut"></div></section>
   <section class="ks-sec"><h3>Back up &amp; restore settings</h3><p class="hint">Download every setting as a file, or load one back. Restoring replaces the current settings (the old ones stay in History).</p>
     <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn line" type="button" id="tlExp">Download settings backup</button><button class="btn line" type="button" id="tlImp">Restore from a backup file…</button><input type="file" id="tlFile" accept="application/json,.json" hidden></div><p class="hint" id="tlMsg" role="status"></p></section>
   <section class="ks-sec"><h3>Visitor data</h3><p class="hint">Your own visits from this browser are never counted. Clear counts older than 400 days to keep things light.</p><button class="btn line" type="button" id="tlPurge">Clear data older than 400 days</button></section>`;
@@ -2887,6 +2935,367 @@ $("tlBody").addEventListener("change", async (e) => {
     if (error) throw error; site = obj; $("tlMsg").textContent = "Restored. Live now.";
   } catch (err) { $("tlMsg").textContent = "Couldn't restore: " + (err.message || err); }
 });
+/* ================= Drill-down: open any row to view, edit, fix or delete it ================= */
+let ddAfter = null;
+function ddOpen(title, html, after) { $("ddT").textContent = title; $("ddBody").innerHTML = html; ddAfter = after || null; $("ddSheet").hidden = false; document.body.style.overflow = "hidden"; $("ddBody").scrollTop = 0; }
+function ddShut() { $("ddSheet").hidden = true; const a = ddAfter; ddAfter = null; if (a) a(); else if ($("anSheet").hidden && $("tlSheet").hidden && $("sdSheet").hidden) document.body.style.overflow = ""; }
+$("ddClose").onclick = ddShut;
+document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("ddSheet").hidden) { e.stopPropagation(); ddShut(); } }, true);
+const closeAllSheets = () => { for (const id of ["ddSheet", "anSheet", "tlSheet", "sdSheet", "hsSheet", "apSheet", "ksSheet", "hubSheet"]) if ($(id)) $(id).hidden = true; document.body.style.overflow = ""; ddAfter = null; };
+const num2 = (v) => (v === "" || v == null ? "" : Math.max(0, Number(v) || 0));
+const warnCls = (bad) => (bad ? ' style="border-color:#e8a33d"' : "");
+const saveSite = async (mut) => {
+  const cur = await readSiteRow(), next = { ...cur }; mut(next);
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
+  if (error) { toast("Couldn't save: " + error.message); return false; } site = next; return true;
+};
+const imgOf = (r) => { const i = Array.isArray(r.images) ? r.images[0] : r.image; const u = typeof i === "string" ? i : i && (i.card || i.thumb || i.url || i.large); return typeof u === "string" && /^(https:\/\/|[\w./-]+\.(jpg|png|webp))/.test(u) ? u : ""; };
+const delBtn = (id, label) => `<button class="btn line" type="button" id="${id}" data-arm="0" style="border-color:#c0504d;color:#ff9a96">${label}</button>`;
+function armDelete(btn, run) { if (btn.dataset.arm !== "1") { btn.dataset.arm = "1"; const t = btn.textContent; btn.textContent = "Tap again to delete for good"; setTimeout(() => { btn.dataset.arm = "0"; btn.textContent = t; }, 4000); return; } run(); }
+
+/* ---- a store product ---- */
+async function drillProduct(id, focus) {
+  const r = rows.find((x) => x.id === id);
+  if (!r && NAMES[id]) return drillDesign(id);
+  if (!r) return ddOpen("Product", `<p class="hint">“${esc(id)}” is not in your product list any more (it may have been deleted or renamed).</p>`);
+  const w = anWindow(); let st = null;
+  try { const { data } = await sb.rpc("product_analytics", { p_id: id, p_from: new Date(Date.now() - 30 * 864e5).toISOString(), p_to: new Date(Date.now() + 6e4).toISOString(), p_bucket: "day" }); st = data; } catch { /* stats are optional */ }
+  const T = (st && st.totals) || {}, img = imgOf(r), bad = { price: !(Number(r.price) > 0), desc: !String(r.description || "").trim(), photo: !img && !(Array.isArray(r.images) && r.images.length) };
+  ddOpen(r.name || id, `<div style="display:flex;gap:12px;align-items:center">${img ? `<img src="${esc(img)}" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:12px">` : ""}<div><b>${esc(r.name || id)}</b><div class="hint">${esc(r.category || "")} · ${r.visible === false ? "hidden from the store" : "showing on the store"}</div>${bad.photo ? '<div class="hint" style="color:#e8a33d">No photo yet. Add one in the full editor.</div>' : ""}</div></div>
+    <div class="an-kpis">${kpi("Views (30 days)", fmtN(T.views))}${kpi("People", fmtN(T.viewers))}${kpi("Added to cart", fmtN(T.adds), fmtN(T.adders) + " people")}${kpi("In carts now", fmtN(st && st.in_carts))}</div>
+    ${st && st.series && st.series.length ? `<div class="an-chart" style="height:110px" role="img" aria-label="Views by day">${(() => { const mx = Math.max(1, ...st.series.map((x) => x.views)); return st.series.map((x) => `<div class="an-col" title="${lbl(x.t, "day")}: ${x.views} views, ${x.adds} added"><i style="height:${Math.max(3, Math.round((x.views / mx) * 100))}%"></i></div>`).join(""); })()}</div>` : ""}
+    <section class="ks-sec"><h3>Quick fix</h3>
+      <label class="f"><span>Name</span><input class="in" id="dpName" value="${esc(r.name || "")}"></label>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f"><span>Price ($)</span><input class="in" id="dpPrice" type="number" min="0" step="0.01" value="${esc(r.price ?? "")}"${warnCls(bad.price)}></label><label class="f"><span>In stock</span><input class="in" id="dpStock" type="number" min="0" step="1" value="${esc(r.stock ?? "")}" ${r.digital ? "disabled" : ""}></label></div>
+      <label class="f"><span>Description</span><textarea class="in" id="dpDesc" rows="4"${warnCls(bad.desc)}>${esc(r.description || "")}</textarea></label>
+      <label class="ssw"><span class="switch"><input type="checkbox" id="dpVis" ${r.visible === false ? "" : "checked"}></span>Show on the store</label>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn gold" type="button" id="dpSave">Save fixes</button><button class="btn line" type="button" id="dpFull">Open full editor</button><a class="btn line" href="./#p/${encodeURIComponent(id)}" target="_blank" rel="noopener">View on store ↗</a>${delBtn("dpDel", "Delete product")}</div><p class="hint" id="dpMsg" role="status"></p></section>`,
+    () => { if (!$("tlSheet").hidden && window.tlRescan) tlRescan(); else if (!$("anSheet").hidden) anLoad(); });
+  $("dpSave").onclick = async () => {
+    const patch = { name: $("dpName").value.trim() || r.name, price: Number($("dpPrice").value) || 0, description: $("dpDesc").value.trim(), visible: $("dpVis").checked };
+    if (!r.digital && $("dpStock").value !== "") patch.stock = Math.max(0, Math.round(Number($("dpStock").value)));
+    const { error } = await sb.from("listings").update({ ...patch, updated_at: new Date().toISOString() }).eq("id", id);
+    if (error) return ($("dpMsg").textContent = "Couldn't save: " + error.message);
+    Object.assign(r, patch); try { render(); } catch { /* list may be closed */ } $("dpMsg").textContent = "Saved. Live on the store now."; toast("Saved");
+  };
+  $("dpFull").onclick = () => { closeAllSheets(); openEditor(r); };
+  $("dpDel").onclick = (e) => armDelete(e.target, async () => {
+    const { error } = await sb.from("listings").delete().eq("id", id);
+    if (error) return ($("dpMsg").textContent = "Couldn't delete: " + error.message);
+    toast("Product deleted"); try { await loadRows(); } catch { /* fine */ } ddShut();
+  });
+}
+
+/* ---- a keepsake design ---- */
+async function drillDesign(id) {
+  const row = await readSiteRow(), meta = (row.ksItemMeta || {})[id] || {}, pr = meta.price || {}, off = (row.ksItemOff || []).includes(id), sd = (row.ksItemSides || {})[id] || "";
+  let st = null; try { const { data } = await sb.rpc("product_analytics", { p_id: id, p_from: new Date(Date.now() - 30 * 864e5).toISOString(), p_to: new Date(Date.now() + 6e4).toISOString(), p_bucket: "day" }); st = data; } catch { /* optional */ }
+  const T = (st && st.totals) || {};
+  ddOpen(NAMES[id] || id, `<div class="an-kpis">${kpi("Views (30 days)", fmtN(T.views))}${kpi("People", fmtN(T.viewers))}${kpi("Requests", fmtN(T.orders))}</div>
+    <section class="ks-sec"><h3>Edit this design</h3>
+    <label class="ssw"><span class="switch"><input type="checkbox" id="ddShow" ${off ? "" : "checked"}></span>Show to customers</label>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px">
+      <label class="f"><span>Display name</span><input class="in" id="ddName" maxlength="40" value="${esc(meta.name || "")}" placeholder="${esc((NAMES[id] || id).replace(/ \(.*/, ""))}"></label>
+      <label class="f"><span>Badge</span><input class="in" id="ddBadge" maxlength="14" value="${esc(meta.badge || "")}" placeholder="New, Popular…"></label>
+      <label class="f"><span>Position (1 = first)</span><input class="in" id="ddPos" type="number" min="1" value="${esc(meta.pos || "")}"></label>
+      <label class="f"><span>Price Standard $</span><input class="in" id="ddP1" type="number" min="0" step="0.5" value="${esc(pr.standard || "")}" placeholder="as category"></label>
+      <label class="f"><span>Price Large $</span><input class="in" id="ddP2" type="number" min="0" step="0.5" value="${esc(pr.large || "")}" placeholder="as category"></label>
+      <label class="f"><span>Printing sides</span><select class="in" id="ddSides"><option value="">As category</option><option value="both"${sd === "both" ? " selected" : ""}>Both sides</option><option value="front"${sd === "front" ? " selected" : ""}>Front only</option></select></label></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn gold" type="button" id="ddSave">Save</button>${delBtn("ddClear", "Clear my edits")}</div><p class="hint" id="ddMsg" role="status"></p></section>`);
+  $("ddSave").onclick = async () => {
+    const ok = await saveSite((n) => {
+      const m = {}; const nm = $("ddName").value.trim(), bg = $("ddBadge").value.trim(), ps = Math.round(num2($("ddPos").value)), p1 = num2($("ddP1").value), p2 = num2($("ddP2").value);
+      if (nm) m.name = nm; if (bg) m.badge = bg; if (ps) m.pos = ps; if (p1 || p2) { m.price = {}; if (p1) m.price.standard = p1; if (p2) m.price.large = p2; }
+      const all = { ...(n.ksItemMeta || {}) }; if (Object.keys(m).length) all[id] = m; else delete all[id]; if (Object.keys(all).length) n.ksItemMeta = all; else delete n.ksItemMeta;
+      const o = new Set(n.ksItemOff || []); if ($("ddShow").checked) o.delete(id); else o.add(id); if (o.size) n.ksItemOff = [...o]; else delete n.ksItemOff;
+      const s = { ...(n.ksItemSides || {}) }; if ($("ddSides").value) s[id] = $("ddSides").value; else delete s[id]; if (Object.keys(s).length) n.ksItemSides = s; else delete n.ksItemSides;
+    });
+    if (ok) { $("ddMsg").textContent = "Saved. Live on the keepsakes page now."; toast("Saved"); }
+  };
+  $("ddClear").onclick = (e) => armDelete(e.target, async () => { if (await saveSite((n) => { for (const k of ["ksItemMeta", "ksItemSides"]) { const o = { ...(n[k] || {}) }; delete o[id]; if (Object.keys(o).length) n[k] = o; else delete n[k]; } })) { toast("Edits cleared"); drillDesign(id); } });
+}
+
+/* ---- a keepsake category (price it) ---- */
+async function drillFam(key) {
+  const fam = KS_FAMS.find((f) => f[0] === key), row = await readSiteRow(), b = ((row.ksPrice || {}).base || {})[key] || {}, off = (row.keepsakeOff || []).includes(key), sd = (row.ksFamSides || {})[key] || "";
+  ddOpen(fam[1], `<p class="hint">${fam[2].length} designs. Set the price customers see as “Estimated price”. Individual designs can still override it.</p>
+    <section class="ks-sec"><h3>Category price</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><label class="f"><span>Standard (4.5 in) $</span><input class="in" id="dfP1" type="number" min="0" step="0.5" value="${esc(b.standard || "")}" style="border-color:#e8a33d"></label><label class="f"><span>Large (6.5 in) $</span><input class="in" id="dfP2" type="number" min="0" step="0.5" value="${esc(b.large || "")}" style="border-color:#e8a33d"></label></div>
+    <label class="ssw"><span class="switch"><input type="checkbox" id="dfShow" ${off ? "" : "checked"}></span>Show this category to customers</label>
+    ${key === "photos" ? "" : `<label class="f"><span>Printing sides</span><select class="in" id="dfSides"><option value="">Store default</option><option value="both"${sd === "both" ? " selected" : ""}>Both sides</option><option value="front"${sd === "front" ? " selected" : ""}>Front only</option></select></label>`}
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn gold" type="button" id="dfSave">Save</button><button class="btn line" type="button" id="dfAll">Open all ${esc(fam[1])} designs</button></div><p class="hint" id="dfMsg" role="status"></p></section>`,
+    () => { if (!$("tlSheet").hidden && window.tlRescan) tlRescan(); });
+  $("dfSave").onclick = async () => {
+    const p1 = num2($("dfP1").value), p2 = num2($("dfP2").value);
+    const ok = await saveSite((n) => {
+      const pr = JSON.parse(JSON.stringify(n.ksPrice || {})); pr.base = pr.base || {}; const o = {}; if (p1) o.standard = p1; if (p2) o.large = p2; if (Object.keys(o).length) pr.base[key] = o; else delete pr.base[key]; if (!Object.keys(pr.base).length) delete pr.base;
+      if (Object.keys(pr).length) n.ksPrice = pr; else delete n.ksPrice;
+      const f = new Set(n.keepsakeOff || []); if ($("dfShow").checked) f.delete(key); else f.add(key); if (f.size) n.keepsakeOff = [...f]; else delete n.keepsakeOff;
+      if ($("dfSides")) { const s = { ...(n.ksFamSides || {}) }; if ($("dfSides").value) s[key] = $("dfSides").value; else delete s[key]; if (Object.keys(s).length) n.ksFamSides = s; else delete n.ksFamSides; }
+    });
+    if (ok) { $("dfMsg").textContent = "Saved. Live on the keepsakes page now."; toast("Saved"); }
+  };
+  $("dfAll").onclick = () => { closeAllSheets(); $("ksBtn").click(); };
+}
+
+/* ---- one cart ---- */
+function drillCart(sid) {
+  const c = (an.carts || []).find((x) => x.sid === sid); if (!c) return;
+  ddOpen("Cart", `<div class="an-kpis">${kpi("Items", fmtN(c.item_count))}${kpi("Value", usd2(c.total))}${kpi("Last changed", ago(c.updated_at) + " ago", "started " + when(c.created_at))}${kpi("Device", esc(c.device || "?"), esc((c.tz || "").split("/").pop().replace(/_/g, " ")))}</div>
+    ${table(["Item", "Qty", "Price", ""], (c.items || []).map((i) => `<tr class="clk" data-ddp="${esc(i.id)}"><td>${esc(i.n)}${i.o ? `<br><small>${esc(i.o)}</small>` : ""}</td><td>${i.q}</td><td>${usd2(i.u * i.q)}</td><td>Open ›</td></tr>`))}
+    <section class="ks-sec"><h3>Reach this customer</h3>${c.email ? `<p>${esc(c.email)} ${c.contacted ? `<span class="hint">· emailed ${ago(c.contacted)} ago</span>` : ""}</p><div style="display:flex;gap:10px;flex-wrap:wrap"><a class="btn gold" href="mailto:${esc(c.email)}?subject=${encodeURIComponent("You left something in your PrAjo cart")}&body=${encodeURIComponent("Hi!\n\nYou left a few things in your cart at PrAjo Custom Studio. Visit prajocustomstudio.com to finish your order.\n\nPrAjo Custom Studio")}" id="dcMail">Email them</a><button class="btn line" type="button" id="dcDone">Mark emailed</button></div>` : '<p class="hint">They did not leave an email, so this cart can only be helped with a sale on the products inside it.</p>'}
+    <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px">${delBtn("dcDel", "Delete this cart")}</div><p class="hint" id="dcMsg" role="status"></p></section>`, () => anLoad());
+  if ($("dcDone")) $("dcDone").onclick = async () => { await sb.from("carts_live").update({ contacted: new Date().toISOString() }).eq("sid", sid); $("dcMsg").textContent = "Marked as emailed."; };
+  $("dcDel").onclick = (e) => armDelete(e.target, async () => { const { error } = await sb.from("carts_live").delete().eq("sid", sid); if (error) return ($("dcMsg").textContent = error.message); toast("Cart deleted"); ddShut(); });
+}
+
+/* ---- one keepsake request ---- */
+const STATUSES = [["new", "New"], ["reviewing", "Reviewing"], ["quoted", "Quoted"], ["approved", "Approved"], ["in_production", "In production"], ["done", "Done"], ["cancelled", "Cancelled"]];
+function drillOrder(i) {
+  const o = (an.orders || [])[i]; if (!o) return;
+  ddOpen(o.code || "Request", `<div class="an-kpis">${kpi("Received", when(o.created_at))}${kpi("Pieces", fmtN(o.qty))}${kpi("Sides", o.sides === "front" ? "Front only" : o.sides === "both" ? "Both sides" : "?")}${kpi("Estimate each", o.price ? usd2(o.price) : "none")}</div>
+    <section class="ks-sec"><h3>${esc(pname(o.design))}</h3><p class="hint">${esc(o.summary || "")}</p>
+    <p><b>${esc(o.customer_name || "")}</b><br>${o.customer_email ? `<a href="mailto:${esc(o.customer_email)}">${esc(o.customer_email)}</a>` : ""}${o.customer_phone ? "<br>" + esc(o.customer_phone) : ""}</p>
+    <label class="f"><span>Status</span><select class="in" id="doStatus">${STATUSES.map(([v, l]) => `<option value="${v}"${o.status === v ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+    <label class="f"><span>Your notes (only you see these)</span><textarea class="in" id="doNotes" rows="3" style="min-height:90px">${esc(o.owner_notes || "")}</textarea></label>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn gold" type="button" id="doSave">Save</button><button class="btn line" type="button" id="doOpen">Open in Custom designs (proof, files, workbench)</button>${delBtn("doDel", "Delete request")}</div><p class="hint" id="doMsg" role="status"></p></section>`, () => anLoad());
+  $("doSave").onclick = async () => { const { error } = await sb.from("custom_designs").update({ status: $("doStatus").value, owner_notes: $("doNotes").value.trim() || null }).eq("id", o.id); $("doMsg").textContent = error ? "Couldn't save: " + error.message : "Saved. The customer's status page shows it."; if (!error) { o.status = $("doStatus").value; o.owner_notes = $("doNotes").value; } };
+  $("doOpen").onclick = () => { closeAllSheets(); $("dsBtn").click(); };
+  $("doDel").onclick = (e) => armDelete(e.target, async () => { const { error } = await sb.from("custom_designs").delete().eq("id", o.id); if (error) return ($("doMsg").textContent = error.message); toast("Request deleted"); ddShut(); });
+}
+
+/* ---- one period (a day, week, month) ---- */
+const ptToUtc = (t) => { const g = new Date(t + "Z"), p = new Date(g.toLocaleString("en-US", { timeZone: "America/Los_Angeles" })); return new Date(g.getTime() + (g - p)); };
+async function drillPeriod(t, bucket) {
+  const from = ptToUtc(t), to = new Date(from.getTime() + { hour: 36e5, day: 864e5, week: 7 * 864e5, month: 31 * 864e5 }[bucket]);
+  if (bucket === "month") to.setTime(new Date(from.getFullYear(), from.getMonth() + 1, 1).getTime());
+  const sub = bucket === "hour" || bucket === "day" ? "hour" : "day";
+  const { data: D, error } = await sb.rpc("site_analytics", { p_from: from.toISOString(), p_to: to.toISOString(), p_bucket: sub });
+  if (error) return toast(error.message);
+  const T = D.totals || {}, S = D.series || [];
+  ddOpen(lbl(t, bucket), `<div class="an-kpis">${kpi("Visitors", fmtN(T.visitors), fmtN(T.returning) + " came back")}${kpi("Page views", fmtN(T.views))}${kpi("Product views", fmtN(T.product_views))}${kpi("Added to cart", fmtN(T.adds))}${kpi("Checkouts", fmtN(T.checkouts))}${kpi("Orders", fmtN(T.orders))}</div>
+    <h3 class="an-h">By ${sub}</h3>${table([sub[0].toUpperCase() + sub.slice(1), "Visitors", "Views", "Product views", "Added", "Orders"], S.map((x) => `<tr><td>${lbl(x.t, sub)}</td><td>${x.visitors}</td><td>${x.views}</td><td>${x.product_views}</td><td>${x.adds}</td><td>${x.orders}</td></tr>`))}
+    <h3 class="an-h">Products people looked at</h3>${table(["Product", "Views", "Added to cart"], (D.products || []).map((p) => `<tr class="clk" data-ddp="${esc(p.id)}"><td>${esc(pname(p.id))}</td><td>${p.views}</td><td>${p.adds}</td></tr>`))}
+    <div class="an-minis">${mini("Came from", D.sources || [])}${mini("Devices", D.devices || [])}${mini("Places", D.places || [])}</div>`);
+}
+
+/* ---- health check with drill-down ---- */
+const grp = (title, tone, count, body, open) => `<details class="hc-g" ${open ? "open" : ""}><summary><b>${title}</b> <span class="hc-n ${tone}">${count}</span></summary><div class="hc-b">${body}</div></details>`;
+const hcRow = (attr, title, sub, go) => `<div class="hc-r clk" ${attr} role="button" tabindex="0"><div><b>${title}</b><small>${sub}</small></div><span>${go || "Fix ›"}</span></div>`;
+async function tlRescan() {
+  const out = $("tlOut"); out.innerHTML = '<p class="hint">Checking…</p>';
+  const [{ data, error }, row, cartsRes] = await Promise.all([sb.from("listings").select("*"), readSiteRow(), sb.from("carts_live").select("sid,updated_at").lt("updated_at", new Date(Date.now() - 30 * 864e5).toISOString())]);
+  if (error) return (out.innerHTML = `<p class="hint">${esc(error.message)}</p>`);
+  const L = data || []; rows = rows && rows.length ? rows : L;
+  const imgs = (l) => (Array.isArray(l.images) ? l.images.length : l.image ? 1 : 0), probs = [];
+  for (const l of L) { const p = []; if (!(Number(l.price) > 0)) p.push("no price"); if (!imgs(l)) p.push("no photo"); if (!String(l.description || l.desc || "").trim()) p.push("no description"); if (/\btest\b/i.test(l.name || "")) p.push("looks like a test product"); if (p.length) probs.push([l, p]); }
+  const sold = L.filter((l) => !l.digital && Number(l.stock) <= 0 && l.visible !== false), hidden = L.filter((l) => l.visible === false);
+  const pr = (row.ksPrice && row.ksPrice.base) || {}, off = row.keepsakeOff || [], noPrice = KS_FAMS.filter(([k]) => !off.includes(k) && !pr[k] && k !== "photos");
+  const ended = (row.sched || []).filter((r) => r.to && Date.parse(r.to) < Date.now()), oldCarts = (cartsRes.data || []).length;
+  const sale = row.sale, saleEnded = sale && sale.on && sale.ends && sale.ends < new Date().toISOString().slice(0, 10);
+  const total = probs.length + sold.length + noPrice.length + ended.length + (oldCarts ? 1 : 0) + (saleEnded ? 1 : 0);
+  out.innerHTML = `<p class="hint">${total ? total + " thing" + (total === 1 ? "" : "s") + " to look at" : "Everything looks good"} (checked ${L.length} products). Tap any row to view, edit, fix or delete it.</p>` +
+    grp("Products with gaps", probs.length ? "warn" : "ok", probs.length, probs.map(([l, p]) => hcRow(`data-ddp="${esc(l.id)}"`, esc(l.name || l.id), p.join(" · "))).join("") || '<p class="hint">None.</p>', probs.length) +
+    grp("Showing but sold out", sold.length ? "warn" : "ok", sold.length, sold.map((l) => hcRow(`data-ddp="${esc(l.id)}"`, esc(l.name || l.id), "stock is 0 · customers see Sold out", "Restock or hide ›")).join("") || '<p class="hint">None.</p>') +
+    grp("Keepsake categories with no price", noPrice.length ? "warn" : "ok", noPrice.length, noPrice.map(([k, l, it]) => hcRow(`data-ddf="${k}"`, esc(l), it.length + " designs · no estimated price", "Set price ›")).join("") || '<p class="hint">All priced.</p>', noPrice.length) +
+    grp("Finished schedules to clean up", ended.length ? "warn" : "ok", ended.length, ended.map((r, i) => hcRow(`data-ddclean="${esc(r.id)}"`, esc(r.label), "ended " + when(r.to), "Delete ›")).join("") || '<p class="hint">None.</p>') +
+    (saleEnded ? grp("Sale still switched on", "warn", 1, hcRow('data-ddsale="1"', `${sale.pct}% off sale`, "its end date (" + sale.ends + ") has passed", "Turn off ›"), true) : "") +
+    (oldCarts ? grp("Old carts", "warn", oldCarts, hcRow('data-ddoldcarts="1"', oldCarts + " carts untouched for 30+ days", "safe to clear", "Delete all ›")) : "") +
+    grp("Hidden from the store", "info", hidden.length, hidden.map((l) => hcRow(`data-ddp="${esc(l.id)}"`, esc(l.name || l.id), "not showing to customers", "View ›")).join("") || '<p class="hint">None.</p>');
+}
+window.tlRescan = tlRescan;
+$("tlBody").addEventListener("click", async (e) => {
+  if (e.target.closest("#tlScan")) { e.stopImmediatePropagation(); tlRescan(); return; }
+  const r = e.target.closest(".hc-r"); if (!r) return;
+  if (r.dataset.ddp) drillProduct(r.dataset.ddp);
+  else if (r.dataset.ddf) drillFam(r.dataset.ddf);
+  else if (r.dataset.ddclean) { if (await saveSite((n) => { n.sched = (n.sched || []).filter((x) => x.id !== r.dataset.ddclean); if (!n.sched.length) delete n.sched; })) { toast("Schedule deleted"); tlRescan(); } }
+  else if (r.dataset.ddsale) { if (await saveSite((n) => { n.sale = { ...n.sale, on: false }; })) { toast("Sale turned off"); tlRescan(); } }
+  else if (r.dataset.ddoldcarts) { if (confirm("Delete every cart that hasn't changed in 30 days?")) { await sb.from("carts_live").delete().lt("updated_at", new Date(Date.now() - 30 * 864e5).toISOString()); toast("Old carts deleted"); tlRescan(); } }
+}, true);
+$("tlBody").addEventListener("keydown", (e) => { if ((e.key === "Enter" || e.key === " ") && e.target.classList.contains("hc-r")) { e.preventDefault(); e.target.click(); } });
+
+/* ---- wire clicks inside Reports ---- */
+$("anBody").addEventListener("click", (e) => {
+  if (e.target.closest("a,button,select,input")) return;
+  const el = e.target.closest("[data-ddp],[data-ddc],[data-ddo],[data-ddt]"); if (!el) return;
+  if (el.dataset.ddp) drillProduct(el.dataset.ddp); else if (el.dataset.ddc) drillCart(el.dataset.ddc); else if (el.dataset.ddo) drillOrder(+el.dataset.ddo); else if (el.dataset.ddt) drillPeriod(el.dataset.ddt, el.dataset.ddb);
+});
+document.addEventListener("click", (e) => { const el = e.target.closest("#ddBody [data-ddp]"); if (el) drillProduct(el.dataset.ddp); });
+
+/* ---- automatic backups list (in Tools) ---- */
+async function tlBackups() {
+  const box = $("tlBk"); if (!box) return;
+  const { data, error } = await sb.from("site_backups").select("id,at").order("id", { ascending: false }).limit(30);
+  box.innerHTML = error ? `<p class="hint">Automatic nightly backups aren't set up yet.</p>` : data.length ? `<div class="hs-chips">${data.map((b) => `<span>${when(b.at)} <a href="#" data-bkr="${b.id}">restore</a></span>`).join("")}</div>` : '<p class="hint">No backup yet. The first one is taken tonight.</p>';
+}
+$("tlBody").addEventListener("click", async (e) => {
+  const a = e.target.closest("[data-bkr]"); if (!a) return; e.preventDefault();
+  const { data } = await sb.from("site_backups").select("data,at").eq("id", a.dataset.bkr).maybeSingle(); if (!data) return;
+  if (!confirm("Replace all current settings with the backup from " + when(data.at) + "? You can undo it from Change history.")) return;
+  const { error } = await sb.from("site_settings").upsert({ id: 1, data: data.data, updated_at: new Date().toISOString() });
+  toast(error ? "Couldn't restore: " + error.message : "Restored. Live now");
+});
+{ const orig = $("tlBtn").onclick; $("tlBtn").onclick = async () => { await orig(); $("tlBody").insertAdjacentHTML("beforeend", `<section class="ks-sec"><h3>Automatic backups</h3><p class="hint">A copy of your settings is saved every night (last 60 kept).</p><div id="tlBk"><p class="hint">Loading…</p></div></section>`); tlBackups(); }; }
+/* ---- keep the admin's design list in step with the keepsakes page ---- */
+fetch("/keepsakes/design-list.json", { cache: "no-store" }).then((r) => (r.ok ? r.json() : null)).then((d) => {
+  if (!Array.isArray(d) || !d.length || !d.every((f) => Array.isArray(f) && Array.isArray(f[2]))) return;
+  KS_FAMS.length = 0; d.forEach((f) => KS_FAMS.push(f)); for (const k of Object.keys(NAMES)) delete NAMES[k];
+  for (const [fk2, fl, items] of KS_FAMS) for (const [id, n] of items) NAMES[id] = n + " (" + fl + ")";
+}).catch(() => {});
+/* ================= Inbox: mail to hello@, orders@, support@, proofs@ — read, reply with templates, search ================= */
+const MAIL_FN = "https://mrnnrmyvjkyjcjnfomna.supabase.co/functions/v1/inbox";
+const MAIL_BOXES = ["hello", "orders", "support", "proofs"];
+const MAIL_DEFAULTS = [{"id": "hello", "name": "Thanks for reaching out", "group": "General", "subject": "Thanks for contacting PrAjo Custom Studio", "body": "Hi {name},\n\nThanks for reaching out to PrAjo Custom Studio! We got your message and will get back to you within one business day.\n\nIf it's about an order, please reply with your order number or request code (it looks like D-AB12CD) so we can find it fast.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "info-needed", "name": "Need a few more details", "group": "General", "subject": "Quick question about your request", "body": "Hi {name},\n\nThanks for your message! So we can help, could you tell us:\n\n- What you'd like made (name, design or photo)\n- How many pieces\n- The size you prefer (Standard 4.5 in or Large 6.5 in)\n- The date you need it by\n\nJust reply to this email with those details.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "order-received", "name": "Order received", "group": "Orders", "subject": "We got your order", "body": "Hi {name},\n\nThank you for your order! We've received it and will start on it shortly. Every piece is made to order in our Sacramento studio, so we'll email you if anything about your timeline changes.\n\nYou can reply here any time with questions.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "payment-reminder", "name": "Payment reminder", "group": "Orders", "subject": "Reminder: payment for your PrAjo order", "body": "Hi {name},\n\nA friendly reminder that we're waiting on payment of {amount} to start your order. Once it arrives we'll get going right away.\n\nIf you've already paid, please ignore this note, or reply with the details and we'll check.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "address-confirm", "name": "Confirm shipping address", "group": "Orders", "subject": "Please confirm your shipping address", "body": "Hi {name},\n\nBefore we ship, please confirm this is the right address:\n\n{address}\n\nReply \"yes\" or send the corrected address and we'll update it.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "shipped", "name": "Shipped with tracking", "group": "Orders", "subject": "Your PrAjo order is on its way", "body": "Hi {name},\n\nGreat news, your order has shipped! Here is your tracking:\n\nCarrier: {carrier}\nTracking number: {tracking}\n\nDelivery usually takes a few business days. If anything looks wrong when it arrives, reply with a photo and we'll make it right.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "pickup", "name": "Local pickup details", "group": "Orders", "subject": "Your order is ready for pickup", "body": "Hi {name},\n\nYour order is ready for local pickup in Sacramento. Pickup time: {pickup_time}.\n\nWe'll send the exact address when you confirm the time. Please reply to confirm.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "delay", "name": "Delay apology", "group": "Orders", "subject": "A short delay on your order", "body": "Hi {name},\n\nWe're sorry, your order is taking a little longer than planned. The new estimate is {new_date}. Thank you for your patience. We want it to be right.\n\nIf the new date doesn't work for you, reply and we'll talk through options.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "out-of-stock", "name": "Out of stock, offer alternative", "group": "Orders", "subject": "About the item you ordered", "body": "Hi {name},\n\nThe item you picked is sold out right now. We can offer {alternative}, or refund you in full if you'd rather. Which would you like?\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "proof-ready", "name": "Proof ready for approval", "group": "Keepsakes", "subject": "Your proof {code} is ready, please approve", "body": "Hi {name},\n\nYour design {code} is ready for review. Please check:\n\n- Spelling of every name\n- The design and colours\n- The size (Standard 4.5 in or Large 6.5 in)\n\nReply \"approved\" and we'll start making it. If you'd like changes, tell us what to adjust and we'll send a new proof. Nothing is made until you approve.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "proof-approved", "name": "Proof approved, in production", "group": "Keepsakes", "subject": "Thank you! {code} is going into production", "body": "Hi {name},\n\nThank you for approving {code}! It's going into production now. We'll email you when it ships. You can also check the status any time at https://prajocustomstudio.com/status.html?code={code}\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "proof-changes", "name": "Proof changes, asking details", "group": "Keepsakes", "subject": "Changes to your proof {code}", "body": "Hi {name},\n\nHappy to adjust it! To make sure the new proof is right, please tell us exactly what to change (spelling, colours, size, placement). We'll send a fresh proof as soon as we can.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "quote", "name": "Price quote", "group": "Keepsakes", "subject": "Your PrAjo quote {code}", "body": "Hi {name},\n\nThanks for your request! Here is your quote:\n\nItem: {item}\nSize: {size}\nPrice: {price} each\nQuantity: {qty}\nReady in about: {lead_time}\n\nIf this looks good, reply \"yes\" and we'll send your proof and payment link. Nothing is charged until you agree.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "sizes-prices", "name": "Sizes and pricing", "group": "Keepsakes", "subject": "Sizes for PrAjo acrylic keepsakes", "body": "Hi {name},\n\nOur acrylic keepsakes come in two sizes, measured on the longest side:\n\n- Standard: 4.5 in (114.3 mm)\n- Large: 6.5 in (165.1 mm)\n\nBoth are 3 mm thick acrylic with a hole for a keyring. Prices are shown on each design page, and you can pick printing on both sides or the front only.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "name-spelling", "name": "Confirm name spelling", "group": "Keepsakes", "subject": "Please confirm the spelling", "body": "Hi {name},\n\nBefore we make it, please confirm the spelling is exactly:\n\n{spelling}\n\nReply \"correct\" or send the right spelling. Once it's printed we can't change it.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "photo-quality", "name": "Need a better photo", "group": "Keepsakes", "subject": "A clearer photo will print better", "body": "Hi {name},\n\nThank you for the photo! It's a little small or blurry to print crisply. Could you send the original from your phone or camera (not a screenshot or a chat copy)? A bright, in-focus photo gives the best result.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "colour-note", "name": "Colours on acrylic can look different", "group": "Keepsakes", "subject": "About colours on your keepsake", "body": "Hi {name},\n\nA quick note: colours print slightly differently on acrylic than on a screen. Reds can look a little deeper and whites a little warmer. The proof gives a close guide, and if a colour is very important to you, tell us and we'll adjust the design.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "bulk", "name": "Bulk or wholesale enquiry", "group": "Custom", "subject": "Your bulk order enquiry", "body": "Hi {name},\n\nThanks for thinking of us for a bigger order! So we can quote properly, please tell us:\n\n- What items and designs\n- Quantity of each\n- Size and printing (both sides or front only)\n- Your deadline and delivery place\n\nWe'll reply with pricing and timing.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "rush", "name": "Rush deadline reply", "group": "Custom", "subject": "Your deadline", "body": "Hi {name},\n\nThanks for telling us your deadline of {deadline}. We'll do our best to meet it. Rush orders depend on our workload, so please reply to confirm you'd like to go ahead and we'll confirm whether it's possible.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "cant-make", "name": "Politely decline a request", "group": "Custom", "subject": "About your request", "body": "Hi {name},\n\nThank you for asking. Unfortunately we can't make this one ({reason}). We'd love to help with something similar, so tell us if you'd like us to suggest an alternative.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "damaged", "name": "Damaged item", "group": "Problems", "subject": "We're sorry, let's fix this", "body": "Hi {name},\n\nWe're so sorry your order arrived damaged. Please reply with a photo of the item and the packaging, and we'll make it right with a replacement or refund.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "wrong-item", "name": "Wrong or incorrect item", "group": "Problems", "subject": "Let's put this right", "body": "Hi {name},\n\nWe're sorry, that isn't what you ordered. Please send a photo of what you received and your order number, and we'll send the correct item right away.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "refund", "name": "Refund processed", "group": "Problems", "subject": "Your refund is on its way", "body": "Hi {name},\n\nWe've refunded {amount}. It can take 5 to 10 business days to show on your statement, depending on your bank. Thank you for your patience, and sorry again for the trouble.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "cancel", "name": "Cancellation request", "group": "Problems", "subject": "About cancelling your order", "body": "Hi {name},\n\nThanks for letting us know. If we haven't started making your order we can cancel it and refund you. Personalized items already in production can't be cancelled, but we'll check where yours is right now and reply shortly.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "care", "name": "Care instructions", "group": "After sale", "subject": "Caring for your acrylic keepsake", "body": "Hi {name},\n\nTo keep your keepsake looking its best: wipe it with a soft damp cloth, avoid harsh cleaners and rough scrubbing, and keep it out of long hot sun in a car. Printed colours are made to last with normal use.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "review", "name": "Thanks and ask for a review", "group": "After sale", "subject": "How did we do?", "body": "Hi {name},\n\nThank you for your order! We'd love to hear how it turned out. A short review helps our small studio more than you know. Just reply to this email, or leave one on our store.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "reorder", "name": "Reorder a past design", "group": "After sale", "subject": "Happy to make it again", "body": "Hi {name},\n\nWe'd be glad to make more! Please tell us how many, the size, and the date you need them by. We have your earlier design on file and will confirm the details before we start.\n\nWarmly,\nPrAjo Custom Studio", "boxes": []}, {"id": "vendor", "name": "Decline vendor or sales email", "group": "General", "subject": "Re: {subject}", "body": "Hi,\n\nThank you for reaching out. We're not looking for new services right now, but we'll keep your details in case that changes.\n\nBest,\nPrAjo Custom Studio", "boxes": []}];
+let inMsgs = [], inState = { box: "", stat: "open", q: "", sel: "" }, inTpls = null, inRaw = null, inVars = {}, inDirty = false;
+const tfill = (text, m, vars) => String(text || "").replace(/\{(\w+)\}/g, (all, k) => { const v = { name: ((m.peer_name || "").trim().split(/\s+/)[0] || (m.peer_email || "").split("@")[0] || "there"), code: m.link_code || "", subject: (m.subject || "").replace(/^((re|fwd?|aw)\s*:\s*)+/i, ""), shop: "PrAjo Custom Studio", ...vars }; return v[k] ? v[k] : all; });
+const leftover = (t) => [...new Set(String(t).match(/\{\w+\}/g) || [])].map((x) => x.slice(1, -1));
+async function inTemplates() { if (inTpls) return inTpls; const r = await readSiteRow(); inTpls = Array.isArray(r.mailTemplates) && r.mailTemplates.length ? r.mailTemplates : MAIL_DEFAULTS.map((t) => ({ ...t })); return inTpls; }
+const threadsOf = (list) => {
+  const m = new Map(); for (const x of list) { const t = m.get(x.thread) || { key: x.thread, msgs: [] }; t.msgs.push(x); m.set(x.thread, t); }
+  return [...m.values()].map((t) => { t.msgs.sort((a, b) => a.id - b.id); const last = t.msgs[t.msgs.length - 1], ins = t.msgs.filter((x) => x.dir === "in"), li = ins[ins.length - 1] || last;
+    t.last = last; t.peer = li.peer_name || li.peer_email; t.email = li.peer_email; t.subject = (li.subject || "").replace(/^((re|fwd?|aw)\s*:\s*)+/i, "") || "(no subject)"; t.box = li.mailbox;
+    t.status = ins.some((x) => x.status === "new") ? "new" : ins.some((x) => x.status === "open") ? "open" : ins.length && ins.every((x) => x.status === "spam") ? "spam" : "done"; t.unread = ins.filter((x) => x.status === "new").length; t.code = (ins.find((x) => x.link_code) || {}).link_code; return t; })
+    .sort((a, b) => b.last.id - a.last.id);
+};
+async function inLoad() {
+  $("inList").innerHTML = '<p class="hint">Loading…</p>';
+  const { data, error } = await sb.from("inbox_messages").select("*").order("id", { ascending: false }).limit(600);
+  if (error) { $("inList").innerHTML = `<div class="empty"><b>The Inbox isn't set up yet</b><p class="hint">Run <b>analytics-setup-3.sql</b> in Supabase, then reopen. (${esc(error.message)})</p></div>`; return; }
+  inMsgs = data || []; inPaint(); inBadge();
+}
+function inBadge() { const n = threadsOf(inMsgs).filter((t) => t.status === "new").length; const s = $("inState"); if (s) s.textContent = n ? `${n} new conversation${n === 1 ? "" : "s"}` : "Read and reply to mail sent to hello@, orders@ and more"; }
+function inPaint() {
+  const T = threadsOf(inMsgs).filter((t) => (!inState.box || (inState.box === "other" ? !MAIL_BOXES.includes(t.box) : t.box === inState.box)) &&
+    (inState.stat === "all" || (inState.stat === "open" ? t.status === "new" || t.status === "open" : t.status === inState.stat)) &&
+    (!inState.q || (t.peer + " " + t.email + " " + t.subject + " " + t.msgs.map((x) => x.body).join(" ")).toLowerCase().includes(inState.q)));
+  $("inBar").innerHTML = `<div class="an-tabs">${[["", "All"], ...MAIL_BOXES.map((b) => [b, b + "@"]), ["other", "Other"]].map(([v, l]) => `<button type="button" data-inbox="${v}" aria-selected="${inState.box === v}">${l}</button>`).join("")}</div>
+    <select id="inStat" aria-label="Show">${[["open", "Open"], ["done", "Done"], ["spam", "Spam"], ["all", "Everything"]].map(([v, l]) => `<option value="${v}"${inState.stat === v ? " selected" : ""}>${l}</option>`).join("")}</select>
+    <input class="in" id="inQ" type="search" placeholder="Search mail…" value="${esc(inState.q)}" style="max-width:240px;min-height:40px" autocomplete="off">`;
+  $("inList").innerHTML = T.length ? T.map((t) => `<button type="button" class="in-row ${t.unread ? "unread" : ""} ${t.key === inState.sel ? "sel" : ""}" data-inth="${esc(t.key)}"><span class="in-dot" aria-hidden="true"></span><div><b>${esc(t.peer)}</b><span class="in-sub">${esc(t.subject)}</span><small>${esc((t.last.body || "").replace(/\s+/g, " ").slice(0, 90))}</small></div><span class="in-meta">${ago(t.last.at)}<br><em>${esc(t.box)}@</em></span></button>`).join("") : '<p class="hint" style="padding:12px">No conversations here.</p>';
+  if (document.activeElement && document.activeElement.id === "inQ") { const e = $("inQ"); e.focus(); e.setSelectionRange(e.value.length, e.value.length); }
+}
+async function inThread(key) {
+  inState.sel = key; const t = threadsOf(inMsgs).find((x) => x.key === key); if (!t) return;
+  $("inGrid").dataset.view = "thread";
+  const ids = t.msgs.filter((x) => x.dir === "in" && x.status === "new").map((x) => x.id);
+  if (ids.length) { await sb.from("inbox_messages").update({ status: "open" }).in("id", ids); t.msgs.forEach((x) => { if (ids.includes(x.id)) x.status = "open"; }); inBadge(); }
+  const T = await inTemplates(), li = [...t.msgs].reverse().find((x) => x.dir === "in") || t.last, groups = {};
+  T.filter((x) => !x.boxes || !x.boxes.length || x.boxes.includes(t.box)).forEach((x) => (groups[x.group || "Other"] = groups[x.group || "Other"] || []).push(x));
+  inRaw = null; inVars = {}; inDirty = false;
+  $("inThread").innerHTML = `<div class="in-top"><button class="btn line in-back" type="button" id="inBack">‹ Back</button><div style="min-width:0"><b>${esc(t.peer)}</b> <small>${esc(t.email)}</small><div class="hint" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(t.subject)}</div></div></div>
+    <div class="in-acts">${t.status === "done" || t.status === "spam" ? '<button class="btn line" type="button" data-inact="open">Reopen</button>' : '<button class="btn line" type="button" data-inact="done">✓ Done</button>'}<button class="btn line" type="button" data-inact="spam">Spam</button>${t.code ? `<button class="btn line" type="button" data-inact="req">Open request ${esc(t.code)}</button>` : ""}<button class="btn line" type="button" data-inact="del" style="color:#ff9a96">Delete</button></div>
+    <div class="in-msgs">${t.msgs.map((x) => `<div class="in-m ${x.dir}"><small>${x.dir === "in" ? esc(x.peer_name || x.peer_email) : "You" + (x.sent_by ? " (" + esc(x.sent_by) + ")" : "")} · ${when(x.at)}</small><div>${esc(x.body || "").replace(/\n/g, "<br>")}</div></div>`).join("")}</div>
+    <section class="in-reply"><h4>Reply as</h4><div class="in-row2"><select id="inFrom" aria-label="Send from">${MAIL_BOXES.map((b) => `<option value="${b}"${b === t.box ? " selected" : ""}>${b}@prajocustomstudio.com</option>`).join("")}</select>
+      <select id="inTpl" aria-label="Template"><option value="">Use a template…</option>${Object.entries(groups).map(([g, a]) => `<optgroup label="${esc(g)}">${a.map((x) => `<option value="${esc(x.id)}">${esc(x.name)}</option>`).join("")}</optgroup>`).join("")}</select></div>
+      <input class="in" id="inSubj" value="${esc("Re: " + t.subject)}" aria-label="Subject">
+      <div id="inBlanks"></div>
+      <textarea class="in" id="inBody" rows="9" placeholder="Write your reply, or pick a template above…" aria-label="Message"></textarea>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="inSend">Send reply</button><span class="hint" id="inMsg" role="status">A copy goes to your Gmail.</span></div></section>`;
+  inPaint();
+  $("inThread")._t = t; $("inThread")._li = li;
+}
+function inBlanks() {
+  const left = leftover($("inBody").value + " " + $("inSubj").value);
+  $("inBlanks").innerHTML = left.length ? `<div class="in-blanks"><small>Fill in the blanks:</small>${left.map((k) => `<label><span>${esc(k.replace(/_/g, " "))}</span><input class="in" data-inv="${esc(k)}" value="${esc(inVars[k] || "")}"></label>`).join("")}</div>` : "";
+}
+async function inRefresh(keep) { await inLoad(); if (keep) { const t = threadsOf(inMsgs).find((x) => x.key === keep); if (t) inThread(keep); else { $("inGrid").dataset.view = "list"; $("inThread").innerHTML = ""; } } }
+$("inBtn").onclick = async () => { sheetOpen("inSheet"); $("inGrid").dataset.view = "list"; $("inThread").innerHTML = '<p class="hint" style="padding:16px">Pick a conversation.</p>'; await inLoad(); };
+$("inClose").onclick = () => sheetShut("inSheet");
+$("inSheet").addEventListener("click", async (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.inbox !== undefined) { inState.box = b.dataset.inbox; inPaint(); }
+  else if (b.dataset.inth) inThread(b.dataset.inth);
+  else if (b.id === "inBack") { $("inGrid").dataset.view = "list"; }
+  else if (b.id === "inNew") inCompose();
+  else if (b.id === "inTplBtn") inManage();
+  else if (b.dataset.inact) {
+    const th = $("inThread")._t, a = b.dataset.inact; if (!th) return;
+    if (a === "req") { closeAllSheets(); $("dsBtn").click(); return; }
+    if (a === "del") { if (!confirm("Delete this whole conversation? This can't be undone.")) return; await sb.from("inbox_messages").delete().eq("thread", th.key); toast("Conversation deleted"); inState.sel = ""; $("inGrid").dataset.view = "list"; return inRefresh(); }
+    await sb.from("inbox_messages").update({ status: a }).eq("thread", th.key).eq("dir", "in"); toast(a === "done" ? "Marked done" : a === "spam" ? "Marked spam" : "Reopened"); inRefresh(th.key);
+  } else if (b.id === "inSend") {
+    const th = $("inThread")._t, li = $("inThread")._li, body = $("inBody").value.trim(), left = leftover(body + " " + $("inSubj").value);
+    if (!body) return ($("inMsg").textContent = "Write something first.");
+    if (left.length && !confirm("These blanks are still empty: " + left.map((k) => "{" + k + "}").join(", ") + ". Send anyway?")) return;
+    b.disabled = true; $("inMsg").textContent = "Sending…";
+    try {
+      const tok = (await sb.auth.getSession()).data.session.access_token;
+      const r = await fetch(MAIL_FN + "?a=send", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok }, body: JSON.stringify({ reply_to: li.id, mailbox: $("inFrom").value, subject: $("inSubj").value.trim(), body, template: $("inTpl").value || null }) });
+      const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || "Couldn't send");
+      toast("Reply sent"); await inRefresh(th.key);
+    } catch (err) { $("inMsg").textContent = err.message; b.disabled = false; }
+  }
+});
+$("inSheet").addEventListener("input", (e) => {
+  const t = e.target;
+  if (t.id === "inQ") { inState.q = t.value.trim().toLowerCase(); inPaint(); }
+  else if (t.id === "inBody") { inDirty = true; inBlanks(); }
+  else if (t.dataset.inv) { inVars[t.dataset.inv] = t.value.trim();
+    if (!inDirty && inRaw) { const th = $("inThread")._li; $("inBody").value = tfill(inRaw.body, th, inVars); $("inSubj").value = tfill(inRaw.subject, th, inVars); const ae = document.activeElement; inBlanksKeep(ae); }
+    else { const tok = "{" + t.dataset.inv + "}"; if (t.value.trim() && ($("inBody").value.includes(tok) || $("inSubj").value.includes(tok))) { $("inBody").value = $("inBody").value.split(tok).join(t.value.trim()); $("inSubj").value = $("inSubj").value.split(tok).join(t.value.trim()); inBlanksKeep(document.activeElement); } } }
+});
+function inBlanksKeep(ae) { const k = ae && ae.dataset && ae.dataset.inv, pos = ae && ae.selectionStart; inBlanks(); if (k) { const e = document.querySelector(`[data-inv="${k}"]`); if (e) { e.focus(); e.setSelectionRange(pos, pos); } } }
+$("inSheet").addEventListener("change", async (e) => {
+  const t = e.target;
+  if (t.id === "inStat") { inState.stat = t.value; inPaint(); }
+  else if (t.id === "inTpl") {
+    const T = await inTemplates(), x = T.find((y) => y.id === t.value); if (!x) return;
+    const li = $("inThread")._li; inRaw = x; inVars = {}; inDirty = false;
+    $("inBody").value = tfill(x.body, li, {}); $("inSubj").value = tfill(x.subject, li, {}); inBlanks();
+  }
+});
+
+/* ---- compose a new email ---- */
+function inCompose() {
+  ddOpen("New email", `<section class="ks-sec"><div class="in-row2"><label class="f"><span>To</span><input class="in" id="cmTo" type="email" inputmode="email" autocomplete="off" placeholder="customer@example.com"></label><label class="f"><span>Send from</span><select class="in" id="cmFrom">${MAIL_BOXES.map((b) => `<option value="${b}">${b}@prajocustomstudio.com</option>`).join("")}</select></label></div>
+    <label class="f"><span>Subject</span><input class="in" id="cmSubj" maxlength="300"></label><label class="f"><span>Message</span><textarea class="in" id="cmBody" rows="9"></textarea></label>
+    <div style="display:flex;gap:10px;align-items:center"><button class="btn gold" type="button" id="cmSend">Send</button><span class="hint" id="cmMsg" role="status"></span></div></section>`, () => inRefresh());
+  $("cmSend").onclick = async () => {
+    const left = leftover($("cmBody").value + $("cmSubj").value); if (left.length && !confirm("Blanks still in the text: " + left.join(", ") + ". Send anyway?")) return;
+    $("cmSend").disabled = true; $("cmMsg").textContent = "Sending…";
+    try { const tok = (await sb.auth.getSession()).data.session.access_token;
+      const r = await fetch(MAIL_FN + "?a=send", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok }, body: JSON.stringify({ to: $("cmTo").value, mailbox: $("cmFrom").value, subject: $("cmSubj").value, body: $("cmBody").value }) });
+      const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || "Couldn't send"); toast("Email sent"); ddShut();
+    } catch (err) { $("cmMsg").textContent = err.message; $("cmSend").disabled = false; }
+  };
+}
+
+/* ---- manage templates ---- */
+let tplEdit = -1;
+async function inManage() {
+  const T = await inTemplates();
+  const groups = {}; T.forEach((t, i) => (groups[t.group || "Other"] = groups[t.group || "Other"] || []).push([t, i]));
+  const form = tplEdit >= 0 ? (() => { const t = T[tplEdit] || { id: "", name: "", group: "General", subject: "", body: "", boxes: [] };
+    return `<section class="ks-sec"><h3>${tplEdit === T.length ? "New template" : "Edit template"}</h3><label class="f"><span>Name</span><input class="in" id="tpName" value="${esc(t.name)}" maxlength="60"></label>
+      <div class="in-row2"><label class="f"><span>Group</span><input class="in" id="tpGroup" value="${esc(t.group || "")}" maxlength="30"></label><div class="f"><span>Show for</span><div style="display:flex;flex-wrap:wrap;gap:6px 12px">${MAIL_BOXES.map((b) => `<label class="ssw"><span class="switch"><input type="checkbox" data-tpb="${b}" ${!t.boxes || !t.boxes.length || t.boxes.includes(b) ? "checked" : ""}></span>${b}@</label>`).join("")}</div></div></div>
+      <label class="f"><span>Subject</span><input class="in" id="tpSubj" value="${esc(t.subject)}" maxlength="200"></label>
+      <label class="f"><span>Message</span><textarea class="in" id="tpBody" rows="10">${esc(t.body)}</textarea></label>
+      <p class="hint">Placeholders: <b>{name}</b> (customer's first name), <b>{code}</b> (request code), <b>{subject}</b> are filled in automatically. Anything else in {curly braces} becomes a blank you fill in when replying.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn gold" type="button" id="tpSave">Save template</button><button class="btn line" type="button" id="tpCancel">Cancel</button>${tplEdit < T.length ? delBtn("tpDel", "Delete template") : ""}</div></section>`; })() : "";
+  ddOpen("Reply templates", `<p class="hint">${T.length} ready-made replies for orders, proofs, quotes, shipping, problems and more. Edit the wording, add your own, or hide one from a mailbox. They work in the Inbox and from Telegram.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn gold" type="button" id="tpNew">+ New template</button>${delBtn("tpReset", "Reset all to the built-in set")}</div>${form}
+    ${Object.entries(groups).map(([g, a]) => `<h3 class="an-h">${esc(g)}</h3>${a.map(([t, i]) => `<div class="hc-r clk" data-tpe="${i}" role="button" tabindex="0"><div><b>${esc(t.name)}</b><small>${esc(t.subject)}</small></div><span>Edit ›</span></div>`).join("")}`).join("")}`, () => {});
+}
+async function tplSave(list) { inTpls = list; return saveSite((n) => { n.mailTemplates = list; }); }
+document.addEventListener("click", async (e) => {
+  if (!e.target.closest("#ddBody")) return;
+  const el = e.target.closest("[data-tpe],#tpNew,#tpCancel,#tpSave,#tpDel,#tpReset"); if (!el) return;
+  const T = await inTemplates();
+  if (el.dataset.tpe !== undefined) { tplEdit = +el.dataset.tpe; inManage(); }
+  else if (el.id === "tpNew") { tplEdit = T.length; inManage(); }
+  else if (el.id === "tpCancel") { tplEdit = -1; inManage(); }
+  else if (el.id === "tpSave") {
+    const name = $("tpName").value.trim(), body = $("tpBody").value; if (!name || !body.trim()) return toast("Give it a name and a message.");
+    const boxes = [...document.querySelectorAll("[data-tpb]")].filter((c) => c.checked).map((c) => c.dataset.tpb), old = T[tplEdit];
+    const t = { id: old ? old.id : "t" + Math.random().toString(36).slice(2, 8), name, group: $("tpGroup").value.trim() || "General", subject: $("tpSubj").value.trim(), body, boxes: boxes.length === MAIL_BOXES.length ? [] : boxes };
+    const list = [...T]; if (old) list[tplEdit] = t; else list.push(t);
+    if (await tplSave(list)) { toast("Template saved"); tplEdit = -1; inManage(); }
+  } else if (el.id === "tpDel") armDelete(el, async () => { if (await tplSave(T.filter((_, i) => i !== tplEdit))) { toast("Template deleted"); tplEdit = -1; inManage(); } });
+  else if (el.id === "tpReset") armDelete(el, async () => { if (await saveSite((n) => { delete n.mailTemplates; })) { inTpls = null; tplEdit = -1; toast("Templates reset"); inManage(); } });
+});
+
+/* open from the Telegram link (admin.html#inbox) once signed in */
+{ const w = $("menuWrap"); if (w) new MutationObserver(() => { if (!w.hidden && location.hash === "#inbox") { history.replaceState(null, "", location.pathname); $("inBtn").click(); } }).observe(w, { attributes: true, attributeFilter: ["hidden"] }); }
 </script>
 </body>
 </html>
