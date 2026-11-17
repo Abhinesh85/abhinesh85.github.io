@@ -2606,7 +2606,7 @@ const HUB_GROUPS = [
   ["Safety & tools", ["hsBtn", "tlBtn", "dpBtn", "helpBtn"]],
   ["Links & account", ["pwBtn", "outBtn"]],
 ];
-const HUB_EXTRA = { inBtn: "email mail hello orders support proofs reply template telegram", anBtn: "traffic analytics visitors daily weekly monthly most viewed products add to cart", caBtn: "abandoned cart discount email reminder", sdBtn: "schedule plan date holiday timer", hsBtn: "undo restore history audit log", apBtn: "theme colour color brand sections cart message", tlBtn: "backup export import health check missing price photo privacy delete my data request gdpr ccpa", ksBtn: "front only, both sides, hide a design, large size, notice", siteBtn: "text headline faq footer contact announcement", slBtn: "discount percent off", coBtn: "delivery pickup shipping fees pause", pwBtn: "login security" };
+const HUB_EXTRA = { inBtn: "email mail hello orders support proofs reply template telegram", anBtn: "traffic analytics visitors daily weekly monthly most viewed products add to cart", caBtn: "abandoned cart discount email reminder automatic follow up unsubscribe", sdBtn: "schedule plan date holiday timer", hsBtn: "undo restore history audit log", apBtn: "theme colour color brand sections cart message", tlBtn: "backup export import health check missing price photo privacy delete my data request gdpr ccpa", ksBtn: "front only, both sides, hide a design, large size, notice", siteBtn: "text headline faq footer contact announcement", slBtn: "discount percent off", coBtn: "delivery pickup shipping fees pause", pwBtn: "login security" };
 function hubText(el) { const s = el.querySelector("small"); const t = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(" ").trim(); return [t || el.textContent.replace(s ? s.textContent : "", "").trim(), s ? s.textContent.trim() : ""]; }
 let hubRows = [];
 function hubOpen() {
@@ -3370,6 +3370,41 @@ $("tlBody").addEventListener("click", async (e) => {
   toast(error ? "Couldn't delete: " + error.message : "Deleted"); prFind();
 });
 $("tlBody").addEventListener("keydown", (e) => { if (e.key === "Enter" && e.target.id === "prEmail") { e.preventDefault(); prFind(); } });
+/* ---- Automatic cart reminders (Reports → Carts) ---- */
+const AR_HOURS = [[2, "2 hours"], [6, "6 hours"], [12, "12 hours"], [24, "1 day (recommended)"], [48, "2 days"], [72, "3 days"]];
+async function arPaint() {
+  const body = $("anBody"); if (!body || an.tab !== "cart") return;
+  const row = await readSiteRow(), R = row.cartRemind || {}, addr = String(row.bizAddress || "").trim(), hrs = Number(R.afterHours) || 24;
+  const cutoff = Date.now() - hrs * 36e5, week = Date.now() - 7 * 864e5;
+  const C = an.carts || [], waiting = C.filter((c) => c.email && !c.contacted && Number(c.item_count) > 0 && new Date(c.updated_at).getTime() < cutoff && new Date(c.updated_at).getTime() > week).length, sent = C.filter((c) => c.contacted).length;
+  const sec = `<section class="ks-sec" id="arSec"><h3>Automatic reminders</h3>
+    <p class="hint">One friendly email to people who left their address and then left their cart, once per cart. It goes out between 9am and 8pm Pacific, includes your mailing address and an unsubscribe link, and never goes to anyone who unsubscribed.</p>
+    ${addr ? "" : `<p class="hint" style="color:#e8a33d"><b>Add your business mailing address first</b> (Site settings → Contact &amp; links). US law requires it in marketing emails, so reminders can't be switched on without it.</p>`}
+    <label class="ssw"><span class="switch"><input type="checkbox" id="arOn" ${R.on ? "checked" : ""} ${addr ? "" : "disabled"}></span>Send cart reminders automatically</label>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px">
+      <label class="f"><span>Send after the cart has been left for</span><select class="in" id="arHrs">${AR_HOURS.map(([v, l]) => `<option value="${v}"${v === hrs ? " selected" : ""}>${l}</option>`).join("")}</select></label>
+      <label class="f"><span>Only if the cart is worth at least ($)</span><input class="in" id="arMin" type="number" min="0" step="1" value="${esc(R.minTotal || "")}" placeholder="any"></label></div>
+    <label class="f"><span>Extra line in the email (optional)</span><input class="in" id="arMsg" maxlength="300" placeholder="e.g. Order by Friday for delivery before the holidays" value="${esc(R.msg || "")}"></label>
+    <p class="hint">Right now <b>${waiting}</b> cart${waiting === 1 ? " is" : "s are"} waiting for a reminder, and <b>${sent}</b> ${sent === 1 ? "has" : "have"} already been emailed.</p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center"><button class="btn gold" type="button" id="arSave">Save</button><button class="btn line" type="button" id="arTest">Send a test to me</button><span class="hint" id="arMsgOut" role="status"></span></div></section>`;
+  const old = $("arSec"); if (old) old.remove();
+  body.insertAdjacentHTML("afterbegin", sec);
+}
+{ const prev = anPaint; anPaint = function () { prev(); if (an.tab === "cart") arPaint(); }; }
+$("anBody").addEventListener("click", async (e) => {
+  if (e.target.id === "arSave") {
+    const ok = await saveSite((n) => { const R = { on: $("arOn").checked, afterHours: +$("arHrs").value, minTotal: Math.max(0, Number($("arMin").value) || 0), msg: $("arMsg").value.trim() }; if (!R.minTotal) delete R.minTotal; if (!R.msg) delete R.msg; n.cartRemind = R; });
+    if (ok) { $("arMsgOut").textContent = $("arOn").checked ? "Saved. Reminders are ON." : "Saved. Reminders are off."; toast("Saved"); }
+  } else if (e.target.id === "arTest") {
+    $("arTest").disabled = true; $("arMsgOut").textContent = "Sending…";
+    try {
+      const tok = (await sb.auth.getSession()).data.session.access_token, me = (await sb.auth.getUser()).data.user.email;
+      const r = await fetch(MAIL_FN + "?a=remind_test", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + tok }, body: JSON.stringify({ to: me }) });
+      const d = await r.json().catch(() => ({})); $("arMsgOut").textContent = r.ok ? "Test sent to " + me + ". Check your inbox." : (d.error || "Couldn't send the test.");
+    } catch (err) { $("arMsgOut").textContent = "Couldn't send the test."; }
+    $("arTest").disabled = false;
+  }
+});
 </script>
 </body>
 </html>
