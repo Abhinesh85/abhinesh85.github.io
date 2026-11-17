@@ -1538,7 +1538,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794929671484';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794931797917';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1873,7 +1873,7 @@ $('sendShop').onclick=async()=>{
     fetch(SB.url+'/functions/v1/design-notify',{method:'POST',headers:sbHead({'Content-Type':'application/json'}),body:JSON.stringify({code})}).catch(()=>{});
     try{localStorage.setItem('prajo:keepsake:contact',JSON.stringify({name,email,phone}));}catch(e){}
     btn.textContent='Sent ✓ '+code;
-    $('sendNote').innerHTML='Thank you. Your reference is <b>'+code+'</b>. We will email <b></b> with a price and your final proof. Nothing is charged until you agree.';
+    $('sendNote').innerHTML='Thank you. Your reference is <b>'+code+'</b>. We will email <b></b> with a price and your final proof. Nothing is charged until you agree. <a href="/status.html?code='+code+'">Track this request</a>';
     $('sendNote').querySelector('b:last-of-type').textContent=email;
     tell('Sent to PrAjo.');
   }catch(e){
