@@ -243,7 +243,52 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 .seeall{grid-column:1/-1;margin-top:6px}
 .bdg{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#d9ab4f;color:#1a1204;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle}
 .pricecap{display:block;margin-top:4px;font-weight:800;color:#f3d48a}
-</style></head>
+</style><script>
+/* Privacy choices: honours Do Not Track and Global Privacy Control, asks first in the EU/UK, and gives everyone a "Your privacy choices" switch. */
+(function () {
+  var NT = "prajo:noTrack", CO = "prajo:consent";
+  var get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
+  var put = function (k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} };
+  var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
+  var eu = /^(Europe\/|Atlantic\/(Azores|Madeira|Canary|Faroe|Reykjavik))/.test(tz);
+  var signal = function () { return navigator.doNotTrack === "1" || window.doNotTrack === "1" || navigator.globalPrivacyControl === true; };
+  var P = window.PRAJO_PRIV = {
+    eu: eu, signal: signal,
+    allowed: function () { return !signal() && !navigator.webdriver && get(NT) !== "1" && (!eu || get(CO) === "yes"); },
+    changed: function () { try { if (window.__prajoTrackRefresh) window.__prajoTrackRefresh(); } catch (e) {} }
+  };
+  var css = "position:fixed;z-index:2147483000;background:#0f1b2e;color:#f5ecdc;border:1px solid #d9ab4f;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;padding:16px 18px;";
+  var btn = "min-height:44px;padding:0 18px;border-radius:999px;border:1px solid #d9ab4f;background:transparent;color:#f5ecdc;font:700 15px system-ui;cursor:pointer;";
+  var gold = "min-height:44px;padding:0 18px;border-radius:999px;border:0;background:#d9ab4f;color:#1a1204;font:800 15px system-ui;cursor:pointer;";
+  function el(id) { return document.getElementById(id); }
+  function drop(id) { var e = el(id); if (e && e.parentNode) e.parentNode.removeChild(e); }
+  function status() { return P.allowed() ? "ON" : "OFF"; }
+  function dialog() {
+    drop("privDlg");
+    var d = document.createElement("div"); d.id = "privDlg"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-label", "Your privacy choices");
+    d.style.cssText = css + "left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92vw);";
+    var why = signal() ? "Your browser is sending a Do Not Track or Global Privacy Control signal, so the counter stays off." : eu && get(CO) !== "yes" ? "Because you are in a region that asks first, it stays off until you say yes." : "";
+    d.innerHTML = '<b style="font-size:18px">Your privacy choices</b><p style="margin:10px 0">Our anonymous visit counter and the saved copy of your cart are <b>' + status() + '</b> for this browser. They have no name or IP address and are never shared with advertisers.</p>' + (why ? '<p style="margin:0 0 10px;color:#b9c0cf">' + why + '</p>' : "") +
+      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">' + (signal() ? "" : '<button type="button" id="privTog" style="' + gold + '">' + (P.allowed() ? "Turn off" : "Turn on") + "</button>") + '<button type="button" id="privX" style="' + btn + '">Close</button></div><p style="margin:12px 0 0;font-size:13px"><a href="/privacy.html" style="color:#e9c46a">Read the privacy policy</a></p>';
+    document.body.appendChild(d);
+    var t = el("privTog"); if (t) t.onclick = function () { if (P.allowed()) { put(NT, "1"); put(CO, "no"); } else { put(NT, null); put(CO, "yes"); } P.changed(); dialog(); };
+    el("privX").onclick = function () { drop("privDlg"); }; (t || el("privX")).focus();
+    d.addEventListener("keydown", function (e) { if (e.key === "Escape") drop("privDlg"); });
+  }
+  function banner() {
+    if (!eu || get(CO) !== null || signal() || el("privBar")) return;
+    var b = document.createElement("div"); b.id = "privBar"; b.setAttribute("role", "region"); b.setAttribute("aria-label", "Visit counter");
+    b.style.cssText = css + "left:12px;right:12px;bottom:12px;max-width:640px;margin:0 auto;";
+    b.innerHTML = '<p style="margin:0 0 10px">May we count your visit? It is anonymous, stays on this site and has no name or IP address. Saying no does not change how the shop works. <a href="/privacy.html" style="color:#e9c46a">Privacy policy</a></p><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="privYes" style="' + gold + '">Yes, count my visit</button><button type="button" id="privNo" style="' + btn + '">No thanks</button></div>';
+    document.body.appendChild(b);
+    el("privYes").onclick = function () { put(CO, "yes"); put(NT, null); drop("privBar"); P.changed(); };
+    el("privNo").onclick = function () { put(CO, "no"); drop("privBar"); P.changed(); };
+  }
+  document.addEventListener("click", function (e) { var a = e.target && e.target.closest ? e.target.closest("#privChoices") : null; if (a) { e.preventDefault(); dialog(); } });
+  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", banner); else banner();
+})();
+</script>
+</head>
 <body>
 <header class="top"><div class="wrap">
 <a class="brand" href="../" aria-label="PrAjo Custom Studio home"><img src="../logo.png" alt="" width="42" height="42"><span><b>PRAJO</b><small>Custom Studio</small></span></a>
@@ -325,7 +370,7 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 <a class="brand" href="../"><img src="../logo.png" alt="" width="36" height="36" style="width:36px;height:36px"><span><b>PRAJO</b><small>Custom Studio</small></span></a>
 <span>Custom gifts &amp; personalized moments &middot; Sacramento, CA</span>
 <a href="https://www.etsy.com/shop/PrAjoCustomStudio" target="_blank" rel="noopener">Find us on Etsy &#8599;</a>
-<a href="../#faq">Shipping &amp; FAQ</a><a href="../returns.html">Returns &amp; refunds</a><a href="../privacy.html">Privacy</a><a href="../terms.html">Terms</a><a href="../accessibility.html">Accessibility</a>
+<a href="../#faq">Shipping &amp; FAQ</a><a href="../returns.html">Returns &amp; refunds</a><a href="../privacy.html">Privacy</a><a href="#" id="privChoices">Your privacy choices</a><a href="../terms.html">Terms</a><a href="../accessibility.html">Accessibility</a>
 <span class="bizline">PrAjo Custom Studio &middot; Sacramento, California &middot; <a href="mailto:hello@prajocustomstudio.com">hello@prajocustomstudio.com</a></span>
 <span>Previews show approximate colour. &copy; 2026 PrAjo Custom Studio</span>
 </div></footer>
@@ -1326,10 +1371,11 @@ const NMAX=()=>Math.min(12,Math.max(3,Number(CFG.ksNameMax)||12));
 const ksPrice=st=>{const M=(CFG.ksItemMeta||{})[st.id],B=CFG.ksPrice||{},fam=itemOf(st.id)&&itemOf(st.id).fam.key;let v=M&&M.price&&Number(M.price[st.size])||0;if(!v&&B.base&&B.base[fam])v=Number(B.base[fam][st.size])||0;if(!v)return null;if(st.sides==='both'&&fam!=='photos')v+=Number(B.both)||0;if(st.layers==='double')v+=Number(B.double)||0;return Math.round(v*100)/100;};
 const usd=n=>'$'+(Math.round(n*100)%100?n.toFixed(2):String(Math.round(n)));
 function effCfg(D){try{D=D||{};const now=Date.now(),out={...D};for(const r of (Array.isArray(D.sched)?D.sched:[])){if(!r||r.off||!r.set)continue;const a=r.from?Date.parse(r.from):-Infinity,b=r.to?Date.parse(r.to):Infinity;if(now<a||now>=b)continue;for(const[k,v]of Object.entries(r.set))out[k]=Array.isArray(v)&&Array.isArray(out[k])?[...new Set([...out[k],...v])]:v;}return out;}catch(e){return D||{};}}
-const PT=(()=>{let off=false;try{off=navigator.doNotTrack==='1'||!!navigator.webdriver||localStorage.getItem('prajo:noTrack')==='1';let sid=localStorage.getItem('prajo:sid')||'';if(!/^[a-z0-9]{10,24}$/.test(sid)){sid=((crypto.randomUUID?crypto.randomUUID().replace(/-/g,''):Math.random().toString(36).slice(2)+Date.now().toString(36))+'x').slice(0,24);localStorage.setItem('prajo:sid',sid);}
+const PT=(kind,product,qty,value,page)=>{try{if(!(window.PRAJO_PRIV&&PRAJO_PRIV.allowed()))return;let sid=localStorage.getItem('prajo:sid')||'';if(!/^[a-z0-9]{10,24}$/.test(sid)){sid=((crypto.randomUUID?crypto.randomUUID().replace(/-/g,''):Math.random().toString(36).slice(2)+Date.now().toString(36))+'x').slice(0,24);localStorage.setItem('prajo:sid',sid);}
  const dev=innerWidth<640?'phone':innerWidth<1024?'tablet':'desktop';let tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
  let ref='';try{ref=sessionStorage.getItem('prajo:ref');if(ref===null){ref='';const r=document.referrer&&new URL(document.referrer);if(r&&r.hostname!==location.hostname)ref=r.hostname.replace(/^www\./,'');const u=new URLSearchParams(location.search).get('utm_source');if(u)ref=u.slice(0,40);sessionStorage.setItem('prajo:ref',ref);}}catch(e){}
- return (kind,product,qty,value,page)=>{if(off)return;try{fetch('https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/rpc/track_event',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',apikey:'sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b',Authorization:'Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b'},body:JSON.stringify({p_sid:sid,p_kind:kind,p_product:product||null,p_page:page||'keepsakes',p_ref:ref||null,p_device:dev,p_tz:tz,p_qty:qty==null?null:qty,p_value:value==null?null:value})}).catch(()=>{});}catch(e){}};}catch(e){return()=>{};}})();
+ fetch('https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/rpc/track_event',{method:'POST',keepalive:true,headers:{'Content-Type':'application/json',apikey:'sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b',Authorization:'Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b'},body:JSON.stringify({p_sid:sid,p_kind:kind,p_product:product||null,p_page:page||'keepsakes',p_ref:ref||null,p_device:dev,p_tz:tz,p_qty:qty==null?null:qty,p_value:value==null?null:value})}).catch(()=>{});}catch(e){}};
+window.__prajoTrackRefresh=()=>{try{if(window.PRAJO_PRIV&&PRAJO_PRIV.allowed()){PT('view',null,null,null,'keepsakes');}else{localStorage.removeItem('prajo:sid');}}catch(e){}};
 PT('view',null,null,null,'keepsakes');
 const itemOf=id=>{for(const f of FAMILIES){const it=f.items.find(i=>i.id===id);if(it)return {fam:f,item:it};}return null;};
 const SIZES={standard:{label:'Standard',w:81.2,h:114.3},large:{label:'Large',w:117.3,h:165.1}};
@@ -1538,7 +1584,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794931797917';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794949149885';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
