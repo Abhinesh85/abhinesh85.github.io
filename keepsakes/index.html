@@ -1319,6 +1319,7 @@ const FAMILIES=[
 ];
 const itemOf=id=>{for(const f of FAMILIES){const it=f.items.find(i=>i.id===id);if(it)return {fam:f,item:it};}return null;};
 const SIZES={standard:{label:'Standard',w:54,h:76},large:{label:'Large',w:81,h:114}};
+const inF=mm=>String(Math.round(mm/25.4*100)/100),mmIn=(w,h)=>`${w} × ${h} mm (${inF(w)} × ${inF(h)} in)`;
 const DIEK={standard:1,large:1.5};/* die-cut pieces (states, maps, gods) scale by this; the 4 mm hole stays 4 mm */
 function scaleRegion(R,size){const k=DIEK[size]||1;return k===1?R:{w:+(R.w*k).toFixed(2),h:+(R.h*k).toFixed(2),pts:R.pts.map(p=>[+(p[0]*k).toFixed(2),+(p[1]*k).toFixed(2)]),hole:[+(R.hole[0]*k).toFixed(2),+(R.hole[1]*k).toFixed(2)],hr:R.hr,k};}
 const LETTERING={bubble:{label:'Bubble',css:'"PrAjo Bubble",cursive',weight:400,upper:true,k:.1,max:.12},signature:{label:'Signature',css:'"PrAjo Signature",cursive',weight:400,upper:false,k:.15,max:.2},serif:{label:'Serif',css:'"PrAjo Serif",serif',weight:400,upper:false,k:.12,max:.15},headline:{label:'Headline',css:'"PrAjo Headline",sans-serif',weight:400,upper:true,k:.1,max:.12},round:{label:'Round',css:'"PrAjo Round",sans-serif',weight:400,upper:false,k:.12,max:.14},block:{label:'Block',css:'"PrAjo Block",sans-serif',weight:400,upper:true,k:.1,max:.11},marker:{label:'Marker',css:'"PrAjo Marker",cursive',weight:400,upper:false,k:.15,max:.17},notebook:{label:'Notebook',css:'"PrAjo Notebook",cursive',weight:400,upper:false,k:0.14,max:0.17},kids:{label:'Kids',css:'"PrAjo Kids",cursive',weight:400,upper:false,k:0.12,max:0.15},royal:{label:'Royal',css:'"PrAjo Royal",serif',weight:400,upper:true,k:0.1,max:0.1,ov:0.16,vov:0.12},heavy:{label:'Heavy',css:'"PrAjo Heavy",sans-serif',weight:400,upper:true,k:0.1,max:0.11},wide:{label:'Wide',css:'"PrAjo Wide",sans-serif',weight:400,upper:true,k:0.09,max:0.09},condensed:{label:'Condensed',css:'"PrAjo Condensed",sans-serif',weight:400,upper:true,k:0.1,max:0.14},cursive:{label:'Cursive',css:'"Great Vibes",cursive',weight:400,upper:false,k:0.15,max:0.2,ov:0.1,vov:0.08,namesOnly:true},clean:{label:'Clean',css:'Manrope,sans-serif',weight:700,upper:true,k:.1,max:.1}};
@@ -1363,7 +1364,7 @@ function nameLayout(o){
   if((o.size||'standard')!=='large') return nameLayout0(o);
   /* Large = the Standard layout scaled exactly 1.5x (letters, margins, overall width and height); only the ring and its hole keep their size */
   const b=nameLayout0({...o,size:'standard'}),k=1.5;
-  return {...b,lines:b.lines.map(r=>({...r,x:r.x*k,base:r.base*k})),fs:b.fs*k,ls:b.ls*k,x0:b.x0*k,W:b.W*k,H:b.H*k,bw:b.bw*k,se:b.se*k,p:b.p*k,hy:b.H*k/2};
+  return {...b,lines:b.lines.map(r=>({...r,x:r.x*k,base:r.base*k})),fs:b.fs*k,ls:b.ls*k,x0:b.x0*k,W:b.W*k,H:b.H*k,width:b.width*k,ovx:b.ovx*k,bw:b.bw*k,se:b.se*k,p:b.p*k,hy:b.H*k/2};
 }
 function nameLayout0(o){
   const L=LETTERING[o.lettering||'bubble'];
@@ -1384,7 +1385,7 @@ function nameLayout0(o){
   const ovx=(L.ov||0)*fs,ovy=(L.vov||0)*fs; /* swash overhang some fonts have beyond their letter widths */
   const x0=tabR+3.2+p+ovx,W=x0+width+p+ovx;let H=lines.length*capH+(lines.length-1)*gap+desc+2*p+2*ovy;const yoff=H<tabR*2?(tabR*2-H)/2:0;if(H<tabR*2)H=tabR*2;
   const rows=lines.map((s,n)=>({text:s,x:x0+(width-widths[n])/2,base:p+ovy+capH+yoff+n*(capH+gap)}));
-  return {text,lines:rows,ghost,fs,ls:fs*ls0,x0,W,H,bw,se,p,tabR,L,hx:tabR,hy:H/2,two};
+  return {text,lines:rows,ghost,fs,ls:fs*ls0,x0,W,H,bw,se,p,tabR,L,hx:tabR,hy:H/2,two,width,ovx};
 }
 function badgeLayout(o){
   const D={small:46,standard:56,large:84}[o.size||'standard'],se=1.1,ringW=1.5,tr=5.2,R=D/2,cx=R,cy=tr*2-2+R,R2=R-se-ringW,bh=9.5,bwid=D*.98;
@@ -1520,7 +1521,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794883154500';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794884105729';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1632,7 +1633,7 @@ function seg(el,items,get,set){el.replaceChildren(...items.map(([v,label,sub])=>
 function drawLettering(){seg($('lettering'),Object.entries(LETTERING).filter(([k,L])=>k!=='clean'&&(!L.namesOnly||isName(state.id))).map(([k,L])=>[k,`<span style="font-family:${L.css.replace(/"/g,"'")};font-weight:${L.weight};font-size:${['signature','marker'].includes(k)?22:k==='cursive'?28:17}px;line-height:1.1">${L.label}</span>`]),()=>state.lettering,v=>state.lettering=v);}
 function drawSize(){
   const nm=isName(state.id),bd=state.shape==='badge'&&!isPhotoId(state.id),R0=A.regionOf?A.regionOf(state.id):null;
-  seg($('size'),Object.entries(SIZES).map(([k,s])=>[k,s.label,nm?({standard:'17 mm letters',large:'25 mm letters'})[k]:R0?(()=>{const q=scaleRegion(R0,k);return `${q.w} × ${q.h} mm`;})():bd?'Ø '+badgeLayout({size:k}).D+' mm':`${s.w} × ${s.h} mm`]),()=>state.size,v=>state.size=v);
+  seg($('size'),Object.entries(SIZES).map(([k,s])=>[k,s.label,nm?({standard:'17 mm ('+inF(17)+' in) letters',large:'25 mm ('+inF(25.5)+' in) letters'})[k]:R0?(()=>{const q=scaleRegion(R0,k);return mmIn(q.w,q.h);})():bd?'Ø '+badgeLayout({size:k}).D+' mm ('+inF(badgeLayout({size:k}).D)+' in)':mmIn(s.w,s.h)]),()=>state.size,v=>state.size=v);
 }
 function drawLayers(){seg($('layers'),[['single','Single layer'],['double','Double layer (3D)']],()=>state.layers,v=>{state.layers=v;syncInk();});}
 function syncInk(){const nm=isName(state.id);$('inkWrap').hidden=nm&&state.layers!=='double'||false;$('inkLab').textContent=nm?'Raised letter colour':'Lettering colour';drawSwatches();}
@@ -1659,7 +1660,7 @@ function render(){
   if(!state)return;
   current=productOpts();
   {const po={...current};const both=state.sides==='both'&&state.id!=='collage'&&state.id!=='portrait'&&itemOf(state.id).fam.key!=='photos';$('stage').innerHTML=both?sidesFig(po):keepsake(current);$('stage').classList.toggle('sides2',both);}
-  const DM=dimsOf(current);$('dims').textContent=`${DM.w} × ${DM.h} mm`;
+  const DM=dimsOf(current);$('dims').textContent=mmIn(DM.w,DM.h);
   $('charCount').textContent=state.name.length+' / '+(isName(state.id)?12:state.id.startsWith('kit-')?14:24);
   const miss=missingPhotos();$('review').disabled=miss;$('reviewHint').textContent=miss?'Add a photo in each slot to review this layout.':'';
   const isP=state.id==='collage'||state.id==='portrait';
@@ -1709,7 +1710,7 @@ for(const ev of ['pointerup','pointercancel','lostpointercapture'])stage.addEven
 /* ---------- review ---------- */
 function summaryRows(){
   const info=itemOf(state.id),S=SIZES[state.size],DM=dimsOf(productOpts());
-  const rows=[['Design',info.item.name+(info.item.sub&&info.fam.key!=='photos'&&info.fam.key!=='baby'?' · '+info.item.sub:'')],['Size',(isName(state.id)||state.shape==='badge'?'':S.label+', ')+`${DM.w} × ${DM.h} mm`]];
+  const rows=[['Design',info.item.name+(info.item.sub&&info.fam.key!=='photos'&&info.fam.key!=='baby'?' · '+info.item.sub:'')],['Size',(isName(state.id)||state.shape==='badge'?'':S.label+', ')+mmIn(DM.w,DM.h)]];
   if(state.name)rows.push(['Name',state.name]);if(state.number)rows.push(['Shirt number',state.number]);if(state.msg)rows.push(['Message',state.msg]);
   rows.push(['Lettering',LETTERING[state.lettering].label]);if(isName(state.id))rows.push(['Layers',state.layers==='double'?'Double layer (3D)'+(state.topInk?', custom top colour':''):'Single layer']);
   if(info.fam.key!=='photos')rows.push(['Print',state.finish==='flat'?'One colour':'Full colour and gold']);
