@@ -1360,6 +1360,12 @@ const wmDefs=uid=>`<pattern id="${uid}W" width="40" height="24" patternUnits="us
 const isName=id=>String(id||'').startsWith('name-');
 const isPhotoId=id=>id==='collage'||id==='portrait';
 function nameLayout(o){
+  if((o.size||'standard')!=='large') return nameLayout0(o);
+  /* Large = the Standard layout scaled exactly 1.5x (letters, margins, overall width and height); only the ring and its hole keep their size */
+  const b=nameLayout0({...o,size:'standard'}),k=1.5;
+  return {...b,lines:b.lines.map(r=>({...r,x:r.x*k,base:r.base*k})),fs:b.fs*k,ls:b.ls*k,x0:b.x0*k,W:b.W*k,H:b.H*k,bw:b.bw*k,se:b.se*k,p:b.p*k,hy:b.H*k/2};
+}
+function nameLayout0(o){
   const L=LETTERING[o.lettering||'bubble'];
   let raw=(o.name||'').trim().replace(/\s+/g,' ');const ghost=!raw;if(ghost)raw=o.sample||'Your name';
   const text=L.upper?raw.toUpperCase():raw;
@@ -1514,7 +1520,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794882545653';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794883154500';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
