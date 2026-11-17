@@ -1318,8 +1318,8 @@ const FAMILIES=[
  {key:'photos',label:'Photos',pick:'',desc:'Your own pictures, framed on dark acrylic.',items:[{id:'collage',name:'Photo collage',sub:'Two to four photos'},{id:'portrait',name:'Single photo',sub:'One picture, full frame'}]}
 ];
 const itemOf=id=>{for(const f of FAMILIES){const it=f.items.find(i=>i.id===id);if(it)return {fam:f,item:it};}return null;};
-const SIZES={standard:{label:'Standard',w:54,h:76},large:{label:'Large',w:64,h:90}};
-const DIEK={standard:1,large:1.3};/* die-cut pieces (states, maps, gods) scale by this; the 4 mm hole stays 4 mm */
+const SIZES={standard:{label:'Standard',w:54,h:76},large:{label:'Large',w:81,h:114}};
+const DIEK={standard:1,large:1.5};/* die-cut pieces (states, maps, gods) scale by this; the 4 mm hole stays 4 mm */
 function scaleRegion(R,size){const k=DIEK[size]||1;return k===1?R:{w:+(R.w*k).toFixed(2),h:+(R.h*k).toFixed(2),pts:R.pts.map(p=>[+(p[0]*k).toFixed(2),+(p[1]*k).toFixed(2)]),hole:[+(R.hole[0]*k).toFixed(2),+(R.hole[1]*k).toFixed(2)],hr:R.hr,k};}
 const LETTERING={bubble:{label:'Bubble',css:'"PrAjo Bubble",cursive',weight:400,upper:true,k:.1,max:.12},signature:{label:'Signature',css:'"PrAjo Signature",cursive',weight:400,upper:false,k:.15,max:.2},serif:{label:'Serif',css:'"PrAjo Serif",serif',weight:400,upper:false,k:.12,max:.15},headline:{label:'Headline',css:'"PrAjo Headline",sans-serif',weight:400,upper:true,k:.1,max:.12},round:{label:'Round',css:'"PrAjo Round",sans-serif',weight:400,upper:false,k:.12,max:.14},block:{label:'Block',css:'"PrAjo Block",sans-serif',weight:400,upper:true,k:.1,max:.11},marker:{label:'Marker',css:'"PrAjo Marker",cursive',weight:400,upper:false,k:.15,max:.17},notebook:{label:'Notebook',css:'"PrAjo Notebook",cursive',weight:400,upper:false,k:0.14,max:0.17},kids:{label:'Kids',css:'"PrAjo Kids",cursive',weight:400,upper:false,k:0.12,max:0.15},royal:{label:'Royal',css:'"PrAjo Royal",serif',weight:400,upper:true,k:0.1,max:0.1,ov:0.16,vov:0.12},heavy:{label:'Heavy',css:'"PrAjo Heavy",sans-serif',weight:400,upper:true,k:0.1,max:0.11},wide:{label:'Wide',css:'"PrAjo Wide",sans-serif',weight:400,upper:true,k:0.09,max:0.09},condensed:{label:'Condensed',css:'"PrAjo Condensed",sans-serif',weight:400,upper:true,k:0.1,max:0.14},cursive:{label:'Cursive',css:'"Great Vibes",cursive',weight:400,upper:false,k:0.15,max:0.2,ov:0.1,vov:0.08,namesOnly:true},clean:{label:'Clean',css:'Manrope,sans-serif',weight:700,upper:true,k:.1,max:.1}};
 const COLORS=[['Gold foil','foil'],['Ivory','#f6efe1'],['White','#ffffff'],['Rose','#f3b6bd'],['Silver','#cfd6e0']];
@@ -1363,7 +1363,7 @@ function nameLayout(o){
   const L=LETTERING[o.lettering||'bubble'];
   let raw=(o.name||'').trim().replace(/\s+/g,' ');const ghost=!raw;if(ghost)raw=o.sample||'Your name';
   const text=L.upper?raw.toUpperCase():raw;
-  const sz=o.size||'standard',capmm={small:13,standard:17,large:21}[sz],maxW={small:58,standard:76,large:96}[sz];
+  const sz=o.size||'standard',capmm={small:13,standard:17,large:25.5}[sz],maxW={small:58,standard:76,large:114}[sz];
   const ls0=-.02,nat=(s,str)=>tw(str,L,s)+s*ls0*(str.length-1);
   const fs1=Math.min(capmm/.72,capmm/.72*maxW/Math.max(1,nat(capmm/.72,text)));
   const words=text.split(' ');let two=false;
@@ -1381,7 +1381,7 @@ function nameLayout(o){
   return {text,lines:rows,ghost,fs,ls:fs*ls0,x0,W,H,bw,se,p,tabR,L,hx:tabR,hy:H/2,two};
 }
 function badgeLayout(o){
-  const D={small:46,standard:56,large:66}[o.size||'standard'],se=1.1,ringW=1.5,tr=5.2,R=D/2,cx=R,cy=tr*2-2+R,R2=R-se-ringW,bh=9.5,bwid=D*.98;
+  const D={small:46,standard:56,large:84}[o.size||'standard'],se=1.1,ringW=1.5,tr=5.2,R=D/2,cx=R,cy=tr*2-2+R,R2=R-se-ringW,bh=9.5,bwid=D*.98;
   const by=cy+R2*.62;return {D,se,ringW,tr,R,cx,cy,R2,bh,bwid,by,bx:cx-bwid/2,W:D,H:by+bh+se,hx:cx,hy:tr};
 }
 function dimsOf(o){
@@ -1514,7 +1514,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794864155443';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794882545653';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1626,7 +1626,7 @@ function seg(el,items,get,set){el.replaceChildren(...items.map(([v,label,sub])=>
 function drawLettering(){seg($('lettering'),Object.entries(LETTERING).filter(([k,L])=>k!=='clean'&&(!L.namesOnly||isName(state.id))).map(([k,L])=>[k,`<span style="font-family:${L.css.replace(/"/g,"'")};font-weight:${L.weight};font-size:${['signature','marker'].includes(k)?22:k==='cursive'?28:17}px;line-height:1.1">${L.label}</span>`]),()=>state.lettering,v=>state.lettering=v);}
 function drawSize(){
   const nm=isName(state.id),bd=state.shape==='badge'&&!isPhotoId(state.id),R0=A.regionOf?A.regionOf(state.id):null;
-  seg($('size'),Object.entries(SIZES).map(([k,s])=>[k,s.label,nm?({standard:'17 mm letters',large:'21 mm letters'})[k]:R0?(()=>{const q=scaleRegion(R0,k);return `${q.w} × ${q.h} mm`;})():bd?'Ø '+badgeLayout({size:k}).D+' mm':`${s.w} × ${s.h} mm`]),()=>state.size,v=>state.size=v);
+  seg($('size'),Object.entries(SIZES).map(([k,s])=>[k,s.label,nm?({standard:'17 mm letters',large:'25 mm letters'})[k]:R0?(()=>{const q=scaleRegion(R0,k);return `${q.w} × ${q.h} mm`;})():bd?'Ø '+badgeLayout({size:k}).D+' mm':`${s.w} × ${s.h} mm`]),()=>state.size,v=>state.size=v);
 }
 function drawLayers(){seg($('layers'),[['single','Single layer'],['double','Double layer (3D)']],()=>state.layers,v=>{state.layers=v;syncInk();});}
 function syncInk(){const nm=isName(state.id);$('inkWrap').hidden=nm&&state.layers!=='double'||false;$('inkLab').textContent=nm?'Raised letter colour':'Lettering colour';drawSwatches();}
@@ -1735,7 +1735,7 @@ function wbBlock(){
   const id=state.id,fam=itemOf(id).fam.key,S=SIZES[state.size]||SIZES.standard,L=LETTERING[state.lettering];
   const fontName=L.css.split(',')[0].replace(/["']/g,'');
   if(isName(id)){const c=NAMECOL[id.slice(5)]||NAMECOL.blush;
-    return {entry:'acrylic-bubble',scale:state.size==='large'?1.24:1,values:{name:state.name||'',showText:true,fontName,...c,nameLines:(state.name&&nameLayout(productOpts()).two)?'two':(state.name&&(state.name.trim().split(/\s+/).length>1)?'one':(state.lines||'auto')),doubleLayer:state.layers==='double',artInk:state.finish==='flat'?'flat':undefined},note:'Name charm. Colours are the workbench preset closest to the customer colour; compare with the customer proof PNG before printing.'};}
+    return {entry:'acrylic-bubble',scale:state.size==='large'?1.5:1,values:{name:state.name||'',showText:true,fontName,...c,nameLines:(state.name&&nameLayout(productOpts()).two)?'two':(state.name&&(state.name.trim().split(/\s+/).length>1)?'one':(state.lines||'auto')),doubleLayer:state.layers==='double',artInk:state.finish==='flat'?'flat':undefined},note:'Name charm. Colours are the workbench preset closest to the customer colour; compare with the customer proof PNG before printing.'};}
   if(fam==='photos')return {entry:id==='portrait'?'acrylic-photo':'collage',values:{width:S.w,height:S.h,holeX:S.w/2,holeY:7},note:'Photos are not inside this file: load the customer photos by hand and match the proof PNG.'};
   if(fam==='kits'){const R=scaleRegion(A.regionOf(id),state.size);return {entry:id,artSvg:A.render(id,{mode:'foil',name:state.name,number:state.number}),values:{width:R.w,height:R.h,holeX:R.hole[0],holeY:R.hole[1]},note:'Football shirt cut to its outline. The workbench shows the shirt with the customer name and number already on it.'};}
   const region=['states','maps','gods','sacred','flowers','stones'].includes(fam);
