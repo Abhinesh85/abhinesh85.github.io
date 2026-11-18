@@ -242,7 +242,7 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 }
 .seeall{grid-column:1/-1;margin-top:6px}
 .bdg{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#d9ab4f;color:#1a1204;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle}
-.pricecap{display:block;margin-top:4px;font-weight:800;color:#f3d48a}
+.pricecap{display:block;margin:0;text-align:center;font-weight:800;font-size:17px;color:#f3d48a}.pricecap:empty{display:none}
 </style><script>
 /* Privacy choices: honours Do Not Track and Global Privacy Control, asks first in the EU/UK, and gives everyone a "Your privacy choices" switch. */
 (function () {
@@ -1584,7 +1584,7 @@ function ensureData(cb){
   if(regState===2){cb();return;}
   regQ.push(cb);
   if(regState===1)return;
-  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794949149885';
+  regState=1;const s=document.createElement('script');s.src='regions-data.js?v=1794964371101';
   s.onload=()=>{try{const R=window.PRAJO_REG;A.setShapes(R.shapes,R.kits);A.setIllustrations(R.illus);A.setCutouts(R.cuts);fillRegionFams();regState=2;}catch(e){regState=0;}regQ.splice(0).forEach(fn=>fn());};
   s.onerror=()=>{regState=0;regQ.length=0;$('cards').replaceChildren(Object.assign(document.createElement('p'),{className:'hint',textContent:'These designs could not load. Please try again.'}));};
   document.head.append(s);
@@ -1728,7 +1728,7 @@ function render(){
   if(!state)return;
   current=productOpts();
   {const po={...current};const both=state.sides==='both'&&state.id!=='collage'&&state.id!=='portrait'&&itemOf(state.id).fam.key!=='photos';$('stage').innerHTML=both?sidesFig(po):keepsake(current);$('stage').classList.toggle('sides2',both);}
-  const DM=dimsOf(current);$('dims').textContent=mmIn(DM.w,DM.h);{const pr=ksPrice(state);let pl=$('priceLine');if(!pl){pl=document.createElement('span');pl.id='priceLine';pl.className='pricecap';$('dims').after(pl);}pl.textContent=pr?'Estimated price '+usd(pr)+' each':'';}
+  const DM=dimsOf(current);$('dims').textContent=mmIn(DM.w,DM.h);{const pr=ksPrice(state);let pl=$('priceLine');if(!pl){pl=document.createElement('span');pl.id='priceLine';pl.className='pricecap';$('review').before(pl);}pl.textContent=pr?'Estimated price '+usd(pr)+' each':'';}
   $('charCount').textContent=state.name.length+' / '+(isName(state.id)?NMAX():state.id.startsWith('kit-')?14:24);
   const miss=missingPhotos();const paused=CFG.ksPause===true;$('review').disabled=miss||paused;$('reviewHint').textContent=paused?(CFG.ksPauseMsg||'New keepsake orders are paused for now. Please check back soon.'):miss?'Add a photo in each slot to review this layout.':'';
   const isP=state.id==='collage'||state.id==='portrait';
