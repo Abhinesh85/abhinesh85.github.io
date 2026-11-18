@@ -2872,27 +2872,30 @@ $("sdBody").addEventListener("input", (e) => { if (e.target.id === "schQ") schPa
 const THEME = [["gold", "Main accent (gold)", "#d9ab4f"], ["gold2", "Light accent", "#f3d48a"], ["saffron", "Warm accent", "#f28a24"], ["navy", "Page background", "#0f1b2e"], ["ink", "Deep background", "#0a1220"], ["panel", "Cards", "#13213a"]];
 const PRESETS = [["Classic navy & gold", {}], ["Midnight rose", { gold: "#e29aa8", gold2: "#f6cdd5", saffron: "#f28a8a", navy: "#1a1226", ink: "#110b1a", panel: "#241a35" }], ["Forest & brass", { gold: "#c9a24d", gold2: "#e8d18e", saffron: "#e08a3c", navy: "#0f2a22", ink: "#091c16", panel: "#143629" }], ["Charcoal & copper", { gold: "#d98a5a", gold2: "#f0bd98", saffron: "#f2a24a", navy: "#1c1f26", ink: "#13151a", panel: "#262a33" }]];
 const SECS = [["trust", "Why shop with us"], ["make", "How you design it"], ["ownpic", "Your own picture"], ["gallery", "Gallery"], ["collections", "Collections"], ["how", "How it's made"], ["reviews", "Reviews"], ["custom", "Custom & bulk orders"], ["faq", "FAQ"], ["about", "Our studio"]];
-let ap = null;
+let ap = null, apList = [];
+const APCATS = [["tumblers", "Tumblers"], ["mugs", "Mugs"], ["tags", "Badges, Tags & Keychains"], ["coasters", "Coasters"], ["stickers", "Stickers"], ["printables", "Printables"]];
 function apPaint() {
   $("apBody").innerHTML = `<p class="hint">Changes the store (the shop page). Press Save to publish. Pick colours that keep text easy to read.</p>
   <section class="ks-sec"><h3>Colours</h3><div style="display:flex;gap:8px;flex-wrap:wrap">${PRESETS.map(([n], i) => `<button class="btn line" type="button" data-appre="${i}">${n}</button>`).join("")}</div>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">${THEME.map(([k, l, d]) => `<label class="f"><span>${l}</span><div style="display:flex;gap:8px;align-items:center"><input type="color" data-apc="${k}" value="${ap.theme[k] || d}" style="width:52px;height:40px;padding:0;border:0;background:none"><button class="btn line" type="button" data-apr="${k}" style="min-height:34px;padding:0 10px;font-size:12px">Reset</button></div></label>`).join("")}</div></section>
   <section class="ks-sec"><h3>Sections on the store page</h3><div style="display:flex;flex-wrap:wrap;gap:8px 16px">${SECS.map(([k, l]) => `<label class="ssw"><span class="switch"><input type="checkbox" data-aps="${k}" ${ap.hide.includes(k) ? "" : "checked"}></span>${l}</label>`).join("")}</div></section>
+  <section class="ks-sec"><h3>Collection pictures</h3><p class="hint">The cards in “Made for every moment” each show one product's photo. Pick which one, so no two cards look the same.</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px">${APCATS.map(([id, label]) => { const l = apList.filter((x) => x.category === id); return l.length ? `<label class="f"><span>${label}</span><select class="in" data-apcoll="${id}"><option value="">First product (automatic)</option>${l.map((x) => `<option value="${esc(x.id)}"${(ap.coll || {})[id] === x.id ? " selected" : ""}>${esc((x.name || x.id).slice(0, 50))}</option>`).join("")}</select></label>` : ""; }).join("")}</div></section>
   <section class="ks-sec"><h3>Cart</h3><label class="f"><span>Message at the bottom of the cart (optional)</span><input class="in" id="apCart" maxlength="160" placeholder="e.g. Order by Friday for delivery before the holiday" value="${esc(ap.cartMsg)}"></label>
     <label class="ssw"><span class="switch"><input type="checkbox" id="apRem" ${ap.remindOff ? "" : "checked"}></span>Ask for an email to save the cart (lets you send reminders and discounts)</label></section>
   <div style="display:flex;gap:10px"><button class="btn gold" type="button" id="apSave">Save appearance</button><span class="ks-dirty" id="apDirty"></span></div>`;
 }
-$("apBtn").onclick = async () => { sheetOpen("apSheet"); const r = await readSiteRow(); ap = { theme: { ...(r.theme || {}) }, hide: Array.isArray(r.hideSections) ? [...r.hideSections] : [], cartMsg: String(r.cartMsg || ""), remindOff: r.remindOff === true }; apPaint(); };
+$("apBtn").onclick = async () => { sheetOpen("apSheet"); const r = await readSiteRow(); try { apList = (await sb.from("listings").select("id,name,category,sort").order("sort")).data || []; } catch { apList = []; } ap = { coll: { ...(r.collPick || {}) }, theme: { ...(r.theme || {}) }, hide: Array.isArray(r.hideSections) ? [...r.hideSections] : [], cartMsg: String(r.cartMsg || ""), remindOff: r.remindOff === true }; apPaint(); };
 $("apClose").onclick = () => sheetShut("apSheet");
 $("apBody").addEventListener("input", (e) => { const t = e.target; if (t.dataset.apc) ap.theme[t.dataset.apc] = t.value; else if (t.id === "apCart") ap.cartMsg = t.value; $("apDirty").textContent = "Unsaved changes"; });
-$("apBody").addEventListener("change", (e) => { const t = e.target; if (t.dataset.aps) ap.hide = t.checked ? ap.hide.filter((x) => x !== t.dataset.aps) : [...new Set([...ap.hide, t.dataset.aps])]; else if (t.id === "apRem") ap.remindOff = !t.checked; else return; $("apDirty").textContent = "Unsaved changes"; });
+$("apBody").addEventListener("change", (e) => { const t = e.target; if (t.dataset.apcoll) { if (t.value) ap.coll[t.dataset.apcoll] = t.value; else delete ap.coll[t.dataset.apcoll]; } else if (t.dataset.aps) ap.hide = t.checked ? ap.hide.filter((x) => x !== t.dataset.aps) : [...new Set([...ap.hide, t.dataset.aps])]; else if (t.id === "apRem") ap.remindOff = !t.checked; else return; $("apDirty").textContent = "Unsaved changes"; });
 $("apBody").addEventListener("click", async (e) => {
   const b = e.target.closest("button"); if (!b) return;
   if (b.dataset.appre) { ap.theme = { ...PRESETS[+b.dataset.appre][1] }; apPaint(); $("apDirty").textContent = "Unsaved changes"; }
   else if (b.dataset.apr) { delete ap.theme[b.dataset.apr]; apPaint(); $("apDirty").textContent = "Unsaved changes"; }
   else if (b.id === "apSave") {
     const cur = await readSiteRow(), next = { ...cur }, set = (k, v, empty) => { if (empty) delete next[k]; else next[k] = v; };
-    set("theme", ap.theme, !Object.keys(ap.theme).length); set("hideSections", ap.hide, !ap.hide.length); set("cartMsg", ap.cartMsg.trim(), !ap.cartMsg.trim()); set("remindOff", true, !ap.remindOff);
+    set("collPick", ap.coll, !Object.keys(ap.coll).length); set("theme", ap.theme, !Object.keys(ap.theme).length); set("hideSections", ap.hide, !ap.hide.length); set("cartMsg", ap.cartMsg.trim(), !ap.cartMsg.trim()); set("remindOff", true, !ap.remindOff);
     const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
     if (error) return toast("Couldn't save: " + error.message); site = next; $("apDirty").textContent = ""; toast("Saved. Live on the store now");
   }

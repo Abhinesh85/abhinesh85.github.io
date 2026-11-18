@@ -1354,7 +1354,7 @@ function renderCollections() {
 $("colls").innerHTML = CATS.map((c) => {
   const list = byCat(c.id); if (!list.length) return "";
   return `<button class="coll" type="button" data-cat="${c.id}">
-    <img src="${esc(list[0].images[0].card)}" alt="" loading="lazy">
+    <img src="${esc(((list.find((p) => p.id === (SITE.collPick || {})[c.id]) || list[0]).images[0] || list[0].images[0]).card)}" alt="" loading="lazy">
     <span class="txt"><h3>${esc(c.label)}</h3><small>${list.length} design${list.length > 1 ? "s" : ""}<span class="blurb"> · ${esc(c.blurb)}</span></small></span></button>`;
 }).join("");
 const aboutPick = P.find((p) => p.category === "tumblers" && p.images.length > 3) || P[0];

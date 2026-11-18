@@ -893,14 +893,14 @@ $("nameToggle").addEventListener("click", () => setName(!PV.showName));
 const INKS = [["gold", "Gold", "linear-gradient(135deg,#fff3cf,#d9a441 55%,#b8862c)"], ["black", "Black", "#15171c"], ["white", "White", "#fff"], ["silver", "Silver", "linear-gradient(135deg,#fff,#c9ced6,#7f8896)"], ["rosegold", "Rose gold", "linear-gradient(135deg,#ffe3dc,#e8a598,#b76e62)"], ["#d62839", "Red", "#d62839"], ["#ff5fa2", "Pink", "#ff5fa2"], ["#ff8a00", "Orange", "#ff8a00"], ["#f5c400", "Yellow", "#f5c400"], ["#1fa34a", "Green", "#1fa34a"], ["#14b8a6", "Teal", "#14b8a6"], ["#2563eb", "Blue", "#2563eb"], ["#1e2a5a", "Navy", "#1e2a5a"], ["#7c3aed", "Purple", "#7c3aed"]];
 const inkLabel = (v) => (INKS.find((x) => x[0] === v) || [0, "custom " + v])[1].toLowerCase();
 $("inkBox").innerHTML = INKS.map(([v, l, bg]) => `<button type="button" class="ink" data-i="${v}" aria-pressed="${v === PV.ink}" aria-label="${l}" title="${l}"><i style="background:${bg}"></i></button>`).join("") + `<label class="cust" title="Pick any color" aria-label="Pick any color">🎨<input type="color" id="inkCustom" value="#e11d48"></label>`;
-function setInk(v) { PV.ink = v; $("inkBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x.dataset.i === v)); sizeName(); }
+function setInk(v) { if (!PV.showName) setName(true); PV.ink = v; $("inkBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", x.dataset.i === v)); sizeName(); }
 $("inkBox").addEventListener("click", (e) => { const b = e.target.closest("button[data-i]"); if (b) setInk(b.dataset.i); });
 $("inkCustom").addEventListener("input", () => setInk($("inkCustom").value));
 // name size, tilt (flat products) and turn-around (round ones)
 function syncNameFx() { $("nszRange").value = PV.nsz || 100; $("nszOut").textContent = (PV.nsz || 100) + "%"; $("ntRange").value = PV.nrot || 0; $("ntOut").textContent = (PV.nrot || 0) + "°"; const d = Math.round((PV.na || 0) * 180 / Math.PI); $("naRange").value = Math.max(-60, Math.min(60, d)); $("naOut").textContent = d + "°"; const flat = PH.kind === "flat"; $("ntWrap").style.display = flat ? "flex" : "none"; $("naWrap").style.display = flat ? "none" : "flex"; }
-$("nszRange").addEventListener("input", () => { PV.nsz = Number($("nszRange").value) || 100; $("nszOut").textContent = PV.nsz + "%"; $("nameReset").hidden = false; sizeName(); });
-$("ntRange").addEventListener("input", () => { PV.nrot = Number($("ntRange").value) || 0; $("ntOut").textContent = PV.nrot + "°"; $("nameReset").hidden = false; requestDraw(); });
-$("naRange").addEventListener("input", () => { PV.na = (Number($("naRange").value) || 0) * Math.PI / 180; $("naOut").textContent = $("naRange").value + "°"; $("nameReset").hidden = false; requestDraw(); });
+$("nszRange").addEventListener("input", () => { if (!PV.showName) setName(true); PV.nsz = Number($("nszRange").value) || 100; $("nszOut").textContent = PV.nsz + "%"; $("nameReset").hidden = false; sizeName(); });
+$("ntRange").addEventListener("input", () => { if (!PV.showName) setName(true); PV.nrot = Number($("ntRange").value) || 0; $("ntOut").textContent = PV.nrot + "°"; $("nameReset").hidden = false; requestDraw(); });
+$("naRange").addEventListener("input", () => { if (!PV.showName) setName(true); PV.na = (Number($("naRange").value) || 0) * Math.PI / 180; $("naOut").textContent = $("naRange").value + "°"; $("nameReset").hidden = false; requestDraw(); });
 function setDesignUi() { $("designBox").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", (x.dataset.d || "") === (PV.design ? PV.design.id : ""))); }
 function buildPicker() {
   $("designBox").querySelectorAll("button[data-d]:not(.none)").forEach((b) => b.remove());
