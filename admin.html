@@ -424,6 +424,16 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .in-blanks { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 8px; padding: 8px; border: 1px dashed var(--gold); border-radius: 12px; } .in-blanks small { grid-column: 1 / -1; color: var(--gold-2); } .in-blanks label span { font-size: 12px; color: var(--muted); text-transform: capitalize; }
 @media (max-width: 860px) { .in-grid { grid-template-columns: 1fr; } .in-grid[data-view="list"] .in-thread { display: none; } .in-grid[data-view="thread"] .in-left { display: none; } .in-back { display: inline-flex; } }
 .panel.inb { width: min(1180px, 100%); } .panel.inb .panel-body { padding: 0; gap: 0; overflow: hidden; display: flex; }
+
+/* cover pictures */
+.cv-row { border: 1px solid var(--line-soft); border-radius: 14px; background: var(--panel); padding: 12px 14px; display: grid; gap: 8px; }
+.cv-h { display: flex; justify-content: space-between; gap: 10px; align-items: baseline; flex-wrap: wrap; } .cv-h small { color: var(--muted); }
+.cv-strip { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.cv-th { position: relative; flex: 0 0 auto; width: 84px; height: 84px; border-radius: 10px; border: 2px solid var(--line-soft); padding: 0; background: var(--ink); cursor: pointer; overflow: hidden; }
+.cv-th img { width: 100%; height: 100%; object-fit: cover; display: block; } .cv-th:hover, .cv-th:focus-visible { border-color: var(--gold-2); outline: none; }
+.cv-th.on { border-color: var(--gold); } .cv-th span { position: absolute; left: 4px; top: 4px; background: var(--gold); color: #1a1204; font-size: 10.5px; font-weight: 800; padding: 1px 7px; border-radius: 999px; }
+.mkcov { margin-top: 6px; width: 100%; min-height: 34px; border-radius: 8px; border: 1px solid var(--line); background: none; color: var(--gold-2); font: 700 12.5px system-ui; cursor: pointer; }
+.mkcov:hover { background: var(--panel-2); }
 </style>
 </head>
 <body>
@@ -450,6 +460,7 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
         <button type="button" role="menuitem" id="caBtn">🛒 Carts &amp; discounts<small>What people are holding, send them an offer</small></button>
         <button type="button" role="menuitem" id="sdBtn">🗓 Schedule<small>Plan notices, pauses and hidden designs by date</small></button>
         <button type="button" role="menuitem" id="hsBtn">🕘 Change history<small>See and undo recent changes</small></button>
+        <button type="button" role="menuitem" id="cvBtn">🖼 Cover pictures<small>Choose each listing's main photo</small></button>
         <button type="button" role="menuitem" id="apBtn">🎨 Appearance<small>Colours, sections, cart message</small></button>
         <button type="button" role="menuitem" id="tlBtn">🩺 Health check &amp; backup<small>Find gaps, download or restore settings</small></button>
         <button type="button" role="menuitem" id="ksBtn">🔑 Keepsake options<small id="ksState">Front/back printing, sizes, and every design on or off</small></button>
@@ -762,6 +773,10 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 <div class="sheet" id="inSheet" hidden role="dialog" aria-modal="true" aria-labelledby="inSheetT">
   <div class="panel inb"><div class="panel-head"><h2 id="inSheetT">Inbox</h2><button class="btn line" type="button" id="inNew" style="min-height:40px;padding:0 14px">✎ New email</button><button class="btn line" type="button" id="inFwdBtn" style="min-height:40px;padding:0 14px">Forwarding</button><button class="btn line" type="button" id="inTplBtn" style="min-height:40px;padding:0 14px">Templates</button><button class="x" type="button" id="inClose" aria-label="Close">×</button></div>
     <div class="panel-body"><div class="in-grid" id="inGrid" data-view="list"><div class="in-left"><div class="in-bar" id="inBar"></div><div class="in-list" id="inList"></div></div><div class="in-thread" id="inThread"></div></div></div></div>
+</div>
+<div class="sheet" id="cvSheet" hidden role="dialog" aria-modal="true" aria-labelledby="cvSheetT">
+  <div class="panel wide"><div class="panel-head"><h2 id="cvSheetT">Cover pictures</h2><button class="x" type="button" id="cvClose" aria-label="Close">×</button></div>
+    <div class="panel-body" id="cvBody"><p class="hint">Loading…</p></div></div>
 </div>
 <div class="sheet" id="helpSheet" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
   <div class="panel">
@@ -1135,12 +1150,13 @@ function renderEditor() {
       <div class="drop" id="drop" tabindex="0" role="button" aria-label="Add photos">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="11" r="2"/><path d="m21 17-5-5-7 7"/><path d="M12 3v4M10 5h4"/></svg>
         <b>Drag photos here or tap to add</b>
-        <span class="hint">JPG, PNG or HEIC from your phone. They're resized automatically. Drag photos to reorder; the first is the cover.</span>
+        <span class="hint">JPG, PNG or HEIC from your phone. They're resized automatically. Tap ★ Make cover or drag photos to reorder; the first is the cover.</span>
       </div>
       <div class="photos" id="photos">${ed.images.map((im, i) => `
         <div class="ph-item${im._busy ? " busy" : ""}" data-i="${i}">
           <div class="im"><img src="${esc(im._preview || im.card)}" alt="">${i === 0 ? `<span class="cover">Cover</span>` : ""}
             <button class="del" type="button" data-del="${i}" aria-label="Remove photo">×</button></div>
+          ${i > 0 && !im._busy ? `<button class="mkcov" type="button" data-cover="${i}">★ Make cover</button>` : ""}
           ${choices.length ? `<select data-shows="${i}" aria-label="Option this photo shows"><option value="">Shows: any option</option>${choices.map((c) => `<option value="${esc(c.name + "\u0001" + c.value)}" ${im.shows && im.shows.name === c.name && im.shows.value === c.value ? "selected" : ""}>${esc(c.name)}: ${esc(c.value)}</option>`).join("")}</select>` : ""}
         </div>`).join("")}</div>
     </section>
@@ -1274,6 +1290,7 @@ $("dlPick").addEventListener("change", (e) => { const f = [...e.target.files]; e
 
 $("edBody").addEventListener("click", (e) => {
   const t = e.target;
+  if (t.dataset.cover != null) { readForm(); const [m] = ed.images.splice(+t.dataset.cover, 1); ed.images.unshift(m); renderEditor(); toast("Now the cover. Press Save to publish"); return; }
   if (t.dataset.del != null) { readForm(); ed.images.splice(+t.dataset.del, 1); renderEditor(); return; }
   if (t.id === "addGroup") { readForm(); ed.variations.push({ name: "", values: [] }); renderEditor(); setTimeout(() => document.querySelector(`[data-gname="${ed.variations.length - 1}"]`)?.focus(), 0); return; }
   if (t.dataset.gdel != null) {
@@ -2601,12 +2618,12 @@ $("ksSave").onclick = async () => {
 const HUB_GROUPS = [
   ["Reports & customers", ["inBtn", "anBtn", "caBtn", "lvBtn", "rvBtn"]],
   ["Keepsakes", ["ksBtn", "kcBtn", "dsBtn"]],
-  ["Store content & look", ["siteBtn", "apBtn", "scBtn", "ptBtn", "tdBtn", "snBtn", "bulkBtn"]],
+  ["Store content & look", ["siteBtn", "apBtn", "cvBtn", "scBtn", "ptBtn", "tdBtn", "snBtn", "bulkBtn"]],
   ["Sales & orders", ["slBtn", "coBtn", "sdBtn"]],
   ["Safety & tools", ["hsBtn", "tlBtn", "dpBtn", "helpBtn"]],
   ["Links & account", ["pwBtn", "outBtn"]],
 ];
-const HUB_EXTRA = { inBtn: "email mail hello orders support proofs reply template telegram", anBtn: "traffic analytics visitors daily weekly monthly most viewed products add to cart", caBtn: "abandoned cart discount email reminder automatic follow up unsubscribe", sdBtn: "schedule plan date holiday timer", hsBtn: "undo restore history audit log", apBtn: "theme colour color brand sections cart message", tlBtn: "backup export import health check missing price photo privacy delete my data request gdpr ccpa", ksBtn: "front only, both sides, hide a design, large size, notice", siteBtn: "text headline faq footer contact announcement", slBtn: "discount percent off", coBtn: "delivery pickup shipping fees pause", pwBtn: "login security" };
+const HUB_EXTRA = { cvBtn: "cover default display main image photo thumbnail listing picture", inBtn: "email mail hello orders support proofs reply template telegram", anBtn: "traffic analytics visitors daily weekly monthly most viewed products add to cart", caBtn: "abandoned cart discount email reminder automatic follow up unsubscribe", sdBtn: "schedule plan date holiday timer", hsBtn: "undo restore history audit log", apBtn: "theme colour color brand sections cart message", tlBtn: "backup export import health check missing price photo privacy delete my data request gdpr ccpa", ksBtn: "front only, both sides, hide a design, large size, notice", siteBtn: "text headline faq footer contact announcement", slBtn: "discount percent off", coBtn: "delivery pickup shipping fees pause", pwBtn: "login security" };
 function hubText(el) { const s = el.querySelector("small"); const t = [...el.childNodes].filter((n) => n.nodeType === 3).map((n) => n.textContent).join(" ").trim(); return [t || el.textContent.replace(s ? s.textContent : "", "").trim(), s ? s.textContent.trim() : ""]; }
 let hubRows = [];
 function hubOpen() {
@@ -3406,6 +3423,36 @@ $("anBody").addEventListener("click", async (e) => {
       const d = await r.json().catch(() => ({})); $("arMsgOut").textContent = r.ok ? "Test sent to " + me + ". Check your inbox." : (d.error || "Couldn't send the test.");
     } catch (err) { $("arMsgOut").textContent = "Couldn't send the test."; }
     $("arTest").disabled = false;
+  }
+});
+/* ---- Cover pictures: choose each listing's default display photo ---- */
+let cvFilter = "all", cvQ = "";
+const cvImgs = (r) => (Array.isArray(r.images) ? r.images : []).filter((x) => x && (x.card || x.large));
+function cvPaint() {
+  const cats = [["all", "All"], ...[...new Set(rows.map((r) => r.category).filter(Boolean))].map((c) => [c, c.charAt(0).toUpperCase() + c.slice(1)])];
+  const q = cvQ.trim().toLowerCase();
+  const list = rows.filter((r) => r.id !== "custom-design" && (cvFilter === "all" || r.category === cvFilter) && (!q || ((r.title || r.name || "") + " " + r.id).toLowerCase().includes(q)));
+  $("cvBody").innerHTML = `<p class="hint">The <b>cover</b> is the photo shown on the shop, in collections and in search. Tap any photo to make it the cover. It saves straight away.</p>
+    <div class="an-bar"><div class="an-tabs" style="max-width:100%;overflow-x:auto">${cats.map(([k, l]) => `<button type="button" data-cvcat="${esc(k)}" aria-selected="${cvFilter === k}">${esc(l)}</button>`).join("")}</div><input class="in" id="cvQ" type="search" placeholder="Search listings…" value="${esc(cvQ)}" style="max-width:240px;min-height:40px" autocomplete="off"></div>
+    ${list.length ? list.map((r) => { const ims = cvImgs(r); return `<div class="cv-row"><div class="cv-h"><b>${esc(r.title || r.name || r.id)}</b><small>${esc(r.category || "")}${ims.length ? "" : " · no photos yet"}</small></div>
+      ${ims.length ? `<div class="cv-strip">${ims.map((im, i) => `<button type="button" class="cv-th ${i === 0 ? "on" : ""}" data-cvset="${esc(r.id)}" data-cvi="${i}" aria-label="${i === 0 ? "Current cover" : "Make this the cover"}" aria-pressed="${i === 0}"><img src="${esc(im.card || im.large)}" alt="" loading="lazy">${i === 0 ? "<span>Cover</span>" : ""}</button>`).join("")}</div>` : `<button class="btn line" type="button" data-cvedit="${esc(r.id)}" style="min-height:36px;padding:0 14px">Add photos</button>`}</div>`; }).join("") : '<p class="hint">No listings match.</p>'}`;
+  if (document.activeElement && document.activeElement.id === "cvQ") { const e = $("cvQ"); e.focus(); e.setSelectionRange(e.value.length, e.value.length); }
+}
+async function cvOpen() { sheetOpen("cvSheet"); $("cvBody").innerHTML = '<p class="hint">Loading…</p>'; try { if (!rows.length) await loadRows(); } catch { /* use what we have */ } cvPaint(); }
+$("cvBtn").onclick = cvOpen; $("cvClose").onclick = () => sheetShut("cvSheet");
+$("cvBody").addEventListener("input", (e) => { if (e.target.id === "cvQ") { cvQ = e.target.value; cvPaint(); } });
+$("cvBody").addEventListener("click", async (e) => {
+  const b = e.target.closest("button"); if (!b) return;
+  if (b.dataset.cvcat !== undefined) { cvFilter = b.dataset.cvcat; cvPaint(); }
+  else if (b.dataset.cvedit) { closeAllSheets(); const r = rows.find((x) => x.id === b.dataset.cvedit); if (r) openEditor(r); }
+  else if (b.dataset.cvset) {
+    const r = rows.find((x) => x.id === b.dataset.cvset), i = +b.dataset.cvi; if (!r || !i) return;
+    const all = Array.isArray(r.images) ? [...r.images] : [], real = cvImgs(r), pick = real[i]; if (!pick) return;
+    const next = [pick, ...all.filter((x) => x !== pick)], prev = r.images;
+    r.images = next; cvPaint();
+    const { error } = await sb.from("listings").update({ images: next.map(({ card, large, shows }) => (shows ? { card, large, shows } : { card, large })), updated_at: new Date().toISOString() }).eq("id", r.id);
+    if (error) { r.images = prev; cvPaint(); return toast("Couldn't save: " + error.message); }
+    try { render(); } catch { /* list may be closed */ } toast("Cover changed. Live on the store now");
   }
 });
 </script>
