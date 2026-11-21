@@ -242,6 +242,7 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 }
 .seeall{grid-column:1/-1;margin-top:6px}
 .bdg{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#d9ab4f;color:#1a1204;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle}
+.how{list-style:none;margin:14px 0 0;padding:14px 16px;border:1px solid var(--line-soft,rgba(245,236,220,.1));border-radius:16px;display:grid;gap:10px;background:rgba(245,236,220,.03);counter-reset:s}.how li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;font-size:13.5px;color:var(--soft,#c9d0dc);counter-increment:s}.how li::before{content:counter(s);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12.5px;background:#d9ab4f;color:#1a1204}.how b{display:block;color:var(--cream,#f5ecdc);font-size:14px}.how:empty{display:none}
 .pricecap{display:block;margin:0;text-align:center;font-weight:800;font-size:17px;color:#f3d48a}.pricecap:empty{display:none}
 </style><script>
 /* Privacy choices: honours Do Not Track and Global Privacy Control, asks first in the EU/UK, and gives everyone a "Your privacy choices" switch. */
@@ -345,6 +346,7 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 <div class="field" id="shapeWrap"><span class="lab" id="shapeLab">Shape</span><div class="seg" id="shape" role="group" aria-labelledby="shapeLab"></div></div>
 <div class="field"><span class="lab" id="sizeLab">Size</span><div class="seg" id="size" role="group" aria-labelledby="sizeLab"></div></div>
 <div class="actions"><button class="btn primary" id="review" type="button">Review my design</button><span class="hint" id="reviewHint" aria-live="polite"></span></div>
+<ol class="how" id="how" aria-label="What happens next"></ol>
 </div></div></div></section>
 
 <section id="reviewView" class="work" hidden aria-label="Review"><div class="wrap">
@@ -1370,6 +1372,7 @@ function applyItemOff(){const off=Array.isArray(CFG.ksItemOff)?CFG.ksItemOff:[],
 const NMAX=()=>Math.min(12,Math.max(3,Number(CFG.ksNameMax)||12));
 const ksPrice=st=>{const M=(CFG.ksItemMeta||{})[st.id],B=CFG.ksPrice||{},fam=itemOf(st.id)&&itemOf(st.id).fam.key;let v=M&&M.price&&Number(M.price[st.size])||0;if(!v&&B.base&&B.base[fam])v=Number(B.base[fam][st.size])||0;if(!v)return null;if(st.sides==='both'&&fam!=='photos')v+=Number(B.both)||0;if(st.layers==='double')v+=Number(B.double)||0;return Math.round(v*100)/100;};
 const usd=n=>'$'+(Math.round(n*100)%100?n.toFixed(2):String(Math.round(n)));
+function fillHow(){const o=$('how');if(!o||!CFG)return;const L=String(CFG.ksLead||'').slice(0,80),P=String(CFG.ksProof||'').slice(0,80);const st=[['Send your design','Tap Review, then send it to us. Nothing is charged at this step.'],['Approve your proof',P?'We email you a proof '+P+'. Nothing is made until you say yes.':'We email you a proof. Nothing is made until you say yes.'],['We make it by hand',L?'Ready in '+L+'.':'Cut and printed in our Sacramento studio.']];o.innerHTML=st.map(([h,x])=>`<li><span><b>${esc(h)}</b>${esc(x)}</span></li>`).join('');}
 function effCfg(D){try{D=D||{};const now=Date.now(),out={...D};for(const r of (Array.isArray(D.sched)?D.sched:[])){if(!r||r.off||!r.set)continue;const a=r.from?Date.parse(r.from):-Infinity,b=r.to?Date.parse(r.to):Infinity;if(now<a||now>=b)continue;for(const[k,v]of Object.entries(r.set))out[k]=Array.isArray(v)&&Array.isArray(out[k])?[...new Set([...out[k],...v])]:v;}return out;}catch(e){return D||{};}}
 const PT=(kind,product,qty,value,page)=>{try{if(!(window.PRAJO_PRIV&&PRAJO_PRIV.allowed()))return;let sid=localStorage.getItem('prajo:sid')||'';if(!/^[a-z0-9]{10,24}$/.test(sid)){sid=((crypto.randomUUID?crypto.randomUUID().replace(/-/g,''):Math.random().toString(36).slice(2)+Date.now().toString(36))+'x').slice(0,24);localStorage.setItem('prajo:sid',sid);}
  const dev=innerWidth<640?'phone':innerWidth<1024?'tablet':'desktop';let tz='';try{tz=Intl.DateTimeFormat().resolvedOptions().timeZone||'';}catch(e){}
@@ -1473,6 +1476,7 @@ function nameCharm(o){
   const body=`<g mask="url(#${uid}M)"${o.ghost&&g.ghost?' opacity=".5"':''}>${tab}${t(2*(g.bw+g.se),STOCK)}${t(2*g.bw,C.band)}${letters}${(o.noWm||!WM.on)?'':t(2*(g.bw+g.se),`url(#${uid}W)`)}</g>`;
   return wrapSvg(o,uid,[-9.5,Math.min(-3,g.hy-9.5),g.W+12.5,Math.max(g.H+6,19+Math.abs(Math.min(-3,g.hy-9.5)))],defs,keyRing(g.hx,g.hy,'left')+body,o.label);
 }
+
 function badge(o){
   const b=badgeLayout(o),uid='k'+(uidc++).toString(36),L=LETTERING[o.lettering||'signature'],flat=o.finish==='flat';
   const name=(o.name||'').trim(),ghost=!name,raw=name||'Your name',txt=L.upper?raw.toUpperCase():raw;
@@ -1945,11 +1949,12 @@ try{const c=new URLSearchParams(location.search).get('c'),f=FAMILIES.find(x=>x.k
 heroRender();drawTabs();drawCards(true);drawDiagram();observe();
 /* owner switch: same public site_settings row the store reads; any failure leaves the watermark ON */
 try{fetch('https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/site_settings?id=eq.1&select=data',{headers:{apikey:'sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b',Authorization:'Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b'}}).then(r=>r.ok?r.json():null).then(rows=>{let D=rows&&rows[0]&&rows[0].data;if(D&&D.watermarkOff===true){WM.on=false;rerenderAll();}
-if(D){CFG=effCfg(D);D=CFG;if(typeof D.ksNotice==='string'&&D.ksNotice.trim()){const h=document.querySelector('header.top'),n=document.createElement('div');n.setAttribute('role','status');n.style.cssText='background:#d9ab4f;color:#1a1204;text-align:center;font:700 14px system-ui;padding:9px 14px';n.textContent=D.ksNotice.trim().slice(0,200);h.parentNode.insertBefore(n,h);}if(D.ksLargeOff&&state)drawSize();if(Array.isArray(D.ksItemOff)&&D.ksItemOff.length){applyItemOff();if(state&&!itemOf(state.id)){/* open design was switched off */}drawCards(false);}if(D.ksSidesMode||D.ksFamSides||D.ksItemSides)rerenderAll();}
+if(D){CFG=effCfg(D);D=CFG;try{fillHow();}catch(e){}if(typeof D.ksNotice==='string'&&D.ksNotice.trim()){const h=document.querySelector('header.top'),n=document.createElement('div');n.setAttribute('role','status');n.style.cssText='background:#d9ab4f;color:#1a1204;text-align:center;font:700 14px system-ui;padding:9px 14px';n.textContent=D.ksNotice.trim().slice(0,200);h.parentNode.insertBefore(n,h);}if(D.ksLargeOff&&state)drawSize();if(Array.isArray(D.ksItemOff)&&D.ksItemOff.length){applyItemOff();if(state&&!itemOf(state.id)){/* open design was switched off */}drawCards(false);}if(D.ksSidesMode||D.ksFamSides||D.ksItemSides)rerenderAll();}
 const off=D&&Array.isArray(D.keepsakeOff)?D.keepsakeOff:[];if(off.length){for(let i=FAMILIES.length-1;i>=0;i--)if(off.includes(FAMILIES[i].key))FAMILIES.splice(i,1);
 if(!FAMILIES.length){const t=$('tabs');t.replaceChildren();$('cards').innerHTML='<p class="lead" style="padding:24px 0">New designs are coming soon. Check back shortly, or message us for a custom order.</p>';}
 else{if(!FAMILIES.some(f=>f.key===famKey))famKey=FAMILIES[0].key;drawTabs();drawCards(true);}}}).catch(()=>{});}catch(e){}
 heroTimer=setInterval(heroCycle,5200);
 fontsReady();
+try{fillHow();}catch(e){}
 </script>
 </body></html>
