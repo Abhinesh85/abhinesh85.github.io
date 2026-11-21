@@ -434,6 +434,76 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .cv-th.on { border-color: var(--gold); } .cv-th span { position: absolute; left: 4px; top: 4px; background: var(--gold); color: #1a1204; font-size: 10.5px; font-weight: 800; padding: 1px 7px; border-radius: 999px; }
 .mkcov { margin-top: 6px; width: 100%; min-height: 34px; border-radius: 8px; border: 1px solid var(--line); background: none; color: var(--gold-2); font: 700 12.5px system-ui; cursor: pointer; }
 .mkcov:hover { background: var(--panel-2); }
+
+/* ---------- dashboard shell: sidebar + Overview ---------- */
+.shell { display: grid; grid-template-columns: 236px minmax(0, 1fr); gap: 22px; align-items: start; padding-top: 18px; }
+.rail { position: sticky; top: 84px; display: grid; gap: 2px; padding: 12px; border: 1px solid var(--line-soft); border-radius: 22px; background: linear-gradient(180deg, rgba(24, 42, 71, .85), rgba(15, 27, 46, .9)); max-height: calc(100vh - 100px); overflow-y: auto; }
+.rail h6 { margin: 12px 10px 4px; font: 800 10.5px var(--f-body); letter-spacing: .16em; text-transform: uppercase; color: var(--muted); }
+.rail h6:first-child { margin-top: 2px; }
+.rl { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 42px; padding: 0 12px; border: 0; border-radius: 12px; background: none; color: var(--cream); font-weight: 700; font-size: 14px; text-align: left; cursor: pointer; text-decoration: none; position: relative; }
+.rl i { font-style: normal; width: 22px; text-align: center; font-size: 16px; }
+.rl:hover { background: rgba(245, 236, 220, .06); }
+.rl:focus-visible { outline: 2px solid var(--gold-2); outline-offset: -2px; }
+.rl[aria-current="page"] { background: linear-gradient(135deg, rgba(243, 212, 138, .2), rgba(217, 171, 79, .1)); color: var(--gold-2); box-shadow: inset 0 0 0 1px var(--line); }
+.rl b { margin-left: auto; min-width: 20px; height: 20px; padding: 0 6px; border-radius: 999px; background: var(--saffron); color: #1b0f02; font-size: 11.5px; font-weight: 800; display: grid; place-items: center; }
+.rl .ext { margin-left: auto; color: var(--muted); font-size: 12px; }
+.dmain { min-width: 0; }
+.ov { display: grid; gap: 16px; padding-bottom: 80px; }
+.ov-hero { display: flex; gap: 16px; align-items: center; justify-content: space-between; flex-wrap: wrap; padding: 22px 24px; border-radius: 24px; background: radial-gradient(120% 140% at 0% 0%, #26406b 0%, #162744 55%, #101d33 100%); border: 1px solid var(--line); }
+.ov-hero h2 { font-size: clamp(22px, 3.2vw, 30px); }
+.ov-hero h2 em { color: var(--gold-2); }
+.ov-hero p { margin: 6px 0 0; color: var(--muted); font-size: 14.5px; max-width: 52ch; }
+.ov-hero .acts a.btn { color: var(--gold-2); text-decoration: none; }
+.ov-hero .acts { display: flex; gap: 10px; flex-wrap: wrap; }
+.ov-kpis { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 640px) { .ov-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.kpi { position: relative; padding: 16px 18px 14px; border-radius: 20px; border: 1px solid var(--line-soft); background: linear-gradient(180deg, rgba(24, 42, 71, .7), rgba(19, 33, 58, .7)); display: grid; gap: 4px; transition: transform .18s ease, border-color .18s ease; cursor: pointer; text-align: left; color: inherit; }
+.kpi:hover { transform: translateY(-3px); border-color: var(--line); }
+.kpi:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
+.kpi small { font: 800 11px var(--f-body); letter-spacing: .1em; text-transform: uppercase; color: var(--muted); }
+.kpi strong { font: 700 30px/1.1 var(--f-display); letter-spacing: -.02em; }
+.kpi .d { font-size: 12.5px; font-weight: 800; color: var(--muted); }
+.kpi .d.up { color: #5fd283; } .kpi .d.dn { color: var(--danger); }
+.kpi svg { width: 100%; height: 26px; margin-top: 4px; }
+.ov-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 16px; }
+.card { border: 1px solid var(--line-soft); border-radius: 22px; background: linear-gradient(180deg, rgba(24, 42, 71, .55), rgba(19, 33, 58, .55)); padding: 18px 20px; display: grid; gap: 12px; align-content: start; min-width: 0; }
+.card h3 { margin: 0; font: 700 17px var(--f-display); display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.card h3 small { font: 700 12px var(--f-body); color: var(--muted); }
+.need { display: flex; align-items: center; gap: 12px; width: 100%; padding: 11px 13px; border-radius: 14px; border: 1px solid var(--line-soft); background: rgba(10, 18, 32, .45); color: inherit; text-align: left; cursor: pointer; min-height: 48px; text-decoration: none; }
+.need:hover { border-color: var(--line); background: rgba(10, 18, 32, .7); }
+.need i { font-style: normal; font-size: 18px; width: 26px; text-align: center; }
+.need span { flex: 1; font-weight: 700; font-size: 14px; } .need span small { display: block; font-weight: 500; color: var(--muted); font-size: 12.5px; }
+.need b { background: var(--saffron); color: #1b0f02; border-radius: 999px; min-width: 24px; height: 24px; padding: 0 8px; display: grid; place-items: center; font-size: 12.5px; }
+.clear { padding: 16px; text-align: center; color: #5fd283; font-weight: 800; border: 1px dashed rgba(95, 210, 131, .35); border-radius: 14px; }
+.bars { display: flex; align-items: flex-end; gap: 5px; height: 130px; padding-top: 6px; }
+.bars div { flex: 1; min-width: 0; display: grid; align-items: end; height: 100%; position: relative; }
+.bars div i { display: block; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, var(--gold-2), var(--gold)); min-height: 3px; transition: height .4s ease; }
+.bars div.v i { background: linear-gradient(180deg, #7fb2ff, #4f86e0); }
+.bars div:hover::after { content: attr(data-t); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #000c; padding: 3px 8px; border-radius: 8px; font-size: 12px; z-index: 2; }
+.axis { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); }
+.legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--muted); } .legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; background: var(--gold); } .legend span.v::before { background: #5f95ea; }
+.tp { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line-soft); font-size: 14px; }
+.tp:last-child { border: 0; } .tp em { font-style: normal; font-weight: 800; color: var(--gold-2); } .tp span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .tp small { color: var(--muted); }
+.feed { display: grid; gap: 0; }
+.fi { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 9px 0; border-bottom: 1px solid var(--line-soft); font-size: 14px; }
+.fi:last-child { border: 0; } .fi i { font-style: normal; font-size: 17px; text-align: center; } .fi span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .fi small { color: var(--muted); white-space: nowrap; }
+.ov-note { font-size: 12.5px; color: var(--muted); }
+.skel { height: 14px; border-radius: 8px; background: linear-gradient(90deg, rgba(245,236,220,.06), rgba(245,236,220,.14), rgba(245,236,220,.06)); background-size: 200% 100%; animation: sk 1.2s linear infinite; }
+@keyframes sk { to { background-position: -200% 0; } }
+@media (prefers-reduced-motion: reduce) { .kpi, .bars div i { transition: none; } .skel { animation: none; } }
+@media (max-width: 1000px) {
+  .shell { grid-template-columns: 1fr; padding-top: 12px; }
+  .rail { position: fixed; z-index: 45; left: 0; right: 0; bottom: 0; top: auto; max-height: none; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0; padding: 6px 6px calc(6px + env(safe-area-inset-bottom, 0px)); border-radius: 18px 18px 0 0; border-width: 1px 0 0; background: rgba(12, 22, 38, .97); }
+  .rail h6, .rail .rl.opt { display: none; }
+  .rl { flex-direction: column; justify-content: center; gap: 2px; min-height: 52px; padding: 4px 2px; font-size: 11px; text-align: center; }
+  .rl i { font-size: 19px; } .rl b { position: absolute; top: 2px; right: 22%; margin: 0; min-width: 17px; height: 17px; font-size: 10.5px; } .rl .ext { display: none; }
+  .ov-cols { grid-template-columns: 1fr; }
+  .ov-hero { padding: 18px; }
+  .bars { height: 110px; gap: 3px; }
+}
+
+body.withshell main.wrap { max-width: 1480px; }
+@media (max-width: 1000px) { #prView .grid { padding-bottom: 110px; } }
 </style>
 </head>
 <body>
@@ -502,6 +572,9 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
   </form>
 
   <div id="appView" hidden>
+   <div class="shell"><nav class="rail" id="rail" aria-label="Admin sections"></nav><div class="dmain">
+    <section class="ov" id="ovView" hidden aria-label="Overview"><div id="ovBody"><div class="skel" style="height:120px;border-radius:24px"></div></div></section>
+    <section id="prView" hidden aria-label="Products">
     <div class="tools">
       <input class="in" id="search" placeholder="Search listings" aria-label="Search listings" autocomplete="off">
       <div class="chips" id="cats" role="group" aria-label="Filter"></div>
@@ -515,6 +588,8 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
       <button class="btn" type="button" id="bulkDone">Done</button></div>
     <p class="hint" style="margin:-6px 0 14px">Drag <b>⠿</b> to change the order on the store. Tap a listing to edit it. Changes go live as soon as you save.</p>
     <div class="grid" id="grid"></div>
+    </section>
+   </div></div>
   </div>
 </main>
 
@@ -2477,7 +2552,7 @@ function ksLoad(row) {
     largeOff: !!row.ksLargeOff, notice: String(row.ksNotice || ""),
     famSides: { ...(v("ksFamSides") || {}) }, itemSides: { ...(v("ksItemSides") || {}) },
     itemOff: Array.isArray(row.ksItemOff) ? [...row.ksItemOff] : [], famOff: Array.isArray(row.keepsakeOff) ? [...row.keepsakeOff] : [],
-    pause: row.ksPause === true, pauseMsg: String(row.ksPauseMsg || ""), lead: String(row.ksLead || ""), nameMax: Number(row.ksNameMax) || 12,
+    pause: row.ksPause === true, pauseMsg: String(row.ksPauseMsg || ""), lead: String(row.ksLead || ""), proof: String(row.ksProof || ""), nameMax: Number(row.ksNameMax) || 12,
     price: JSON.parse(JSON.stringify(v("ksPrice") || {})), letteringOff: Array.isArray(row.ksLetteringOff) ? [...row.ksLetteringOff] : [], inkOff: Array.isArray(row.ksInkOff) ? [...row.ksInkOff] : [],
     meta: JSON.parse(JSON.stringify(v("ksItemMeta") || {})),
   };
@@ -2519,6 +2594,7 @@ function ksRender() {
     <label class="ssw"><span class="switch"><input type="checkbox" id="ksPause" ${ks.pause ? "checked" : ""}></span>Pause new keepsake orders</label>
     ${ks.pause ? `<label class="f" style="display:grid;gap:6px"><span>Message customers see</span><input class="in" id="ksPauseMsg" maxlength="160" placeholder="We're on a short break. Back soon!" value="${esc(ks.pauseMsg)}"></label>` : ""}
     <label class="f" style="display:grid;gap:6px"><span>Lead time shown on the review page (optional)</span><input class="in" id="ksLead" maxlength="80" placeholder="e.g. 5 to 7 days after you approve the proof" value="${esc(ks.lead)}"></label>
+    <label class="f" style="display:grid;gap:6px"><span>How soon you email the proof (optional)</span><input class="in" id="ksProof" maxlength="80" placeholder="e.g. within 1 business day" value="${esc(ks.proof)}"></label>
     <p class="hint">Prices below show customers an “Estimated price” (leave blank to show none). Add details to a single design to override its price.</p>
     <div style="display:grid;gap:6px">${KS_FAMS.filter((f) => f[0] !== "photos" || true).map(([key, label]) => { const b = (ks.price.base || {})[key] || {}; return `<div class="ks-row" style="grid-template-columns:1fr 110px 110px"><div class="nm">${esc(label)}</div><label class="f"><small>Standard $</small><input class="in" type="number" min="0" step="0.5" data-ksp="${key}|standard" value="${esc(b.standard || "")}"></label><label class="f"><small>Large $</small><input class="in" type="number" min="0" step="0.5" data-ksp="${key}|large" value="${esc(b.large || "")}"></label></div>`; }).join("")}
       <div class="ks-row" style="grid-template-columns:1fr 110px 110px"><div class="nm">Extras per piece</div><label class="f"><small>Both sides +$</small><input class="in" type="number" min="0" step="0.5" data-ksp="x|both" value="${esc(ks.price.both || "")}"></label><label class="f"><small>Double layer +$</small><input class="in" type="number" min="0" step="0.5" data-ksp="x|double" value="${esc(ks.price.double || "")}"></label></div></div>
@@ -2575,6 +2651,7 @@ $("ksBody").addEventListener("input", (e) => {
   if (t.id === "ksNotice") { ks.notice = t.value; ksMark(); }
   else if (t.id === "ksPauseMsg") { ks.pauseMsg = t.value; ksMark(); }
   else if (t.id === "ksLead") { ks.lead = t.value; ksMark(); }
+  else if (t.id === "ksProof") { ks.proof = t.value; ksMark(); }
   else if (t.dataset.ksp) { const [a, b] = t.dataset.ksp.split("|"), v = num(t.value);
     if (a === "x") { if (v) ks.price[b] = v; else delete ks.price[b]; }
     else { ks.price.base = ks.price.base || {}; const o = (ks.price.base[a] = ks.price.base[a] || {}); if (v) o[b] = v; else delete o[b]; if (!Object.keys(o).length) delete ks.price.base[a]; }
@@ -2604,7 +2681,7 @@ $("ksSave").onclick = async () => {
     set("ksNotice", ks.notice.trim(), !ks.notice.trim());
     set("ksFamSides", ks.famSides, !Object.keys(ks.famSides).length); set("ksItemSides", ks.itemSides, !Object.keys(ks.itemSides).length);
     set("ksItemOff", ks.itemOff, !ks.itemOff.length); set("keepsakeOff", ks.famOff, !ks.famOff.length);
-    set("ksPause", true, !ks.pause); set("ksPauseMsg", ks.pauseMsg.trim(), !ks.pause || !ks.pauseMsg.trim()); set("ksLead", ks.lead.trim(), !ks.lead.trim());
+    set("ksPause", true, !ks.pause); set("ksPauseMsg", ks.pauseMsg.trim(), !ks.pause || !ks.pauseMsg.trim()); set("ksLead", ks.lead.trim(), !ks.lead.trim()); set("ksProof", ks.proof.trim(), !ks.proof.trim());
     set("ksNameMax", ks.nameMax, ks.nameMax >= 12); set("ksPrice", ks.price, !(ks.price.both || ks.price.double || Object.keys(ks.price.base || {}).length));
     set("ksLetteringOff", ks.letteringOff, !ks.letteringOff.length); set("ksInkOff", ks.inkOff, !ks.inkOff.length); set("ksItemMeta", ks.meta, !Object.keys(ks.meta).length);
     const { error } = await sb.from("site_settings").upsert({ id: 1, data: next, updated_at: new Date().toISOString() });
@@ -3455,6 +3532,124 @@ $("cvBody").addEventListener("click", async (e) => {
     try { render(); } catch { /* list may be closed */ } toast("Cover changed. Live on the store now");
   }
 });
+/* ---- Dashboard shell: sidebar + Overview (the home screen) ---- */
+const RAIL = [
+  ["Run the shop", [["ov", "🏠", "Overview", "", 1], ["pr", "🛍", "Products", "", 1], ["@/PrAjoCustomStudio/", "📦", "Orders & costing", "", 1], ["inBtn", "📥", "Inbox", "inb", 1], ["caBtn", "🛒", "Carts", "cart", 0]]],
+  ["Grow the shop", [["anBtn", "📊", "Reports", "", 0], ["slBtn", "🏷", "Run a sale", "", 0], ["rvBtn", "⭐", "Reviews", "rev", 0], ["dsBtn", "🎨", "Custom designs", "ds", 0]]],
+  ["The site", [["apBtn", "🖌", "Appearance", "", 0], ["siteBtn", "⚙️", "Site settings", "", 0], ["tlBtn", "🩺", "Health & backup", "", 0], ["hsBtn", "🕘", "History", "", 0], ["menuBtn", "⋯", "More", "", 1]]],
+];
+let shView = "ov", ovT = 0, ovBusy = false;
+function railPaint(badges = {}) {
+  $("rail").innerHTML = RAIL.map(([h, items]) => `<h6>${esc(h)}</h6>` + items.map(([id, ic, label, bk, mob]) => {
+    const b = badges[bk] ? `<b aria-label="${badges[bk]} waiting">${badges[bk]}</b>` : "", cls = "rl" + (mob ? "" : " opt");
+    if (id[0] === "@") return `<a class="${cls}" href="${esc(id.slice(1))}" target="_blank" rel="noopener"><i>${ic}</i>${esc(label)}<span class="ext">↗</span></a>`;
+    return `<button type="button" class="${cls}" data-go="${esc(id)}"${(id === "ov" || id === "pr") && shView === id ? ' aria-current="page"' : ""}><i>${ic}</i>${esc(label)}${b}</button>`;
+  }).join("")).join("");
+}
+function showView(v) {
+  shView = v; try { sessionStorage.setItem("prajo:view", v); } catch {}
+  $("ovView").hidden = v !== "ov"; $("prView").hidden = v !== "pr";
+  document.querySelectorAll("#rail [data-go]").forEach((b) => { if (b.dataset.go === "ov" || b.dataset.go === "pr") { if (b.dataset.go === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current"); } });
+  if (v === "ov") ovLoad(); window.scrollTo({ top: 0 });
+}
+$("rail").addEventListener("click", (e) => {
+  const b = e.target.closest("[data-go]"); if (!b) return; const id = b.dataset.go;
+  if (id === "ov" || id === "pr") return showView(id);
+  const t = $(id); if (t) t.click();
+});
+{
+  const start = () => { let v = "ov"; try { v = sessionStorage.getItem("prajo:view") || "ov"; } catch {} railPaint(); document.body.classList.add("withshell"); showView(v === "pr" ? "pr" : "ov"); };
+  const ap = $("appView");
+  if (!ap.hidden) start(); else new MutationObserver((m, ob) => { if (!ap.hidden) { ob.disconnect(); start(); } }).observe(ap, { attributes: true, attributeFilter: ["hidden"] });
+}
+const ovAgo = (t) => { const s = Math.max(1, (Date.now() - t) / 1000); return s < 90 ? "just now" : s < 5400 ? Math.round(s / 60) + " min ovAgo" : s < 129600 ? Math.round(s / 3600) + " h ovAgo" : Math.round(s / 86400) + " d ovAgo"; };
+const ovDay = (d) => new Date(d).toISOString().slice(0, 10);
+function ovOrders(rows) {
+  const m = new Map();
+  for (const r of rows) {
+    const d = r.data || {}, k = d.orderNo ? "n" + d.orderNo : String(r.id).replace(/-\d+$/, ""); let o = m.get(k);
+    if (!o) { o = { k, date: String(d.date || "").slice(0, 10), at: Number(d.createdAt) || Date.parse(d.date) || 0, total: Number(d.orderTotal) || 0, calc: 0, unpaid: d.status === "Unpaid" || d.payment === "Unpaid", buyer: d.buyer || "", no: d.orderNo || "", refunded: Number(d.refunded) || 0, profit: 0, costQty: 0, qty: 0, toMake: false }; m.set(k, o); }
+    const q = Number(d.qty) || 0, up = Number(d.unitPrice) || 0, uc = Number(d.unitCost) || 0;
+    o.calc += up * q; o.qty += q; if (uc > 0) { o.profit += (up - uc) * q; o.costQty += q; }
+    if ((d.stage === "new" || d.stage === "production") && !d.digital) o.toMake = true;
+  }
+  for (const o of m.values()) o.rev = Math.max(0, (o.total || o.calc) - o.refunded);
+  return [...m.values()];
+}
+const ovChip = (c, p) => { if (!p && !c) return '<span class="d">–</span>'; if (!p) return '<span class="d up">▲ new</span>'; const x = Math.round((c - p) / p * 100); if (!x) return '<span class="d">same as last week</span>'; return `<span class="d ${x >= 0 ? "up" : "dn"}">${x >= 0 ? "▲" : "▼"} ${Math.abs(x)}% vs last week</span>`; };
+function ovSpark(vals) { if (!vals.length || Math.max(...vals) === 0) return ""; const mx = Math.max(...vals), w = 100, h = 26, pts = vals.map((v, i) => `${(i / Math.max(1, vals.length - 1) * w).toFixed(1)},${(h - 2 - v / mx * (h - 6)).toFixed(1)}`).join(" "); return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" aria-hidden="true"><polyline points="${pts}" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/></svg>`; }
+async function ovLoad(force) {
+  if (ovBusy || (!force && Date.now() - ovT < 20000)) return; ovBusy = true; $("ovRefresh") && ($("ovRefresh").disabled = true);
+  const now = Date.now(), iso = (t) => new Date(t).toISOString(), D = 864e5;
+  try { await loadNames(); } catch {}
+  const R = await Promise.allSettled([
+    sb.rpc("site_analytics", { p_from: iso(now - 14 * D), p_to: iso(now + 6e4), p_bucket: "day" }),
+    sb.rpc("site_analytics", { p_from: iso(now - 7 * D), p_to: iso(now + 6e4), p_bucket: "day" }),
+    sb.rpc("site_analytics", { p_from: iso(now - 14 * D), p_to: iso(now - 7 * D), p_bucket: "day" }),
+    sb.from("docs").select("id,data").eq("coll", "orders").limit(2000),
+    sb.from("carts_live").select("sid,email,item_count,updated_at,contacted").gt("item_count", 0).gte("updated_at", iso(now - 7 * D)).limit(500),
+    sb.from("inbox_messages").select("id,at,dir,peer_name,peer_email,subject,status,thread").order("at", { ascending: false }).limit(60),
+    sb.from("reviews").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    sb.from("custom_designs").select("id", { count: "exact", head: true }).eq("status", "new"),
+  ]);
+  const ok = (i) => R[i].status === "fulfilled" && !R[i].value.error ? R[i].value : null, bad = R.some((_, i) => !ok(i));
+  const a14 = ok(0)?.data, a7 = ok(1)?.data, ap = ok(2)?.data, ords = ok(3) ? ovOrders(ok(3).data || []) : null, carts = ok(4)?.data, inb = ok(5)?.data, nRev = ok(6)?.count, nDs = ok(7)?.count;
+  const days = [...Array(14)].map((_, i) => ovDay(now - (13 - i) * D)), cutC = ovDay(now - 6 * D), cutP = ovDay(now - 13 * D);
+  const paid = ords ? ords.filter((o) => !o.unpaid) : null, cur = paid ? paid.filter((o) => o.date >= cutC) : [], prev = paid ? paid.filter((o) => o.date >= cutP && o.date < cutC) : [];
+  const sum = (L, f) => L.reduce((t, o) => t + f(o), 0), saleC = sum(cur, (o) => o.rev), saleP = sum(prev, (o) => o.rev), profC = sum(cur, (o) => o.profit), profP = sum(prev, (o) => o.profit);
+  const costQ = sum(cur, (o) => o.costQty), allQ = sum(cur, (o) => o.qty);
+  const vis7 = a7?.totals?.visitors, visP = ap?.totals?.visitors, conv = vis7 ? Math.round(cur.length / vis7 * 1000) / 10 : null;
+  const ser = {}; for (const r of a14?.series || []) ser[String(r.t).slice(0, 10)] = Number(r.visitors) || 0;
+  const visSeries = days.map((d) => ser[d] || 0), saleSeries = days.map((d) => sum((paid || []).filter((o) => o.date === d), (o) => o.rev));
+  const waitingCarts = (carts || []).filter((c) => c.email && !c.contacted && Date.now() - new Date(c.updated_at) > 2 * 36e5), allCarts = carts || [];
+  const unreadThreads = new Set((inb || []).filter((m) => m.dir === "in" && m.status === "new").map((m) => m.thread)).size;
+  const toMake = ords ? ords.filter((o) => !o.unpaid && o.toMake).length : 0, unpaid = ords ? ords.filter((o) => o.unpaid).length : 0;
+  const needs = [];
+  if (unpaid) needs.push(["📦", "Orders waiting for payment", "Mark them paid when the money arrives", unpaid, "@/PrAjoCustomStudio/"]);
+  if (toMake) needs.push(["🛠", "Orders to make", "New or in production", toMake, "@/PrAjoCustomStudio/"]);
+  if (unreadThreads) needs.push(["📥", "Unread messages", "Customers waiting for a reply", unreadThreads, "inBtn"]);
+  if (nDs) needs.push(["🎨", "Custom design requests", "Sent from the Design studio", nDs, "dsBtn"]);
+  if (nRev) needs.push(["⭐", "Reviews to approve", "Customer reviews waiting", nRev, "rvBtn"]);
+  if (waitingCarts.length) needs.push(["🛒", "Carts with an email", "Left over 2 hours ovAgo, not yet contacted", waitingCarts.length, "caBtn"]);
+  const hr = new Date().getHours(), greet = hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
+  const needN = needs.reduce((t, n) => t + n[3], 0);
+  const hero = `<div class="ov-hero"><div><h2>${greet}. <em>${needN ? `${needN} thing${needN === 1 ? "" : "s"} need${needN === 1 ? "s" : ""} you` : "You're all caught up"}</em></h2>
+      <p>${saleC ? `You've sold ${usd2(saleC)} in the last 7 days${saleP ? ` (${saleC >= saleP ? "up" : "down"} from ${usd2(saleP)} the week before)` : ""}.` : ords ? "No paid orders in the last 7 days yet." : "Here's how the shop is doing."}</p></div>
+    <div class="acts"><button class="btn gold" type="button" data-ovgo="new">+ New listing</button><button class="btn line" type="button" id="ovRefresh">⟳ Refresh</button><a class="btn line" href="./" target="_blank" rel="noopener">View store ↗</a></div></div>`;
+  const kpi = (id, label, val, extra, sub) => `<button type="button" class="kpi" data-ovgo="${id}"><small>${label}</small><strong>${val}</strong>${extra}${sub || ""}</button>`;
+  const kpis = `<div class="ov-kpis">
+    ${kpi("anBtn", "Visitors · 7 days", vis7 == null ? "–" : vis7.toLocaleString(), ovChip(vis7 || 0, visP || 0), ovSpark(visSeries))}
+    ${kpi("@orders", "Sales · 7 days", ords ? usd2(saleC) : "–", ovChip(saleC, saleP), ovSpark(saleSeries))}
+    ${kpi("@orders", "Orders · 7 days", ords ? cur.length : "–", ovChip(cur.length, prev.length))}
+    ${kpi("@orders", "Profit · 7 days", ords ? usd2(profC) : "–", ovChip(profC, profP), allQ && costQ < allQ ? `<span class="ov-note">Costs known for ${costQ} of ${allQ} items</span>` : "")}
+    ${kpi("caBtn", "Carts waiting", carts ? allCarts.length : "–", `<span class="d">${allCarts.filter((c) => c.email).length} left an email</span>`)}
+    ${kpi("anBtn", "Visitors who ordered", conv == null ? "–" : conv + "%", '<span class="d">orders ÷ visitors</span>')}</div>`;
+  const needHtml = needs.length ? needs.map(([ic, t, s, n, go]) => `<button type="button" class="need" data-ovgo="${esc(go)}"><i>${ic}</i><span>${esc(t)}<small>${esc(s)}</small></span><b>${n}</b></button>`).join("") : '<div class="clear">✓ Nothing needs you right now</div>';
+  const mx = (L) => Math.max(1, ...L), bars = (L, cls, fmt) => `<div class="bars" role="img" aria-label="Bar chart, last 14 days">${L.map((v, i) => `<div class="${cls}" data-t="${esc(days[i].slice(5))}: ${fmt(v)}"><i style="height:${Math.max(3, v / mx(L) * 100)}%"></i></div>`).join("")}</div>`;
+  const chart = `<div class="card"><h3>Last 14 days <small>${days[0].slice(5)} to ${days[13].slice(5)}</small></h3>
+    <div class="legend"><span>Sales</span><span class="v">Visitors</span></div>${bars(saleSeries, "", usd2)}${bars(visSeries, "v", (v) => v + " visitors")}
+    <div class="axis"><span>${days[0].slice(5)}</span><span>${days[6].slice(5)}</span><span>${days[13].slice(5)}</span></div></div>`;
+  const top = (a7?.products || []).slice(0, 5), topHtml = `<div class="card"><h3>Most viewed <small>last 7 days</small></h3>${top.length ? top.map((p, i) => `<div class="tp"><em>${i + 1}</em><span>${esc(pname(p.id))}</span><small>${p.views} views · ${p.adds} added · ${p.orders} ordered</small></div>`).join("") : '<p class="hint">No product views yet this week.</p>'}</div>`;
+  const ev = [];
+  for (const o of (ords || []).filter((o) => o.at).sort((x, y) => y.at - x.at).slice(0, 6)) ev.push([o.at, "🛒", `Order ${o.no ? "#" + o.no : ""} · ${usd2(o.rev)}${o.buyer ? " · " + o.buyer : ""}${o.unpaid ? " (awaiting payment)" : ""}`]);
+  for (const m of (inb || []).filter((m) => m.dir === "in").slice(0, 5)) ev.push([new Date(m.at).getTime(), "📥", `${m.peer_name || m.peer_email || "Someone"}: ${m.subject || "(no subject)"}`]);
+  for (const c of allCarts.filter((c) => c.email).slice(0, 4)) ev.push([new Date(c.updated_at).getTime(), "🛍", `${c.email} has ${c.item_count} item${c.item_count === 1 ? "" : "s"} in a cart`]);
+  ev.sort((x, y) => y[0] - x[0]);
+  const feed = `<div class="card"><h3>Recent activity</h3><div class="feed">${ev.length ? ev.slice(0, 9).map(([t, ic, tx]) => `<div class="fi"><i>${ic}</i><span title="${esc(tx)}">${esc(tx)}</span><small>${ovAgo(t)}</small></div>`).join("") : '<p class="hint">Nothing yet.</p>'}</div></div>`;
+  $("ovBody").innerHTML = `${hero}${kpis}<div class="ov-cols"><div class="ov-col" style="display:grid;gap:16px;align-content:start">${chart}${feed}</div><div style="display:grid;gap:16px;align-content:start"><div class="card"><h3>Needs you</h3>${needHtml}</div>${topHtml}</div></div>
+    ${bad ? '<p class="ov-note">Some numbers could not load. Sign out and back in if this keeps happening.</p>' : '<p class="ov-note">Sales and profit come from your orders. Profit only counts items that have a cost set in the pricing app.</p>'}`;
+  railPaint({ inb: unreadThreads, cart: waitingCarts.length, rev: nRev || 0, ds: nDs || 0 });
+  ovT = Date.now(); ovBusy = false;
+}
+$("ovBody").addEventListener("click", (e) => {
+  if (e.target.closest("#ovRefresh")) return ovLoad(true);
+  const g = e.target.closest("[data-ovgo]"); if (!g) return; const id = g.dataset.ovgo;
+  if (id === "new") { $("newBtn").click(); return; }
+  if (id[0] === "@") { window.open(id === "@orders" ? "/PrAjoCustomStudio/" : id.slice(1), "_blank", "noopener"); return; }
+  const t = $(id); if (t) t.click();
+});
+setInterval(() => { if (shView === "ov" && !document.hidden) ovLoad(); }, 120000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden && shView === "ov" && !$("appView").hidden) ovLoad(); });
 </script>
 </body>
 </html>
