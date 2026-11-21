@@ -244,51 +244,7 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 .bdg{font-style:normal;font-size:10.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;background:#d9ab4f;color:#1a1204;border-radius:999px;padding:2px 8px;margin-left:6px;vertical-align:middle}
 .how{list-style:none;margin:14px 0 0;padding:14px 16px;border:1px solid var(--line-soft,rgba(245,236,220,.1));border-radius:16px;display:grid;gap:10px;background:rgba(245,236,220,.03);counter-reset:s}.how li{display:grid;grid-template-columns:26px 1fr;gap:10px;align-items:start;font-size:13.5px;color:var(--soft,#c9d0dc);counter-increment:s}.how li::before{content:counter(s);width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:12.5px;background:#d9ab4f;color:#1a1204}.how b{display:block;color:var(--cream,#f5ecdc);font-size:14px}.how:empty{display:none}
 .pricecap{display:block;margin:0;text-align:center;font-weight:800;font-size:17px;color:#f3d48a}.pricecap:empty{display:none}
-</style><script>
-/* Privacy choices: honours Do Not Track and Global Privacy Control, asks first in the EU/UK, and gives everyone a "Your privacy choices" switch. */
-(function () {
-  var NT = "prajo:noTrack", CO = "prajo:consent";
-  var get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
-  var put = function (k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} };
-  var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
-  var eu = /^(Europe\/|Atlantic\/(Azores|Madeira|Canary|Faroe|Reykjavik))/.test(tz);
-  var signal = function () { return navigator.doNotTrack === "1" || window.doNotTrack === "1" || navigator.globalPrivacyControl === true; };
-  var P = window.PRAJO_PRIV = {
-    eu: eu, signal: signal,
-    allowed: function () { return !signal() && !navigator.webdriver && get(NT) !== "1" && (!eu || get(CO) === "yes"); },
-    changed: function () { try { if (window.__prajoTrackRefresh) window.__prajoTrackRefresh(); } catch (e) {} }
-  };
-  var css = "position:fixed;z-index:2147483000;background:#0f1b2e;color:#f5ecdc;border:1px solid #d9ab4f;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;padding:16px 18px;";
-  var btn = "min-height:44px;padding:0 18px;border-radius:999px;border:1px solid #d9ab4f;background:transparent;color:#f5ecdc;font:700 15px system-ui;cursor:pointer;";
-  var gold = "min-height:44px;padding:0 18px;border-radius:999px;border:0;background:#d9ab4f;color:#1a1204;font:800 15px system-ui;cursor:pointer;";
-  function el(id) { return document.getElementById(id); }
-  function drop(id) { var e = el(id); if (e && e.parentNode) e.parentNode.removeChild(e); }
-  function status() { return P.allowed() ? "ON" : "OFF"; }
-  function dialog() {
-    drop("privDlg");
-    var d = document.createElement("div"); d.id = "privDlg"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-label", "Your privacy choices");
-    d.style.cssText = css + "left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92vw);";
-    var why = signal() ? "Your browser is sending a Do Not Track or Global Privacy Control signal, so the counter stays off." : eu && get(CO) !== "yes" ? "Because you are in a region that asks first, it stays off until you say yes." : "";
-    d.innerHTML = '<b style="font-size:18px">Your privacy choices</b><p style="margin:10px 0">Our anonymous visit counter and the saved copy of your cart are <b>' + status() + '</b> for this browser. They have no name or IP address and are never shared with advertisers.</p>' + (why ? '<p style="margin:0 0 10px;color:#b9c0cf">' + why + '</p>' : "") +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">' + (signal() ? "" : '<button type="button" id="privTog" style="' + gold + '">' + (P.allowed() ? "Turn off" : "Turn on") + "</button>") + '<button type="button" id="privX" style="' + btn + '">Close</button></div><p style="margin:12px 0 0;font-size:13px"><a href="/privacy.html" style="color:#e9c46a">Read the privacy policy</a></p>';
-    document.body.appendChild(d);
-    var t = el("privTog"); if (t) t.onclick = function () { if (P.allowed()) { put(NT, "1"); put(CO, "no"); } else { put(NT, null); put(CO, "yes"); } P.changed(); dialog(); };
-    el("privX").onclick = function () { drop("privDlg"); }; (t || el("privX")).focus();
-    d.addEventListener("keydown", function (e) { if (e.key === "Escape") drop("privDlg"); });
-  }
-  function banner() {
-    if (!eu || get(CO) !== null || signal() || el("privBar")) return;
-    var b = document.createElement("div"); b.id = "privBar"; b.setAttribute("role", "region"); b.setAttribute("aria-label", "Visit counter");
-    b.style.cssText = css + "left:12px;right:12px;bottom:12px;max-width:640px;margin:0 auto;";
-    b.innerHTML = '<p style="margin:0 0 10px">May we count your visit? It is anonymous, stays on this site and has no name or IP address. Saying no does not change how the shop works. <a href="/privacy.html" style="color:#e9c46a">Privacy policy</a></p><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="privYes" style="' + gold + '">Yes, count my visit</button><button type="button" id="privNo" style="' + btn + '">No thanks</button></div>';
-    document.body.appendChild(b);
-    el("privYes").onclick = function () { put(CO, "yes"); put(NT, null); drop("privBar"); P.changed(); };
-    el("privNo").onclick = function () { put(CO, "no"); drop("privBar"); P.changed(); };
-  }
-  document.addEventListener("click", function (e) { var a = e.target && e.target.closest ? e.target.closest("#privChoices") : null; if (a) { e.preventDefault(); dialog(); } });
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", banner); else banner();
-})();
-</script>
+</style><script src="/track.js?v=1"></script>
 </head>
 <body>
 <header class="top"><div class="wrap">
@@ -308,7 +264,7 @@ html.embed .tabbar{top:0}html.embed #cards{scroll-margin-top:64px}html.embed{--h
 <div class="hero-copy">
 <h1 class="rise" style="--i:0">Name charms &amp; keepsakes</h1>
 <p class="lead rise" style="--i:1">Type a name to see it set in gold, or pick a design below.</p>
-<form class="namefield rise" style="--i:2" id="heroForm"><label class="sr" for="heroName">Name for your keepsake</label><input id="heroName" maxlength="12" placeholder="Type a name" autocomplete="off" enterkeyhint="go"><button class="btn primary" type="submit">Make it mine</button></form>
+<form class="namefield rise" style="--i:2" id="heroForm"><label class="sr" for="heroName">Name for your keepsake</label><input id="heroName" maxlength="16" placeholder="Type a name" autocomplete="off" enterkeyhint="go"><button class="btn primary" type="submit">Make it mine</button></form>
 <p class="small hero-note rise" style="--i:3" id="heroNote" aria-live="polite">Shown: <span id="heroTitle"></span></p>
 </div>
 </section>
@@ -1370,6 +1326,8 @@ let CFG={};
 const sidesRule=id=>{const o=CFG.ksItemSides&&CFG.ksItemSides[id];if(o==='front'||o==='both')return o;const f=itemOf(id),fo=f&&CFG.ksFamSides&&CFG.ksFamSides[f.fam.key];if(fo==='front'||fo==='both')return fo;return (CFG.ksSidesMode==='front'||CFG.ksSidesMode==='both')?CFG.ksSidesMode:'';};
 function applyItemOff(){const off=Array.isArray(CFG.ksItemOff)?CFG.ksItemOff:[],M=CFG.ksItemMeta||{};for(const f of FAMILIES){f.items=f.items.filter(i=>!off.includes(i.id)).map(i=>{const m=M[i.id];return m&&(m.name||m.badge)?{...i,name:m.name||i.name,badge:m.badge||''}:i;});if(Object.keys(M).some(k=>M[k]&&M[k].pos)){const pos=i=>(M[i.id]&&Number(M[i.id].pos))||0;f.items=f.items.map((i,x)=>[i,x]).sort((a,b)=>{const pa=pos(a[0]),pb=pos(b[0]);return pa&&pb?pa-pb:pa?-1:pb?1:a[1]-b[1];}).map(x=>x[0]);}}}
 const NMAX=()=>Math.min(12,Math.max(3,Number(CFG.ksNameMax)||12));
+/* names may have spaces ("Mary Jane"); the limit counts letters, not spaces */
+const cleanNm=v=>{v=String(v||'').replace(/\s+/g,' ').replace(/^ /,'');let out='',n=0;for(const ch of v){if(ch!==' '){if(n>=NMAX())break;n++;}out+=ch;}return out.slice(0,NMAX()+3);};
 const ksPrice=st=>{const M=(CFG.ksItemMeta||{})[st.id],B=CFG.ksPrice||{},fam=itemOf(st.id)&&itemOf(st.id).fam.key;let v=M&&M.price&&Number(M.price[st.size])||0;if(!v&&B.base&&B.base[fam])v=Number(B.base[fam][st.size])||0;if(!v)return null;if(st.sides==='both'&&fam!=='photos')v+=Number(B.both)||0;if(st.layers==='double')v+=Number(B.double)||0;return Math.round(v*100)/100;};
 const usd=n=>'$'+(Math.round(n*100)%100?n.toFixed(2):String(Math.round(n)));
 function fillHow(){const o=$('how');if(!o||!CFG)return;const L=String(CFG.ksLead||'').slice(0,80),P=String(CFG.ksProof||'').slice(0,80);const st=[['Send your design','Tap Review, then send it to us. Nothing is charged at this step.'],['Approve your proof',P?'We email you a proof '+P+'. Nothing is made until you say yes.':'We email you a proof. Nothing is made until you say yes.'],['We make it by hand',L?'Ready in '+L+'.':'Cut and printed in our Sacramento studio.']];o.innerHTML=st.map(([h,x])=>`<li><span><b>${esc(h)}</b>${esc(x)}</span></li>`).join('');}
@@ -1650,7 +1608,7 @@ function heroCycle(){
   $('heroStage').classList.add('out');
   setTimeout(()=>{heroIdx=(heroIdx+1)%HERO_SEQ.length;heroRender();$('heroStage').classList.remove('out');},500);
 }
-$('heroName').addEventListener('input',()=>{const v=$('heroName').value.replace(/\s+/g,'').slice(0,12);if(v!==$('heroName').value)$('heroName').value=v;heroName=v;heroRender();});
+$('heroName').addEventListener('input',()=>{const v=cleanNm($('heroName').value);if(v!==$('heroName').value)$('heroName').value=v;heroName=v;heroRender();});
 $('heroForm').addEventListener('submit',e=>{e.preventDefault();openEditor(HERO_SEQ[heroIdx],{name:heroName});});
 /* ---------- views ---------- */
 function navigate(next,anchor,push=true){
@@ -1679,7 +1637,7 @@ function openEditor(id,preset={}){
   if(isP&&id!=='portrait')$('layout').value=state.layout;
   $('finishWrap').hidden=isP||fam.key==='names';
   drawPicker(fam);drawLettering();drawSwatches();drawShape();drawLines();drawLayers();drawSize();drawSlots();$('linesWrap').hidden=true;$('layersWrap').hidden=true;$('shapeWrap').hidden=isP||fam.key==='names';syncInk();
-  {const nm=isName(id);state.name=nm?String(state.name||'').replace(/\s+/g,'').slice(0,NMAX()):state.name;$('name').maxLength=nm?NMAX():(fam.key==='kits'?14:24);$('name').closest('.field').querySelector('label').innerHTML=nm?'Name <small>one name, up to 12 letters</small>':'Name';}
+  {const nm=isName(id);state.name=nm?cleanNm(state.name):state.name;$('name').maxLength=nm?NMAX()+3:(fam.key==='kits'?14:24);$('name').closest('.field').querySelector('label').innerHTML=nm?'Name <small>up to '+NMAX()+' letters, spaces allowed</small>':'Name';}
   $('name').value=state.name;$('message').value=state.msg;
   {const die=A.regionOf?A.regionOf(id):null,kit=fam.key==='kits';if(kit)state.lettering='heavy';for(const k of ['name','message','lettering'])$(k).closest('.field').hidden=!!die&&!(kit&&k==='name');$('numWrap').hidden=!kit;$('jnum').value=state.number||'';if(die)$('inkWrap').hidden=true;}
   {const rule=sidesRule(id);if(rule)state.sides=rule;else if(!d._sidesSet){state.sides=CFG.ksSidesDefault==='front'?'front':'both';}d._sidesSet=true;$('sidesWrap').hidden=!!rule;drawFinishSides();}
@@ -1733,14 +1691,14 @@ function render(){
   current=productOpts();
   {const po={...current};const both=state.sides==='both'&&state.id!=='collage'&&state.id!=='portrait'&&itemOf(state.id).fam.key!=='photos';$('stage').innerHTML=both?sidesFig(po):keepsake(current);$('stage').classList.toggle('sides2',both);}
   const DM=dimsOf(current);$('dims').textContent=mmIn(DM.w,DM.h);{const pr=ksPrice(state);let pl=$('priceLine');if(!pl){pl=document.createElement('span');pl.id='priceLine';pl.className='pricecap';$('review').before(pl);}pl.textContent=pr?'Estimated price '+usd(pr)+' each':'';}
-  $('charCount').textContent=state.name.length+' / '+(isName(state.id)?NMAX():state.id.startsWith('kit-')?14:24);
+  $('charCount').textContent=(isName(state.id)?state.name.replace(/ /g,''):state.name).length+' / '+(isName(state.id)?NMAX():state.id.startsWith('kit-')?14:24);
   const miss=missingPhotos();const paused=CFG.ksPause===true;$('review').disabled=miss||paused;$('reviewHint').textContent=paused?(CFG.ksPauseMsg||'New keepsake orders are paused for now. Please check back soon.'):miss?'Add a photo in each slot to review this layout.':'';
   const isP=state.id==='collage'||state.id==='portrait';
   $('cropTools').hidden=!isP||!state.photos[framed];$('photoZoom').value=state.photos[framed]?.frame?.zoom??100;
 }
 function rerenderAll(){heroRender();drawCards(false);if(state&&view!=='home')render();drawDiagram();}
 $('jnum').addEventListener('input',()=>{state.number=$('jnum').value.replace(/\D/g,'').slice(0,2);$('jnum').value=state.number;render();});
-for(const [id,key,ev] of [['name','name','input'],['message','msg','input'],['layout','layout','change']]) $(id).addEventListener(ev,()=>{let v=$(id).value;if(key==='name'&&isName(state.id)){v=v.replace(/\s+/g,'').slice(0,12);if(v!==$(id).value)$(id).value=v;}state[key]=v;if(key==='layout')drawSlots();render();});
+for(const [id,key,ev] of [['name','name','input'],['message','msg','input'],['layout','layout','change']]) $(id).addEventListener(ev,()=>{let v=$(id).value;if(key==='name'&&isName(state.id)){v=cleanNm(v);if(v!==$(id).value)$(id).value=v;}state[key]=v;if(key==='layout')drawSlots();render();});
 $('zoom').onclick=()=>{const z=$('stage').classList.toggle('zoomed');$('zoom').textContent=z?'Fit':'Enlarge';$('zoom').setAttribute('aria-pressed',String(z));};
 /* ---------- photos ---------- */
 const decode=src=>new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=()=>no(new Error('This image could not be opened.'));i.src=src;});
@@ -1800,6 +1758,7 @@ function mailto(){
 }
 $('review').onclick=()=>{
   if($('review').disabled)return;
+  if(isName(state.id)){state.name=String(state.name||'').trim();$('name').value=state.name;}
   {const po={...current,ghost:false,label:'Your design proof'},mk=()=>keepsake(po);$('reviewStage').innerHTML=state.sides==='both'?'<div class="two"><figure>'+mk()+'<figcaption>Front</figcaption></figure><figure>'+backSvgFor(po)+'<figcaption>'+BACKLAB[backMode()]+'</figcaption></figure></div>':mk();}
   $('proofSize').textContent=$('dims').textContent;$('quantity').value=state.quantity;$('notes').value=state.notes;
   $('orderSummary').replaceChildren(...summaryRows().map(([t,v])=>{const d=document.createElement('div');const a=document.createElement('dt'),b=document.createElement('dd');a.textContent=t;b.textContent=v;d.append(a,b);return d;}));
