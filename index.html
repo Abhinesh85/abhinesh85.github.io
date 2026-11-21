@@ -765,51 +765,7 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
 .gal-cap small { color: var(--muted); font-size: 14px; }
 @media (max-width: 600px) { .gal-nav { width: 42px; height: 42px; } .gal { height: 290px; perspective: 1000px; } }
 </style>
-<script>
-/* Privacy choices: honours Do Not Track and Global Privacy Control, asks first in the EU/UK, and gives everyone a "Your privacy choices" switch. */
-(function () {
-  var NT = "prajo:noTrack", CO = "prajo:consent";
-  var get = function (k) { try { return localStorage.getItem(k); } catch (e) { return null; } };
-  var put = function (k, v) { try { if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) {} };
-  var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
-  var eu = /^(Europe\/|Atlantic\/(Azores|Madeira|Canary|Faroe|Reykjavik))/.test(tz);
-  var signal = function () { return navigator.doNotTrack === "1" || window.doNotTrack === "1" || navigator.globalPrivacyControl === true; };
-  var P = window.PRAJO_PRIV = {
-    eu: eu, signal: signal,
-    allowed: function () { return !signal() && !navigator.webdriver && get(NT) !== "1" && (!eu || get(CO) === "yes"); },
-    changed: function () { try { if (window.__prajoTrackRefresh) window.__prajoTrackRefresh(); } catch (e) {} }
-  };
-  var css = "position:fixed;z-index:2147483000;background:#0f1b2e;color:#f5ecdc;border:1px solid #d9ab4f;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif;padding:16px 18px;";
-  var btn = "min-height:44px;padding:0 18px;border-radius:999px;border:1px solid #d9ab4f;background:transparent;color:#f5ecdc;font:700 15px system-ui;cursor:pointer;";
-  var gold = "min-height:44px;padding:0 18px;border-radius:999px;border:0;background:#d9ab4f;color:#1a1204;font:800 15px system-ui;cursor:pointer;";
-  function el(id) { return document.getElementById(id); }
-  function drop(id) { var e = el(id); if (e && e.parentNode) e.parentNode.removeChild(e); }
-  function status() { return P.allowed() ? "ON" : "OFF"; }
-  function dialog() {
-    drop("privDlg");
-    var d = document.createElement("div"); d.id = "privDlg"; d.setAttribute("role", "dialog"); d.setAttribute("aria-modal", "true"); d.setAttribute("aria-label", "Your privacy choices");
-    d.style.cssText = css + "left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92vw);";
-    var why = signal() ? "Your browser is sending a Do Not Track or Global Privacy Control signal, so the counter stays off." : eu && get(CO) !== "yes" ? "Because you are in a region that asks first, it stays off until you say yes." : "";
-    d.innerHTML = '<b style="font-size:18px">Your privacy choices</b><p style="margin:10px 0">Our anonymous visit counter and the saved copy of your cart are <b>' + status() + '</b> for this browser. They have no name or IP address and are never shared with advertisers.</p>' + (why ? '<p style="margin:0 0 10px;color:#b9c0cf">' + why + '</p>' : "") +
-      '<div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">' + (signal() ? "" : '<button type="button" id="privTog" style="' + gold + '">' + (P.allowed() ? "Turn off" : "Turn on") + "</button>") + '<button type="button" id="privX" style="' + btn + '">Close</button></div><p style="margin:12px 0 0;font-size:13px"><a href="/privacy.html" style="color:#e9c46a">Read the privacy policy</a></p>';
-    document.body.appendChild(d);
-    var t = el("privTog"); if (t) t.onclick = function () { if (P.allowed()) { put(NT, "1"); put(CO, "no"); } else { put(NT, null); put(CO, "yes"); } P.changed(); dialog(); };
-    el("privX").onclick = function () { drop("privDlg"); }; (t || el("privX")).focus();
-    d.addEventListener("keydown", function (e) { if (e.key === "Escape") drop("privDlg"); });
-  }
-  function banner() {
-    if (!eu || get(CO) !== null || signal() || el("privBar")) return;
-    var b = document.createElement("div"); b.id = "privBar"; b.setAttribute("role", "region"); b.setAttribute("aria-label", "Visit counter");
-    b.style.cssText = css + "left:12px;right:12px;bottom:12px;max-width:640px;margin:0 auto;";
-    b.innerHTML = '<p style="margin:0 0 10px">May we count your visit? It is anonymous, stays on this site and has no name or IP address. Saying no does not change how the shop works. <a href="/privacy.html" style="color:#e9c46a">Privacy policy</a></p><div style="display:flex;gap:10px;flex-wrap:wrap"><button type="button" id="privYes" style="' + gold + '">Yes, count my visit</button><button type="button" id="privNo" style="' + btn + '">No thanks</button></div>';
-    document.body.appendChild(b);
-    el("privYes").onclick = function () { put(CO, "yes"); put(NT, null); drop("privBar"); P.changed(); };
-    el("privNo").onclick = function () { put(CO, "no"); drop("privBar"); P.changed(); };
-  }
-  document.addEventListener("click", function (e) { var a = e.target && e.target.closest ? e.target.closest("#privChoices") : null; if (a) { e.preventDefault(); dialog(); } });
-  if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", banner); else banner();
-})();
-</script>
+<script src="/track.js?v=1"></script>
 </head>
 <body>
 <a class="skip" href="#shop">Skip to the shop</a>

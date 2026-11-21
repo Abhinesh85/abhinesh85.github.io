@@ -2769,7 +2769,10 @@ async function anLoad() {
   const w = anWindow(); await loadNames();
   $("anBody").innerHTML = '<p class="hint">Loading…</p>';
   try {
-    if (an.tab === "over" || an.tab === "prod") {
+    if (an.tab === "who") {
+      const { data, error } = await sb.rpc("visitor_report", { p_from: w.from.toISOString(), p_to: w.to.toISOString() });
+      if (error) throw error; an.who = data;
+    } else if (an.tab === "over" || an.tab === "prod") {
       const { data, error } = await sb.rpc("site_analytics", { p_from: w.from.toISOString(), p_to: w.to.toISOString(), p_bucket: w.bucket });
       if (error) throw error; an.data = data;
     } else if (an.tab === "cart") {
@@ -2781,14 +2784,14 @@ async function anLoad() {
     }
     anPaint();
   } catch (e) {
-    $("anBody").innerHTML = `<div class="empty"><b>Reports aren't set up yet</b><p class="hint">Run <b>analytics-setup.sql</b> once in Supabase → SQL Editor, then reopen this page. (${esc(e.message || e)})</p></div>`;
+    $("anBody").innerHTML = `<div class="empty"><b>Reports aren't set up yet</b><p class="hint">Run <b>${an.tab === "who" ? "analytics-setup-6.sql" : "analytics-setup.sql"}</b> once in Supabase → SQL Editor, then reopen this page. (${esc(e.message || e)})</p></div>`;
   }
 }
 const kpi = (t, v, s) => `<div class="an-k"><small>${t}</small><b>${v}</b>${s ? `<em>${s}</em>` : ""}</div>`;
 const table = (head, rows, cls) => `<div class="an-tw"><table class="an-t ${cls || ""}"><thead><tr>${head.map((h) => `<th>${h}</th>`).join("")}</tr></thead><tbody>${rows.join("") || `<tr><td colspan="${head.length}" class="hint">Nothing yet.</td></tr>`}</tbody></table></div>`;
 const mini = (title, rows, key) => `<div class="an-mini"><h4>${title}</h4>${rows.length ? rows.map((r) => `<div><span>${esc(r.name)}</span><b>${fmtN(r.n)}</b></div>`).join("") : '<p class="hint">Nothing yet.</p>'}</div>`;
 function anPaint() {
-  const w = anWindow(), tabs = [["over", "Traffic"], ["prod", "Products"], ["cart", "Carts"], ["ord", "Keepsake orders"]];
+  const w = anWindow(), tabs = [["over", "Traffic"], ["who", "Visitors"], ["prod", "Products"], ["cart", "Carts"], ["ord", "Keepsake orders"]];
   let h = `<div class="an-bar"><div class="an-tabs" role="tablist">${tabs.map(([k, l]) => `<button type="button" role="tab" aria-selected="${an.tab === k}" data-antab="${k}">${l}</button>`).join("")}</div>
     <select id="anRange" aria-label="Time range">${RANGES.map(([v, l]) => `<option value="${v}"${an.range === v ? " selected" : ""}>${l}</option>`).join("")}</select>
     ${an.tab === "over" ? `<select id="anBucket" aria-label="Group by">${[["", "Group: auto"], ["hour", "By hour"], ["day", "By day"], ["week", "By week"], ["month", "By month"]].map(([v, l]) => `<option value="${v}"${an.bucket === v ? " selected" : ""}>${l}</option>`).join("")}</select>` : ""}</div>`;
@@ -3562,7 +3565,7 @@ $("rail").addEventListener("click", (e) => {
   const ap = $("appView");
   if (!ap.hidden) start(); else new MutationObserver((m, ob) => { if (!ap.hidden) { ob.disconnect(); start(); } }).observe(ap, { attributes: true, attributeFilter: ["hidden"] });
 }
-const ovAgo = (t) => { const s = Math.max(1, (Date.now() - t) / 1000); return s < 90 ? "just now" : s < 5400 ? Math.round(s / 60) + " min ovAgo" : s < 129600 ? Math.round(s / 3600) + " h ovAgo" : Math.round(s / 86400) + " d ovAgo"; };
+const ovAgo = (t) => { const s = Math.max(1, (Date.now() - t) / 1000); return s < 90 ? "just now" : s < 5400 ? Math.round(s / 60) + " min ago" : s < 129600 ? Math.round(s / 3600) + " h ago" : Math.round(s / 86400) + " d ago"; };
 const ovDay = (d) => new Date(d).toISOString().slice(0, 10);
 function ovOrders(rows) {
   const m = new Map();
@@ -3610,7 +3613,7 @@ async function ovLoad(force) {
   if (unreadThreads) needs.push(["📥", "Unread messages", "Customers waiting for a reply", unreadThreads, "inBtn"]);
   if (nDs) needs.push(["🎨", "Custom design requests", "Sent from the Design studio", nDs, "dsBtn"]);
   if (nRev) needs.push(["⭐", "Reviews to approve", "Customer reviews waiting", nRev, "rvBtn"]);
-  if (waitingCarts.length) needs.push(["🛒", "Carts with an email", "Left over 2 hours ovAgo, not yet contacted", waitingCarts.length, "caBtn"]);
+  if (waitingCarts.length) needs.push(["🛒", "Carts with an email", "Left over 2 hours ago, not yet contacted", waitingCarts.length, "caBtn"]);
   const hr = new Date().getHours(), greet = hr < 12 ? "Good morning" : hr < 18 ? "Good afternoon" : "Good evening";
   const needN = needs.reduce((t, n) => t + n[3], 0);
   const hero = `<div class="ov-hero"><div><h2>${greet}. <em>${needN ? `${needN} thing${needN === 1 ? "" : "s"} need${needN === 1 ? "s" : ""} you` : "You're all caught up"}</em></h2>
@@ -3650,6 +3653,42 @@ $("ovBody").addEventListener("click", (e) => {
 });
 setInterval(() => { if (shView === "ov" && !document.hidden) ovLoad(); }, 120000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden && shView === "ov" && !$("appView").hidden) ovLoad(); });
+/* ---- Reports -> Visitors: place, source, time on site, pages (each visit, with a drill-down) ---- */
+const flagOf = (c) => (/^[A-Z]{2}$/.test(c || "") ? String.fromCodePoint(...[...c].map((x) => 127397 + x.charCodeAt(0))) : "🌐");
+const countryName = (c) => { if (!/^[A-Z]{2}$/.test(c || "")) return "Unknown"; try { return new Intl.DisplayNames(["en"], { type: "region" }).of(c) || c; } catch { return c; } };
+const durTxt = (s) => { s = Math.round(Number(s) || 0); return !s ? "–" : s < 60 ? s + "s" : s < 3600 ? Math.floor(s / 60) + "m " + (s % 60) + "s" : Math.floor(s / 3600) + "h " + Math.floor((s % 3600) / 60) + "m"; };
+const placeTxt = (v) => [v.city, v.region].filter(Boolean).join(", ") || countryName(v.country);
+function whoPaint() {
+  const W = an.who; if (!W) return;
+  const T = W.totals || {}, rows = W.recent || [], noGeo = !(T.visits) ? 0 : rows.filter((r) => !r.country).length;
+  let h = `<div class="an-kpis">${kpi("Visits", fmtN(T.visits), fmtN(T.visitors) + " different people")}${kpi("Average time on site", durTxt(T.avg_seconds), "while the page was open")}${kpi("Pages per visit", T.avg_pages || 0)}${kpi("Left within 15 seconds", pct(T.bounced, T.visits), fmtN(T.bounced) + " visits")}${kpi("Came back", fmtN(T.returning), "returning visitors")}</div>
+    <div class="an-minis">
+      ${mini("Countries", (W.countries || []).map((x) => ({ name: flagOf(x.name) + " " + countryName(x.name), n: x.n })))}
+      ${mini("States and regions", (W.regions || []).map((x) => ({ name: x.name + (x.country && x.country !== "US" ? " · " + x.country : ""), n: x.n })))}
+      ${mini("Cities", (W.cities || []).map((x) => ({ name: x.name + (x.region ? ", " + x.region : ""), n: x.n })))}
+      ${mini("ZIP codes", (W.zips || []).map((x) => ({ name: x.name + (x.city ? " · " + x.city : ""), n: x.n })))}
+      ${mini("Where they came from", (W.sources || []).map((x) => ({ name: x.name, n: x.n })))}
+      ${mini("First page they saw", (W.landings || []).map((x) => ({ name: x.name, n: x.n })))}</div>
+    <p class="hint">Place comes from the visitor's internet connection, so the city and ZIP are the internet provider's area and often not the street. People who decline tracking, send "Do Not Track", or have not accepted yet in the EU are not counted. Your own signed-in browser is skipped.${T.visits && noGeo === rows.length ? " <b>No places yet: the location step is not switched on.</b>" : ""}</p>
+    <h3 class="an-h">Recent visits <small style="text-transform:none;letter-spacing:0;color:var(--muted)">· tap a row to see what they looked at</small></h3>
+    ${table(["When", "Place", "Came from", "Time", "Pages", "Device"], rows.map((v, i) => `<tr class="clk" data-visit="${i}"><td>${new Date(v.started_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</td><td>${flagOf(v.country)} ${esc(placeTxt(v))}${v.zip ? " · " + esc(v.zip) : ""}${v.returning ? ' <small class="hint">(back)</small>' : ""}</td><td>${esc(v.ref || (v.medium ? "utm: " + v.medium : "Direct"))}</td><td>${durTxt(v.seconds)}</td><td>${v.pages}</td><td>${esc(v.device || "")}</td></tr>`))}`;
+  $("anBody").insertAdjacentHTML("beforeend", h);
+}
+{ const prev = anPaint; anPaint = function () { prev(); if (an.tab === "who") whoPaint(); }; }
+const EVT = { view: (e) => "Looked at the " + (e.page || "home") + " page", product_view: (e) => "Viewed " + pname(e.product_id), design_view: (e) => "Viewed design " + pname(e.product_id), add_to_cart: (e) => "Added " + pname(e.product_id) + " to the cart", remove_from_cart: (e) => "Removed " + pname(e.product_id) + " from the cart", checkout_start: () => "Started checkout", purchase: () => "Placed an order", design_submit: () => "Sent a design request" };
+async function whyOpen(i) {
+  const v = (an.who?.recent || [])[i]; if (!v) return;
+  ddOpen("Visit · " + new Date(v.started_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }), '<p class="hint">Loading…</p>');
+  let ev = []; try { const { data } = await sb.from("site_events").select("at,kind,product_id,page,qty").eq("sid", v.sid).gte("at", new Date(new Date(v.started_at).getTime() - 120000).toISOString()).lte("at", new Date(new Date(v.last_seen).getTime() + 120000).toISOString()).order("at").limit(200); ev = data || []; } catch { /* none */ }
+  const same = (an.who.recent || []).filter((x) => x.sid === v.sid).length;
+  $("ddBody").innerHTML = `<div class="an-kpis">${kpi("Place", flagOf(v.country) + " " + esc(placeTxt(v)), v.zip ? "ZIP area " + esc(v.zip) : "")}${kpi("Time on site", durTxt(v.seconds))}${kpi("Pages", v.pages)}</div>
+    <p class="hint" style="margin:10px 0">Came from <b>${esc(v.ref || "a direct visit or an app that hides it")}</b>${v.medium ? " · " + esc(v.medium) : ""}${v.campaign ? " · campaign " + esc(v.campaign) : ""} · first page <b>${esc(v.landing || "home")}</b> · ${esc(v.device || "unknown device")}${same > 1 ? ` · this person visited ${same} times in this list` : v.returning ? " · has been here before" : " · first visit"}.</p>
+    <h4 style="margin:12px 0 6px">What they did</h4>
+    ${ev.length ? `<div class="feedlist">${ev.map((e) => `<div class="hc-r" style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line-soft)"><span>${esc((EVT[e.kind] || (() => e.kind))(e))}</span><small class="hint">${new Date(e.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" })}</small></div>`).join("")}</div>` : '<p class="hint">No page or product events were recorded for this visit.</p>'}
+    <div style="margin-top:14px"><button class="btn danger" type="button" id="whyDel">Delete this visit</button> <span class="hint" id="whyMsg" role="status"></span></div>`;
+  $("whyDel").onclick = (e) => armDelete(e.target, async () => { const { error } = await sb.from("site_visits").delete().eq("vid", v.vid); if (error) return ($("whyMsg").textContent = error.message); toast("Visit deleted"); ddShut(); anLoad(); });
+}
+$("anBody").addEventListener("click", (e) => { const r = e.target.closest("[data-visit]"); if (r) whyOpen(+r.dataset.visit); });
 </script>
 </body>
 </html>

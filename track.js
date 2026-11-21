@@ -47,7 +47,7 @@
    Counts only when PRAJO_PRIV.allowed(). The visitor's address is never stored: the place comes from our own Cloudflare Worker (see privacy.html). */
 (function () {
   var DB = { url: "https://mrnnrmyvjkyjcjnfomna.supabase.co", key: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" };
-  var GEO_URL = "";   // the prajo-geo Worker address; empty = visits are counted without a place
+  var GEO_URL = "https://prajo-geo.abhi-prasad85.workers.dev/";   // the prajo-geo Worker address; empty = visits are counted without a place
   var path = location.pathname.toLowerCase(), isShop = !/(tumbler|keepsakes|design)/.test(path);
   var kind = /tumbler/.test(path) ? "tumbler" : /keepsakes/.test(path) ? "keepsakes" : /design/.test(path) ? "design" : "";
   var ok = function () { return !!(window.PRAJO_PRIV && window.PRAJO_PRIV.allowed()); };
