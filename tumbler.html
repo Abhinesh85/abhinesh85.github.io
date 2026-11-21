@@ -121,8 +121,8 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .scrollrow { flex-wrap: nowrap; overflow-x: auto; padding-bottom: 6px; scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
 .scrollrow > * { flex: none; }
 .styles button[role="switch"][aria-checked="true"] { border-color: var(--gold-2); background: rgba(217, 171, 79, .16); }
-.styles .ink { width: 40px; padding: 0; position: relative; } .styles { flex-wrap: wrap; }
-.styles label.cust { width: 40px; height: 40px; border-radius: 50%; border: 2px dashed rgba(255,255,255,.4); display: grid; place-items: center; cursor: pointer; font-size: 17px; position: relative; overflow: hidden; } .styles label.cust input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
+.styles .ink { width: 44px; min-height: 44px; padding: 0; position: relative; } .styles { flex-wrap: wrap; }
+.styles label.cust { width: 44px; height: 44px; border-radius: 50%; border: 2px dashed rgba(255,255,255,.4); display: grid; place-items: center; cursor: pointer; font-size: 17px; position: relative; overflow: hidden; } .styles label.cust input { position: absolute; inset: 0; opacity: 0; width: 100%; height: 100%; cursor: pointer; }
 .styles .ink i { position: absolute; inset: 9px; border-radius: 50%; box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .3); }
 .try .btn { width: 100%; min-height: 50px; font-size: 15px; padding: 0 12px; white-space: nowrap; }
 /* phones: when the big preview scrolls away, a small live copy floats in the corner so changes stay visible */
@@ -258,7 +258,9 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 .about .loc { display: inline-flex; gap: 8px; align-items: center; color: var(--gold-2); font-weight: 700; }
 
 footer { border-top: 1px solid var(--line-soft); padding: 40px 0 calc(40px + env(safe-area-inset-bottom, 0px)); color: var(--muted); font-size: 14px; }
-footer .wrap { display: flex; flex-wrap: wrap; gap: 18px; justify-content: space-between; align-items: center; }
+footer .wrap { display: flex; flex-wrap: wrap; gap: 8px 18px; justify-content: space-between; align-items: center; }
+footer .wrap a { display: inline-flex; align-items: center; min-height: 44px; }
+.fromline { margin: 2px 0 8px; text-align: center; font-weight: 800; color: var(--gold-2); font-size: 15px; } .fromline small { display: block; font-weight: 500; color: var(--muted); font-size: 12.5px; }
 
 /* product sheet */
 .sheet { position: fixed; inset: 0; z-index: 80; background: rgba(5, 9, 17, .72); backdrop-filter: blur(6px); display: flex; justify-content: center; align-items: flex-start; overflow-y: auto; padding: max(16px, env(safe-area-inset-top, 0px)) var(--gutter-r) max(16px, env(safe-area-inset-bottom, 0px)) var(--gutter); }
@@ -503,6 +505,7 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
 .toast2 { position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px); opacity: 0; background: #0e1628; color: var(--cream); border: 1px solid var(--line); padding: 12px 18px; border-radius: 999px; font-weight: 700; font-size: 14px; z-index: 200; transition: .25s; pointer-events: none; }
 .toast2.on { opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
+<script src="/track.js?v=1"></script>
 </head>
 <body>
 <a class="skip" href="#studioMain">Skip to the designer</a>
@@ -579,6 +582,7 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
               <label class="adjd"><span>Size</span><input type="range" id="nszRange" min="40" max="160" step="1" value="100"><output id="nszOut">100%</output></label>
               <label class="adjd" id="ntWrap"><span>Tilt</span><input type="range" id="ntRange" min="-90" max="90" step="1" value="0"><output id="ntOut">0°</output></label>
               <label class="adjd" id="naWrap" style="display:none"><span>Turn around</span><input type="range" id="naRange" min="-60" max="60" step="1" value="0"><output id="naOut">0°</output></label></div>
+            <p class="fromline" id="fromPrice" hidden></p>
             <button class="btn btn-gold" type="button" id="orderName">Order a tumbler with this name →</button>
             <div class="tools"><button class="btn btn-line" type="button" id="rotDesign" hidden>↻ Rotate design</button><div id="rotWrap" style="display:none;flex:1 1 100%;gap:6px;flex-direction:column"><label class="adjd"><span>Angle</span><input type="range" id="rotRange" min="-180" max="180" step="1" value="0"><output id="rotRangeOut">0°</output></label><label class="adjd"><span>Size</span><input type="range" id="szRange" min="30" max="200" step="1" value="100"><output id="szRangeOut">100%</output></label><label class="adjd"><span>Left / right</span><input type="range" id="xRange" min="-50" max="50" step="1" value="0"><output id="xRangeOut">0%</output></label><label class="adjd"><span>Up / down</span><input type="range" id="yRange" min="-50" max="50" step="1" value="0"><output id="yRangeOut">0%</output></label><button class="btn btn-line" type="button" id="adjReset" style="align-self:flex-start">Reset position</button></div><button class="btn btn-line" type="button" id="surprise">🎲 Surprise me</button><button class="btn btn-line" type="button" id="shareDesign">🔗 Share</button><button class="btn btn-line" type="button" id="saveImg">⬇ Save image</button></div>
             
@@ -594,6 +598,7 @@ a.cart-btn { text-decoration: none; color: var(--cream); }
     <a class="brand" href="./"><img src="logo-128.png" alt="" width="36" height="36" style="width:36px;height:36px"><span><b>PRAJO</b><small>Custom Studio</small></span></a>
     <span>Custom gifts &amp; personalized moments · Sacramento, CA</span>
     <a href="./#shop">← Back to the shop</a>
+    <a href="privacy.html">Privacy</a><a href="#" id="privChoices">Your privacy choices</a>
     <span>© 2026 PrAjo Custom Studio</span>
   </div>
 </footer>
@@ -1016,12 +1021,27 @@ function init() {
   const want = new URLSearchParams(location.search).get("p"); setTemplate(TEMPLATES.find((t) => t.slug === want) || TEMPLATES[0]); buildProdBar();
   document.querySelector(".swatches button")?.click(); applyParams(); setGlow();
 }
+// "From $X" under the Order button, from the shop listing linked to this product
+const priceCache = {};
+async function showFrom() {
+  const el = $("fromPrice"); if (!el) return; const t = PV.template || TEMPLATES[0], id = t && t.listing_id;
+  if (!id) { el.hidden = true; return; }
+  if (!(id in priceCache)) {
+    priceCache[id] = null;
+    try { const r = await fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/listings?id=eq." + encodeURIComponent(id) + "&select=price", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } }); const j = r.ok ? await r.json() : []; if (j[0] && Number(j[0].price) > 0) priceCache[id] = Number(j[0].price); } catch { /* no price line */ }
+  }
+  const cur = PV.template || TEMPLATES[0]; if (!cur || cur.listing_id !== id) return;
+  const p = priceCache[id]; if (!p) { el.hidden = true; return; }
+  el.innerHTML = "From $" + (p % 1 ? p.toFixed(2) : p) + "<small>Sizes and extras can change the price. You see the total before you pay.</small>"; el.hidden = false;
+}
+{ const _setTemplate = setTemplate; setTemplate = function (t) { _setTemplate(t); showFrom(); }; }
+showFrom();
 // product templates from the database (admin → Products to design)
 fetch("https://mrnnrmyvjkyjcjnfomna.supabase.co/rest/v1/product_templates?select=*&visible=eq.true&order=sort", { headers: { apikey: "sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b", Authorization: "Bearer sb_publishable_yRYTwn_RktQUGMaqwiQVAA_Gb1ei78b" } })
   .then((r) => (r.ok ? r.json() : null)).then((rows) => {
     if (!rows || !rows.length) return;
     TEMPLATES = rows; try { localStorage.setItem("prajo:templates", JSON.stringify(rows)); } catch { /* optional */ }
-    buildProdBar(); const want = new URLSearchParams(location.search).get("p"), t = TEMPLATES.find((x) => x.slug === want);
+    buildProdBar(); showFrom(); const want = new URLSearchParams(location.search).get("p"), t = TEMPLATES.find((x) => x.slug === want);
     const cur = PV.template && TEMPLATES.find((x) => x.slug === PV.template.slug);
     if (PV.template && !cur) setTemplate(TEMPLATES[0]); else if (t && PV.template && t.slug !== PV.template.slug) setTemplate(t);
     else if (cur && (cur.photo !== PV.template.photo || JSON.stringify(cur.geom) !== JSON.stringify(PV.template.geom))) { setTemplate(cur); applyPos(); }   // photo or printable area edited in admin
