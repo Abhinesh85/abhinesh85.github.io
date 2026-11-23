@@ -29,6 +29,7 @@
 <link rel="stylesheet" href="fonts/google-main.css">
 <link rel="preconnect" href="https://i.etsystatic.com">
 <script src="products.js?v=d6fe29f995"></script>
+<script src="listing-art.js?v=3"></script>
 <style>
 /* Layout: dark navy studio with gold line-work from the PrAjo badge; one wide column of full-bleed bands, content capped at 1200px. */
 :root {
@@ -213,13 +214,13 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 .card .ph img + img { opacity: 0; }
 .card .ph.wide::before { content: ""; position: absolute; inset: 0; background: var(--bg) center / cover; filter: blur(22px) brightness(.72); transform: scale(1.25); }
 .card .ph.wide img:not(.cs) { object-fit: contain; }
-.card .ph.tall { background: #efefef; } .card .ph.tall img:not(.cs) { object-fit: contain; }
+.card .ph.tall { background: radial-gradient(ellipse 95% 70% at 8% 0%, #5e3d24 0%, #2a1e17 40%, #151112 82%); } .card .ph.tall img:not(.cs) { object-fit: contain; }
 .slides img.tall, .thumbs img.tall { object-fit: contain; background: #efefef; }
 .card.dig .ph { background: #fff; } .card.dig .ph img { object-fit: contain; }
 .card.seeall .ph { display: grid; place-content: center; gap: 8px; padding: 18px; text-align: center; background: var(--panel-2, #13213a); border-style: dashed; }
 .card.seeall b { font-family: var(--f-display); font-size: 22px; color: var(--gold-2); } .card.seeall small { font-size: 14px; color: var(--muted); }
 
-.card .ph img.cs { z-index: 1; opacity: 0; object-fit: contain; background: #efefef; transition: opacity .8s; }
+.card .ph img.cs { z-index: 1; opacity: 0; object-fit: contain; inset: 6% 8%; width: 84%; height: 88%; border-radius: 12px; background: #f3f0ec; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); transition: opacity .8s; }
 .card .ph img.cs.on { opacity: 1; }
 .card .clab { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: grid; gap: 2px; padding: 26px 12px 10px; background: linear-gradient(transparent, rgba(8, 12, 22, .82)); color: #fff; pointer-events: none; }
 .card .clab:empty { display: none; }
@@ -1174,7 +1175,14 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
 <script>
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
-let P = window.PRAJO_PRODUCTS || [];   // built-in copy; replaced by the live listings from Supabase when they load
+// Studio photo first: the product cut out on the campaign background, so every card has the same backdrop. Other photos stay in the gallery.
+function withStaged(p) {
+  const s = (window.PRAJO_STAGED || {})[p.id];
+  if (!s || !p.images || (p.images[0] && p.images[0].staged)) return p;
+  return { ...p, images: [{ card: s.card, large: s.large, staged: true }, ...p.images],
+    variations: (p.variations || []).map((v) => v.photos ? { ...v, photos: Object.fromEntries(Object.entries(v.photos).map(([k, i]) => [k, i + 1])) } : v) };
+}
+let P = (window.PRAJO_PRODUCTS || []).map(withStaged);   // built-in copy; replaced by the live listings from Supabase when they load
 const SHARE_ICON = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"/><path d="M16 6l-4-4-4 4M12 2v14"/></svg>`;
 let SHOP = "https://www.etsy.com/shop/PrAjoCustomStudio";
 /* ---------- site settings (edited in admin: ⚙ Settings → Site settings). Empty fields keep the text in this page. ---------- */
@@ -1390,7 +1398,7 @@ function setFilter(f) {
       : p.stock > 0 && p.stock <= lowAt() && !p.digital ? `<span class="badge low">Only ${p.stock} left</span>`
       : (p.tags || []).some((t) => /^best ?seller$/i.test(t)) ? `<span class="badge best">Best seller</span>` : "";
     return `<a class="card${soldOut(p) ? " soldout" : ""}${p.digital ? " dig" : ""}" href="#p/${esc(p.id)}">
-      <span class="ph"><button type="button" class="fav" data-fav-p="${esc(p.id)}" aria-pressed="${favs.has("p", p.id)}" aria-label="Save ${esc(p.name)}">${HEART(favs.has("p", p.id))}</button>${badge}${isNew(p) && !soldOut(p) ? `<span class="badge new">New</span>` : ""}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy" onload="window.__cardFit&&__cardFit(this)" onerror="this.closest('.ph').classList.add('ld')">${p.images[1] ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
+      <span class="ph"><button type="button" class="fav" data-fav-p="${esc(p.id)}" aria-pressed="${favs.has("p", p.id)}" aria-label="Save ${esc(p.name)}">${HEART(favs.has("p", p.id))}</button>${badge}${isNew(p) && !soldOut(p) ? `<span class="badge new">New</span>` : ""}<img src="${esc(p.images[0].card)}" alt="${esc(p.name)}" loading="lazy" onload="window.__cardFit&&__cardFit(this)" onerror="this.closest('.ph').classList.add('ld')">${p.images[1] && !p.images[0].staged ? `<img src="${esc(p.images[1].card)}" alt="" loading="lazy">` : ""}</span>
       <span class="nm">${esc(p.name)}</span>${rvLine(p.id)}
       <span class="pr">${priceHtml(p)}</span></a>`;
   };
@@ -1531,7 +1539,7 @@ let listingsLoaded = false;   // the cart keeps items it can't match yet (e.g. t
     if (!r.ok) return;
     const list = (await r.json()).map(fromRow).filter((p) => p.images.length);
     if (!list.length) return;
-    P0 = list; listingsLoaded = true;
+    P0 = list.map(withStaged); listingsLoaded = true;
     refreshShop(); paintReviews();
     if (!$("cart").hidden) renderCart();
     if (location.hash.startsWith("#p/")) { $("sheet").hidden = true; route(); }
