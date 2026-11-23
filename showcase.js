@@ -33,6 +33,25 @@ async function blankTumbler(tpl) {
   const photo = await loadImg("tumbler-white.jpg"), { W, H, SY } = TP, K = 2, cv = document.createElement("canvas"); cv.width = W * K; cv.height = H * K;
   const c = cv.getContext("2d"); c.setTransform(K, 0, 0, K, 0, 0); c.drawImage(photo, 0, SY, W, H, 0, 0, W, H); return (blankTp = cv.toDataURL("image/jpeg", .9));
 }
+
+/* Optional dark "studio" look (the home page sets window.PRAJO_STAGE): the product is cut out of its studio photo with a saved outline (stage-masks/<photo>.png)
+   and shown on the same dark backdrop as the shop cards. No outline file for a photo, or the flag off: the picture is left exactly as it was drawn. */
+const stageMasks = {};
+const stageMaskOf = (photo) => { const k = String(photo || "").replace(/^.*\//, "").replace(/\.[a-z]+$/i, ""); return stageMasks[k] || (stageMasks[k] = loadImg(`stage-masks/${k}.png?v=2`).then((m) => { const q = document.createElement("canvas"); q.width = 100; q.height = Math.max(1, Math.round(100 * m.naturalHeight / m.naturalWidth)); const x = q.getContext("2d", { willReadFrequently: true }); x.drawImage(m, 0, 0, q.width, q.height); const d = x.getImageData(0, 0, q.width, q.height).data; let x0 = 1e9, x1 = -1, y0 = 1e9, y1 = -1; for (let j = 0; j < q.height; j++) for (let i = 0; i < q.width; i++) if (d[(j * q.width + i) * 4 + 3] > 128) { if (i < x0) x0 = i; if (i > x1) x1 = i; if (j < y0) y0 = j; if (j > y1) y1 = j; } return { m, cx: (x0 + x1 + 1) / 2 / q.width, w: (x1 - x0 + 1) / q.width, top: y0 / q.height, bottom: (y1 + 1) / q.height }; }).catch(() => null)); };
+async function stagedUrl(cv, photo) {
+  if (!window.PRAJO_STAGE) return cv.toDataURL("image/jpeg", .9);
+  const mk = await stageMaskOf(photo); if (!mk) return cv.toDataURL("image/jpeg", .9);
+  const W = cv.width, H = cv.height, fw = W / H > .8 ? W : H * .8, fh = fw / .8;   // the picture is framed 4:5 like every shop card, so it fills the card with one backdrop
+  const bw = mk.w * W, bh = (mk.bottom - mk.top) * H, s = Math.min(.8 * fw / bw, .66 * fh / bh, 1.7), pw = W * s, ph = H * s, bcx = mk.cx * W * s, btop = mk.top * H * s, bh2 = bh * s;
+  const px = fw / 2 - bcx, py = fh * .52 - bh2 / 2 - btop;   // product centred, like the shop photos
+  const o = document.createElement("canvas"); o.width = Math.round(fw); o.height = Math.round(fh); const c = o.getContext("2d");
+  c.fillStyle = "#161211"; c.fillRect(0, 0, o.width, o.height);
+  const g = c.createRadialGradient(o.width * .08, 0, 0, o.width * .08, 0, o.width * 1.05); g.addColorStop(0, "rgba(150,98,58,.5)"); g.addColorStop(.5, "rgba(150,98,58,.14)"); g.addColorStop(1, "rgba(150,98,58,0)"); c.fillStyle = g; c.fillRect(0, 0, o.width, o.height);
+  const v = c.createRadialGradient(o.width / 2, o.height / 2, o.width * .3, o.width / 2, o.height / 2, o.height * .75); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.3)"); c.fillStyle = v; c.fillRect(0, 0, o.width, o.height);
+  const t = document.createElement("canvas"); t.width = W; t.height = H; const tc = t.getContext("2d"); tc.drawImage(cv, 0, 0); tc.globalCompositeOperation = "destination-in"; tc.drawImage(mk.m, 0, 0, W, H);
+  c.save(); c.filter = `blur(${Math.max(4, o.width * .02)}px)`; c.fillStyle = "rgba(0,0,0,.6)"; c.beginPath(); c.ellipse(px + mk.cx * W * s, py + mk.bottom * H * s + o.height * .012, bw * s * .4, Math.max(3, o.height * .012), 0, 0, Math.PI * 2); c.fill(); c.restore();
+  c.drawImage(t, px, py, pw, ph); return o.toDataURL("image/jpeg", .9);
+}
 const fitWhole = (t) => !!t && ["uv-dtf-sticker"].includes(t.slug);   // stickers print the whole design, never cropped
 function artBoxed(im) {   // art on a white or transparent square (round, arched or cut-out shapes): fit the whole thing instead of cropping it
   if (im.__boxed !== undefined) return im.__boxed;
@@ -97,7 +116,7 @@ async function flatPreview(d, tpl, opt) {   // a design printed on a flat produc
   if (opt && opt.name) { const nm = nameSprite(opt.name, opt.f, opt.i, aw * .88), yy = "ny" in opt ? opt.ny : opt.y, ny = yy == null || yy === "" ? (g.TY || (T + B) / 2) : T + ah * Math.max(0, Math.min(100, Number(yy))) / 100; const sc = Math.max(.3, Math.min(2, (Number(opt.ns) || 100) / 100)), cx = (L + R) / 2 + (Number(opt.nx) || 0) / 100 * aw, th = (Number(opt.na) || 0) * Math.PI / 180; c.save(); c.translate(cx, ny); c.rotate(th); c.scale(sc, sc); c.drawImage(nm.o, -nm.o.width / 4, -nm.oh / 2, nm.o.width / 2, nm.oh); c.restore(); }
   if (g.overlay) { c.globalCompositeOperation = "multiply"; c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H); c.globalCompositeOperation = "source-over"; }
   if (g.hole) { const h = g.hole; c.save(); c.beginPath(); c.roundRect(h.x, h.y, h.w, h.h, h.r); c.clip(); c.drawImage(photo, 0, g.SY || 0, W, H, 0, 0, W, H); c.restore(); }   // a punched slot stays open: the art does not print over it
-  c.restore(); return (flatCache[key] = cv.toDataURL("image/jpeg", .9));
+  c.restore(); return (flatCache[key] = await stagedUrl(cv, tpl.photo));
 }
 async function tumblerPreview(d, opt, tpl) {   // opt = { name, f, i } also prints a name on it
   if (tpl && tpl.slug === "uv-dtf-sticker") return artOf(d);   // stickers: show the sticker itself, not a mock-up
@@ -123,5 +142,5 @@ async function tumblerPreview(d, opt, tpl) {   // opt = { name, f, i } also prin
   g.addColorStop(.8, "rgba(255,255,255,0)"); g.addColorStop(.89, "rgba(255,255,255,.22)"); g.addColorStop(.95, "rgba(255,255,255,0)"); c.globalCompositeOperation = "screen"; c.fillStyle = g; c.fillRect(L, T, R - L, B - T);
   const e = c.createLinearGradient(L, 0, R, 0); e.addColorStop(0, "rgba(40,40,50,.55)"); e.addColorStop(.1, "rgba(40,40,50,.14)"); e.addColorStop(.3, "rgba(255,255,255,0)"); e.addColorStop(.72, "rgba(255,255,255,0)"); e.addColorStop(.92, "rgba(40,40,50,.16)"); e.addColorStop(1, "rgba(40,40,50,.5)");
   c.globalCompositeOperation = "multiply"; c.fillStyle = e; c.fillRect(L, T, R - L, B - T); c.restore();
-  return (tpCache[key] = cv.toDataURL("image/jpeg", .9));
+  return (tpCache[key] = await stagedUrl(cv, "tumbler-white.jpg"));
 }

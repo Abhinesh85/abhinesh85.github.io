@@ -119,14 +119,14 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .teaser { display: grid; justify-items: center; gap: 18px; position: relative; }
 .teaser::before { content: ""; position: absolute; inset: -6% -10%; background: radial-gradient(ellipse 55% 50% at 50% 48%, rgba(217, 171, 79, .22), transparent 70%); pointer-events: none; }
 .tcards { position: relative; width: min(520px, 92vw); aspect-ratio: 10 / 9; }
-.tcard { position: absolute; bottom: 0; display: block; border-radius: 22px; overflow: hidden; background: #ededed; box-shadow: 0 34px 60px -22px rgba(0, 0, 0, .75), 0 0 0 1px rgba(255, 255, 255, .08); transition: transform .45s cubic-bezier(.2, .8, .2, 1), box-shadow .45s; animation: bob 7s ease-in-out infinite; }
+.tcard { position: absolute; bottom: 0; display: block; border-radius: 22px; overflow: hidden; background: #161211; box-shadow: 0 34px 60px -22px rgba(0, 0, 0, .75), 0 0 0 1px rgba(255, 255, 255, .08); transition: transform .45s cubic-bezier(.2, .8, .2, 1), box-shadow .45s; animation: bob 7s ease-in-out infinite; }
 .tcard img { display: block; width: 100%; height: auto; }
 .t-a { left: 1%; width: 35%; rotate: -5deg; translate: 0 12px; animation-delay: -2s; }
 .t-b { left: 31.5%; width: 38%; z-index: 2; animation-delay: 0s; }
 .t-c { right: 1%; width: 35%; rotate: 5deg; translate: 0 12px; animation-delay: -4s; }
 @keyframes bob { 50% { transform: translateY(-9px); } }
 .tcard:hover, .tcard:focus-visible { transform: translateY(-14px) scale(1.03); z-index: 3; box-shadow: 0 44px 70px -22px rgba(0, 0, 0, .85), 0 0 0 2px var(--gold-2); animation-play-state: paused; outline: none; }
-.teaser .tcard img { transition: opacity .35s; } .teaser.sc-wait .tcard img:not(.ok) { opacity: 0; }   /* while the saved showcase is being drawn, don't flash the old pictures */
+.teaser .tcard img:not([data-st]), .make-grid img[data-stg]:not([data-st]) { opacity: 0; } .teaser .tcard img, .make-grid img { transition: opacity .35s; } .teaser.sc-wait .tcard img:not(.ok) { opacity: 0; }   /* while the saved showcase is being drawn, don't flash the old pictures */
 .teaser-cta { min-height: 54px; padding: 0 30px; font-size: 16px; }
 .teaser-sub { margin: 0; color: var(--muted); font-size: 14px; position: relative; }
 @media (prefers-reduced-motion: reduce) { .tcard { animation: none; } }
@@ -220,7 +220,7 @@ section.band { padding: clamp(56px, 9vw, 110px) 0; }
 .card.seeall .ph { display: grid; place-content: center; gap: 8px; padding: 18px; text-align: center; background: var(--panel-2, #13213a); border-style: dashed; }
 .card.seeall b { font-family: var(--f-display); font-size: 22px; color: var(--gold-2); } .card.seeall small { font-size: 14px; color: var(--muted); }
 
-.card .ph img.cs { z-index: 1; opacity: 0; object-fit: contain; inset: 6% 8%; width: 84%; height: 88%; border-radius: 12px; background: #f3f0ec; box-shadow: 0 10px 30px rgba(0, 0, 0, .5); transition: opacity .8s; }
+.card .ph img.cs { z-index: 1; opacity: 0; object-fit: contain; background: radial-gradient(ellipse 95% 70% at 8% 0%, #5e3d24 0%, #2a1e17 40%, #151112 82%); transition: opacity .8s; }
 .card .ph img.cs.on { opacity: 1; }
 .card .clab { position: absolute; left: 0; right: 0; bottom: 0; z-index: 3; display: grid; gap: 2px; padding: 26px 12px 10px; background: linear-gradient(transparent, rgba(8, 12, 22, .82)); color: #fff; pointer-events: none; }
 .card .clab:empty { display: none; }
@@ -866,10 +866,10 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
     <div class="wrap">
       <h2 id="makeT">Make your own</h2>
       <ul class="make-grid">
-        <li><a href="tumbler.html"><img src="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-0.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Tumbler or mug</span><small>Pick a design, add a name</small></a></li>
+        <li><a href="tumbler.html"><img src="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-0.jpg" alt="" width="320" height="240" loading="lazy" data-stg><span class="t">Tumbler or mug</span><small>Pick a design, add a name</small></a></li>
         <li><a href="keepsakes/"><img src="kp-maps.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Keychain or charm</span><small>Maps, states, flowers, names</small></a></li>
-        <li id="makeTiles" hidden><a href="design.html"><img src="keychain-1-card.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Name tiles</span><small>Type a name, see it live</small></a></li>
-        <li><a href="#custom" data-bulk><img src="coaster-1-card.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Something else</span><small>Photos, logos, bulk, teams</small></a></li>
+        <li id="makeTiles" hidden><a href="design.html"><img src="listing/custom-photo-keychain-card.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Name tiles</span><small>Type a name, see it live</small></a></li>
+        <li><a href="#custom" data-bulk><img src="listing/tile-something-else-card.jpg?v=2" alt="" width="320" height="240" loading="lazy"><span class="t">Something else</span><small>Photos, logos, bulk, teams</small></a></li>
       </ul>
     </div>
   </section>
@@ -1169,7 +1169,8 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
   </div>
 </div>
 
-<script src="showcase.js?v=fit3"></script>
+<script>window.PRAJO_STAGE = true;</script>
+<script src="showcase.js?v=fit5"></script>
 <script src="fontsheet.js"></script>
 <script src="season.js" defer></script>
 <script>
@@ -1237,6 +1238,38 @@ function applySite() {
   setTimeout(applyShowcase, 0);   // after the whole page script has loaded
   if (S.occasions) $("track").innerHTML = [...Array(2)].flatMap(() => S.occasions.split("\n").map((x) => x.trim()).filter(Boolean)).map((o) => `<span>${esc(o)}</span>`).join("");
 }
+/* The tumblers at the top and in "Make your own" are drawn from one studio tumbler photo (in admin → Home page showcase). Cut that photo's outline out once
+   (stage-masks/tumbler.png) and every showcase picture, now or later, is shown on the same dark backdrop as the product cards. Anything unusual keeps its own picture. */
+const STAGE_MASK = new Image(); const stageMaskReady = new Promise((ok) => { STAGE_MASK.onload = () => ok(true); STAGE_MASK.onerror = () => ok(false); STAGE_MASK.src = "stage-masks/tumbler.png?v=2"; });
+async function stageTumblerImg(im) {
+  if (!im) return;
+  const done = () => { im.dataset.st = "1"; };
+  try {
+    const src = im.currentSrc || im.src;
+    if (!src || /^(blob|data):/.test(src) || im.dataset.ps === src) return;   // already staged, or already tried this picture
+    im.dataset.ps = src;
+    if (!(await stageMaskReady)) return done();
+    if (!im.naturalWidth || Math.abs(im.naturalWidth / im.naturalHeight - 496 / 1086) > 0.012) return done();   // not a studio-tumbler picture
+    const a = new Image(); a.crossOrigin = "anonymous"; a.src = src + (src.includes("?") ? "&" : "?") + "cors=1"; await a.decode();
+    const W = a.naturalWidth, H = a.naturalHeight, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const c = cv.getContext("2d");
+    c.fillStyle = "#161211"; c.fillRect(0, 0, W, H);
+    const g = c.createRadialGradient(W * .08, 0, 0, W * .08, 0, W * 1.05); g.addColorStop(0, "rgba(150,98,58,.5)"); g.addColorStop(.5, "rgba(150,98,58,.14)"); g.addColorStop(1, "rgba(150,98,58,0)"); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    const v = c.createRadialGradient(W / 2, H / 2, W * .3, W / 2, H / 2, H * .75); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.3)"); c.fillStyle = v; c.fillRect(0, 0, W, H);
+    const t = document.createElement("canvas"); t.width = W; t.height = H; const tc = t.getContext("2d"); tc.drawImage(a, 0, 0, W, H); tc.globalCompositeOperation = "destination-in"; tc.drawImage(STAGE_MASK, 0, 0, W, H);
+    c.save(); c.filter = `blur(${Math.max(4, W * .022)}px)`; c.fillStyle = "rgba(0,0,0,.62)"; c.beginPath(); c.ellipse(W / 2, H * .955, W * .31, H * .012, 0, 0, Math.PI * 2); c.fill(); c.restore();
+    c.drawImage(t, 0, 0);
+    const blob = await new Promise((ok) => cv.toBlob(ok, "image/jpeg", .92)); if (!blob) return done();
+    im.src = URL.createObjectURL(blob); done();
+  } catch { done(); }
+}
+const stageShowcase = () => document.querySelectorAll(".teaser .tcard img, .make-grid img[data-stg]").forEach((im) => {
+  const s = im.currentSrc || im.src; if (!s || /^(blob|data):/.test(s) || im.dataset.ps === s) return;   // nothing new to do
+  if (im.dataset.st) delete im.dataset.st;   // a new picture arrived: hide it until its background is swapped
+  if (im.complete && im.naturalWidth) stageTumblerImg(im); else im.addEventListener("load", () => stageTumblerImg(im), { once: true });
+});
+new MutationObserver(stageShowcase).observe(document.body, { subtree: true, attributes: true, attributeFilter: ["src"] });
+document.addEventListener("load", (e) => { const im = e.target; if (im && im.matches && im.matches(".teaser .tcard img, .make-grid img[data-stg]")) stageShowcase(); }, true);   // a new picture finished loading (the src change alone fires before that)
+document.addEventListener("DOMContentLoaded", stageShowcase); setTimeout(stageShowcase, 600); setTimeout(() => document.querySelectorAll(".teaser .tcard img, .make-grid img[data-stg]").forEach((im) => { im.dataset.st = "1"; }), 6000);   // never leave a picture hidden
 /* home page showcase: the three tumblers at the top are drawn from the choices saved in admin → Home page showcase */
 let scSig = "", siteFresh = false;
 const scShow = () => {
