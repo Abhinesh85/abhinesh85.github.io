@@ -1531,7 +1531,7 @@ function fromRow(r) {
     return Object.keys(photos).length ? { ...v, photos } : { ...v };
   });
   return { id: r.id, name: r.name, title: r.title || r.name, category: r.category, price: Number(r.price), currency: r.currency,
-    stock: r.stock, sort: r.sort, created: r.created_at ? Date.parse(r.created_at) : 0, bundleIds: r.bundle_ids || [], digital: r.digital, hasFile: (r.files || []).length > 0, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
+    stock: r.stock, sort: r.sort, created: r.created_at ? Date.parse(r.created_at) : 0, bundleIds: r.bundle_ids || [], digital: r.digital, hasFile: r.has_file === true || (r.files || []).length > 0, personalizable: r.personalizable, images, variations, tags: r.tags || [], description: describe(r.description) };
 }
 /* ---------- customer reviews: one quiet fetch of the published ones; nothing shows (and nothing breaks) if the table isn't there ---------- */
 const STAR_SVG = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5l2.9 6.1 6.6.8-4.9 4.6 1.3 6.6L12 17.3 6.1 20.6l1.3-6.6L2.5 9.4l6.6-.8z"/></svg>';
@@ -1568,7 +1568,7 @@ fetch(`${DB.url}/rest/v1/reviews?select=product_id,rating,name,body,created_at&s
 let listingsLoaded = false;   // the cart keeps items it can't match yet (e.g. the Custom design item) until the live listings have arrived
 (async function loadListings() {
   try {
-    const r = await fetch(`${DB.url}/rest/v1/listings?select=*&visible=eq.true&order=sort.asc,name.asc`, { headers: { apikey: DB.key, Authorization: `Bearer ${DB.key}` } });
+    const r = await fetch(`${DB.url}/rest/v1/listings?select=id,name,title,category,price,currency,stock,sort,created_at,updated_at,bundle_ids,digital,personalizable,images,variations,tags,description,visible,has_file&visible=eq.true&order=sort.asc,name.asc`, { headers: { apikey: DB.key, Authorization: `Bearer ${DB.key}` } });
     if (!r.ok) return;
     const list = (await r.json()).map(fromRow).filter((p) => p.images.length);
     if (!list.length) return;
