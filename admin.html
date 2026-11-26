@@ -480,7 +480,9 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 64
 .bars div { flex: 1; min-width: 0; display: grid; align-items: end; height: 100%; position: relative; }
 .bars div i { display: block; border-radius: 6px 6px 2px 2px; background: linear-gradient(180deg, var(--gold-2), var(--gold)); min-height: 3px; transition: height .4s ease; }
 .bars div.v i { background: linear-gradient(180deg, #7fb2ff, #4f86e0); }
-.bars div:hover::after { content: attr(data-t); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #000c; padding: 3px 8px; border-radius: 8px; font-size: 12px; z-index: 2; }
+.bars div[data-day] { cursor: pointer; }
+.bars div[data-day]:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; border-radius: 6px; }
+.bars div:focus-visible::after, .bars div:hover::after { content: attr(data-t); position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%); white-space: nowrap; background: #000c; padding: 3px 8px; border-radius: 8px; font-size: 12px; z-index: 2; }
 .axis { display: flex; justify-content: space-between; font-size: 11.5px; color: var(--muted); }
 .legend { display: flex; gap: 14px; font-size: 12.5px; color: var(--muted); } .legend span::before { content: ""; display: inline-block; width: 9px; height: 9px; border-radius: 3px; margin-right: 6px; background: var(--gold); } .legend span.v::before { background: #5f95ea; }
 .tp { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--line-soft); font-size: 14px; }
@@ -3629,7 +3631,7 @@ async function ovLoad(force) {
     ${kpi("caBtn", "Carts waiting", carts ? allCarts.length : "–", `<span class="d">${allCarts.filter((c) => c.email).length} left an email</span>`)}
     ${kpi("anBtn", "Visitors who ordered", conv == null ? "–" : conv + "%", '<span class="d">orders ÷ visitors</span>')}</div>`;
   const needHtml = needs.length ? needs.map(([ic, t, s, n, go]) => `<button type="button" class="need" data-ovgo="${esc(go)}"><i>${ic}</i><span>${esc(t)}<small>${esc(s)}</small></span><b>${n}</b></button>`).join("") : '<div class="clear">✓ Nothing needs you right now</div>';
-  const mx = (L) => Math.max(1, ...L), bars = (L, cls, fmt) => `<div class="bars" role="img" aria-label="Bar chart, last 14 days">${L.map((v, i) => `<div class="${cls}" data-t="${esc(days[i].slice(5))}: ${fmt(v)}"><i style="height:${Math.max(3, v / mx(L) * 100)}%"></i></div>`).join("")}</div>`;
+  const mx = (L) => Math.max(1, ...L), bars = (L, cls, fmt) => `<div class="bars" role="img" aria-label="Bar chart, last 14 days">${L.map((v, i) => `<div class="${cls}" data-day="${days[i]}" role="button" tabindex="0" aria-label="${esc(days[i].slice(5))}: ${fmt(v)}. Open this day" data-t="${esc(days[i].slice(5))}: ${fmt(v)}"><i style="height:${Math.max(3, v / mx(L) * 100)}%"></i></div>`).join("")}</div>`;
   const chart = `<div class="card"><h3>Last 14 days <small>${days[0].slice(5)} to ${days[13].slice(5)}</small></h3>
     <div class="legend"><span>Sales</span><span class="v">Visitors</span></div>${bars(saleSeries, "", usd2)}${bars(visSeries, "v", (v) => v + " visitors")}
     <div class="axis"><span>${days[0].slice(5)}</span><span>${days[6].slice(5)}</span><span>${days[13].slice(5)}</span></div></div>`;
@@ -3642,10 +3644,26 @@ async function ovLoad(force) {
   const feed = `<div class="card"><h3>Recent activity</h3><div class="feed">${ev.length ? ev.slice(0, 9).map(([t, ic, tx]) => `<div class="fi"><i>${ic}</i><span title="${esc(tx)}">${esc(tx)}</span><small>${ovAgo(t)}</small></div>`).join("") : '<p class="hint">Nothing yet.</p>'}</div></div>`;
   $("ovBody").innerHTML = `${hero}${kpis}<div class="ov-cols"><div class="ov-col" style="display:grid;gap:16px;align-content:start">${chart}${feed}</div><div style="display:grid;gap:16px;align-content:start"><div class="card"><h3>Needs you</h3>${needHtml}</div>${topHtml}</div></div>
     ${bad ? '<p class="ov-note">Some numbers could not load. Sign out and back in if this keeps happening.</p>' : '<p class="ov-note">Sales and profit come from your orders. Profit only counts items that have a cost set in the pricing app.</p>'}`;
+  window.ovPaid = paid || [];
   railPaint({ inb: unreadThreads, cart: waitingCarts.length, rev: nRev || 0, ds: nDs || 0 });
   ovT = Date.now(); ovBusy = false;
 }
+/* click (or Enter on) a bar in "Last 14 days" to see that day's visits and sales */
+async function ovDayOpen(day) {
+  const from = new Date(day + "T00:00:00Z"), to = new Date(from.getTime() + 864e5), label = new Date(day + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", timeZone: "UTC" });
+  ddOpen(label, '<p class="hint">Loading…</p>');
+  let vis = [], bad = false; try { const { data, error } = await sb.from("site_visits").select("started_at,country,region,city,ref,medium,seconds,pages,device,browser,os,returning").gte("started_at", from.toISOString()).lt("started_at", to.toISOString()).order("started_at", { ascending: false }).limit(200); if (error) throw error; vis = data || []; } catch { bad = true; }
+  const ords = (window.ovPaid || []).filter((o) => o.date === day), rev = ords.reduce((t, o) => t + o.rev, 0);
+  const tm = (d) => new Date(d).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  $("ddBody").innerHTML = `<div class="an-kpis">${kpi("Visits", fmtN(vis.length), bad ? "could not load" : "")}${kpi("Orders", ords.length)}${kpi("Sales", usd2(rev))}</div>
+    <h4 style="margin:12px 0 6px">Visits</h4>
+    ${table(["Time", "Place", "Came from", "Device", "Stayed", "Pages"], vis.map((v) => `<tr><td>${tm(v.started_at)}</td><td>${flagOf(v.country)} ${esc(placeTxt(v))}${v.returning ? ' <small class="hint">(back)</small>' : ""}</td><td>${esc(v.ref || (v.medium ? "utm: " + v.medium : "Direct"))}</td><td>${esc([v.device, v.browser, v.os].filter(Boolean).join(" · "))}</td><td>${durTxt(v.seconds)}</td><td>${v.pages}</td></tr>`))}
+    <h4 style="margin:14px 0 6px">Orders</h4>
+    ${ords.length ? ords.map((o) => `<div class="hc-r" style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line-soft)"><span>${o.no ? "#" + esc(String(o.no)) + " " : ""}${esc(o.buyer || "")}</span><b>${usd2(o.rev)}</b></div>`).join("") : '<p class="hint">No paid orders this day.</p>'}`;
+}
+$("ovBody").addEventListener("keydown", (e) => { const b = (e.key === "Enter" || e.key === " ") && e.target.closest("[data-day]"); if (b) { e.preventDefault(); ovDayOpen(b.dataset.day); } });
 $("ovBody").addEventListener("click", (e) => {
+  const bar = e.target.closest("[data-day]"); if (bar) return ovDayOpen(bar.dataset.day);
   if (e.target.closest("#ovRefresh")) return ovLoad(true);
   const g = e.target.closest("[data-ovgo]"); if (!g) return; const id = g.dataset.ovgo;
   if (id === "new") { $("newBtn").click(); return; }
