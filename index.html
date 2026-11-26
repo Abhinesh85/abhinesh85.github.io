@@ -2797,7 +2797,8 @@ route();
   let tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch { /* none */ }
   let ref = ""; try { ref = sessionStorage.getItem("prajo:ref"); if (ref === null) { ref = ""; const r = document.referrer && new URL(document.referrer); if (r && r.hostname !== location.hostname) ref = r.hostname.replace(/^www\./, ""); const u = new URLSearchParams(location.search).get("utm_source"); if (u) ref = u.slice(0, 40); sessionStorage.setItem("prajo:ref", ref); } } catch { /* fine */ }
   const rpc = (fn, body) => { try { fetch(DB.url + "/rest/v1/rpc/" + fn, { method: "POST", keepalive: true, headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: "Bearer " + DB.key }, body: JSON.stringify(body) }).catch(() => {}); } catch { /* fine */ } };
-  const ev = (kind, product, qty, value, page) => { if (!off) rpc("track_event", { p_sid: sid, p_kind: kind, p_product: product || null, p_page: page || null, p_ref: ref || null, p_device: dev, p_tz: tz, p_qty: qty == null ? null : qty, p_value: value == null ? null : value }); };
+  const ev = (kind, product, qty, value, page, detail) => { if (!off) rpc("track_event", { p_sid: sid, p_kind: kind, p_product: product || null, p_page: page || null, p_ref: ref || null, p_device: dev, p_tz: tz, p_qty: qty == null ? null : qty, p_value: value == null ? null : value, p_detail: detail || null }); };
+  const dtl = (i) => [i && i.options ? Object.entries(i.options).map(([k, v]) => k + ": " + (/^\d+$/.test(v) ? v + "oz" : v)).join(", ") : "", i && i.personalization ? "Text: \"" + String(i.personalization) + "\"" : ""].filter(Boolean).join(" · ").slice(0, 160);
   /* page views */
   let lastKey = "";
   const seen = () => {
@@ -2809,7 +2810,7 @@ route();
     if (o) { try { const done = JSON.parse(localStorage.getItem("prajo:ordersSeen") || "[]"); if (!done.includes(o[1])) { done.push(o[1]); localStorage.setItem("prajo:ordersSeen", JSON.stringify(done.slice(-20))); ev("purchase", null, 1, null, "order"); } } catch { /* fine */ } }
   };
   /* cart: events and a snapshot so the owner can see what people are holding */
-  const rows = () => { const items = cart.get(); return items.map((i) => { const p = (typeof P !== "undefined" ? P : []).find((x) => x.id === i.id); return { id: i.id, n: p ? p.name : i.id, q: i.qty, u: p ? Number(unitOf(p, i.options)) || 0 : 0, o: i.options ? Object.values(i.options).join(", ").slice(0, 60) : "" }; }); };
+  const rows = () => { const items = cart.get(); return items.map((i) => { const p = (typeof P !== "undefined" ? P : []).find((x) => x.id === i.id); return { id: i.id, n: p ? p.name : i.id, q: i.qty, u: p ? Number(unitOf(p, i.options)) || 0 : 0, o: i.options ? Object.values(i.options).join(", ").slice(0, 60) : "", t: i.personalization ? String(i.personalization).slice(0, 80) : "" }; }); };
   let pt, email = ""; try { email = localStorage.getItem("prajo:rem") || ""; } catch { /* fine */ }
   const remShow = () => { const box = $$("remind"); if (box) box.hidden = !cart.get().length || off || (typeof SITE !== "undefined" && SITE.remindOff === true); };
   const push = () => { if (off) return; const r = rows(), n = r.reduce((t, x) => t + x.q, 0), total = r.reduce((t, x) => t + x.u * x.q, 0);
@@ -2821,7 +2822,7 @@ route();
       const before = new Map(); for (const i of cart.get()) before.set(i.id, (before.get(i.id) || 0) + i.qty);
       orig(v);
       const after = new Map(); for (const i of (v || [])) after.set(i.id, (after.get(i.id) || 0) + i.qty);
-      for (const [id, q] of after) { const d = q - (before.get(id) || 0); if (d > 0) { const p = (typeof P !== "undefined" ? P : []).find((x) => x.id === id); ev("add_to_cart", id, d, p ? Number(unitOf(p, {})) * d || null : null, "product"); } }
+      for (const [id, q] of after) { const d = q - (before.get(id) || 0); if (d > 0) { const p = (typeof P !== "undefined" ? P : []).find((x) => x.id === id); ev("add_to_cart", id, d, p ? Number(unitOf(p, {})) * d || null : null, "product", dtl([...(v || [])].reverse().find((x) => x.id === id))); } }
       later();
     };
   } catch { /* fine */ }

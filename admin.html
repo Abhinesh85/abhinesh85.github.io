@@ -2823,7 +2823,7 @@ function anPaint() {
     <h3 class="an-h">Most held in carts</h3>
     ${table(["Product", "In carts", "Units"], Object.values(held).sort((a, b) => b.carts - a.carts).slice(0, 30).map((r) => `<tr class="clk" data-ddp="${esc(r.id)}"><td>${esc(pname(r.id) === r.id ? r.n : pname(r.id))}</td><td>${r.carts}</td><td>${r.qty}</td></tr>`))}
     <h3 class="an-h">Each cart</h3>
-    ${table(["Updated", "Items", "Total", "Email", "Device", ""], C.map((c) => `<tr class="clk" data-ddc="${esc(c.sid)}"><td>${ago(c.updated_at)} ago</td><td>${(c.items || []).map((i) => `${esc(i.n)} ×${i.q}`).join("<br>")}</td><td>${usd2(c.total)}</td><td>${c.email ? esc(c.email) + (c.contacted ? "<br><small>emailed " + ago(c.contacted) + " ago</small>" : "") : "–"}</td><td>${esc(c.device || "")}</td><td>${c.email ? `<button class="btn line" type="button" data-cdone="${esc(c.sid)}" style="min-height:32px;padding:0 10px;font-size:12px">Mark emailed</button>` : ""}</td></tr>`))}`;
+    ${table(["Updated", "Items", "Total", "Email", "Device", ""], C.map((c) => `<tr class="clk" data-ddc="${esc(c.sid)}"><td>${ago(c.updated_at)} ago</td><td>${(c.items || []).map((i) => `${esc(i.n)} ×${i.q}${i.o ? " <small>(" + esc(i.o) + ")</small>" : ""}${i.t ? " <small>“" + esc(i.t) + "”</small>" : ""}`).join("<br>")}</td><td>${usd2(c.total)}</td><td>${c.email ? esc(c.email) + (c.contacted ? "<br><small>emailed " + ago(c.contacted) + " ago</small>" : "") : "–"}</td><td>${esc(c.device || "")}</td><td>${c.email ? `<button class="btn line" type="button" data-cdone="${esc(c.sid)}" style="min-height:32px;padding:0 10px;font-size:12px">Mark emailed</button>` : ""}</td></tr>`))}`;
   } else if (an.tab === "ord" && an.orders) {
     const O = an.orders, by = (f) => { const m = {}; for (const o of O) { const k = f(o) || "unknown"; m[k] = (m[k] || 0) + 1; } return Object.entries(m).sort((a, b) => b[1] - a[1]).map(([name, n]) => ({ name, n })); };
     const front = O.filter((o) => o.sides === "front").length, both = O.filter((o) => o.sides === "both").length;
@@ -3652,14 +3652,31 @@ async function ovLoad(force) {
 async function ovDayOpen(day) {
   const from = new Date(day + "T00:00:00Z"), to = new Date(from.getTime() + 864e5), label = new Date(day + "T12:00:00Z").toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric", timeZone: "UTC" });
   ddOpen(label, '<p class="hint">Loading…</p>');
-  let vis = [], bad = false; try { const { data, error } = await sb.from("site_visits").select("started_at,country,region,city,ref,medium,seconds,pages,device,browser,os,returning").gte("started_at", from.toISOString()).lt("started_at", to.toISOString()).order("started_at", { ascending: false }).limit(200); if (error) throw error; vis = data || []; } catch { bad = true; }
+  try { await loadNames(); } catch { /* names optional */ }
+  let vis = [], evs = [], carts = [], bad = false;
+  try {
+    const { data, error } = await sb.from("site_visits").select("sid,started_at,last_seen,country,region,city,ref,medium,seconds,pages,device,browser,os,returning").gte("started_at", from.toISOString()).lt("started_at", to.toISOString()).order("started_at", { ascending: false }).limit(200); if (error) throw error; vis = data || [];
+    if (vis.length) {
+      const e = await sb.from("site_events").select("sid,at,kind,product_id,page,qty,detail").gte("at", new Date(from.getTime() - 12e4).toISOString()).lt("at", new Date(to.getTime() + 12e4).toISOString()).order("at").limit(3000); evs = e.data || [];
+      const c = await sb.from("carts_live").select("sid,items,total").in("sid", [...new Set(vis.map((v) => v.sid))]); carts = c.data || [];
+    }
+  } catch { bad = true; }
   const ords = (window.ovPaid || []).filter((o) => o.date === day), rev = ords.reduce((t, o) => t + o.rev, 0);
   const tm = (d) => new Date(d).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+  const nm = (id) => { try { return pname(id); } catch { return id; } };
+  const mine = vis.map((v) => { const lo = new Date(v.started_at).getTime() - 12e4, hi = new Date(v.last_seen).getTime() + 12e4; return evs.filter((x) => x.sid === v.sid && new Date(x.at).getTime() >= lo && new Date(x.at).getTime() <= hi); });
+  const summary = (L) => { const seen = []; for (const x of L) { const t = x.kind === "view" ? (x.page || "home") : (x.kind === "product_view" || x.kind === "design_view") ? nm(x.product_id) : ""; if (t && !seen.includes(t)) seen.push(t); } return seen.length ? esc(seen.slice(0, 3).join(", ")) + (seen.length > 3 ? " +" + (seen.length - 3) : "") : '<span class="hint">–</span>'; };
+  const rows = vis.map((v, i) => {
+    const L = mine[i], cart = carts.find((c) => c.sid === v.sid);
+    const act = L.length ? L.map((x) => `<div style="display:flex;justify-content:space-between;gap:10px;padding:4px 0;border-bottom:1px solid var(--line-soft)"><span>${esc((EVT[x.kind] || (() => x.kind))(x))}${x.qty > 1 ? " ×" + x.qty : ""}</span><small class="hint">${new Date(x.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" })}</small></div>`).join("") : '<p class="hint" style="margin:0">No page or product events were recorded for this visit.</p>';
+    const ct = cart && (cart.items || []).length ? `<p class="hint" style="margin:8px 0 0"><b>Cart now:</b> ${(cart.items || []).map((x) => esc(x.n) + " ×" + x.q + (x.o ? " (" + esc(x.o) + ")" : "") + (x.t ? " “" + esc(x.t) + "”" : "")).join("; ")} · ${usd2(cart.total)}</p>` : "";
+    return `<tr class="clk" data-dayrow="${i}"><td>${tm(v.started_at)}</td><td>${flagOf(v.country)} ${esc(placeTxt(v))}${v.returning ? ' <small class="hint">(back)</small>' : ""}</td><td>${esc(v.ref || (v.medium ? "utm: " + v.medium : "Direct"))}</td><td>${esc([v.device, v.browser, v.os].filter(Boolean).join(" · "))}</td><td>${summary(L)}</td><td>${durTxt(v.seconds)}</td><td>${v.pages}</td></tr><tr hidden data-daydet="${i}"><td colspan="7" style="background:var(--card-2,#0000001a)">${act}${ct}</td></tr>`; });
   $("ddBody").innerHTML = `<div class="an-kpis">${kpi("Visits", fmtN(vis.length), bad ? "could not load" : "")}${kpi("Orders", ords.length)}${kpi("Sales", usd2(rev))}</div>
-    <h4 style="margin:12px 0 6px">Visits</h4>
-    ${table(["Time", "Place", "Came from", "Device", "Stayed", "Pages"], vis.map((v) => `<tr><td>${tm(v.started_at)}</td><td>${flagOf(v.country)} ${esc(placeTxt(v))}${v.returning ? ' <small class="hint">(back)</small>' : ""}</td><td>${esc(v.ref || (v.medium ? "utm: " + v.medium : "Direct"))}</td><td>${esc([v.device, v.browser, v.os].filter(Boolean).join(" · "))}</td><td>${durTxt(v.seconds)}</td><td>${v.pages}</td></tr>`))}
+    <h4 style="margin:12px 0 6px">Visits <small class="hint" style="font-weight:400">· tap a row to see every page, product and selection</small></h4>
+    ${table(["Time", "Place", "Came from", "Device", "Looked at", "Stayed", "Pages"], rows)}
     <h4 style="margin:14px 0 6px">Orders</h4>
     ${ords.length ? ords.map((o) => `<div class="hc-r" style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line-soft)"><span>${o.no ? "#" + esc(String(o.no)) + " " : ""}${esc(o.buyer || "")}</span><b>${usd2(o.rev)}</b></div>`).join("") : '<p class="hint">No paid orders this day.</p>'}`;
+  $("ddBody").onclick = (e) => { const r = e.target.closest("[data-dayrow]"); if (!r) return; const d = $("ddBody").querySelector(`[data-daydet="${r.dataset.dayrow}"]`); if (d) d.hidden = !d.hidden; };
 }
 $("ovBody").addEventListener("keydown", (e) => { const b = (e.key === "Enter" || e.key === " ") && e.target.closest("[data-day]"); if (b) { e.preventDefault(); ovDayOpen(b.dataset.day); } });
 $("ovBody").addEventListener("click", (e) => {
@@ -3698,11 +3715,11 @@ function whoPaint() {
   $("anBody").insertAdjacentHTML("beforeend", h);
 }
 { const prev = anPaint; anPaint = function () { prev(); if (an.tab === "who") whoPaint(); }; }
-const EVT = { view: (e) => "Looked at the " + (e.page || "home") + " page", product_view: (e) => "Viewed " + pname(e.product_id), design_view: (e) => "Viewed design " + pname(e.product_id), add_to_cart: (e) => "Added " + pname(e.product_id) + " to the cart", remove_from_cart: (e) => "Removed " + pname(e.product_id) + " from the cart", checkout_start: () => "Started checkout", purchase: () => "Placed an order", design_submit: () => "Sent a design request" };
+const EVT = { view: (e) => "Looked at the " + (e.page || "home") + " page", product_view: (e) => "Viewed " + pname(e.product_id), design_view: (e) => "Viewed design " + pname(e.product_id), add_to_cart: (e) => "Added " + pname(e.product_id) + " to the cart" + (e.detail ? " — " + e.detail : ""), remove_from_cart: (e) => "Removed " + pname(e.product_id) + " from the cart", checkout_start: () => "Started checkout", purchase: () => "Placed an order", design_submit: () => "Sent a design request" };
 async function whyOpen(i) {
   const v = (an.who?.recent || [])[i]; if (!v) return;
   ddOpen("Visit · " + new Date(v.started_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }), '<p class="hint">Loading…</p>');
-  let ev = []; try { const { data } = await sb.from("site_events").select("at,kind,product_id,page,qty").eq("sid", v.sid).gte("at", new Date(new Date(v.started_at).getTime() - 120000).toISOString()).lte("at", new Date(new Date(v.last_seen).getTime() + 120000).toISOString()).order("at").limit(200); ev = data || []; } catch { /* none */ }
+  let ev = []; try { const { data } = await sb.from("site_events").select("at,kind,product_id,page,qty,detail").eq("sid", v.sid).gte("at", new Date(new Date(v.started_at).getTime() - 120000).toISOString()).lte("at", new Date(new Date(v.last_seen).getTime() + 120000).toISOString()).order("at").limit(200); ev = data || []; } catch { /* none */ }
   const same = (an.who.recent || []).filter((x) => x.sid === v.sid).length;
   $("ddBody").innerHTML = `<div class="an-kpis">${kpi("Place", flagOf(v.country) + " " + esc(placeTxt(v)), v.zip ? "ZIP area " + esc(v.zip) : "")}${kpi("Time on site", durTxt(v.seconds))}${kpi("Pages", v.pages)}</div>
     <p class="hint" style="margin:10px 0">Came from <b>${esc(v.ref || "a direct visit or an app that hides it")}</b>${v.medium ? " · " + esc(v.medium) : ""}${v.campaign ? " · campaign " + esc(v.campaign) : ""} · first page <b>${esc(v.landing || "home")}</b> · ${esc([v.device, v.browser, v.os, v.screen && v.screen + " px wide"].filter(Boolean).join(", ") || "unknown device")}${same > 1 ? ` · this person visited ${same} times in this list` : v.returning ? " · has been here before" : " · first visit"}.</p>
