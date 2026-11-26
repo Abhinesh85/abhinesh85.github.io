@@ -3669,10 +3669,14 @@ function whoPaint() {
       ${mini("Cities", (W.cities || []).map((x) => ({ name: x.name + (x.region ? ", " + x.region : ""), n: x.n })))}
       ${mini("ZIP codes", (W.zips || []).map((x) => ({ name: x.name + (x.city ? " · " + x.city : ""), n: x.n })))}
       ${mini("Where they came from", (W.sources || []).map((x) => ({ name: x.name, n: x.n })))}
-      ${mini("First page they saw", (W.landings || []).map((x) => ({ name: x.name, n: x.n })))}</div>
+      ${mini("First page they saw", (W.landings || []).map((x) => ({ name: x.name, n: x.n })))}
+      ${mini("Device type", (W.devices || []).map((x) => ({ name: x.name, n: x.n })))}
+      ${mini("Browser", (W.browsers || []).map((x) => ({ name: x.name, n: x.n })))}
+      ${mini("Operating system", (W.systems || []).map((x) => ({ name: x.name, n: x.n })))}
+      ${mini("Window width (px)", (W.screens || []).map((x) => ({ name: x.name, n: x.n })))}</div>
     <p class="hint">Place comes from the visitor's internet connection, so the city and ZIP are the internet provider's area and often not the street. People who decline tracking, send "Do Not Track", or have not accepted yet in the EU are not counted. Your own signed-in browser is skipped.${T.visits && noGeo === rows.length ? " <b>No places yet: the location step is not switched on.</b>" : ""}</p>
     <h3 class="an-h">Recent visits <small style="text-transform:none;letter-spacing:0;color:var(--muted)">· tap a row to see what they looked at</small></h3>
-    ${table(["When", "Place", "Came from", "Time", "Pages", "Device"], rows.map((v, i) => `<tr class="clk" data-visit="${i}"><td>${new Date(v.started_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</td><td>${flagOf(v.country)} ${esc(placeTxt(v))}${v.zip ? " · " + esc(v.zip) : ""}${v.returning ? ' <small class="hint">(back)</small>' : ""}</td><td>${esc(v.ref || (v.medium ? "utm: " + v.medium : "Direct"))}</td><td>${durTxt(v.seconds)}</td><td>${v.pages}</td><td>${esc(v.device || "")}</td></tr>`))}`;
+    ${table(["When", "Place", "Came from", "Time", "Pages", "Device"], rows.map((v, i) => `<tr class="clk" data-visit="${i}"><td>${new Date(v.started_at).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}</td><td>${flagOf(v.country)} ${esc(placeTxt(v))}${v.zip ? " · " + esc(v.zip) : ""}${v.returning ? ' <small class="hint">(back)</small>' : ""}</td><td>${esc(v.ref || (v.medium ? "utm: " + v.medium : "Direct"))}</td><td>${durTxt(v.seconds)}</td><td>${v.pages}</td><td>${esc([v.device, v.browser, v.os].filter(Boolean).join(" · "))}</td></tr>`))}`;
   $("anBody").insertAdjacentHTML("beforeend", h);
 }
 { const prev = anPaint; anPaint = function () { prev(); if (an.tab === "who") whoPaint(); }; }
@@ -3683,7 +3687,7 @@ async function whyOpen(i) {
   let ev = []; try { const { data } = await sb.from("site_events").select("at,kind,product_id,page,qty").eq("sid", v.sid).gte("at", new Date(new Date(v.started_at).getTime() - 120000).toISOString()).lte("at", new Date(new Date(v.last_seen).getTime() + 120000).toISOString()).order("at").limit(200); ev = data || []; } catch { /* none */ }
   const same = (an.who.recent || []).filter((x) => x.sid === v.sid).length;
   $("ddBody").innerHTML = `<div class="an-kpis">${kpi("Place", flagOf(v.country) + " " + esc(placeTxt(v)), v.zip ? "ZIP area " + esc(v.zip) : "")}${kpi("Time on site", durTxt(v.seconds))}${kpi("Pages", v.pages)}</div>
-    <p class="hint" style="margin:10px 0">Came from <b>${esc(v.ref || "a direct visit or an app that hides it")}</b>${v.medium ? " · " + esc(v.medium) : ""}${v.campaign ? " · campaign " + esc(v.campaign) : ""} · first page <b>${esc(v.landing || "home")}</b> · ${esc(v.device || "unknown device")}${same > 1 ? ` · this person visited ${same} times in this list` : v.returning ? " · has been here before" : " · first visit"}.</p>
+    <p class="hint" style="margin:10px 0">Came from <b>${esc(v.ref || "a direct visit or an app that hides it")}</b>${v.medium ? " · " + esc(v.medium) : ""}${v.campaign ? " · campaign " + esc(v.campaign) : ""} · first page <b>${esc(v.landing || "home")}</b> · ${esc([v.device, v.browser, v.os, v.screen && v.screen + " px wide"].filter(Boolean).join(", ") || "unknown device")}${same > 1 ? ` · this person visited ${same} times in this list` : v.returning ? " · has been here before" : " · first visit"}.</p>
     <h4 style="margin:12px 0 6px">What they did</h4>
     ${ev.length ? `<div class="feedlist">${ev.map((e) => `<div class="hc-r" style="display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px solid var(--line-soft)"><span>${esc((EVT[e.kind] || (() => e.kind))(e))}</span><small class="hint">${new Date(e.at).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", second: "2-digit" })}</small></div>`).join("")}</div>` : '<p class="hint">No page or product events were recorded for this visit.</p>'}
     <div style="margin-top:14px"><button class="btn danger" type="button" id="whyDel">Delete this visit</button> <span class="hint" id="whyMsg" role="status"></span></div>`;

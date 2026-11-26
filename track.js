@@ -57,6 +57,11 @@
   var pagesN = 0, activeMs = 0;
   var tz = ""; try { tz = Intl.DateTimeFormat().resolvedOptions().timeZone || ""; } catch (e) {}
   var dev = innerWidth < 640 ? "phone" : innerWidth < 1024 ? "tablet" : "desktop";
+  // coarse labels only: browser family, operating system and window-width band. The raw user-agent text is never sent or stored.
+  var ua = navigator.userAgent || "";
+  var brw = /FBAN|FBAV|FB_IAB/.test(ua) ? "Facebook app" : /Instagram/.test(ua) ? "Instagram app" : /musical_ly|TikTok|Bytedance/i.test(ua) ? "TikTok app" : /Pinterest/.test(ua) ? "Pinterest app" : /Snapchat/.test(ua) ? "Snapchat app" : /EdgA?\/|EdgiOS\//.test(ua) ? "Edge" : /OPR\/|Opera/.test(ua) ? "Opera" : /SamsungBrowser/.test(ua) ? "Samsung Internet" : /Firefox\/|FxiOS\//.test(ua) ? "Firefox" : /CriOS\/|Chrome\//.test(ua) ? "Chrome" : /Safari\//.test(ua) ? "Safari" : "Other";
+  var osn = /Android/.test(ua) ? "Android" : /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && navigator.maxTouchPoints > 1) ? "iOS" : /Windows/.test(ua) ? "Windows" : /CrOS/.test(ua) ? "ChromeOS" : /Mac OS X/.test(ua) ? "macOS" : /Linux/.test(ua) ? "Linux" : "Other";
+  var scr = innerWidth < 400 ? "under 400" : innerWidth < 640 ? "400-639" : innerWidth < 1024 ? "640-1023" : innerWidth < 1440 ? "1024-1439" : "1440+";
   var qs = new URLSearchParams(location.search), medium = (qs.get("utm_medium") || "").slice(0, 40), campaign = (qs.get("utm_campaign") || "").slice(0, 60);
   var returning = false; try { returning = localStorage.getItem("prajo:seen") === "1"; } catch (e) {}
   var rpc = function (fn, body) { try { fetch(DB.url + "/rest/v1/rpc/" + fn, { method: "POST", keepalive: true, headers: { "Content-Type": "application/json", apikey: DB.key, Authorization: "Bearer " + DB.key }, body: JSON.stringify(body) }).catch(function () {}); } catch (e) {} };
@@ -69,7 +74,7 @@
   function tick() { var n = Date.now(); if (document.visibilityState === "visible") activeMs += Math.min(n - lastTick, 6000); lastTick = n; S("prajo:vms", String(Math.round(activeMs))); }
   function send(force) {
     if (!ok() || !sid || !vid) return; var secs = Math.round(activeMs / 1000), key = secs + ":" + pagesN + ":" + (geo ? 1 : 0); if (!force && key === sentKey) return; sentKey = key; var g = geo || {};
-    rpc("track_visit", { p_vid: vid, p_sid: sid, p_seconds: secs, p_pages: pagesN, p_country: g.c || null, p_region: g.r || null, p_city: g.city || null, p_zip: g.z || null, p_ref: ref || null, p_landing: landing || null, p_medium: medium || null, p_campaign: campaign || null, p_device: dev, p_tz: tz, p_returning: returning });
+    rpc("track_visit", { p_vid: vid, p_sid: sid, p_seconds: secs, p_pages: pagesN, p_country: g.c || null, p_region: g.r || null, p_city: g.city || null, p_zip: g.z || null, p_ref: ref || null, p_landing: landing || null, p_medium: medium || null, p_campaign: campaign || null, p_device: dev, p_tz: tz, p_returning: returning, p_browser: brw, p_os: osn, p_screen: scr });
   }
   function page(name) {
     if (!ok() || !started) return; pagesN++; S("prajo:vpg", String(pagesN));
