@@ -36,8 +36,9 @@ header.top .wrap { display: flex; align-items: center; gap: 12px; min-height: 60
 @keyframes med-turn { to { transform: rotate(360deg); } }
 @media (prefers-reduced-motion: reduce) { .brand .med img.o { animation: none; } }
 .brand b { display: block; line-height: 0; }
-.brand b img.wm { max-width: none; width: auto; height: 22px; border-radius: 0; }
-.brand small { display: block; font-size: 11px; color: var(--gold); letter-spacing: .14em; text-transform: uppercase; }
+.brand b img.wm { max-width: none; width: auto; height: 38px; border-radius: 0; }
+.brand span { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; }
+.brand small { display: block; font-size: 9px; font-weight: 600; color: #e6cd96; letter-spacing: .1em; text-transform: uppercase; margin-top: 5px; padding-left: 2px; white-space: nowrap; }
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid transparent; font-weight: 800; font-size: 14.5px; cursor: pointer; text-decoration: none; background: none; }
 .btn:focus-visible, .chips button:focus-visible, .lrow:focus-visible, canvas:focus-visible, .in:focus-visible { outline: 2px solid var(--gold-2); outline-offset: 2px; }
 .btn[disabled] { opacity: .5; cursor: not-allowed; }
@@ -136,7 +137,7 @@ input[type=color] { width: 100%; height: 44px; border-radius: 12px; border: 1px 
 <body>
 <header class="top">
   <div class="wrap">
-    <a class="brand" href="./"><span class="med" style="--s:38px"><img class="o" src="medallion-outer.webp" alt="" width="38" height="38"><img src="medallion-inner.webp" alt="" width="38" height="38"></span><span><b><img class="wm" src="prajo-wordmark.png" alt="PrAjo" width="54" height="24"></b><small>Custom Studio</small></span></a>
+    <a class="brand" href="./"><span class="med" style="--s:38px"><img class="o" src="medallion-outer.webp" alt="" width="38" height="38"><img src="medallion-inner.webp" alt="" width="38" height="38"></span><span><b><img class="wm" src="prajo-wordmark.png" alt="PrAjo" width="86" height="38"></b><small>Custom Studio</small></span></a>
     <button class="btn line small" type="button" id="savedBtn">My designs <span id="savedN"></span></button>
     <a class="btn line small" href="./">← Back to shop</a>
   </div>

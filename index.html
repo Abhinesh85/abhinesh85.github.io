@@ -94,16 +94,15 @@ nav.links { display: flex; gap: 28px; font-size: 14.5px; font-weight: 600; }
 nav.links a { text-decoration: none; color: var(--muted); transition: color .2s; }
 nav.links a:hover { color: var(--cream); }
 .top .btn { min-height: 42px; padding: 0 18px; font-size: 14px; }
-@media (max-width: 980px) { nav.links { display: none; } }
+@media (max-width: 1040px) { nav.links { display: none; } }
 nav.links a { white-space: nowrap; }
 .top .btn, .brand small { white-space: nowrap; }
-@media (min-width: 981px) and (max-width: 1100px) { .brand small { display: none; } }
+@media (min-width: 1041px) and (max-width: 1100px) { nav.links { gap: 10px; } nav.links a { font-size: 13px; } }
 @media (max-width: 1100px) { nav.links { gap: 20px; } }
-@media (max-width: 520px) { .top .brand small { display: none; } }
 
 /* hero */
 .hero { position: relative; overflow: hidden; padding: clamp(36px, 7vw, 90px) 0 clamp(40px, 6vw, 80px); }
-.hero::before { content: ""; position: absolute; inset: -20% -10% auto; height: 120%; background: radial-gradient(60% 50% at 75% 40%, rgba(242, 138, 36, .16), transparent 70%), radial-gradient(50% 45% at 15% 20%, rgba(217, 171, 79, .12), transparent 70%); pointer-events: none; }
+.hero::before { content: ""; position: absolute; inset: -20% -10% auto; height: 120%; background: radial-gradient(60% 50% at 75% 40%, rgba(48, 104, 136, .22), transparent 70%), radial-gradient(50% 45% at 15% 20%, rgba(217, 171, 79, .07), transparent 70%); pointer-events: none; }
 .hero .wrap { position: relative; display: grid; grid-template-columns: 1.05fr .95fr; align-items: center; gap: clamp(28px, 5vw, 64px); }
 @media (max-width: 900px) { .hero .wrap { grid-template-columns: 1fr; } }
 .hero h1 { font-size: clamp(44px, 8.4vw, 92px); line-height: .98; margin: 18px 0 20px; }
@@ -129,7 +128,7 @@ footer .social a, footer a[data-link] { color: var(--gold-2); }
 .teaser { display: grid; justify-items: center; gap: 18px; position: relative; }
 .teaser::before { content: ""; position: absolute; inset: -6% -10%; background: radial-gradient(ellipse 55% 50% at 50% 48%, rgba(217, 171, 79, .22), transparent 70%); pointer-events: none; }
 .tcards { position: relative; width: min(520px, 92vw); aspect-ratio: 10 / 9; }
-.tcard { position: absolute; bottom: 0; display: block; border-radius: 22px; overflow: hidden; background: #161211; box-shadow: 0 34px 60px -22px rgba(0, 0, 0, .75), 0 0 0 1px rgba(255, 255, 255, .08); transition: transform .45s cubic-bezier(.2, .8, .2, 1), box-shadow .45s; animation: bob 7s ease-in-out infinite; }
+.tcard { position: absolute; bottom: 0; display: block; border-radius: 22px; overflow: hidden; background: #0d1828; box-shadow: 0 34px 60px -22px rgba(0, 0, 0, .75), 0 0 0 1px rgba(255, 255, 255, .08); transition: transform .45s cubic-bezier(.2, .8, .2, 1), box-shadow .45s; animation: bob 7s ease-in-out infinite; }
 .tcard img { display: block; width: 100%; height: auto; }
 .t-a { left: 1%; width: 35%; rotate: -5deg; translate: 0 12px; animation-delay: -2s; }
 .t-b { left: 31.5%; width: 38%; z-index: 2; animation-delay: 0s; }
@@ -518,7 +517,7 @@ nav.links a { padding: 12px 4px; }
 .navsheet nav a { display: flex; align-items: center; min-height: 52px; padding: 0 6px; font-size: 19px; font-weight: 700; color: var(--cream); text-decoration: none; border-bottom: 1px solid rgba(245, 236, 220, .08); }
 .navsheet nav a.gold { color: var(--gold-2, #e8c872); }
 .navsheet .nav-x { justify-self: end; width: 44px; height: 44px; border-radius: 50%; border: 1px solid rgba(245, 236, 220, .22); background: transparent; color: var(--cream); font-size: 24px; cursor: pointer; margin-bottom: 8px; }
-@media (max-width: 980px) { .nav-btn { display: inline-grid; } .top .btn.btn-gold { display: none; } .top-actions { display: flex; gap: 8px; align-items: center; } }
+@media (max-width: 1040px) { .nav-btn { display: inline-grid; } .top .btn.btn-gold { display: none; } .top-actions { display: flex; gap: 8px; align-items: center; } }
 
 /* ---- upgrade: shop controls ---- */
 .shopbar { display: flex; flex-wrap: wrap; gap: 10px 12px; align-items: center; margin: 0 0 18px; }
@@ -776,6 +775,17 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
 .gal-cap b { font-family: var(--f-display); font-size: clamp(22px, 3vw, 30px); }
 .gal-cap small { color: var(--muted); font-size: 14px; }
 @media (max-width: 600px) { .gal-nav { width: 42px; height: 42px; } .gal { height: 290px; perspective: 1000px; } }
+
+/* tidy-up: even tiles, lighter phone first screen */
+.make-grid img { aspect-ratio: 1 / 1; object-position: center 46%; }
+@media (max-width: 600px) {
+  .trust ul { display: flex !important; overflow-x: auto; gap: 8px; padding-bottom: 4px; scroll-snap-type: x proximity; scrollbar-width: none; }
+  .trust ul::-webkit-scrollbar { display: none; }
+  .trust li { flex: none; padding: 8px 14px; border-radius: 999px; scroll-snap-align: start; }
+  .trust li span { display: none !important; }
+  .trust b { white-space: nowrap; font-size: 13px; }
+  .deadline { padding: 7px 12px; font-size: 13px; }
+}
 </style>
 <script src="/track.js?v=1"></script>
 </head>
@@ -845,7 +855,7 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
         </div>
         <div class="proof">
           <span><span class="stars" role="img" aria-label="5 out of 5 stars"></span> <span data-s="proof1"><b>5.0</b> on Etsy</span></span>
-          <span data-s="proof2"><b>Local pickup</b> in Sacramento</span>
+          <span data-s="proof2"><b>Local delivery</b> in Sacramento</span>
           <span data-s="proof3"><b>Personalized</b> just for you</span>
         </div>
       </div>
@@ -866,7 +876,7 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
     <div class="live" id="live" hidden role="status"><i></i><span id="liveTxt"></span></div>
     <ul class="wrap">
       <li><b>Made in Sacramento</b><span>Printed and engraved in our own studio</span></li>
-      <li><b id="trustShip">Ships in about 3 days</b><span>Plus delivery time. Local pickup is free</span></li>
+      <li><b id="trustShip">Ships in about 3 days</b><span>Plus delivery time. Local delivery in Sacramento</span></li>
       <li><b>Secure checkout</b><span>Card, Apple Pay, Google Pay or bank transfer</span></li>
       <li><b>We fix our mistakes</b><span>Wrong print? We remake it</span></li>
     </ul>
@@ -878,9 +888,9 @@ html.still .rv { opacity: 1 !important; transform: none !important; }
       <h2 id="makeT">Make your own</h2>
       <ul class="make-grid">
         <li><a href="tumbler.html"><img src="https://mrnnrmyvjkyjcjnfomna.supabase.co/storage/v1/object/public/design-art/showcase/slot-0.jpg" alt="" width="320" height="240" loading="lazy" data-stg><span class="t">Tumbler or mug</span><small>Pick a design, add a name</small></a></li>
-        <li><a href="keepsakes/"><img src="kp-maps.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Keychain or charm</span><small>Maps, states, flowers, names</small></a></li>
+        <li><a href="keepsakes/"><img src="kp-maps.jpg?v=2" alt="" width="320" height="240" loading="lazy"><span class="t">Keychain or charm</span><small>Maps, states, flowers, names</small></a></li>
         <li id="makeTiles" hidden><a href="design.html"><img src="listing/custom-photo-keychain-card.jpg" alt="" width="320" height="240" loading="lazy"><span class="t">Name tiles</span><small>Type a name, see it live</small></a></li>
-        <li><a href="#custom" data-bulk><img src="listing/tile-something-else-card.jpg?v=2" alt="" width="320" height="240" loading="lazy"><span class="t">Something else</span><small>Photos, logos, bulk, teams</small></a></li>
+        <li><a href="#custom" data-bulk><img src="listing/tile-something-else-card.jpg?v=3" alt="" width="320" height="240" loading="lazy"><span class="t">Something else</span><small>Photos, logos, bulk, teams</small></a></li>
       </ul>
     </div>
   </section>
@@ -1263,8 +1273,8 @@ async function stageTumblerImg(im) {
     if (!im.naturalWidth || Math.abs(im.naturalWidth / im.naturalHeight - 496 / 1086) > 0.012) return done();   // not a studio-tumbler picture
     const a = new Image(); a.crossOrigin = "anonymous"; a.src = src + (src.includes("?") ? "&" : "?") + "cors=1"; await a.decode();
     const W = a.naturalWidth, H = a.naturalHeight, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const c = cv.getContext("2d");
-    c.fillStyle = "#161211"; c.fillRect(0, 0, W, H);
-    const g = c.createRadialGradient(W * .08, 0, 0, W * .08, 0, W * 1.05); g.addColorStop(0, "rgba(150,98,58,.5)"); g.addColorStop(.5, "rgba(150,98,58,.14)"); g.addColorStop(1, "rgba(150,98,58,0)"); c.fillStyle = g; c.fillRect(0, 0, W, H);
+    c.fillStyle = "#0d1828"; c.fillRect(0, 0, W, H);
+    const g = c.createRadialGradient(W * .08, 0, 0, W * .08, 0, W * 1.05); g.addColorStop(0, "rgba(48,104,136,.55)"); g.addColorStop(.5, "rgba(48,104,136,.16)"); g.addColorStop(1, "rgba(48,104,136,0)"); c.fillStyle = g; c.fillRect(0, 0, W, H);
     const v = c.createRadialGradient(W / 2, H / 2, W * .3, W / 2, H / 2, H * .75); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.3)"); c.fillStyle = v; c.fillRect(0, 0, W, H);
     const t = document.createElement("canvas"); t.width = W; t.height = H; const tc = t.getContext("2d"); tc.drawImage(a, 0, 0, W, H); tc.globalCompositeOperation = "destination-in"; tc.drawImage(STAGE_MASK, 0, 0, W, H);
     c.save(); c.shadowColor = "rgba(0,0,0,.78)"; c.shadowBlur = Math.max(6, W * .03); c.shadowOffsetX = W * 3; c.fillStyle = "#000"; c.beginPath(); c.ellipse(W / 2 - W * 3, H * .955, W * .31, H * .012, 0, 0, Math.PI * 2); c.fill(); c.restore();   // soft shadow via shadowBlur (ctx.filter is not in Safari)

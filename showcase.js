@@ -45,8 +45,8 @@ async function stagedUrl(cv, photo) {
   const bw = mk.w * W, bh = (mk.bottom - mk.top) * H, s = Math.min(.8 * fw / bw, .66 * fh / bh, 1.7), pw = W * s, ph = H * s, bcx = mk.cx * W * s, btop = mk.top * H * s, bh2 = bh * s;
   const px = fw / 2 - bcx, py = fh * .52 - bh2 / 2 - btop;   // product centred, like the shop photos
   const o = document.createElement("canvas"); o.width = Math.round(fw); o.height = Math.round(fh); const c = o.getContext("2d");
-  c.fillStyle = "#161211"; c.fillRect(0, 0, o.width, o.height);
-  const g = c.createRadialGradient(o.width * .08, 0, 0, o.width * .08, 0, o.width * 1.05); g.addColorStop(0, "rgba(150,98,58,.5)"); g.addColorStop(.5, "rgba(150,98,58,.14)"); g.addColorStop(1, "rgba(150,98,58,0)"); c.fillStyle = g; c.fillRect(0, 0, o.width, o.height);
+  c.fillStyle = "#0d1828"; c.fillRect(0, 0, o.width, o.height);
+  const g = c.createRadialGradient(o.width * .08, 0, 0, o.width * .08, 0, o.width * 1.05); g.addColorStop(0, "rgba(48,104,136,.55)"); g.addColorStop(.5, "rgba(48,104,136,.16)"); g.addColorStop(1, "rgba(48,104,136,0)"); c.fillStyle = g; c.fillRect(0, 0, o.width, o.height);
   const v = c.createRadialGradient(o.width / 2, o.height / 2, o.width * .3, o.width / 2, o.height / 2, o.height * .75); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.3)"); c.fillStyle = v; c.fillRect(0, 0, o.width, o.height);
   const t = document.createElement("canvas"); t.width = W; t.height = H; const tc = t.getContext("2d"); tc.drawImage(cv, 0, 0); tc.globalCompositeOperation = "destination-in"; tc.drawImage(mk.m, 0, 0, W, H);
   c.save(); c.shadowColor = "rgba(0,0,0,.75)"; c.shadowBlur = Math.max(6, o.width * .03); c.shadowOffsetX = o.width * 3; c.fillStyle = "#000"; c.beginPath(); c.ellipse(px + mk.cx * W * s - o.width * 3, py + mk.bottom * H * s + o.height * .012, bw * s * .4, Math.max(3, o.height * .012), 0, 0, Math.PI * 2); c.fill(); c.restore();   // soft shadow via shadowBlur (ctx.filter is not in Safari)

@@ -34,7 +34,7 @@
     { id: "cthanks", label: "Thanksgiving (Canada)", win: (y) => { const d = nth(y, 10, 1, 2); return [add(d, -6), d]; }, p: ["leaf|#d9792b", "leaf|#c2552b", "leaf|#e0a43a", "leaf|#e8584a"] },
     { id: "diwali", label: "Diwali", win: around(DIWALI, 7, 2), p: ["sparkle|#f3b84a", "sparkle|#f3d48a", "petal|#f0a040", "sparkle|#ffffff"] },
     { id: "remembrance", label: "Veterans / Remembrance Day", win: (y) => [D(y, 11, 4), D(y, 11, 11)], p: ["petal|#d9453a", "petal|#c2362e", "snow"] },
-    { id: "thanks", label: "Thanksgiving (US)", win: (y) => { const d = nth(y, 11, 4, 4); return [add(d, -9), d]; }, p: ["leaf|#d9792b", "leaf|#c2552b", "leaf|#e0a43a", "leaf|#b8442b"] },
+    { id: "thanks", label: "Thanksgiving (US)", win: (y) => { const d = nth(y, 11, 4, 4); return [add(d, -9), d]; }, p: ["leaf|#e0a43a", "leaf|#f3d48a", "leaf|#d9a441", "leaf|#c98a2b"] },
   ];
   window.PRAJO_SEASONS = T.map((t) => ({ id: t.id, label: t.label }));
 
@@ -94,7 +94,7 @@
     const size = kind === "snow" ? 3 + Math.random() * 5 : kind === "ghost" ? 26 + Math.random() * 16 : kind === "hat" ? 16 + Math.random() * 6 : 9 + Math.random() * 9;
     return { k: kind, spr: sprite(spec, Math.round(size), dpr), size, x: Math.random() * W, y: first ? Math.random() * H : up ? H + size * 2 : -size * 2,
       vy: up ? -(10 + Math.random() * 14) : 14 + Math.random() * 22, amp: 8 + Math.random() * 16, fr: .3 + Math.random() * .6, ph: Math.random() * TAU, rot: Math.random() * TAU,
-      vr: kind === "snow" || up ? 0 : (Math.random() - .5) * .8, a: kind === "ghost" ? .38 + Math.random() * .12 : kind === "snow" ? .3 + Math.random() * .35 : .45 + Math.random() * .25 };
+      vr: kind === "snow" || up ? 0 : (Math.random() - .5) * .8, a: kind === "ghost" ? .38 + Math.random() * .12 : kind === "snow" ? .3 + Math.random() * .35 : .28 + Math.random() * .22 };
   }
   function size() { dpr = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cvs.width = W * dpr; cvs.height = H * dpr; cvs.style.width = W + "px"; cvs.style.height = H + "px"; }
   function frame(t) {
@@ -113,7 +113,7 @@
     if (still()) return;
     cvs = document.createElement("canvas"); cvs.setAttribute("aria-hidden", "true"); cvs.id = "seasonFx";
     cvs.style.cssText = "position:fixed;left:0;top:0;pointer-events:none;z-index:30"; document.body.appendChild(cvs); ctx = cvs.getContext("2d"); size();
-    const n = W < 700 ? 8 : 14; parts = Array.from({ length: n }, () => make(true)); last = 0; raf = requestAnimationFrame(frame);
+    const n = W < 700 ? 5 : 9; parts = Array.from({ length: n }, () => make(true)); last = 0; raf = requestAnimationFrame(frame);
   }
   document.addEventListener("visibilitychange", () => { if (!cvs) return; if (document.hidden) { cancelAnimationFrame(raf); raf = 0; } else if (!raf) { last = 0; raf = requestAnimationFrame(frame); } });
   addEventListener("resize", () => { if (cvs) { size(); parts.forEach((p) => { if (p.x > W) p.x = Math.random() * W; }); } });
