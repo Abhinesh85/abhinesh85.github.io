@@ -1272,13 +1272,13 @@ async function stageTumblerImg(im) {
     if (!(await stageMaskReady)) return done();
     if (!im.naturalWidth || Math.abs(im.naturalWidth / im.naturalHeight - 496 / 1086) > 0.012) return done();   // not a studio-tumbler picture
     const a = new Image(); a.crossOrigin = "anonymous"; a.src = src + (src.includes("?") ? "&" : "?") + "cors=1"; await a.decode();
-    const W = a.naturalWidth, H = a.naturalHeight, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const c = cv.getContext("2d");
+    const W0 = a.naturalWidth, H = a.naturalHeight, sq = !!im.closest(".make-grid"), W = sq ? H : W0, ox = (W - W0) / 2, cv = document.createElement("canvas"); cv.width = W; cv.height = H; const c = cv.getContext("2d");
     c.fillStyle = "#0d1828"; c.fillRect(0, 0, W, H);
     const g = c.createRadialGradient(W * .08, 0, 0, W * .08, 0, W * 1.05); g.addColorStop(0, "rgba(48,104,136,.55)"); g.addColorStop(.5, "rgba(48,104,136,.16)"); g.addColorStop(1, "rgba(48,104,136,0)"); c.fillStyle = g; c.fillRect(0, 0, W, H);
     const v = c.createRadialGradient(W / 2, H / 2, W * .3, W / 2, H / 2, H * .75); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.3)"); c.fillStyle = v; c.fillRect(0, 0, W, H);
-    const t = document.createElement("canvas"); t.width = W; t.height = H; const tc = t.getContext("2d"); tc.drawImage(a, 0, 0, W, H); tc.globalCompositeOperation = "destination-in"; tc.drawImage(STAGE_MASK, 0, 0, W, H);
-    c.save(); c.shadowColor = "rgba(0,0,0,.78)"; c.shadowBlur = Math.max(6, W * .03); c.shadowOffsetX = W * 3; c.fillStyle = "#000"; c.beginPath(); c.ellipse(W / 2 - W * 3, H * .955, W * .31, H * .012, 0, 0, Math.PI * 2); c.fill(); c.restore();   // soft shadow via shadowBlur (ctx.filter is not in Safari)
-    c.drawImage(t, 0, 0);
+    const t = document.createElement("canvas"); t.width = W0; t.height = H; const tc = t.getContext("2d"); tc.drawImage(a, 0, 0, W0, H); tc.globalCompositeOperation = "destination-in"; tc.drawImage(STAGE_MASK, 0, 0, W0, H);
+    c.save(); c.shadowColor = "rgba(0,0,0,.78)"; c.shadowBlur = Math.max(6, W * .03); c.shadowOffsetX = W * 3; c.fillStyle = "#000"; c.beginPath(); c.ellipse(W / 2 - W * 3, H * .955, W0 * .31, H * .012, 0, 0, Math.PI * 2); c.fill(); c.restore();   // soft shadow via shadowBlur (ctx.filter is not in Safari)
+    c.drawImage(t, ox, 0);
     const blob = await new Promise((ok) => cv.toBlob(ok, "image/jpeg", .92)); if (!blob) return done();
     im.src = URL.createObjectURL(blob); done();
   } catch { done(); }

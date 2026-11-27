@@ -34,7 +34,7 @@
     { id: "cthanks", label: "Thanksgiving (Canada)", win: (y) => { const d = nth(y, 10, 1, 2); return [add(d, -6), d]; }, p: ["leaf|#d9792b", "leaf|#c2552b", "leaf|#e0a43a", "leaf|#e8584a"] },
     { id: "diwali", label: "Diwali", win: around(DIWALI, 7, 2), p: ["sparkle|#f3b84a", "sparkle|#f3d48a", "petal|#f0a040", "sparkle|#ffffff"] },
     { id: "remembrance", label: "Veterans / Remembrance Day", win: (y) => [D(y, 11, 4), D(y, 11, 11)], p: ["petal|#d9453a", "petal|#c2362e", "snow"] },
-    { id: "thanks", label: "Thanksgiving (US)", win: (y) => { const d = nth(y, 11, 4, 4); return [add(d, -9), d]; }, p: ["leaf|#e0a43a", "leaf|#f3d48a", "leaf|#d9a441", "leaf|#c98a2b"] },
+    { id: "thanks", label: "Thanksgiving (US)", win: (y) => { const d = nth(y, 11, 4, 4); return [add(d, -9), d]; }, p: ["leaf|#e8742a", "leaf|#d94a2e", "leaf|#e8b030", "leaf|#f08a3c"] },
   ];
   window.PRAJO_SEASONS = T.map((t) => ({ id: t.id, label: t.label }));
 
@@ -58,7 +58,11 @@
     else if (kind === "star") { const pts = []; for (let i = 0; i < 10; i++) { const r = i % 2 ? .2 : .46, a = -Math.PI / 2 + i * Math.PI / 5; pts.push([Math.cos(a) * r, Math.sin(a) * r]); } poly(pts); }
     else if (kind === "heart") { c.translate(0, .04); c.beginPath(); c.moveTo(0, .38); c.bezierCurveTo(-.55, .02, -.4, -.4, 0, -.14); c.bezierCurveTo(.4, -.4, .55, .02, 0, .38); c.fill(); }
     else if (kind === "petal") { c.beginPath(); c.moveTo(0, -.45); c.bezierCurveTo(.4, -.25, .3, .3, 0, .45); c.bezierCurveTo(-.3, .3, -.4, -.25, 0, -.45); c.fill(); }
-    else if (kind === "leaf") { c.beginPath(); c.moveTo(0, -.46); c.bezierCurveTo(.5, -.2, .4, .3, 0, .4); c.bezierCurveTo(-.4, .3, -.5, -.2, 0, -.46); c.fill(); c.strokeStyle = "rgba(0,0,0,.25)"; c.lineWidth = .04; c.beginPath(); c.moveTo(0, -.4); c.lineTo(0, .5); c.stroke(); }
+    else if (kind === "leaf") {   // maple leaf: five pointed lobes, serrated edge, veins and a stem
+      c.beginPath(); for (let k = 0; k <= 90; k++) { const t = k / 90 * TAU, r = (.22 + .28 * Math.pow(Math.abs(Math.cos(2.5 * t)), 1.5)) * (1 + .06 * Math.sin(t * 25)) * (Math.abs(t - Math.PI) < .5 ? .8 : 1), x = Math.sin(t) * r, y = -Math.cos(t) * r - .04; k ? c.lineTo(x, y) : c.moveTo(x, y); } c.closePath(); c.fill();
+      c.strokeStyle = "rgba(80,30,5,.5)"; c.lineCap = "round"; c.lineWidth = .028; for (const d of [0, 72, -72, 144, -144]) { const t = d * Math.PI / 180; c.beginPath(); c.moveTo(0, .02); c.lineTo(Math.sin(t) * .3, -Math.cos(t) * .3 - .04); c.stroke(); }
+      c.lineWidth = .05; c.beginPath(); c.moveTo(0, .06); c.lineTo(0, .5); c.stroke();
+    }
     else if (kind === "clover") { for (let i = 0; i < 4; i++) { c.save(); c.rotate(i * Math.PI / 2); c.beginPath(); c.arc(0, -.2, .17, 0, TAU); c.fill(); c.restore(); } c.lineWidth = .06; c.beginPath(); c.moveTo(0, 0); c.lineTo(.12, .42); c.stroke(); }
     else if (kind === "egg") { c.beginPath(); c.ellipse(0, .04, .26, .36, 0, 0, TAU); c.fill(); c.strokeStyle = "rgba(255,255,255,.7)"; c.lineWidth = .05; c.beginPath(); c.moveTo(-.24, .06); c.quadraticCurveTo(0, .16, .24, .06); c.stroke(); }
     else if (kind === "drop") { c.beginPath(); c.moveTo(0, -.46); c.bezierCurveTo(.34, -.02, .3, .4, 0, .42); c.bezierCurveTo(-.3, .4, -.34, -.02, 0, -.46); c.fill(); }
@@ -91,10 +95,10 @@
   const still = () => { let f = null; try { f = localStorage.getItem("prajo:still"); } catch { /* private mode */ } return f === "1" || (f !== "0" && (matchMedia("(prefers-reduced-motion: reduce)").matches || !!(navigator.connection && navigator.connection.saveData))); };   // "0" = the visitor chose Play
   function make(first) {
     const spec = theme.p[Math.floor(Math.random() * theme.p.length)], kind = spec.split("|")[0], up = kind === "ghost";
-    const size = kind === "snow" ? 3 + Math.random() * 5 : kind === "ghost" ? 26 + Math.random() * 16 : kind === "hat" ? 16 + Math.random() * 6 : 9 + Math.random() * 9;
+    const size = kind === "snow" ? 3 + Math.random() * 5 : kind === "ghost" ? 26 + Math.random() * 16 : kind === "hat" ? 16 + Math.random() * 6 : kind === "leaf" ? 18 + Math.random() * 12 : 9 + Math.random() * 9;
     return { k: kind, spr: sprite(spec, Math.round(size), dpr), size, x: Math.random() * W, y: first ? Math.random() * H : up ? H + size * 2 : -size * 2,
       vy: up ? -(10 + Math.random() * 14) : 14 + Math.random() * 22, amp: 8 + Math.random() * 16, fr: .3 + Math.random() * .6, ph: Math.random() * TAU, rot: Math.random() * TAU,
-      vr: kind === "snow" || up ? 0 : (Math.random() - .5) * .8, a: kind === "ghost" ? .38 + Math.random() * .12 : kind === "snow" ? .3 + Math.random() * .35 : .28 + Math.random() * .22 };
+      vr: kind === "snow" || up ? 0 : (Math.random() - .5) * .8, a: kind === "ghost" ? .38 + Math.random() * .12 : kind === "snow" ? .3 + Math.random() * .35 : kind === "leaf" ? .6 + Math.random() * .25 : .45 + Math.random() * .25 };
   }
   function size() { dpr = Math.min(window.devicePixelRatio || 1, 2); W = innerWidth; H = innerHeight; cvs.width = W * dpr; cvs.height = H * dpr; cvs.style.width = W + "px"; cvs.style.height = H + "px"; }
   function frame(t) {
